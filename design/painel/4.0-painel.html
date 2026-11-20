@@ -1,0 +1,1250 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>4.0 · Painel · Nelcota</title>
+        <link rel="stylesheet" href="../console/tokens.css" />
+        <style>
+            :root {
+                /* Proposed new tokens (craft-system, add mode). */
+                --chart-current: oklch(0.7 0.15 245);
+                --chart-previous: var(--muted-foreground);
+                --trend-good: var(--success);
+                --trend-bad: var(--destructive);
+                --trend-flat: var(--muted-foreground);
+            }
+            * {
+                box-sizing: border-box;
+                margin: 0;
+            }
+            body {
+                background: oklch(0.12 0.004 286);
+                color: var(--foreground);
+                font-family: var(--font-sans);
+                font-size: 14px;
+                padding: 40px;
+                display: grid;
+                gap: 56px;
+                justify-content: center;
+            }
+            .board-label {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--muted-foreground);
+                margin-bottom: 12px;
+                letter-spacing: 0.02em;
+            }
+            .board-note {
+                font-size: 13px;
+                color: var(--muted-foreground);
+                margin-bottom: 12px;
+                max-width: 72ch;
+                line-height: 1.5;
+            }
+            .frame {
+                width: 1360px;
+                border-radius: 16px;
+                overflow: hidden;
+                border: 1px solid var(--border);
+                background: var(--background);
+            }
+            .app {
+                display: grid;
+                grid-template-columns: 240px 1fr;
+                min-height: 880px;
+            }
+            /* Sidebar (mirrors the app) */
+            .sidebar {
+                background: var(--card);
+                border-right: 1px solid var(--border);
+                padding: 16px 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .brand {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 800;
+                font-size: 16px;
+                padding: 4px 6px;
+            }
+            .ghost {
+                width: 28px;
+                height: 28px;
+                border-radius: 50% 50% 6px 6px;
+                background: var(--primary);
+            }
+            .btn {
+                height: 40px;
+                border-radius: var(--radius-md);
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 0 16px;
+                font: inherit;
+                font-weight: 600;
+                border: 1px solid transparent;
+                cursor: pointer;
+            }
+            .btn-primary {
+                background: var(--primary);
+                color: var(--primary-foreground);
+                width: 100%;
+            }
+            .btn-secondary {
+                background: var(--secondary);
+                color: var(--foreground);
+                border-color: var(--border);
+            }
+            .btn-ghost {
+                background: transparent;
+                color: var(--foreground);
+            }
+            .nav {
+                display: grid;
+                gap: 4px;
+            }
+            .nav a {
+                height: 40px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 0 10px;
+                border-radius: var(--radius-md);
+                color: var(--foreground);
+                text-decoration: none;
+                font-weight: 600;
+            }
+            .nav a.current {
+                background: var(--accent);
+            }
+            .nav .count {
+                margin-left: auto;
+                color: var(--muted-foreground);
+                font-size: 12px;
+                font-weight: 500;
+            }
+            .side-label {
+                font-size: 12px;
+                color: var(--muted-foreground);
+                padding: 8px 10px 0;
+                font-weight: 600;
+            }
+            .recent {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                padding: 6px 10px;
+                border-radius: var(--radius-md);
+            }
+            .recent .m {
+                width: 24px;
+                height: 24px;
+                border-radius: 6px;
+                flex: none;
+            }
+            .recent div {
+                min-width: 0;
+            }
+            .recent b {
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .recent small {
+                color: var(--muted-foreground);
+                font-size: 12px;
+            }
+            .account {
+                margin-top: auto;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                padding: 10px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius-lg);
+            }
+            .avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: var(--secondary);
+                display: grid;
+                place-items: center;
+                font-size: 11px;
+                font-weight: 700;
+            }
+            .account b {
+                font-size: 13px;
+                display: block;
+            }
+            .account small {
+                font-size: 12px;
+                color: var(--muted-foreground);
+            }
+            svg.i {
+                width: 18px;
+                height: 18px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 1.7;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                flex: none;
+            }
+            /* Page */
+            .main {
+                padding: 36px 32px 48px;
+                display: grid;
+                gap: 24px;
+                align-content: start;
+            }
+            .page-head {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 24px;
+            }
+            .page-head h1 {
+                font-size: 28px;
+                font-weight: 800;
+                letter-spacing: -0.02em;
+            }
+            .page-head p {
+                color: var(--muted-foreground);
+                margin-top: 6px;
+            }
+            .segmented {
+                display: inline-flex;
+                background: var(--muted);
+                border-radius: var(--radius-md);
+                padding: 3px;
+                height: 40px;
+            }
+            .segmented button {
+                font: inherit;
+                font-weight: 600;
+                font-size: 13px;
+                border: 1px solid transparent;
+                background: transparent;
+                color: var(--muted-foreground);
+                padding: 0 14px;
+                border-radius: calc(var(--radius-md) - 3px);
+                cursor: pointer;
+            }
+            .segmented button[aria-selected="true"] {
+                background: var(--background);
+                border-color: var(--input);
+                color: var(--foreground);
+            }
+            .notice {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .notice a {
+                color: var(--foreground);
+                font-weight: 600;
+            }
+            .pulse {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--primary);
+            }
+            .grid-top {
+                display: grid;
+                grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+                gap: 16px;
+            }
+            .kpis {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            .card {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-xl);
+                padding: 20px;
+            }
+            a.card {
+                color: inherit;
+                text-decoration: none;
+            }
+            .kpi {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto auto;
+                column-gap: 16px;
+                row-gap: 8px;
+                min-height: 138px;
+            }
+            .kpi-label {
+                grid-column: 1 / -1;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                color: var(--muted-foreground);
+                font-size: 13px;
+                font-weight: 600;
+            }
+            .kpi-value {
+                display: flex;
+                align-items: baseline;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .kpi-value strong {
+                font-size: 30px;
+                font-weight: 800;
+                letter-spacing: -0.02em;
+                font-variant-numeric: tabular-nums;
+                white-space: nowrap;
+            }
+            .kpi-value .unit {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--muted-foreground);
+            }
+            .delta {
+                display: inline-flex;
+                align-items: center;
+                gap: 2px;
+                font-size: 12px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+            }
+            .delta.good {
+                color: var(--trend-good);
+            }
+            .delta.bad {
+                color: var(--trend-bad);
+            }
+            .delta.flat {
+                color: var(--trend-flat);
+            }
+            .delta svg {
+                width: 12px;
+                height: 12px;
+                stroke-width: 2.4;
+            }
+            .kpi-foot {
+                grid-column: 1;
+                font-size: 12px;
+                color: var(--muted-foreground);
+                align-self: end;
+            }
+            .spark {
+                grid-column: 2;
+                grid-row: 2 / 4;
+                align-self: end;
+                width: 120px;
+                height: 40px;
+            }
+            .section-title {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            .section-title h2 {
+                font-size: 15px;
+                font-weight: 700;
+            }
+            .section-title a,
+            .link {
+                font-size: 13px;
+                color: var(--muted-foreground);
+                font-weight: 600;
+                text-decoration: none;
+            }
+            /* Best clips carousel */
+            .carousel {
+                display: flex;
+                flex-direction: column;
+            }
+            .reel {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: calc((100% - 12px) / 2.25);
+                gap: 12px;
+                overflow: hidden;
+                flex: 1;
+            }
+            .clip {
+                position: relative;
+                aspect-ratio: 9 / 16;
+                border-radius: var(--radius-lg);
+                overflow: hidden;
+                background: var(--muted);
+            }
+            .clip .frame-img {
+                position: absolute;
+                inset: 0;
+            }
+            .clip .shade {
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(to top, oklch(0 0 0 / 0.85), transparent 55%);
+            }
+            .clip .score {
+                position: absolute;
+                top: 8px;
+                left: 8px;
+                background: oklch(0 0 0 / 0.6);
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 7px;
+                border-radius: 999px;
+            }
+            .clip .dur {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: oklch(0 0 0 / 0.6);
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 7px;
+                border-radius: 999px;
+                font-variant-numeric: tabular-nums;
+            }
+            .clip .play {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                translate: -50% -50%;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: oklch(1 0 0 / 0.18);
+                backdrop-filter: blur(6px);
+                display: grid;
+                place-items: center;
+            }
+            .clip .play svg {
+                fill: currentColor;
+                stroke: none;
+                width: 16px;
+                height: 16px;
+                margin-left: 2px;
+            }
+            .clip .caption {
+                position: absolute;
+                left: 50%;
+                top: 62%;
+                translate: -50% 0;
+                font-weight: 800;
+                font-size: 12px;
+                text-transform: uppercase;
+                text-align: center;
+                width: 80%;
+                color: #fff;
+                text-shadow: 0 1px 3px #000;
+            }
+            .clip .caption em {
+                font-style: normal;
+                color: #ffe500;
+            }
+            .clip .meta {
+                position: absolute;
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+            }
+            .clip .meta b {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                font-size: 13px;
+                line-height: 1.3;
+            }
+            .clip .meta small {
+                display: flex;
+                gap: 6px;
+                align-items: center;
+                margin-top: 4px;
+                font-size: 11px;
+                color: oklch(0.85 0 0);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .clip .meta small .m {
+                width: 14px;
+                height: 14px;
+                border-radius: 4px;
+                flex: none;
+            }
+            .reel-nav {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 14px;
+            }
+            .icon-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: var(--radius-md);
+                border: 1px solid var(--border);
+                background: transparent;
+                color: var(--foreground);
+                display: grid;
+                place-items: center;
+                cursor: pointer;
+            }
+            .icon-btn:disabled {
+                color: var(--muted-foreground);
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            .dots {
+                display: flex;
+                gap: 6px;
+            }
+            .dots i {
+                width: 6px;
+                height: 6px;
+                border-radius: 999px;
+                background: var(--input);
+            }
+            .dots i.on {
+                width: 18px;
+                background: var(--foreground);
+            }
+            /* Bottom row */
+            .grid-bottom {
+                display: grid;
+                grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+                gap: 16px;
+            }
+            .chart-head {
+                display: flex;
+                align-items: baseline;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .chart-head strong {
+                font-size: 30px;
+                font-weight: 800;
+                letter-spacing: -0.02em;
+                font-variant-numeric: tabular-nums;
+            }
+            .chart-head span {
+                color: var(--muted-foreground);
+                font-size: 13px;
+            }
+            .legend {
+                display: flex;
+                gap: 16px;
+                font-size: 12px;
+                color: var(--muted-foreground);
+                margin-top: 8px;
+            }
+            .legend span {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .legend i {
+                width: 16px;
+                height: 0;
+                border-top: 2px solid var(--chart-current);
+            }
+            .legend i.prev {
+                border-top: 2px dashed var(--chart-previous);
+            }
+            .area-chart {
+                width: 100%;
+                height: 260px;
+                display: block;
+                margin-top: 16px;
+            }
+            .axis text {
+                fill: var(--muted-foreground);
+                font-size: 11px;
+                font-family: var(--font-sans);
+            }
+            .tooltip {
+                position: absolute;
+                background: var(--popover);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-md);
+                padding: 8px 10px;
+                font-size: 12px;
+                box-shadow: 0 8px 24px oklch(0 0 0 / 0.4);
+                display: grid;
+                gap: 2px;
+                pointer-events: none;
+            }
+            .tooltip b {
+                font-size: 13px;
+            }
+            .tooltip span {
+                color: var(--muted-foreground);
+            }
+            .funnel-stats {
+                display: grid;
+                grid-template-columns: repeat(3, auto);
+                justify-content: start;
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+            .funnel-stats strong {
+                font-size: 24px;
+                font-weight: 800;
+                display: block;
+                letter-spacing: -0.02em;
+                font-variant-numeric: tabular-nums;
+            }
+            .funnel-stats span {
+                font-size: 12px;
+                color: var(--muted-foreground);
+            }
+            .funnel {
+                margin-top: 20px;
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                position: relative;
+            }
+            .funnel svg {
+                grid-column: 1 / -1;
+                grid-row: 2;
+                width: 100%;
+                height: 150px;
+            }
+            .funnel .pct,
+            .funnel .stage {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                padding-left: 8px;
+                border-left: 1px dashed var(--border);
+            }
+            .funnel .pct {
+                grid-row: 1;
+                padding-bottom: 8px;
+            }
+            .funnel .pct b {
+                font-size: 12px;
+                background: var(--muted);
+                padding: 2px 8px;
+                border-radius: 999px;
+                font-variant-numeric: tabular-nums;
+            }
+            .funnel .stage {
+                grid-row: 3;
+                padding-top: 8px;
+            }
+            .funnel .stage b {
+                font-size: 14px;
+                font-variant-numeric: tabular-nums;
+            }
+            .funnel .stage span {
+                font-size: 12px;
+                color: var(--muted-foreground);
+                line-height: 1.3;
+            }
+            /* States */
+            .skeleton {
+                background: var(--muted);
+                border-radius: 8px;
+                animation: none;
+            }
+            .empty {
+                display: grid;
+                justify-items: start;
+                gap: 16px;
+                max-width: 520px;
+                margin: 80px auto 0;
+                text-align: left;
+            }
+            .empty h2 {
+                font-size: 20px;
+                font-weight: 800;
+            }
+            .empty p {
+                color: var(--muted-foreground);
+                line-height: 1.55;
+                max-width: 65ch;
+            }
+            .empty .btn-primary {
+                width: auto;
+            }
+            .preview-ghost {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                width: 100%;
+                margin-top: 8px;
+            }
+            .preview-ghost div {
+                border: 1px dashed var(--border);
+                border-radius: var(--radius-lg);
+                padding: 12px;
+                font-size: 12px;
+                color: var(--muted-foreground);
+            }
+            .preview-ghost b {
+                display: block;
+                color: var(--foreground);
+                font-size: 18px;
+                margin-top: 4px;
+            }
+            .inline-error {
+                display: grid;
+                place-items: center;
+                align-content: center;
+                gap: 12px;
+                text-align: center;
+                flex: 1;
+                color: var(--muted-foreground);
+                min-height: 200px;
+            }
+            .inline-error b {
+                color: var(--foreground);
+            }
+            .stale {
+                opacity: 0.55;
+                transition: opacity 0.2s;
+            }
+            .sheet {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 24px;
+                width: 1360px;
+            }
+            .sheet > div > p {
+                font-size: 12px;
+                color: var(--muted-foreground);
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+        </style>
+    </head>
+    <body>
+        <section id="b-default">
+            <div class="board-label">4.0 · Painel · padrão (últimos 30 dias)</div>
+            <div class="board-note">
+                Um único botão principal: o "Novo vídeo" da sidebar. Cor do mini-gráfico e da
+                variação = se a mudança é boa (verde) ou ruim (vermelho), não decoração. Cada card
+                abre a lista correspondente.
+            </div>
+            <div class="frame"><div class="app" data-fill="default"></div></div>
+        </section>
+
+        <section id="b-loading">
+            <div class="board-label">4.1 · Painel · primeiro carregamento</div>
+            <div class="frame"><div class="app" data-fill="loading"></div></div>
+        </section>
+
+        <section id="b-empty">
+            <div class="board-label">4.2 · Painel · vazio (nenhum vídeo ainda)</div>
+            <div class="board-note">
+                O Nel recebe a pessoa. Sem gráficos zerados; o botão da página é o mesmo "Novo
+                vídeo" (a sidebar o esconde neste estado, como no Início).
+            </div>
+            <div class="frame"><div class="app" data-fill="empty"></div></div>
+        </section>
+
+        <section id="b-period-empty">
+            <div class="board-label">4.3 · Painel · período sem vídeos (últimos 7 dias)</div>
+            <div class="frame"><div class="app" data-fill="period-empty"></div></div>
+        </section>
+
+        <section id="b-error">
+            <div class="board-label">4.4 · Painel · não foi possível carregar</div>
+            <div class="frame"><div class="app" data-fill="error"></div></div>
+        </section>
+
+        <section id="b-sheet">
+            <div class="board-label">4.5 · Painel · folha de estados (partes)</div>
+            <div class="sheet" id="sheet"></div>
+        </section>
+
+        <script>
+            const ICON = {
+                plus: '<path d="M5 12h14M12 5v14"/>',
+                home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+                chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+                clap: '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="m3 8 2-5 16 3-1 2M10 12.5v5l4-2.5z"/>',
+                user: '<circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+                up: '<path d="m6 15 6-6 6 6"/>',
+                down: '<path d="m6 9 6 6 6-6"/>',
+                info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+                left: '<path d="m15 18-6-6 6-6"/>',
+                right: '<path d="m9 18 6-6-6-6"/>',
+                play: '<path d="M6 3l14 9-14 9z"/>',
+                alert: '<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+                rotate: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/>',
+                more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+            };
+            const i = (n) => `<svg class="i" viewBox="0 0 24 24">${ICON[n]}</svg>`;
+
+            const MASCOT_COLORS = [
+                "oklch(0.7 0.16 30)",
+                "oklch(0.72 0.14 250)",
+                "oklch(0.78 0.15 85)",
+                "oklch(0.68 0.17 320)",
+                "oklch(0.74 0.13 190)",
+            ];
+
+            function sidebar(state) {
+                const hideNew = state === "empty";
+                const recent =
+                    state === "empty"
+                        ? ""
+                        : `<div class="side-label">Recentes</div>
+                <div class="recent"><span class="m" style="background:${MASCOT_COLORS[0]}"></span><div><b>Podcast Flow #412 — Como a economia brasileira vai reagir em 2027</b><small>Brasa está fazendo os cortes · 64%</small></div></div>
+                <div class="recent"><span class="m" style="background:${MASCOT_COLORS[1]}"></span><div><b>Aula completa de marketing de conteúdo</b><small>Tinta está transcrevendo</small></div></div>
+                <div class="recent"><span class="m" style="background:${MASCOT_COLORS[2]}"></span><div><b>Entrevista com Maria Fernanda de Albuquerque Santos</b><small>8 cortes prontos</small></div></div>`;
+                const counts = state === "empty" ? ["", ""] : ["47", "212"];
+
+                return `<aside class="sidebar">
+                <div class="brand"><span class="ghost"></span>Nelcota</div>
+                ${hideNew ? "" : `<button class="btn btn-primary">${i("plus")}Novo vídeo</button>`}
+                <nav class="nav">
+                  <a class="current" href="#">${i("chart")}Painel</a>
+                  <a href="#">${i("home")}Início<span class="count">${counts[0]}</span></a>
+                  <a href="#">${i("clap")}Cortes<span class="count">${counts[1]}</span></a>
+                  <a href="#">${i("user")}Conta</a>
+                </nav>
+                ${recent}
+                <div class="account"><span class="avatar">HF</span><div><b>Haniel</b><small>conta@nelcota.test</small></div></div>
+              </aside>`;
+            }
+
+            function head(selected) {
+                const tab = (label, n) =>
+                    `<button role="tab" aria-selected="${n === selected}">${label}</button>`;
+
+                return `<div class="page-head">
+                <div><h1>Painel</h1><p>Como seus vídeos viraram cortes no período.</p></div>
+                <div class="segmented" role="tablist">${tab("Últimos 7 dias", 7)}${tab("Últimos 30 dias", 30)}${tab("Últimos 90 dias", 90)}</div>
+              </div>`;
+            }
+
+            function sparkPath(values, w, h, pad = 3) {
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                const span = max - min || 1;
+                const step = (w - pad * 2) / (values.length - 1);
+
+                return values
+                    .map((v, n) => {
+                        const x = pad + n * step;
+                        const y = h - pad - ((v - min) / span) * (h - pad * 2);
+                        return `${n === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+                    })
+                    .join(" ");
+            }
+
+            function spark(values, trend) {
+                const color = {
+                    good: "var(--trend-good)",
+                    bad: "var(--trend-bad)",
+                    flat: "var(--trend-flat)",
+                }[trend];
+                const d = sparkPath(values, 120, 40);
+                const last = d.split(" L").pop().replace("M", "").split(" ");
+
+                return `<svg class="spark" viewBox="0 0 120 40" aria-hidden="true"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${last[0]}" cy="${last[1]}" r="3" fill="${color}"/></svg>`;
+            }
+
+            function delta(text, dir, trend) {
+                const arrow = { up: i("up"), down: i("down"), none: "" }[dir];
+                return `<span class="delta ${trend}">${arrow}${text}</span>`;
+            }
+
+            function kpi(k) {
+                return `<a class="card kpi" href="#">
+                <div class="kpi-label">${k.label} <span title="${k.help}">${i("info").replace('class="i"', 'class="i" style="width:14px;height:14px"')}</span></div>
+                <div class="kpi-value"><strong>${k.value}</strong>${k.unit ? `<span class="unit">${k.unit}</span>` : ""}</div>
+                <div class="kpi-foot">${k.delta ? delta(k.delta, k.dir, k.trend) + " " : ""}${k.foot ?? "vs. 30 dias anteriores"}</div>
+                ${spark(k.series, k.trend)}
+              </a>`;
+            }
+
+            const rnd = (seed) => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+            function series(seed, base, drift, noise, n = 30) {
+                const r = rnd(seed);
+                return Array.from({ length: n }, (_, k) => base + k * drift + (r() - 0.5) * noise);
+            }
+
+            const KPIS = [
+                {
+                    label: "Vídeos enviados",
+                    help: "Vídeos que entraram na fila no período",
+                    value: "47",
+                    delta: "17,5%",
+                    dir: "up",
+                    trend: "good",
+                    series: series(3, 1, 0.04, 2),
+                },
+                {
+                    label: "Cortes gerados",
+                    help: "Cortes que ficaram prontos no período",
+                    value: "212",
+                    delta: "22,5%",
+                    dir: "up",
+                    trend: "good",
+                    series: series(7, 5, 0.12, 6),
+                },
+                {
+                    label: "Minutos transcritos",
+                    help: "Soma da duração dos vídeos transcritos",
+                    value: "1.284",
+                    unit: "min",
+                    delta: "9,9%",
+                    dir: "up",
+                    trend: "good",
+                    series: series(11, 40, 0.3, 30),
+                },
+                {
+                    label: "Tempo médio de processamento",
+                    help: "Do envio até os cortes ficarem prontos",
+                    value: "6 min 42 s",
+                    delta: "12,3%",
+                    dir: "down",
+                    trend: "good",
+                    series: series(19, 9, -0.08, 2.5),
+                },
+                {
+                    label: "Nota média do Brilho",
+                    help: "Média da nota (0–100) dos cortes gerados",
+                    value: "78",
+                    unit: "/100",
+                    delta: "3,1%",
+                    dir: "down",
+                    trend: "bad",
+                    series: series(23, 82, -0.12, 6),
+                },
+                {
+                    label: "Falhas",
+                    help: "Vídeos que não chegaram ao fim",
+                    value: "3",
+                    delta: "+2",
+                    dir: "up",
+                    trend: "bad",
+                    foot: "vs. 1 antes · ver vídeos",
+                    series: [
+                        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 1, 0, 0,
+                    ],
+                },
+            ];
+
+            const CLIPS = [
+                {
+                    score: 96,
+                    dur: "0:48",
+                    title: '"Ninguém te conta isso sobre juros compostos"',
+                    from: "Podcast Flow #412 — Como a economia brasileira vai reagir em 2027",
+                    cap: ["ninguém te", "conta isso"],
+                    hue: 30,
+                },
+                {
+                    score: 93,
+                    dur: "0:31",
+                    title: "O erro que quase quebrou a minha empresa no primeiro ano",
+                    from: "Entrevista com Maria Fernanda de Albuquerque Santos",
+                    cap: ["quase", "quebrou"],
+                    hue: 250,
+                },
+                {
+                    score: 91,
+                    dur: "1:02",
+                    title: "3 ganchos que prendem nos primeiros segundos",
+                    from: "Aula completa de marketing de conteúdo",
+                    cap: ["três", "ganchos"],
+                    hue: 190,
+                },
+                {
+                    score: 89,
+                    dur: "0:57",
+                    title: "Por que o algoritmo prefere vídeos curtos",
+                    from: "Live de terça",
+                    cap: ["o algoritmo", "prefere"],
+                    hue: 320,
+                },
+            ];
+
+            function clipCard(c) {
+                return `<div class="clip">
+                <div class="frame-img" style="background:radial-gradient(120% 70% at 50% 30%, oklch(0.55 0.08 ${c.hue}), oklch(0.25 0.03 ${c.hue}))"></div>
+                <div class="shade"></div>
+                <span class="score">Nota ${c.score}</span><span class="dur">${c.dur}</span>
+                <span class="play">${i("play")}</span>
+                <div class="meta"><b>${c.title}</b><small><span class="m" style="background:oklch(0.7 0.15 ${c.hue})"></span>${c.from}</small></div>
+              </div>`;
+            }
+
+            function carousel(clips, opts = {}) {
+                const many = clips.length > 2;
+                const nav = many
+                    ? `<div class="reel-nav"><button class="icon-btn" disabled aria-label="Anteriores">${i("left")}</button><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div><button class="icon-btn" aria-label="Próximos">${i("right")}</button></div>`
+                    : "";
+                const body = opts.error
+                    ? `<div class="inline-error">${i("alert")}<div><b>Não foi possível carregar os cortes.</b><br/>Os números ao lado continuam valendo.</div><button class="btn btn-secondary">${i("rotate")}Tentar de novo</button></div>`
+                    : `<div class="reel">${clips.map(clipCard).join("")}</div>${nav}`;
+
+                return `<section class="card carousel">
+                <div class="section-title"><h2>Melhores cortes do período</h2><a href="#">Ver todos</a></div>
+                ${body}
+              </section>`;
+            }
+
+            function cumulative(seed, total, n = 30) {
+                const r = rnd(seed);
+                const daily = Array.from({ length: n }, () => r() + 0.2);
+                const sum = daily.reduce((a, b) => a + b, 0);
+                let acc = 0;
+                return daily.map((d) => (acc += (d / sum) * total));
+            }
+
+            function areaChart(current, previous, opts = {}) {
+                const W = 820,
+                    H = 260,
+                    L = 36,
+                    B = 24,
+                    T = 8;
+                const max = opts.max ?? Math.ceil(Math.max(...current, ...previous) / 50) * 50;
+                const x = (n) => L + (n / 29) * (W - L - 8);
+                const y = (v) => T + (1 - v / max) * (H - T - B);
+                const line = (s) =>
+                    s
+                        .map((v, n) => `${n ? "L" : "M"}${x(n).toFixed(1)} ${y(v).toFixed(1)}`)
+                        .join(" ");
+                const ticks = [0, 0.2, 0.4, 0.6, 0.8, 1].map((f) => Math.round(f * max));
+                const days = [
+                    "21/10",
+                    "25/10",
+                    "29/10",
+                    "02/11",
+                    "06/11",
+                    "10/11",
+                    "14/11",
+                    "19/11",
+                ];
+                const grid = ticks
+                    .map(
+                        (t) =>
+                            `<line x1="${L}" x2="${W - 8}" y1="${y(t)}" y2="${y(t)}" stroke="var(--border)" stroke-width="1"/><text x="${L - 8}" y="${y(t) + 4}" text-anchor="end">${t}</text>`,
+                    )
+                    .join("");
+                const xl = days
+                    .map(
+                        (d, k) =>
+                            `<text x="${x(Math.round((k * 29) / 7))}" y="${H - 4}" text-anchor="middle">${d}</text>`,
+                    )
+                    .join("");
+                const hover = opts.hover
+                    ? `<line x1="${x(22)}" x2="${x(22)}" y1="${T}" y2="${H - B}" stroke="var(--input)"/><circle cx="${x(22)}" cy="${y(current[22])}" r="4" fill="var(--chart-current)" stroke="var(--card)" stroke-width="2"/>`
+                    : "";
+
+                return `<div style="position:relative"><svg class="area-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+                <defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chart-current)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--chart-current)" stop-opacity="0"/></linearGradient></defs>
+                <g class="axis">${grid}${xl}</g>
+                ${previous.length ? `<path d="${line(previous)}" fill="none" stroke="var(--chart-previous)" stroke-width="1.5" stroke-dasharray="4 4"/>` : ""}
+                <path d="${line(current)} L${x(29)} ${y(0)} L${x(0)} ${y(0)} Z" fill="url(#fade)"/>
+                <path d="${line(current)}" fill="none" stroke="var(--chart-current)" stroke-width="2.2"/>
+                ${hover}
+              </svg>${opts.hover ? `<div class="tooltip" style="left:${(x(22) / W) * 100}%;top:40px;transform:translateX(12px)"><b>12/11 · 158 cortes</b><span>mesmo dia antes: 131</span></div>` : ""}</div>`;
+            }
+
+            function chartCard(opts = {}) {
+                const current = opts.current ?? cumulative(5, 212);
+                const previous = opts.previous ?? cumulative(9, 173);
+                const head =
+                    opts.head ??
+                    `<strong>212</strong><span>cortes · eram 173 no período anterior</span>`;
+
+                return `<section class="card">
+                <div class="section-title" style="margin-bottom:8px"><h2>Cortes acumulados</h2></div>
+                <div class="chart-head">${head}</div>
+                <div class="legend"><span><i></i>Este período</span><span><i class="prev"></i>Período anterior</span></div>
+                ${areaChart(current, previous, opts)}
+              </section>`;
+            }
+
+            function funnelCard(stages, opts = {}) {
+                const W = 400,
+                    H = 150,
+                    mid = H / 2;
+                const top = stages[0].n || 1;
+                const half = (n) => Math.max(3, (n / top) * (H / 2 - 8));
+                const xs = stages.map((_, k) => (k / (stages.length - 1)) * W);
+                let upper = `M0 ${mid - half(stages[0].n)}`;
+                let lower = "";
+                for (let k = 1; k < stages.length; k++) {
+                    const cx = (xs[k - 1] + xs[k]) / 2;
+                    upper += ` C${cx} ${mid - half(stages[k - 1].n)} ${cx} ${mid - half(stages[k].n)} ${xs[k]} ${mid - half(stages[k].n)}`;
+                }
+                lower = `L${W} ${mid + half(stages.at(-1).n)}`;
+                for (let k = stages.length - 1; k > 0; k--) {
+                    const cx = (xs[k - 1] + xs[k]) / 2;
+                    lower += ` C${cx} ${mid + half(stages[k].n)} ${cx} ${mid + half(stages[k - 1].n)} ${xs[k - 1]} ${mid + half(stages[k - 1].n)}`;
+                }
+                const pct = (n) => (stages[0].n === 0 ? "—" : `${Math.round((n / top) * 100)}%`);
+
+                return `<section class="card">
+                <div class="section-title"><h2>Do envio ao corte</h2><span class="link">vídeos por etapa</span></div>
+                <div class="funnel-stats">
+                  <div><strong>${stages[0].n}</strong><span>vídeos enviados</span></div>
+                  <div><strong>${pct(stages.at(-1).n)}</strong><span>chegaram aos cortes</span></div>
+                  <div><strong>${opts.clips ?? 212}</strong><span>cortes prontos</span></div>
+                </div>
+                <div class="funnel">
+                  ${stages.map((s) => `<div class="pct"><b>${pct(s.n)}</b></div>`).join("")}
+                  <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path d="${upper} ${lower} Z" fill="var(--chart-current)" fill-opacity="0.45" stroke="var(--chart-current)" stroke-width="1.5"/></svg>
+                  ${stages.map((s) => `<div class="stage"><b>${s.n}</b><span>${s.label}</span></div>`).join("")}
+                </div>
+              </section>`;
+            }
+
+            const STAGES = [
+                { n: 47, label: "Enviados" },
+                { n: 44, label: "Transcritos" },
+                { n: 43, label: "Momentos escolhidos" },
+                { n: 41, label: "Cortes prontos" },
+            ];
+
+            const notice = `<div class="notice"><span class="pulse"></span>2 vídeos em andamento ainda não entram nos números · <a href="#">ver no Início</a></div>`;
+
+            function page(state) {
+                if (state === "loading") {
+                    const sk = (h, w = "100%") =>
+                        `<div class="skeleton" style="height:${h}px;width:${w}"></div>`;
+                    const kc = `<div class="card kpi">${sk(14, "50%")}<div style="grid-column:1">${sk(32, "60%")}</div><div style="grid-column:1;align-self:end">${sk(12, "70%")}</div></div>`;
+                    return `${head(30)}<div class="grid-top"><div class="kpis">${kc.repeat(6)}</div><div class="card">${sk(16, "60%")}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">${sk(300)}${sk(300)}</div></div></div>
+                      <div class="grid-bottom"><div class="card">${sk(16, "30%")}<div style="margin-top:12px">${sk(32, "25%")}</div><div style="margin-top:24px">${sk(240)}</div></div><div class="card">${sk(16, "50%")}<div style="margin-top:24px">${sk(220)}</div></div></div>`;
+                }
+
+                if (state === "empty") {
+                    return `<div class="page-head"><div><h1>Painel</h1><p>Como seus vídeos viraram cortes no período.</p></div></div>
+                      <div class="empty">
+                        <div class="ghost" style="width:56px;height:56px"></div>
+                        <h2>Seu painel aparece aqui</h2>
+                        <p><b style="color:var(--foreground)">Nel:</b> "Envie o primeiro vídeo e eu mostro quantos cortes saíram dele, quanto tempo levou e quais ficaram melhores."</p>
+                        <button class="btn btn-primary">${i("plus")}Novo vídeo</button>
+                        <div class="preview-ghost"><div>Vídeos enviados<b>—</b></div><div>Cortes gerados<b>—</b></div><div>Nota média do Brilho<b>—</b></div></div>
+                      </div>`;
+                }
+
+                if (state === "error") {
+                    return `${head(30)}<div class="card" style="display:grid;place-items:center;min-height:520px"><div class="inline-error">${i("alert")}<div><b>Não foi possível carregar o painel.</b><br/>Seus vídeos e cortes estão salvos; só os números não vieram.</div><button class="btn btn-secondary">${i("rotate")}Tentar de novo</button></div></div>`;
+                }
+
+                if (state === "period-empty") {
+                    const zero = (label, foot) => ({
+                        label,
+                        help: "",
+                        value: "0",
+                        delta: "",
+                        dir: "none",
+                        trend: "flat",
+                        foot,
+                        series: Array(7).fill(0),
+                    });
+                    const k = [
+                        zero("Vídeos enviados", "eram 9 nos 7 dias anteriores"),
+                        zero("Cortes gerados", "eram 41 nos 7 dias anteriores"),
+                        {
+                            ...zero("Minutos transcritos", "eram 242 min nos 7 dias anteriores"),
+                            unit: "min",
+                        },
+                        {
+                            ...zero(
+                                "Tempo médio de processamento",
+                                "sem vídeos concluídos no período",
+                            ),
+                            value: "—",
+                        },
+                        { ...zero("Nota média do Brilho", "sem cortes no período"), value: "—" },
+                        zero("Falhas", "nenhuma nos 7 dias anteriores"),
+                    ];
+                    const flat = Array(30).fill(0);
+                    return `${head(7)}
+                      <div class="grid-top"><div class="kpis">${k.map(kpi).join("")}</div>
+                        <section class="card carousel"><div class="section-title"><h2>Melhores cortes do período</h2><a href="#">Ver todos</a></div>
+                          <div class="inline-error"><div><b>Nenhum corte nos últimos 7 dias.</b><br/>Os 41 cortes dos 30 dias aparecem se você ampliar o período.</div><button class="btn btn-secondary">Ver últimos 30 dias</button></div></section></div>
+                      <div class="grid-bottom">${chartCard({ current: flat, previous: cumulative(9, 41), max: 50, head: `<strong>0</strong><span>cortes · eram 41 no período anterior</span>` })}
+                      ${funnelCard(
+                          STAGES.map((s) => ({ ...s, n: 0 })),
+                          { clips: 0 },
+                      )}</div>`;
+                }
+
+                return `${head(30)}${notice}
+                  <div class="grid-top"><div class="kpis">${KPIS.map(kpi).join("")}</div>${carousel(CLIPS)}</div>
+                  <div class="grid-bottom">${chartCard({ hover: true })}${funnelCard(STAGES)}</div>`;
+            }
+
+            document.querySelectorAll("[data-fill]").forEach((el) => {
+                const state = el.dataset.fill;
+                el.innerHTML = `${sidebar(state)}<main class="main">${page(state)}</main>`;
+            });
+
+            const sheet = document.getElementById("sheet");
+            const part = (title, html) => `<div><p>${title}</p>${html}</div>`;
+            sheet.innerHTML = [
+                part(
+                    'Variação sem base (período anterior = 0): "novo"',
+                    kpi({
+                        label: "Cortes gerados",
+                        help: "",
+                        value: "18",
+                        delta: "novo",
+                        dir: "none",
+                        trend: "flat",
+                        foot: "nenhum nos 30 dias anteriores",
+                        series: series(4, 0, 0.6, 2),
+                    }),
+                ),
+                part(
+                    "Número longo cabe sem quebrar o card",
+                    kpi({
+                        label: "Minutos transcritos",
+                        help: "",
+                        value: "128.480",
+                        unit: "min",
+                        delta: "142,7%",
+                        dir: "up",
+                        trend: "good",
+                        series: series(8, 10, 1, 8),
+                    }),
+                ),
+                part(
+                    "Troca de período: números antigos ficam apagados até os novos chegarem",
+                    `<div class="stale">${kpi(KPIS[1])}</div>`,
+                ),
+                part("Poucos cortes (≤ 2): sem setas nem pontos", carousel(CLIPS.slice(0, 2))),
+                part("Só o carrossel falhou: erro dentro dele", carousel([], { error: true })),
+                part(
+                    "Falhas = 0: sem vermelho",
+                    kpi({
+                        label: "Falhas",
+                        help: "",
+                        value: "0",
+                        delta: "−1",
+                        dir: "down",
+                        trend: "good",
+                        foot: "vs. 1 antes",
+                        series: Array(30).fill(0),
+                    }),
+                ),
+            ].join("");
+        </script>
+    </body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Studio · estados</title>
+        <link rel="stylesheet" href="../explore/navigation/tokens.css" />
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+            }
+            body {
+                background: var(--background);
+                color: var(--foreground);
+                font-family: var(--font-sans);
+                padding: 40px 32px 80px;
+                -webkit-font-smoothing: antialiased;
+            }
+            .wrap {
+                max-width: 1240px;
+                margin: 0 auto;
+                display: grid;
+                gap: 40px;
+            }
+            h1 {
+                font-size: 30px;
+                font-weight: 800;
+            }
+            h2 {
+                font-size: 20px;
+                font-weight: 800;
+            }
+            p {
+                font-size: 14px;
+                line-height: 1.5;
+                color: var(--muted-foreground);
+                max-width: 80ch;
+            }
+            section {
+                display: grid;
+                gap: 12px;
+            }
+            img {
+                width: 100%;
+                display: block;
+                border-radius: 14px;
+                border: 1px solid var(--border);
+            }
+            .phones {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+            }
+            .phones div {
+                overflow: hidden;
+                border-radius: 22px;
+                border: 1px solid var(--border);
+            }
+            .phones img {
+                width: 128%;
+                max-width: none;
+                border: 0;
+                border-radius: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header style="display: grid; gap: 6px">
+                <h1>Studio · direção A "Mesa de edição"</h1>
+                <p>
+                    Aba "Studio" na página do vídeo. Ela edita um corte por vez: trecho, texto e
+                    tempo das legendas e estilo, com prévia ao vivo e "Renderizar corte" como única
+                    ação primária. Os dados são do vídeo real de demonstração. As imagens são
+                    geradas por <code>sh render.sh</code> nesta pasta.
+                </p>
+            </header>
+            <section>
+                <h2>1.0 · Studio · padrão</h2>
+                <p>
+                    Três alterações em rascunho; o bloco "Golf e cortou" está aberto; a alça de
+                    início está sendo arrastada.
+                </p>
+                <img src="renders/1.0-studio-default.png" alt="" />
+            </section>
+            <section>
+                <h2>1.1 · Studio · carregando</h2>
+                <img src="renders/1.1-studio-loading.png" alt="" />
+            </section>
+            <section>
+                <h2>1.2 · Studio · vídeo ainda processando</h2>
+                <img src="renders/1.2-studio-not-ready.png" alt="" />
+            </section>
+            <section>
+                <h2>1.3 · Studio · renderizando</h2>
+                <p>
+                    A Brasa está trabalhando. O editor fica só para leitura, porque o servidor
+                    coloca o vídeo de volta na fila.
+                </p>
+                <img src="renders/1.3-studio-rendering.png" alt="" />
+            </section>
+            <section>
+                <h2>1.4 · Studio · falhou ao renderizar</h2>
+                <img src="renders/1.4-studio-render-failed.png" alt="" />
+            </section>
+            <section>
+                <h2>1.5 · Studio · corte refeito</h2>
+                <img src="renders/1.5-studio-rendered.png" alt="" />
+            </section>
+            <section>
+                <h2>1.6 · Studio · sem prévia ao vivo</h2>
+                <img src="renders/1.6-studio-no-preview.png" alt="" />
+            </section>
+            <section>
+                <h2>1.7 · Studio · sem conexão</h2>
+                <img src="renders/1.7-studio-offline.png" alt="" />
+            </section>
+            <section>
+                <h2>2.0 · Studio · peças que mudam</h2>
+                <img src="renders/2.0-studio-sheet-parts.png" alt="" />
+            </section>
+            <section>
+                <h2>2.1 · Studio · diálogos</h2>
+                <img src="renders/2.1-studio-sheet-dialogs.png" alt="" />
+            </section>
+            <section>
+                <h2>3 · Studio · celular (Legendas, renderizando, Estilo, Trecho)</h2>
+                <p>
+                    No celular não há linha do tempo para arrastar: o trecho é ajustado de 0,5 em
+                    0,5 s ou pelo ponto da prévia.
+                </p>
+                <div class="phones">
+                    <div><img src="renders/3.default-studio-phone.png" alt="" /></div>
+                    <div><img src="renders/3.rendering-studio-phone.png" alt="" /></div>
+                    <div><img src="renders/3.style-studio-phone.png" alt="" /></div>
+                    <div><img src="renders/3.trim-studio-phone.png" alt="" /></div>
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

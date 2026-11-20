@@ -1,0 +1,20 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "react", "unicorn", "oxc", "import"],
+    "categories": {
+        "correctness": "error",
+        "suspicious": "warn"
+    },
+    "rules": {
+        // The project uses the automatic JSX runtime (React 17+), so React never needs to be in scope.
+        "react/react-in-jsx-scope": "off",
+        "no-else-return": "error",
+        "no-nested-ternary": "error",
+        "no-console": ["warn", { "allow": ["info", "warn", "error"] }],
+        "typescript/no-explicit-any": "error",
+        "typescript/no-non-null-assertion": "error",
+        "eqeqeq": "error",
+        "curly": "error"
+    },
+    "ignorePatterns": ["src/routeTree.gen.ts", "drizzle/**", "storage/**", ".output/**"]
+}

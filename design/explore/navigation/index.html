@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Navegação · 3 direções</title>
+        <link rel="stylesheet" href="tokens.css" />
+        <link rel="stylesheet" href="board.css" />
+        <style>
+            body {
+                padding: 40px 32px 80px;
+            }
+            .wrap {
+                max-width: 1320px;
+                margin: 0 auto;
+                display: grid;
+                gap: 40px;
+            }
+            .legend {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+            }
+            .legend article {
+                padding: 18px;
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                background: var(--popover);
+                display: grid;
+                gap: 8px;
+                align-content: start;
+            }
+            .legend article.is-pick {
+                border-color: var(--primary);
+            }
+            .tag {
+                display: inline-block;
+                font-size: 12px;
+                font-weight: 800;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: var(--primary);
+                color: var(--primary-foreground);
+            }
+            .legend h3 {
+                font-size: 18px;
+                font-weight: 800;
+            }
+            .legend p {
+                font-size: 14px;
+            }
+            .legend b {
+                color: var(--foreground);
+            }
+            section {
+                display: grid;
+                gap: 14px;
+            }
+            section h2 {
+                font-size: 20px;
+                font-weight: 800;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 260px;
+                gap: 16px;
+                align-items: start;
+            }
+            .shots img {
+                width: 100%;
+                border-radius: 14px;
+                border: 1px solid var(--border);
+                display: block;
+            }
+            .phone-shot {
+                width: 260px;
+                overflow: hidden;
+                border-radius: 22px;
+                border: 1px solid var(--border);
+            }
+            .phone-shot img {
+                width: 333px;
+                max-width: none;
+                border: 0;
+                border-radius: 0;
+            }
+            .caption {
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header style="display: grid; gap: 6px">
+                <h1 class="page-title">Navegação · atual + 3 direções</h1>
+                <p class="muted">
+                    Mesmos 6 vídeos, mesmo conteúdo da página e mesmo tamanho (1280 × 800 e celular
+                    390). Só a navegação muda. Nada disso está no app ainda.
+                </p>
+            </header>
+
+            <div class="legend">
+                <article class="is-pick">
+                    <span><span class="tag">Recomendo</span></span>
+                    <h3>A · Uma barra só</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> uma barra lateral com Início, Cortes e Conta; embaixo, os
+                        vídeos recentes com mascote, nome e o que a equipe está fazendo; a conta no
+                        rodapé. Recolhe para só ícones.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> uma camada de navegação, os mascotes ganham nome e frase,
+                        tudo a 1 clique.
+                    </p>
+                    <p class="muted"><b>Custa:</b> a barra ocupa largura (por isso recolhe).</p>
+                    <p class="muted">
+                        <b>Por que recomendo:</b> resolve a confusão sem tirar nada que você usa, e
+                        dá aos mascotes um lugar fixo para falar.
+                    </p>
+                </article>
+                <article>
+                    <h3>B · Abas no topo</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> nada de barra lateral. Abas Início, Cortes e Conta no topo;
+                        "Novo vídeo" e a foto à direita. A equipe aparece numa faixa "Em andamento"
+                        na página.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> conteúdo com a largura toda, visual mais limpo; no celular
+                        vira abas embaixo.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> os recentes não ficam sempre à vista; dentro de um vídeo,
+                        trocar de vídeo é voltar ao Início.
+                    </p>
+                </article>
+                <article>
+                    <h3>
+                        C · Doca de mascotes
+                        <span class="muted" style="font-size: 13px; font-weight: 600"
+                            >(mais ousada)</span
+                        >
+                    </h3>
+                    <p class="muted">
+                        <b>Ideia:</b> a coluna estreita é a navegação inteira: seções no topo e os
+                        vídeos como mascotes com nome embaixo. A equipe fala numa faixa no topo da
+                        página.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> os mascotes viram o centro do app; muito espaço para o
+                        conteúdo.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> nomes cortados em 2 linhas, cabem poucos vídeos, rótulos
+                        pequenos.
+                    </p>
+                </article>
+            </div>
+
+            <section>
+                <h2>Atual</h2>
+                <img
+                    src="renders/current.png"
+                    alt="Layout atual"
+                    style="width: 100%; border-radius: 14px; border: 1px solid var(--border)"
+                />
+                <p class="caption">
+                    Coluna de ícones + barra lateral com cabeçalho de conta + barra do painel: três
+                    camadas para navegar.
+                </p>
+            </section>
+
+            <section>
+                <h2>
+                    A · Uma barra só
+                    <span class="tag" style="vertical-align: middle">Recomendo</span>
+                </h2>
+                <div class="shots">
+                    <img src="renders/a.png" alt="Direção A" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-a-raw.png" alt="Direção A no celular" />
+                    </div>
+                </div>
+                <img
+                    src="renders/a-collapsed.png"
+                    alt="Direção A com a barra recolhida"
+                    style="
+                        width: calc(100% - 276px);
+                        border-radius: 14px;
+                        border: 1px solid var(--border);
+                    "
+                />
+                <p class="caption">
+                    Embaixo: a mesma barra recolhida (só ícones e mascotes; o nome aparece ao passar
+                    o mouse). No celular, menu ☰ no topo e "Novo vídeo" fixo embaixo.
+                </p>
+            </section>
+
+            <section>
+                <h2>B · Abas no topo</h2>
+                <div class="shots">
+                    <img src="renders/b.png" alt="Direção B" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-b-raw.png" alt="Direção B no celular" />
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>C · Doca de mascotes</h2>
+                <div class="shots">
+                    <img src="renders/c.png" alt="Direção C" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-c-raw.png" alt="Direção C no celular" />
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Elenco</h2>
+                <img
+                    src="renders/cast.png"
+                    alt="Elenco dos mascotes"
+                    style="width: 100%; border-radius: 14px; border: 1px solid var(--border)"
+                />
+                <p class="caption">
+                    Vale para qualquer direção. As falas acompanham a informação (etapa, %, erro) e
+                    nunca a substituem.
+                </p>
+            </section>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,146 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@700&family=Bebas+Neue&family=League+Spartan:wght@700&family=Inter:wght@700&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Nelcota is a dark tool: videos read better on a dark canvas. See DESIGN.md. */
+:root {
+    color-scheme: dark;
+
+    --background: oklch(0.16 0.004 286);
+    --foreground: oklch(0.97 0.002 286);
+    --card: oklch(0.2 0.005 286);
+    --card-foreground: oklch(0.97 0.002 286);
+    --popover: oklch(0.22 0.005 286);
+    --popover-foreground: oklch(0.97 0.002 286);
+    --primary: oklch(0.71 0.19 148);
+    --primary-foreground: oklch(0.2 0.045 150);
+    --secondary: oklch(0.27 0.006 286);
+    --secondary-foreground: oklch(0.97 0.002 286);
+    --muted: oklch(0.25 0.006 286);
+    --muted-foreground: oklch(0.72 0.012 286);
+    --accent: oklch(0.29 0.008 286);
+    --accent-foreground: oklch(0.97 0.002 286);
+    --destructive: oklch(0.64 0.21 25);
+    --destructive-foreground: oklch(0.97 0.002 286);
+    --success: oklch(0.76 0.16 155);
+    --border: oklch(0.3 0.006 286);
+    --input: oklch(0.32 0.006 286);
+    --ring: oklch(0.71 0.19 148);
+    /* Charts: the period being looked at, and the one before it (drawn dashed). */
+    --chart-current: oklch(0.7 0.15 245);
+    --chart-previous: oklch(0.72 0.012 286);
+    --radius: 0.75rem;
+}
+
+/*
+ * Type scale one step above Tailwind's default: small grey text on a dark canvas was hard to read.
+ * See DESIGN.md › Type and icons.
+ */
+@theme {
+    --text-xs: 0.8125rem;
+    --text-xs--line-height: 1.125rem;
+    --text-sm: 0.9375rem;
+    --text-sm--line-height: 1.375rem;
+}
+
+@theme inline {
+    --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-success: var(--success);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-current: var(--chart-current);
+    --color-chart-previous: var(--chart-previous);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    /* The crew member of the running stage bobs while it works. Use with motion-safe:. */
+    --animate-crew-work: crew-work 1.4s ease-in-out infinite;
+
+    @keyframes crew-work {
+        0%,
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        25% {
+            transform: translateY(-3px) rotate(-6deg);
+        }
+
+        75% {
+            transform: translateY(-1px) rotate(6deg);
+        }
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    html,
+    body {
+        min-height: 100%;
+    }
+
+    body {
+        @apply bg-background text-foreground font-sans antialiased;
+    }
+
+    /*
+     * Tailwind v4 removed the pointer cursor from buttons. Every clickable element shows it. Never remove.
+     * :where() keeps it at zero specificity, so the disabled and busy cursors below always win
+     * (otherwise a[href][aria-disabled="true"] would still show the hand).
+     */
+    :where(
+        button,
+        [role="button"],
+        [role="link"],
+        [role="tab"],
+        [role="option"],
+        [role="menuitem"],
+        [role="menuitemcheckbox"],
+        [role="menuitemradio"],
+        [role="checkbox"],
+        [role="radio"],
+        [role="switch"],
+        [role="combobox"],
+        a[href],
+        label[for],
+        summary,
+        select,
+        input[type="file"],
+        input[type="checkbox"],
+        input[type="radio"]
+    ) {
+        cursor: pointer;
+    }
+
+    :disabled,
+    [aria-disabled="true"],
+    [data-disabled] {
+        cursor: not-allowed;
+    }
+
+    [aria-busy="true"] {
+        cursor: progress;
+    }
+}

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>Player · opção</title>
+        <link rel="stylesheet" href="../navigation/tokens.css" />
+        <link rel="stylesheet" href="player.css" />
+    </head>
+    <body>
+        <div id="root"></div>
+        <script src="icons.js"></script>
+        <script src="player.js"></script>
+        <script>
+            const params = new URLSearchParams(location.search);
+            const option = params.get("o");
+            const view = params.get("v");
+            const P = window.P;
+            const scrubCurrent = `<div class="stack" style="gap:6px">${P.scrubberB({ withTip: false })}${P.ticks()}</div>`;
+
+            const DESK = {
+                current: () =>
+                    `<div class="shot">${P.studio(P.playerNative() + scrubCurrent, P.verticalNative())}</div>`,
+                a: () => `<div class="shot">${P.studio(P.playerA({ state: "hover" }), P.verticalA())}
+        <div class="states">
+            <div class="state">${P.playerA({ state: "paused", compact: true })}<p class="caption"><b>Pausado:</b> botão grande no meio; a barra continua mostrando os cortes.</p></div>
+            <div class="state">${P.playerA({ state: "playing" })}<p class="caption"><b>Tocando, mouse parado:</b> os controles somem em 2 s; fica só uma linha fina.</p></div>
+            <div class="state">${P.playerA({ state: "loading", compact: true })}<p class="caption"><b>Carregando:</b> roda no meio, controles no lugar (nada pula).</p></div>
+        </div></div>`,
+                b: () => `<div class="shot">${P.studio(`<div>${P.playerB()}${P.dockB()}</div>`, P.verticalB())}
+        <div class="states">
+            <div class="state">${P.playerB({ state: "playing" })}<p class="caption"><b>Clique no vídeo:</b> toca ou pausa, com um aviso rápido no meio. Nada fica por cima da imagem.</p></div>
+            <div class="state">${P.playerB({ state: "loading" })}<p class="caption"><b>Carregando:</b> roda no meio; o painel de baixo não muda.</p></div>
+            <div class="state"><div class="dock" style="border-top:1px solid var(--border);border-radius:16px;padding-top:44px">${P.scrubberB()}</div><p class="caption"><b>Barra:</b> é a de hoje, agora com o ponto que mostra o tempo; clicar num número toca aquele corte.</p></div>
+        </div></div>`,
+                c: () => `<div class="shot">${P.studio(P.playerC(), P.verticalA())}
+        <div class="states">
+            <div class="state">${P.playerC({ state: "playing" })}<p class="caption"><b>Tocando:</b> sobra o nome do corte no canto e uma linha fina.</p></div>
+            <div class="state">${P.playerC({ state: "end" })}<p class="caption"><b>Fim do corte</b> (com "Repetir" desligado): de novo ou o próximo.</p></div>
+            <div class="state">${P.playerC({ state: "whole" })}<p class="caption"><b>"Ver vídeo inteiro":</b> a barra volta a ser o vídeo todo, igual à A.</p></div>
+        </div></div>`,
+            };
+
+            const PHONE = {
+                current: () => `<div class="phone">${P.playerNative()}${scrubCurrent}</div>`,
+                a: () =>
+                    `<div class="phone">${P.playerA({ state: "hover", compact: true })}<div style="display:grid;grid-template-columns:96px 1fr;gap:12px">${P.verticalA({ tiny: true })}<p style="font-size:15px;font-weight:800">${P.SELECTED.title}</p></div></div>`,
+                b: () =>
+                    `<div class="phone"><div>${P.playerB()}${P.dockB({ compact: true })}</div></div>`,
+                c: () =>
+                    `<div class="phone">${P.playerC({ compact: true })}<div style="display:grid;grid-template-columns:96px 1fr;gap:12px">${P.verticalA({ tiny: true })}<p style="font-size:15px;font-weight:800">${P.SELECTED.title}</p></div></div>`,
+            };
+
+            const table = view === "phone" ? PHONE : DESK;
+            document.getElementById("root").innerHTML = table[option]();
+            if (view === "phone") {
+                document.body.classList.add("is-phone");
+            }
+        </script>
+    </body>
+</html>

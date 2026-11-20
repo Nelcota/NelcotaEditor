@@ -1,0 +1,61 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { UseMutationResult } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
+import { uploadVideoFile } from "#/modules/videos/client/upload-video-file";
+import { createYoutubeVideo } from "#/modules/videos/server/video-functions";
+import { NoSourceError } from "#/modules/videos/ui/no-source-error";
+import { toLinkVideoId } from "#/modules/videos/ui/video-source";
+import type { VideoSource } from "#/modules/videos/ui/video-source";
+import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+
+export interface Submission {
+    source: VideoSource;
+    clipCount: number;
+    title: string;
+    language: TranscriptionLanguage;
+}
+
+/** Creates the video from a link, or uploads the file with progress; returns the new video's id. */
+async function createVideo(
+    { source, clipCount, title, language }: Submission,
+    onUploadProgress: (percent: number) => void,
+): Promise<string> {
+    if (source.kind === "file") {
+        onUploadProgress(0);
+        return uploadVideoFile({ file: source.file, clipCount, title, language }, onUploadProgress);
+    }
+
+    if (toLinkVideoId(source) === null) {
+        throw new NoSourceError();
+    }
+
+    const created = await createYoutubeVideo({
+        data: { url: source.text.trim(), clipCount, language },
+    });
+
+    return created.videoId;
+}
+
+interface VideoSubmission {
+    submission: UseMutationResult<string, Error, Submission>;
+    uploadPercent: number | null;
+}
+
+/** Sends the form and opens the new video's page; the upload percent is null when not uploading. */
+export function useVideoSubmission(): VideoSubmission {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const [uploadPercent, setUploadPercent] = useState<number | null>(null);
+    const submission = useMutation({
+        mutationFn: (input: Submission) => createVideo(input, setUploadPercent),
+        onSuccess: async (videoId) => {
+            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await navigate({ to: "/videos/$videoId", params: { videoId } });
+        },
+        onError: () => setUploadPercent(null),
+    });
+
+    return { submission, uploadPercent };
+}

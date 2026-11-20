@@ -1,0 +1,191 @@
+/* Account page exploration. Tokens and sidebar come from ../navigation and ../video-page. */
+
+.card-a {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--popover);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.input {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--input);
+    background: var(--background);
+    font-size: 15px;
+}
+
+.input.is-readonly {
+    color: var(--muted-foreground);
+    background: transparent;
+}
+
+.select {
+    justify-content: space-between;
+}
+
+.saved {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted-foreground);
+}
+
+.saved .icon {
+    color: var(--success);
+}
+
+.big-avatar {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--secondary);
+    flex-shrink: 0;
+}
+
+.avatar-edit {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--foreground);
+    color: var(--background);
+    box-shadow: 0 0 0 3px var(--popover);
+}
+
+/* ---------- A: tabs ---------- */
+
+.tabs-a {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.tab-a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.tab-a[aria-selected="true"] {
+    color: var(--foreground);
+    border-bottom-color: var(--primary);
+    font-weight: 700;
+}
+
+/* ---------- B: crew panel ---------- */
+
+.crew-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.crew-stat {
+    display: grid;
+    gap: 6px;
+    padding: 16px;
+}
+
+.crew-stat .value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.storage-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--muted);
+    overflow: hidden;
+    display: flex;
+}
+
+.storage-bar span {
+    height: 100%;
+}
+
+/* ---------- C: grouped settings list ---------- */
+
+.group {
+    display: grid;
+    gap: 8px;
+}
+
+.group-label {
+    padding: 0 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.rows {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--popover);
+    overflow: hidden;
+}
+
+.set-row {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+}
+
+.set-row:first-child {
+    border-top: 0;
+}
+
+.set-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--secondary);
+    color: var(--muted-foreground);
+}
+
+.set-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted-foreground);
+    font-size: 15px;
+}

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Player · atual + 3 direções</title>
+        <link rel="stylesheet" href="../navigation/tokens.css" />
+        <link rel="stylesheet" href="../navigation/board.css" />
+        <style>
+            body {
+                padding: 40px 32px 80px;
+            }
+            .wrap {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                gap: 40px;
+            }
+            .legend {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+            }
+            .legend article {
+                padding: 18px;
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                background: var(--popover);
+                display: grid;
+                gap: 8px;
+                align-content: start;
+            }
+            .legend article.is-pick {
+                border-color: var(--primary);
+            }
+            .tag {
+                display: inline-block;
+                font-size: 12px;
+                font-weight: 800;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: var(--primary);
+                color: var(--primary-foreground);
+            }
+            .legend h3 {
+                font-size: 18px;
+                font-weight: 800;
+            }
+            .legend p {
+                font-size: 14px;
+            }
+            .legend b {
+                color: var(--foreground);
+            }
+            section {
+                display: grid;
+                gap: 14px;
+            }
+            section h2 {
+                font-size: 20px;
+                font-weight: 800;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 300px;
+                gap: 16px;
+                align-items: start;
+            }
+            .shots img {
+                width: 100%;
+                border-radius: 14px;
+                border: 1px solid var(--border);
+                display: block;
+            }
+            .caption {
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .shared {
+                padding: 16px 18px;
+                border: 1px dashed var(--border);
+                border-radius: 16px;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header style="display: grid; gap: 6px">
+                <h1 class="page-title">Player · atual + 3 direções</h1>
+                <p class="muted">
+                    Quadros reais do seu vídeo demo (16:51, 5 cortes; tocando no 2:11, dentro do
+                    corte 1). Computador 1200 px e celular 390. Nada disso está no app ainda.
+                </p>
+            </header>
+
+            <p class="shared muted">
+                <b style="color: var(--foreground)">Igual nas três:</b> controles próprios no lugar
+                dos do navegador (mesmo visual no Chrome, Safari e Edge); atalhos de teclado (espaço
+                toca/pausa, ← → pulam 5 s, J/L 10 s, F tela cheia, M mudo); velocidade 0,5× a 2×; o
+                corte em pé ganha o mesmo visual; quem pede menos movimento não vê animação. Os
+                estados "ainda baixando" e "o navegador não toca este arquivo" ficam como hoje. Sem
+                biblioteca nova: é o &lt;video&gt; do navegador com controles nossos.
+            </p>
+
+            <div class="legend">
+                <article class="is-pick">
+                    <span><span class="tag">Recomendo</span></span>
+                    <h3>A · Controles sobre o vídeo</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> o jeito do YouTube: controles por cima da imagem, que somem
+                        enquanto toca. A barra de progresso do player já mostra os cortes em verde;
+                        passar o mouse mostra o quadro e o tempo. "Corte 1 de 5" com setas pula
+                        entre cortes.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> todo mundo já sabe usar; o vídeo fica maior (a barra de baixo
+                        some, ganha ~60 px de altura).
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> os trechos dos cortes ficam finos (6 px) em vez dos blocos
+                        grandes de hoje; os números saem da barra.
+                    </p>
+                    <p class="muted">
+                        <b>Por que recomendo:</b> é a mudança que mais "parece produto" com menos
+                        coisa nova para aprender; junta player e barra num só lugar.
+                    </p>
+                </article>
+                <article>
+                    <h3>B · Painel de edição embaixo</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> como um editor (CapCut, Descript): a imagem fica limpa, sem
+                        nada por cima; embaixo, colado, um painel com tocar, tempo, "Corte 1 de 5",
+                        "Só este corte" (repete o trecho) e a barra de hoje com os números.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> mira precisa nos cortes (blocos grandes, numerados); nada
+                        tampa o vídeo.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> ocupa mais altura; em tela cheia os controles precisam de
+                        outra versão.
+                    </p>
+                </article>
+                <article>
+                    <h3>
+                        C · Foco no corte
+                        <span class="muted" style="font-size: 13px; font-weight: 600"
+                            >(mais ousada)</span
+                        >
+                    </h3>
+                    <p class="muted">
+                        <b>Ideia:</b> o player trata o corte escolhido como o vídeo: a barra grande
+                        vai só do início ao fim do corte (1:56 → 2:35), repete sozinho, e
+                        anterior/próximo trocam de corte. Uma linha fina em cima mostra onde ele
+                        fica no original. "Ver vídeo inteiro" volta ao modo A.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> o trabalho da tela é escolher qual corte postar; aqui você
+                        passa por eles como uma playlist.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> dois modos para entender; assistir ao original inteiro pede um
+                        clique.
+                    </p>
+                </article>
+            </div>
+
+            <section>
+                <h2>Atual</h2>
+                <div class="shots">
+                    <img src="renders/current.png" alt="Player atual" /><img
+                        src="renders/phone-current.png"
+                        alt="Player atual no celular"
+                    />
+                </div>
+                <p class="caption">
+                    Controles do navegador (cada navegador desenha diferente) e a barra dos cortes
+                    separada embaixo.
+                </p>
+            </section>
+            <section>
+                <h2>
+                    A · Controles sobre o vídeo
+                    <span class="tag" style="vertical-align: middle">Recomendo</span>
+                </h2>
+                <div class="shots">
+                    <img src="renders/a.png" alt="Direção A" /><img
+                        src="renders/phone-a.png"
+                        alt="Direção A no celular"
+                    />
+                </div>
+                <p class="caption">
+                    Em cima: mouse sobre a barra, no trecho do corte 1. O corte em pé à direita usa
+                    os mesmos controles.
+                </p>
+            </section>
+            <section>
+                <h2>B · Painel de edição embaixo</h2>
+                <div class="shots">
+                    <img src="renders/b.png" alt="Direção B" /><img
+                        src="renders/phone-b.png"
+                        alt="Direção B no celular"
+                    />
+                </div>
+                <p class="caption">
+                    "Só este corte" ligado: chega ao fim do trecho e volta para o início dele.
+                </p>
+            </section>
+            <section>
+                <h2>C · Foco no corte</h2>
+                <div class="shots">
+                    <img src="renders/c.png" alt="Direção C" /><img
+                        src="renders/phone-c.png"
+                        alt="Direção C no celular"
+                    />
+                </div>
+                <p class="caption">
+                    No fim do corte (com "Repetir" desligado) aparece o próximo, com 3 s para
+                    cancelar.
+                </p>
+            </section>
+        </div>
+    </body>
+</html>

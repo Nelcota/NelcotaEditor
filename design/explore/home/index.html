@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Início · 3 direções</title>
+        <link rel="stylesheet" href="../navigation/tokens.css" />
+        <link rel="stylesheet" href="../navigation/board.css" />
+        <style>
+            body {
+                padding: 40px 32px 80px;
+            }
+            .wrap {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                gap: 40px;
+            }
+            .legend {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+            }
+            .legend article {
+                padding: 18px;
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                background: var(--popover);
+                display: grid;
+                gap: 8px;
+                align-content: start;
+            }
+            .legend article.is-pick {
+                border-color: var(--primary);
+            }
+            .tag {
+                display: inline-block;
+                font-size: 12px;
+                font-weight: 800;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: var(--primary);
+                color: var(--primary-foreground);
+            }
+            .legend h3 {
+                font-size: 18px;
+                font-weight: 800;
+            }
+            .legend p {
+                font-size: 14px;
+            }
+            .legend b {
+                color: var(--foreground);
+            }
+            section {
+                display: grid;
+                gap: 14px;
+            }
+            section h2 {
+                font-size: 20px;
+                font-weight: 800;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 260px;
+                gap: 16px;
+                align-items: start;
+            }
+            .shots img,
+            .full {
+                width: 100%;
+                border-radius: 14px;
+                border: 1px solid var(--border);
+                display: block;
+            }
+            .phone-shot {
+                width: 260px;
+                overflow: hidden;
+                border-radius: 22px;
+                border: 1px solid var(--border);
+            }
+            .phone-shot img {
+                width: 333px;
+                max-width: none;
+                border: 0;
+                border-radius: 0;
+            }
+            .caption {
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .shared {
+                padding: 16px 18px;
+                border: 1px dashed var(--border);
+                border-radius: 16px;
+                font-size: 14px;
+            }
+            .phone-shot img {
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header style="display: grid; gap: 6px">
+                <h1 class="page-title">Início · atual + 3 direções</h1>
+                <p class="muted">
+                    Os mesmos vídeos (2 em andamento, 1 com erro, 1 cancelado, prontos com títulos
+                    longos e um com corte que falhou). 1440 × 900 e celular 390. Nada disso está no
+                    app ainda.
+                </p>
+            </header>
+
+            <p class="shared muted">
+                <b style="color: var(--foreground)">Igual nas três:</b> miniatura do vídeo (com o
+                mascote do vídeo no canto); a fala da equipe no lugar do selo de situação; barra e
+                tempo que falta nos vídeos em andamento; "Tentar de novo" direto no vídeo com erro;
+                busca por título e ordenação ("Mais recentes").
+            </p>
+
+            <div class="legend">
+                <article class="is-pick">
+                    <span><span class="tag">Recomendo</span></span>
+                    <h3>A · Lista com miniaturas</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> um vídeo por linha: miniatura, título inteiro, a fala de quem
+                        está trabalhando nele e, à direita, o progresso ou os cortes prontos em
+                        miniatura. Filtros em cima, como hoje.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> ler tudo de cada vídeo de uma vez; funciona igual com 3 ou 40
+                        vídeos; é a mesma linha da tela de Cortes.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> quem está em andamento não se destaca tanto; ele fica no topo
+                        só por ser o mais novo.
+                    </p>
+                    <p class="muted">
+                        <b>Por que recomendo:</b> fica coerente com o resto do app e mostra o que
+                        importa sem mudar como você procura um vídeo.
+                    </p>
+                </article>
+                <article>
+                    <h3>B · Agora + biblioteca</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> em cima, "Agora": cartões grandes só com o que está em
+                        andamento ou com erro, com o mascote trabalhando. Embaixo, a biblioteca dos
+                        prontos em duas colunas.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> o que pede atenção aparece primeiro; a seção some quando não
+                        há nada acontecendo.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> dois lugares para achar um vídeo; os filtros viram seções.
+                    </p>
+                </article>
+                <article>
+                    <h3>
+                        C · Galeria
+                        <span class="muted" style="font-size: 13px; font-weight: 600"
+                            >(mais ousada)</span
+                        >
+                    </h3>
+                    <p class="muted">
+                        <b>Ideia:</b> cartões grandes com a miniatura em destaque e os cortes
+                        empilhados no canto; nos vídeos em andamento, a equipe aparece por cima da
+                        imagem.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> a tela mais visual; parece uma biblioteca de vídeos.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> cabem só 6 vídeos por tela; menos texto por vídeo.
+                    </p>
+                </article>
+            </div>
+
+            <section>
+                <h2>Atual</h2>
+                <img class="full" src="renders/current.png" alt="Início atual" />
+                <p class="caption">
+                    Tabela sem miniaturas; "Pronto" e "Processando" têm o mesmo peso; não diz quem
+                    está trabalhando nem quanto falta.
+                </p>
+            </section>
+            <section>
+                <h2>
+                    A · Lista com miniaturas
+                    <span class="tag" style="vertical-align: middle">Recomendo</span>
+                </h2>
+                <div class="shots">
+                    <img src="renders/a.png" alt="Direção A" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-a.png" alt="Direção A no celular" />
+                    </div>
+                </div>
+                <p class="caption">
+                    Quadrinhos pontilhados são cortes que ainda vão sair; o roxo é um corte que
+                    falhou.
+                </p>
+            </section>
+            <section>
+                <h2>B · Agora + biblioteca</h2>
+                <div class="shots">
+                    <img src="renders/b.png" alt="Direção B" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-b.png" alt="Direção B no celular" />
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h2>C · Galeria</h2>
+                <div class="shots">
+                    <img src="renders/c.png" alt="Direção C" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-c.png" alt="Direção C no celular" />
+                    </div>
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

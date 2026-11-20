@@ -1,0 +1,36 @@
+import RestartIcon from "~icons/solar/restart-linear";
+import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
+import { PreferencesForm } from "#/modules/preferences/ui/preferences-form";
+import { preferencesQueryOptions } from "#/modules/preferences/ui/preferences-queries";
+import { Button } from "#/shared/ui/button";
+import { FormAlert } from "#/shared/ui/form-alert";
+import { Skeleton } from "#/shared/ui/skeleton";
+
+export function PreferencesSection(): ReactNode {
+    const preferencesQuery = useQuery(preferencesQueryOptions());
+    const preferences = preferencesQuery.data;
+
+    if (preferencesQuery.isError === true && preferences === undefined) {
+        return (
+            <div className="grid justify-items-start gap-3">
+                <FormAlert message="Não foi possível carregar suas preferências." />
+                <Button
+                    variant="secondary"
+                    onClick={async () => {
+                        await preferencesQuery.refetch();
+                    }}
+                >
+                    <RestartIcon aria-hidden="true" />
+                    Tentar de novo
+                </Button>
+            </div>
+        );
+    }
+
+    if (preferences === undefined) {
+        return <Skeleton className="h-56 rounded-2xl" aria-busy="true" aria-label="Carregando" />;
+    }
+
+    return <PreferencesForm initial={preferences} />;
+}

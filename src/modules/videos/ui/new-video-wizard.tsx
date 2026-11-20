@@ -1,0 +1,102 @@
+import { useState } from "react";
+import type { FormEvent, ReactNode } from "react";
+import { TRANSCRIPTION_LANGUAGE_LABELS } from "#/modules/preferences/preferences";
+import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
+import { LanguageStepFields } from "#/modules/videos/ui/language-step-fields";
+import { NewVideoPreview } from "#/modules/videos/ui/new-video-preview";
+import { ClipsStepFields, VideoStepFields } from "#/modules/videos/ui/new-video-step-fields";
+import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
+import { UploadProgress } from "#/modules/videos/ui/upload-progress";
+import { useIsLinkBlocked } from "#/modules/videos/ui/use-is-link-blocked";
+import { useVideoSubmission } from "#/modules/videos/ui/use-video-submission";
+import { EMPTY_SOURCE, hasUsableSource } from "#/modules/videos/ui/video-source";
+import type { VideoSource } from "#/modules/videos/ui/video-source";
+import { Button } from "#/shared/ui/button";
+import { DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/dialog";
+import { FormAlert } from "#/shared/ui/form-alert";
+
+const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente novamente.";
+
+interface NewVideoWizardProps {
+    defaultClipCount: number;
+    defaultLanguage: TranscriptionLanguage;
+}
+
+/**
+ * The new video dialog on a single screen: the video first, then the clip count and the spoken
+ * language, both already filled from the account's preferences. One button sends it, and the
+ * preview fills in as you go. Opens the new video when it is created.
+ */
+export function NewVideoWizard({
+    defaultClipCount,
+    defaultLanguage,
+}: NewVideoWizardProps): ReactNode {
+    const [source, setSource] = useState<VideoSource>(EMPTY_SOURCE);
+    const [clipCount, setClipCount] = useState(defaultClipCount);
+    const [title, setTitle] = useState("");
+    const [language, setLanguage] = useState<TranscriptionLanguage>(defaultLanguage);
+    const languageLabel = TRANSCRIPTION_LANGUAGE_LABELS[language];
+    const isLinkBlocked = useIsLinkBlocked(source);
+    const { submission, uploadPercent } = useVideoSubmission();
+    const isBusy = submission.isPending;
+
+    const submit = (event: FormEvent<HTMLFormElement>): void => {
+        event.preventDefault();
+
+        if (hasUsableSource(source) === false || isLinkBlocked === true || isBusy === true) {
+            return;
+        }
+
+        submission.mutate({ source, clipCount, title, language });
+    };
+
+    return (
+        <form
+            noValidate
+            onSubmit={submit}
+            className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto]"
+        >
+            <DialogHeader className="border-b px-5 py-4 sm:px-7 sm:py-5">
+                <DialogTitle>Novo vídeo</DialogTitle>
+                <DialogDescription>
+                    Cole o link ou envie o arquivo. O resto já vem preenchido; mude só se quiser.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid min-h-0 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <section className="grid min-h-0 content-start gap-8 overflow-y-auto p-5 sm:p-7">
+                    <VideoStepFields
+                        source={source}
+                        title={title}
+                        onTitleChange={setTitle}
+                        onSourceChange={setSource}
+                    />
+                    <ClipsStepFields clipCount={clipCount} onClipCountChange={setClipCount} />
+                    <LanguageStepFields language={language} onLanguageChange={setLanguage} />
+                    <UploadProgress percent={uploadPercent} />
+                    {submission.isError === true && (
+                        <FormAlert
+                            message={toErrorMessage(submission.error, FALLBACK_ERROR_MESSAGE)}
+                        />
+                    )}
+                </section>
+                <NewVideoPreview
+                    source={source}
+                    title={title}
+                    clipCount={clipCount}
+                    languageLabel={languageLabel}
+                />
+            </div>
+            <footer className="flex items-center justify-end gap-3 border-t px-5 py-4 sm:px-7">
+                <Button
+                    type="submit"
+                    size="lg"
+                    className="font-semibold max-sm:flex-1 sm:min-w-40"
+                    disabled={hasUsableSource(source) === false || isLinkBlocked === true || isBusy}
+                    aria-busy={isBusy}
+                >
+                    Gerar cortes
+                </Button>
+            </footer>
+        </form>
+    );
+}

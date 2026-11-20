@@ -1,0 +1,59 @@
+name: nelcota
+
+services:
+    postgres:
+        image: postgres:18.7-alpine
+        environment:
+            POSTGRES_USER: nelcota
+            POSTGRES_PASSWORD: nelcota
+            POSTGRES_DB: nelcota
+        ports:
+            - "5433:5432"
+        volumes:
+            - postgres-data:/var/lib/postgresql
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U nelcota -d nelcota"]
+            interval: 2s
+            timeout: 5s
+            retries: 30
+        restart: unless-stopped
+
+    whisper:
+        # Pinned by digest: speaches only publishes moving tags.
+        image: ghcr.io/speaches-ai/speaches@sha256:21e3df06d842fb7802ab470dd77c25f0e8c0d22950e8d8c6ae886e851af53ef8
+        environment:
+            # CPU tuning measured on 8 cores: 4 model workers x 2 threads, fed 3 chunks at once by
+            # the worker, transcribed 10 minutes of audio in 51s (165s with the defaults).
+            # Keep workers x threads close to the number of CPU cores.
+            WHISPER__COMPUTE_TYPE: int8
+            WHISPER__NUM_WORKERS: "4"
+            WHISPER__CPU_THREADS: "2"
+        ports:
+            - "8000:8000"
+        volumes:
+            - whisper-models:/home/ubuntu/.cache/huggingface/hub
+        restart: unless-stopped
+
+    worker:
+        build:
+            context: .
+            dockerfile: Dockerfile.worker
+        env_file: .env
+        environment:
+            DATABASE_URL: postgresql://nelcota:nelcota@postgres:5432/nelcota
+            STORAGE_DIR: /app/storage
+            WHISPER_URL: http://whisper:8000
+        volumes:
+            - ./storage:/app/storage
+            # Mounted so code changes only need `npm run worker:restart`, not a rebuild.
+            - ./src:/app/src:ro
+        depends_on:
+            postgres:
+                condition: service_healthy
+            whisper:
+                condition: service_started
+        restart: unless-stopped
+
+volumes:
+    postgres-data:
+    whisper-models:

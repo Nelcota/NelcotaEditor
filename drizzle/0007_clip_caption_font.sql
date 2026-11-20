@@ -1,0 +1,2 @@
+CREATE TYPE "public"."clip_caption_font" AS ENUM('montserrat', 'bebas-neue', 'league-spartan', 'inter');--> statement-breakpoint
+ALTER TABLE "clips" ADD COLUMN "caption_font" "clip_caption_font" DEFAULT 'montserrat' NOT NULL;
