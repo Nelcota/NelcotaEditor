@@ -4,5 +4,11 @@
     "semi": true,
     "singleQuote": false,
     "printWidth": 100,
-    "ignorePatterns": ["src/routeTree.gen.ts", "drizzle/**", "storage/**"]
+    "ignorePatterns": [
+        "src/routeTree.gen.ts",
+        "drizzle/**",
+        "storage/**",
+        ".claude/skills/**",
+        "skills-lock.json"
+    ]
 }

@@ -102,7 +102,7 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
                 <ul
                     ref={scrollerRef}
                     aria-label="Melhores cortes, da maior nota para a menor"
-                    className="-mx-1 grid snap-x snap-mandatory auto-cols-[10rem] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain px-1 motion-safe:scroll-smooth pb-1 [scrollbar-width:none] @2xl/clips:auto-cols-[calc((100%-2.25rem)/4)] @4xl/clips:auto-cols-[calc((100%-3rem)/5)]"
+                    className="-mx-1 grid snap-x snap-mandatory auto-cols-[10rem] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain px-1 scroll-px-1 motion-safe:scroll-smooth pb-1 [scrollbar-width:none] @2xl/clips:auto-cols-[calc((100%-2.25rem)/4)] @4xl/clips:auto-cols-[calc((100%-3rem)/5)]"
                 >
                     {clips.map((item) => (
                         <BestClipCard key={item.clip.id} item={item} />

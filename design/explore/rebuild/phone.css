@@ -1,0 +1,68 @@
+/* Phone frame shared by the three directions: 16px frame line, 56px top bar, 64px tab bar. */
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.p-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 56px;
+    padding: 0 8px 0 16px;
+    flex: none;
+}
+
+.p-top h1 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.p-body {
+    flex: 1;
+    overflow: hidden;
+    padding: 0 16px;
+    grid-template-columns: minmax(0, 1fr);
+    display: grid;
+    gap: 12px;
+    align-content: start;
+}
+
+.tabbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: 64px;
+    flex: none;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.tabbar span {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--faint);
+}
+
+.tabbar span.on {
+    color: var(--ink);
+}
+
+.tabbar [data-i] {
+    width: 24px;
+    height: 24px;
+}
+
+.tabbar .fab {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--accent);
+    color: var(--on-accent);
+    display: grid;
+    place-items: center;
+}

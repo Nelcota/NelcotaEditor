@@ -42,7 +42,7 @@ function DialogContent({
                 {children}
                 <DialogPrimitive.Close
                     data-slot="dialog-close"
-                    className="absolute top-[calc(var(--dialog-padding)-0.125rem)] right-[calc(var(--dialog-padding)-0.5rem)] grid size-8 pointer-coarse:size-11 place-items-center rounded-md text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&_svg]:size-5"
+                    className="absolute top-[calc(var(--dialog-padding)-0.125rem)] right-[calc(var(--dialog-padding)-0.375rem)] grid size-8 pointer-coarse:top-[calc(var(--dialog-padding)-0.5rem)] pointer-coarse:right-[calc(var(--dialog-padding)-0.75rem)] pointer-coarse:size-11 place-items-center rounded-md text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&_svg]:size-5"
                 >
                     <CloseIcon aria-hidden="true" />
                     <span className="sr-only">Fechar</span>

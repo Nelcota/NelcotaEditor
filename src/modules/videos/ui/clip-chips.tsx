@@ -1,10 +1,10 @@
 import type { ClipView } from "#/modules/clips/clip-view";
 import { cn } from "#/shared/ui/cn";
 
-// Grows to two lines instead of cutting the title: picking a clip means reading its name. It never
-// grows past its row, so a title with no spaces breaks anywhere instead of overflowing.
-const CHIP_CLASS =
-    "group inline-flex min-h-10 max-w-[min(20rem,100%)] items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pe-3 ps-1.5 text-sm font-semibold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
+// One row per clip, the full width of the list. The title grows to two lines instead of being cut:
+// picking a clip means reading its name; a title with no spaces breaks anywhere.
+const ROW_CLASS =
+    "group flex min-h-12 w-full items-center gap-3 rounded-xl px-2 py-2 text-start text-sm font-medium outline-none transition-[color,background-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
 
 interface ClipChipsProps {
     clips: Array<ClipView>;
@@ -19,28 +19,24 @@ function ScoreOrState({ clip }: { clip: ClipView }) {
     }
 
     if (clip.status !== "done") {
-        return (
-            <span className="text-xs text-muted-foreground group-aria-pressed:text-background/75">
-                montando
-            </span>
-        );
+        return <span className="text-xs text-muted-foreground">montando</span>;
     }
 
     return (
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
+        <span className="font-mono text-xs font-semibold text-success tabular-nums">
             {clip.score}
         </span>
     );
 }
 
 const PLACEHOLDER_CLASS =
-    "inline-flex h-10 items-center gap-2 rounded-full border border-dashed py-0 pe-3 ps-1.5 text-sm text-muted-foreground";
+    "flex min-h-12 w-full items-center gap-3 rounded-xl border border-dashed px-2 text-sm text-muted-foreground";
 
 /** A slot for a clip Brilho has not picked yet; the number continues after the real ones. */
 function PlaceholderChip({ number }: { number: number }) {
     return (
         <span className={PLACEHOLDER_CLASS}>
-            <span className="grid size-7 place-items-center rounded-full bg-secondary text-xs tabular-nums">
+            <span className="grid size-7 place-items-center rounded-lg bg-secondary text-xs tabular-nums">
                 {number}
             </span>
             Luna guarda o lugar
@@ -48,7 +44,7 @@ function PlaceholderChip({ number }: { number: number }) {
     );
 }
 
-/** Every clip, best first, as a numbered button; the number matches the marks on the bar. */
+/** Every clip, best first, as a numbered row; the number matches the marks on the bar. */
 export function ClipChips({
     clips,
     selectedClipId,
@@ -56,7 +52,7 @@ export function ClipChips({
     placeholderCount,
 }: ClipChipsProps) {
     return (
-        <div role="group" aria-label="Cortes, pela nota do Brilho" className="flex flex-wrap gap-2">
+        <div role="group" aria-label="Cortes, pela nota do Brilho" className="grid gap-0.5">
             {clips.map((clip, index) => (
                 <button
                     key={clip.id}
@@ -65,15 +61,15 @@ export function ClipChips({
                     onClick={() => onSelectClip(clip)}
                     title={clip.title}
                     className={cn(
-                        CHIP_CLASS,
-                        "aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:hover:bg-foreground/90",
-                        clip.status === "failed" && "border-destructive/50",
+                        ROW_CLASS,
+                        "aria-pressed:bg-primary/8 aria-pressed:hover:bg-primary/10",
+                        clip.status === "failed" && "text-destructive",
                     )}
                 >
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary text-xs text-secondary-foreground tabular-nums">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-secondary text-xs text-secondary-foreground tabular-nums group-aria-pressed:bg-primary-solid group-aria-pressed:text-primary-foreground">
                         {index + 1}
                     </span>
-                    <span className="line-clamp-2 min-w-0 text-start leading-snug [overflow-wrap:anywhere]">
+                    <span className="line-clamp-2 min-w-0 flex-1 leading-snug [overflow-wrap:anywhere]">
                         {clip.title}
                     </span>
                     <ScoreOrState clip={clip} />

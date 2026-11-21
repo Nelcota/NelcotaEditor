@@ -13,7 +13,7 @@ import { Mascot } from "#/shared/ui/mascot";
 /** Brilho picked the moment, so the score and the reason are presented as Brilho's. */
 function BrilhoReason({ clip }: { clip: ClipView }) {
     return (
-        <div className="flex gap-3 rounded-xl border bg-background/40 p-3 text-sm">
+        <div className="flex gap-3 rounded-xl bg-muted p-3 text-sm">
             <Mascot index={STAGE_CREW.selecting} className="size-7 shrink-0" />
             <p className="max-w-prose">
                 <span className="font-semibold">
@@ -58,7 +58,7 @@ function ClipActions({ videoId, clip, canRetry }: Omit<SelectedClipPanelProps, "
     );
 }
 
-/** The clip being watched: why Brilho chose it and what to do with it. The phone shows it here too. */
+/** The clip being watched, playing at its real shape, why Brilho chose it and what to do with it. */
 export function SelectedClipPanel({
     videoId,
     clip,
@@ -72,35 +72,30 @@ export function SelectedClipPanel({
         <section
             aria-labelledby="selected-clip-title"
             aria-live="polite"
-            className="grid grid-cols-[96px_minmax(0,1fr)] gap-4 rounded-2xl border bg-popover p-4 sm:p-5 @5xl:grid-cols-[minmax(0,1fr)_auto]"
+            className="grid gap-4 border-t p-4 sm:p-5"
         >
-            <div className="@5xl:hidden">
+            <div className="grid grid-cols-[112px_minmax(0,1fr)] items-start gap-4 sm:grid-cols-[148px_minmax(0,1fr)]">
                 <ClipPreview key={clip.id} clip={clip} />
-            </div>
-            <div className="grid min-w-0 content-start gap-2">
-                <p className="flex flex-wrap gap-x-3 gap-y-1 text-meta font-semibold text-muted-foreground tabular-nums">
-                    <span className="whitespace-nowrap">
-                        CORTE {rank} DE {total}
-                    </span>
-                    <span className="whitespace-nowrap">
-                        {formatClock(clip.startSeconds)} a {formatClock(clip.endSeconds)}
-                    </span>
-                    <span className="whitespace-nowrap">{durationSeconds}s</span>
-                </p>
-                <h2
-                    id="selected-clip-title"
-                    className="text-lg leading-snug font-semibold text-balance sm:text-xl"
-                >
-                    {clip.title}
-                </h2>
-                <div className="hidden sm:block">
-                    <BrilhoReason clip={clip} />
+                <div className="grid min-w-0 content-start gap-2">
+                    <p className="flex flex-wrap gap-x-3 gap-y-1 text-meta text-muted-foreground tabular-nums">
+                        <span className="whitespace-nowrap">
+                            Corte {rank} de {total}
+                        </span>
+                        <span className="whitespace-nowrap">
+                            {formatClock(clip.startSeconds)} a {formatClock(clip.endSeconds)}
+                        </span>
+                        <span className="whitespace-nowrap">{durationSeconds}s</span>
+                    </p>
+                    <h2
+                        id="selected-clip-title"
+                        className="text-lg leading-snug font-semibold text-balance [overflow-wrap:anywhere]"
+                    >
+                        {clip.title}
+                    </h2>
                 </div>
             </div>
-            <div className="col-span-2 grid gap-3 sm:hidden">
-                <BrilhoReason clip={clip} />
-            </div>
-            <div className="col-span-2 flex flex-wrap gap-2 [&>*]:flex-1 sm:[&>*]:flex-none @5xl:col-span-1 @5xl:flex-col @5xl:[&>*]:w-full">
+            <BrilhoReason clip={clip} />
+            <div className="grid grid-cols-2 gap-2 [&>*]:w-full [&>*:first-child]:col-span-2">
                 <ClipActions videoId={videoId} clip={clip} canRetry={canRetry} />
             </div>
         </section>

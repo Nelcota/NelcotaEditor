@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>A · Mesa · celular</title>
+        <link rel="stylesheet" href="rebuild.css" />
+        <link rel="stylesheet" href="a.css" />
+        <link rel="stylesheet" href="phone.css" />
+        <style>
+            body {
+                background: var(--bg);
+            }
+            .video-row {
+                padding: 8px;
+                margin: 0 -8px;
+            }
+        </style>
+    </head>
+    <body data-guides="box@8:caixa; text@16:texto; trail@374:fim">
+        <header class="p-top">
+            <span
+                class="mascot"
+                style="width: 28px; height: 28px; background-position: 100% 100%"
+            ></span>
+            <h1 class="grow">Vídeos</h1>
+            <span class="btn sm primary"><span data-i="add"></span>Novo</span>
+        </header>
+        <div class="p-body">
+            <div class="field" style="margin: 0 -8px; padding: 0 8px">
+                <span data-i="search"></span>Buscar vídeo
+            </div>
+            <div class="segmented" style="margin: 0 -8px; width: max-content">
+                <span class="on">Todos</span><span>Prontos</span><span>Processando</span>
+            </div>
+            <div style="display: grid; gap: 2px">
+                <article class="video-row">
+                    <div class="thumb" style="background-image: url(img/v5.jpg)"></div>
+                    <div class="grow">
+                        <p class="title clamp-2">Podcast com a Marina sobre carreira em dados</p>
+                        <span class="pill work">Tinta transcrevendo · 42%</span>
+                    </div>
+                </article>
+                <article class="video-row">
+                    <div class="thumb" style="background-image: url(img/v1.jpg)"></div>
+                    <div class="grow">
+                        <p class="title clamp-2">PRIMEIRO ROLE DE VW ID4</p>
+                        <p class="xs muted">3 cortes · 13:00 · 20/11</p>
+                    </div>
+                </article>
+                <article class="video-row">
+                    <div class="thumb" style="background-image: url(img/v2.jpg)"></div>
+                    <div class="grow">
+                        <p class="title clamp-2">ESSA HISTÓRIA DA URSO ESTÁ INDO LONGE DE MAIS</p>
+                        <p class="xs muted">3 cortes · 20:25 · 19/11</p>
+                    </div>
+                </article>
+                <article class="video-row">
+                    <div class="thumb" style="background-image: url(img/v3.jpg)"></div>
+                    <div class="grow">
+                        <p class="title clamp-2">
+                            CARIANI E BALESTRIN FORAM NUM RESTAURANTE ITALIANO RAIZ
+                        </p>
+                        <p class="xs muted">2 cortes · 35:37 · 19/11</p>
+                    </div>
+                </article>
+                <article class="video-row">
+                    <div class="thumb" style="background-image: url(img/v6.jpg)"></div>
+                    <div class="grow">
+                        <p class="title clamp-2">Live de sexta: perguntas da comunidade</p>
+                        <p class="xs muted">4 cortes · 48:10 · 12/11</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <nav class="tabbar">
+            <span class="on"><span data-i="videos"></span>Vídeos</span>
+            <span><span data-i="scissors"></span>Cortes</span>
+            <span><span data-i="chart"></span>Painel</span>
+            <span><span data-i="user"></span>Conta</span>
+        </nav>
+        <script src="icons.js"></script>
+        <script src="guides.js"></script>
+    </body>
+</html>

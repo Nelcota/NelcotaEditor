@@ -59,7 +59,10 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
             }}
             className="gap-6"
         >
-            <TabsList variant="line" className="h-auto w-full justify-start gap-6 border-b pb-0">
+            <TabsList
+                variant="line"
+                className="h-auto w-full justify-start gap-6 border-b px-0 pb-0"
+            >
                 <TabsTrigger value="clips" className="h-11 flex-none px-0 text-base font-semibold">
                     <ClapperboardIcon aria-hidden="true" />
                     Cortes

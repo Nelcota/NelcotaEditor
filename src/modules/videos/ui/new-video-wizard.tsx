@@ -78,7 +78,8 @@ export function NewVideoWizard({
             onSubmit={submit}
             className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto]"
         >
-            <DialogHeader className="border-b py-4 pr-16 pl-5 sm:py-5 sm:pr-16 sm:pl-7">
+            {/* The top inset matches the dialog padding, so the title centres on the close button. */}
+            <DialogHeader className="border-b pt-(--dialog-padding) pr-16 pb-4 pl-5 sm:pr-16 sm:pb-5 sm:pl-7">
                 <DialogTitle>Novo vídeo</DialogTitle>
                 <DialogDescription>
                     Cole o link ou envie o arquivo. O resto já vem preenchido; mude só se quiser.

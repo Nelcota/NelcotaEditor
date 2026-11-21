@@ -61,7 +61,7 @@ export function FirstVideoEmptyState() {
             title={`Oi! Eu sou o ${HOST_NAME}.`}
             description="Cole um link do YouTube ou envie um arquivo e a equipe começa: Faísca baixa, Tinta transcreve, Brilho escolhe os melhores momentos e Brasa faz os cortes."
             action={
-                <Button asChild size="lg" className="rounded-full font-semibold">
+                <Button asChild size="lg" className="font-semibold">
                     <Link to="/" search={{ newVideo: true }}>
                         <AddIcon aria-hidden="true" />
                         Enviar o primeiro vídeo
@@ -79,7 +79,7 @@ export function VideoListLoadError({ onRetry }: { onRetry: () => void }) {
             title="Não foi possível carregar seus vídeos"
             description="Seus vídeos e cortes continuam salvos. Tente de novo; se continuar, recarregue a página."
             action={
-                <Button variant="secondary" className="rounded-full" onClick={onRetry}>
+                <Button variant="secondary" onClick={onRetry}>
                     <RestartIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
@@ -123,7 +123,7 @@ export function NoMatchState({ query, onClear }: { query: string; onClear: () =>
             title={copy.title}
             description={copy.description}
             action={
-                <Button variant="secondary" className="rounded-full" onClick={onClear}>
+                <Button variant="secondary" onClick={onClear}>
                     {copy.actionLabel}
                 </Button>
             }

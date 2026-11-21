@@ -25,7 +25,7 @@ export function StandaloneMessageScreen({
                 <p className="text-muted-foreground">{description}</p>
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
                     {actions}
-                    <Button asChild variant="secondary" className="rounded-full">
+                    <Button asChild variant="secondary">
                         <Link to="/">
                             <ArrowLeftIcon aria-hidden="true" />
                             Ir para o início

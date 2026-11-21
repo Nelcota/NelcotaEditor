@@ -1,0 +1,263 @@
+/* A · Mesa: rail 64 · list 340 · detail. Ink primary, 8px rectangles. */
+:root {
+    --accent: #171715;
+    --accent-ink: #1f55d6;
+    --accent-soft: rgba(47, 107, 255, 0.1);
+    --radius: 10px;
+    --radius-control: 8px;
+}
+
+.app {
+    display: grid;
+    grid-template-columns: 64px 340px minmax(0, 1fr);
+    height: 100vh;
+}
+
+/* Rail: every glyph centres on x = 32. */
+.rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 0 16px;
+    border-right: 1px solid var(--line);
+    background: var(--bg);
+}
+
+.rail .brand {
+    width: 32px;
+    height: 32px;
+    background-position: 100% 100%;
+    margin-bottom: 12px;
+}
+
+.rail a {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    color: var(--muted);
+}
+
+.rail a [data-i] {
+    width: 22px;
+    height: 22px;
+}
+
+.rail a.on {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 0 0 1px var(--line);
+}
+
+.rail .avatar {
+    margin-top: 8px;
+}
+
+/* List pane: box line 8px in (72), text line 16px in (80), trailing 8px in (396). */
+.list {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid var(--line);
+    background: var(--bg);
+}
+
+.pane-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 56px;
+    padding: 0 8px 0 16px;
+}
+
+.pane-head h1 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.list-tools {
+    display: grid;
+    gap: 8px;
+    padding: 0 8px 12px;
+}
+
+.list-tools .field {
+    padding: 0 8px;
+}
+
+.rows {
+    display: grid;
+    gap: 2px;
+    padding: 0 8px;
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+}
+
+.video-row {
+    display: flex;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.video-row.is-on {
+    background: var(--surface);
+    box-shadow: 0 0 0 1px var(--line);
+}
+
+.video-row .thumb {
+    width: 88px;
+    height: 50px;
+}
+
+.video-row .title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+
+/* Detail pane: text line 32px in, trailing 32px in. */
+.detail {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--surface);
+}
+
+.detail-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 32px 12px;
+}
+
+.detail-head h2 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+}
+
+.tabs {
+    display: flex;
+    gap: 24px;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--line);
+}
+
+.tabs span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+}
+
+.tabs span.on {
+    color: var(--ink);
+    border-color: var(--ink);
+}
+
+.clip-stage {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 32px;
+    padding: 24px 32px;
+    align-items: start;
+}
+
+.clip-list {
+    display: grid;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.clip-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 0 16px;
+    border-top: 1px solid var(--line);
+}
+
+.clip-row:first-child {
+    border-top: 0;
+}
+
+.clip-row.is-on {
+    background: var(--bg);
+}
+
+.clip-row .title {
+    font-weight: 500;
+}
+
+.num {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--sunken);
+    font:
+        600 12px/1 "Geist Mono",
+        monospace;
+    color: var(--muted);
+}
+
+.clip-row.is-on .num {
+    background: var(--ink);
+    color: #fff;
+}
+
+.clip-open {
+    display: grid;
+    gap: 16px;
+    padding: 4px 16px 16px 52px;
+    background: var(--bg);
+}
+
+.reason {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 60ch;
+}
+
+.reason b {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+/* Cortes screen */
+.detail.wide .clip-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px 16px;
+    padding: 24px 32px;
+}
+
+.clip-card {
+    display: grid;
+    gap: 8px;
+}
+
+.clip-card .title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 32px 0;
+}

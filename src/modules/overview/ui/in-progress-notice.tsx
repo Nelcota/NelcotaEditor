@@ -27,7 +27,7 @@ export function InProgressNotice({ count }: { count: number }) {
                 search={{ status: "processing" }}
                 className="rounded font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
             >
-                ver no Início
+                ver em Vídeos
             </Link>
         </p>
     );

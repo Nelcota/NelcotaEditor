@@ -36,7 +36,7 @@ export function OverviewLoadError({ onRetry }: { onRetry: () => void }) {
             title="Não foi possível carregar o painel"
             description="Seus vídeos e cortes continuam salvos; só os números não vieram. Tente de novo."
             action={
-                <Button variant="secondary" className="rounded-full" onClick={onRetry}>
+                <Button variant="secondary" onClick={onRetry}>
                     <RestartIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>

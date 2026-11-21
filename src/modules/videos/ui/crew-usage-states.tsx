@@ -17,7 +17,7 @@ export function UsageError({ onRetry }: { onRetry: () => void }) {
             title="Não foi possível carregar o uso"
             description="Guarda não conseguiu buscar os números. Tente de novo; se continuar, recarregue a página."
             action={
-                <Button variant="secondary" className="rounded-full" onClick={onRetry}>
+                <Button variant="secondary" onClick={onRetry}>
                     <RestartIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>

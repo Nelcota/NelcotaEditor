@@ -21,7 +21,7 @@ function describeFailure(resumeError: Error | null, cancelError: Error | null): 
     return null;
 }
 
-interface VideoRowActions {
+export interface VideoRowActions {
     resume: () => void;
     cancel: () => void;
     isPending: boolean;

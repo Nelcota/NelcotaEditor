@@ -1,5 +1,6 @@
 import GallerySendIcon from "~icons/solar/gallery-send-linear";
 import Logout2Icon from "~icons/solar/logout-2-linear";
+import ShieldUserIcon from "~icons/solar/shield-user-linear";
 import UserRoundedIcon from "~icons/solar/user-rounded-linear";
 import { Link, getRouteApi } from "@tanstack/react-router";
 import type { ComponentProps, ReactNode } from "react";
@@ -66,6 +67,15 @@ export function AccountMenuContent({
                     <Link to="/account">
                         <UserRoundedIcon aria-hidden="true" />
                         Conta
+                    </Link>
+                </DropdownMenuItem>
+            )}
+            {/* Phones have no room for Admin in the tab bar, so it lives here. */}
+            {user.isAdmin === true && (
+                <DropdownMenuItem asChild className="md:hidden">
+                    <Link to="/admin">
+                        <ShieldUserIcon aria-hidden="true" />
+                        Admin
                     </Link>
                 </DropdownMenuItem>
             )}

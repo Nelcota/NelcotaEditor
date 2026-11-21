@@ -70,7 +70,7 @@ export function ProfileCard(): ReactNode {
         };
 
     return (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border bg-popover p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border bg-popover p-4 sm:p-5">
             <AvatarButton onClick={() => setOpenDialog("photo")} />
             <div className="grid min-w-0 flex-[1_1_10rem] gap-0.5">
                 <p title={user.name} className="truncate text-xl font-semibold tracking-tight">

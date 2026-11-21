@@ -2,36 +2,39 @@ import CalendarIcon from "~icons/solar/calendar-linear";
 import ClockCircleIcon from "~icons/solar/clock-circle-linear";
 import SquareArrowRightUpIcon from "~icons/solar/square-arrow-right-up-linear";
 import UploadIcon from "~icons/solar/upload-linear";
+import AltArrowRightIcon from "~icons/solar/alt-arrow-right-linear";
+import { Link } from "@tanstack/react-router";
 import { isVideoFinished } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoActionsMenu } from "#/modules/videos/ui/video-actions-menu";
 import { VideoMascot } from "#/modules/videos/ui/video-mascot";
 import { VIDEO_SOURCE_LABELS } from "#/modules/videos/ui/video-status-labels";
 import { VideoStatusBadge } from "#/modules/videos/ui/video-status-badge";
-import { cn } from "#/shared/ui/cn";
 import { formatClock, formatDate } from "#/shared/ui/format";
 
 const SECURE_URL_PREFIX = "https://";
 
-/** A frame of the video when there is one; the video's mascot otherwise. */
-function VideoThumbnail({ video }: { video: VideoSummary }) {
-    const thumbnailUrl = video.thumbnailUrl;
-
-    if (thumbnailUrl === null) {
-        return <VideoMascot videoId={video.id} className="size-14" />;
-    }
-
+/** Where the page sits: back to the gallery, then this video. */
+function Breadcrumb({ title }: { title: string }) {
     return (
-        <img
-            src={thumbnailUrl}
-            alt=""
-            referrerPolicy="no-referrer"
-            className={cn(
-                "aspect-video w-full shrink-0 rounded-xl bg-muted object-cover sm:w-44",
-                // On phones the original plays full width right below; the same frame twice is noise.
-                video.originalFileUrl !== null && "hidden sm:block",
-            )}
-        />
+        <nav aria-label="Você está em" className="text-meta text-muted-foreground">
+            <ol className="flex min-w-0 items-center gap-1.5">
+                <li>
+                    <Link
+                        to="/"
+                        className="rounded underline-offset-4 outline-none transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/70"
+                    >
+                        Vídeos
+                    </Link>
+                </li>
+                <li aria-hidden="true">
+                    <AltArrowRightIcon className="size-4" />
+                </li>
+                <li aria-current="page" className="min-w-0 truncate text-foreground">
+                    {title}
+                </li>
+            </ol>
+        </nav>
     );
 }
 
@@ -86,16 +89,17 @@ function VideoMeta({ video }: { video: VideoSummary }) {
 
 export function VideoHeader({ video }: { video: VideoSummary }) {
     return (
-        <header className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <VideoThumbnail video={video} />
-            <div className="grid min-w-0 flex-1 gap-2.5">
-                <div className="flex items-start gap-3">
-                    <h1 className="min-w-0 flex-1 line-clamp-2 text-2xl leading-tight font-medium tracking-[-0.03em] text-balance [overflow-wrap:anywhere] sm:text-[30px]">
+        <header className="grid gap-3">
+            <Breadcrumb title={video.title} />
+            <div className="flex items-center gap-4">
+                <VideoMascot videoId={video.id} className="size-10 shrink-0 max-sm:hidden" />
+                <div className="grid min-w-0 flex-1 gap-1.5">
+                    <h1 className="line-clamp-2 text-2xl leading-tight font-semibold tracking-[-0.02em] text-balance [overflow-wrap:anywhere]">
                         {video.title}
                     </h1>
-                    <VideoActionsMenu video={video} />
+                    <VideoMeta video={video} />
                 </div>
-                <VideoMeta video={video} />
+                <VideoActionsMenu video={video} />
             </div>
         </header>
     );

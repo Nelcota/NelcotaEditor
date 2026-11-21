@@ -125,7 +125,7 @@ function ProcessingSteps({ video }: { video: VideoSummary }) {
 
 export function ProcessingPanel({ video }: { video: VideoSummary }) {
     return (
-        <section aria-live="polite" className="grid gap-5 rounded-2xl border bg-popover p-5 sm:p-6">
+        <section aria-live="polite" className="grid gap-5 rounded-2xl border bg-popover p-4 sm:p-5">
             <StageHeadline video={video} />
             <Progress value={video.progressPercent} aria-label="Progresso do processamento" />
             <ProcessingSteps video={video} />

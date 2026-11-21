@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "skills": {
+    "gridlines": {
+      "source": "pritamux/gridlines",
+      "commit": "20d0944c8eec66957c1bde9c9919345ab4c6b4eb",
+      "sourceType": "github",
+      "skillPath": "skills/gridlines/SKILL.md",
+      "computedHash": "f23b13057af9b38b2f789fdfc8a5ebe3fd8c6c9a79fbc6dc2d9ef1c2e80a2370"
+    }
+  }
+}

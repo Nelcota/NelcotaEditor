@@ -39,7 +39,7 @@ export function ClipsLoadError({ onRetry }: { onRetry: () => void }) {
             title="Não foi possível carregar seus cortes"
             description="Eles continuam salvos. Tente de novo; se continuar, recarregue a página."
             action={
-                <Button variant="secondary" className="rounded-full" onClick={onRetry}>
+                <Button variant="secondary" onClick={onRetry}>
                     <RestartIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>

@@ -86,7 +86,7 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
     };
 
     return (
-        <div className="@container grid gap-5 rounded-2xl border bg-popover p-5 sm:p-6">
+        <div className="@container grid gap-5 rounded-2xl border bg-popover p-4 sm:p-5">
             <div className="grid gap-6 @2xl:grid-cols-2">
                 <PreferenceField description="Já vem escolhido quando você adiciona um vídeo; dá para mudar em cada um.">
                     <ClipCountStepper

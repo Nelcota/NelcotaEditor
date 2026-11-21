@@ -35,7 +35,7 @@ export function PeriodPicker({ value, onChange }: PeriodPickerProps) {
 
                 onChange(result.data);
             }}
-            className="w-full rounded-full whitespace-nowrap [&>button]:rounded-full [&>button]:px-3 sm:w-fit"
+            className="w-full whitespace-nowrap [&>button]:px-3 sm:w-fit"
         />
     );
 }
