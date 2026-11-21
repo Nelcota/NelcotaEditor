@@ -1,5 +1,5 @@
-import PlayIcon from "~icons/solar/play-linear";
-import RestartIcon from "~icons/solar/restart-linear";
+import PlayIcon from "~icons/lucide/play";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { retryVideo } from "#/modules/videos/server/video-functions";
@@ -20,9 +20,10 @@ interface PanelCopy {
 
 const FAILED_COPY: PanelCopy = {
     title: "Não deu certo desta vez",
-    fallbackDescription: "Algo deu errado durante o processamento.",
+    fallbackDescription:
+        "O processamento parou antes do fim. Tente de novo; se falhar outra vez, envie o vídeo de novo.",
     actionLabel: "Tentar de novo",
-    actionIcon: RestartIcon,
+    actionIcon: RotateCwIcon,
     className: "border-destructive/40 bg-destructive/10",
 };
 

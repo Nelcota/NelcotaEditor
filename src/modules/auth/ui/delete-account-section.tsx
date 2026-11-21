@@ -1,4 +1,4 @@
-import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
+import TrashIcon from "~icons/lucide/trash";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { DeleteAccountDialog } from "#/modules/auth/ui/delete-account-dialog";
@@ -20,7 +20,7 @@ export function DeleteAccountSection(): ReactNode {
                 className="font-medium text-destructive not-disabled:hover:text-destructive"
                 onClick={() => setIsDialogOpen(true)}
             >
-                <TrashBinTrashIcon aria-hidden="true" />
+                <TrashIcon aria-hidden="true" />
                 Excluir conta
             </Button>
             <DeleteAccountDialog isOpen={isDialogOpen} onOpenChange={setIsDialogOpen} />

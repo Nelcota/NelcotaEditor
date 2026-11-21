@@ -1,4 +1,4 @@
-import RestartIcon from "~icons/solar/restart-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { PreferencesForm } from "#/modules/preferences/ui/preferences-form";
@@ -21,7 +21,7 @@ export function PreferencesSection(): ReactNode {
                         await preferencesQuery.refetch();
                     }}
                 >
-                    <RestartIcon aria-hidden="true" />
+                    <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
             </div>

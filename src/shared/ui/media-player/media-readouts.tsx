@@ -21,7 +21,7 @@ export function TimeLabel({
     return (
         <span
             className={cn(
-                "px-2 text-[14px] font-semibold whitespace-nowrap text-white tabular-nums",
+                "px-2 text-meta font-semibold whitespace-nowrap text-white tabular-nums",
                 className,
             )}
         >
@@ -48,7 +48,7 @@ export function VolumeSlider({
             onChange={(event) => player.setVolume(Number(event.target.value))}
             aria-label="Volume"
             className={cn(
-                "range-media w-16 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring/70",
+                "range-media w-16 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring",
                 className,
             )}
         />
@@ -65,7 +65,7 @@ export function PlaybackRateButton({ player }: { player: MediaPlayer }): ReactNo
             aria-label={`Velocidade ${rateLabel}. Clique para trocar`}
             title="Velocidade"
             onClick={player.stepRate}
-            className="group/rate grid h-10 min-w-10 shrink-0 place-items-center rounded-lg px-1 text-white outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+            className="group/rate grid h-10 min-w-10 shrink-0 place-items-center rounded-lg px-1 text-white outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
         >
             <span className="grid h-7 min-w-9 place-items-center rounded-md border border-white/35 px-1.5 text-xs font-semibold tabular-nums transition-colors group-hover/rate:bg-white/15">
                 {rateLabel}

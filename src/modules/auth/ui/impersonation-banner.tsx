@@ -1,4 +1,4 @@
-import UserSpeakIcon from "~icons/solar/user-speak-linear";
+import SpeechIcon from "~icons/lucide/speech";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { currentUserQueryOptions } from "#/modules/auth/ui/current-user-query";
@@ -20,7 +20,7 @@ export function ImpersonationBanner(): ReactNode {
             role="status"
             className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm"
         >
-            <UserSpeakIcon className="size-5 shrink-0 text-primary-ink" aria-hidden="true" />
+            <SpeechIcon className="size-5 shrink-0 text-primary-ink" aria-hidden="true" />
             <p className="min-w-0 flex-[1_1_16rem]">
                 Você está vendo o Nelcota como <strong>{currentUser.name}</strong> (
                 {currentUser.email}). O que fizer aqui vale para a conta dessa pessoa.

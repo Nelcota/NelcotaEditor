@@ -39,7 +39,7 @@ export function UserAvatar({ name, image, className }: UserAvatarProps): ReactNo
                 <img
                     src={avatar.url}
                     alt=""
-                    className="size-full object-cover outline outline-1 -outline-offset-1 outline-white/10"
+                    className="size-full object-cover outline-1 -outline-offset-1 outline-solid outline-white/10"
                 />
             </span>
         );

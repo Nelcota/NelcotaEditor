@@ -1,4 +1,4 @@
-import CheckIcon from "~icons/solar/check-linear";
+import CheckIcon from "~icons/lucide/check";
 import type { VideoStatus } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { toCrewLine } from "#/modules/videos/crew-lines";

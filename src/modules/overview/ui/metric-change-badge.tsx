@@ -1,5 +1,5 @@
-import AltArrowDownIcon from "~icons/solar/alt-arrow-down-linear";
-import AltArrowUpIcon from "~icons/solar/alt-arrow-up-linear";
+import ChevronDownIcon from "~icons/lucide/chevron-down";
+import ChevronUpIcon from "~icons/lucide/chevron-up";
 import type { ChangeDirection, ChangeTone, MetricChange } from "#/modules/overview/metric-change";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { cn } from "#/shared/ui/cn";
@@ -11,8 +11,8 @@ const TONE_CLASSES: Record<ChangeTone, string> = {
 };
 
 const DIRECTION_ICONS: Record<ChangeDirection, IconComponent | null> = {
-    up: AltArrowUpIcon,
-    down: AltArrowDownIcon,
+    up: ChevronUpIcon,
+    down: ChevronDownIcon,
     none: null,
 };
 

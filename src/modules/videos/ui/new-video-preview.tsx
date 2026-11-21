@@ -1,4 +1,4 @@
-import VideoFramePlayHorizontalIcon from "~icons/solar/video-frame-play-horizontal-linear";
+import FilmIcon from "~icons/lucide/film";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
@@ -14,7 +14,7 @@ import type { VideoSource } from "#/modules/videos/ui/video-source";
 import { youtubePreviewQueryOptions } from "#/modules/videos/ui/youtube-preview-queries";
 
 const FRAME_CLASS =
-    "aspect-video w-full rounded-lg bg-black object-cover outline outline-1 -outline-offset-1 outline-white/10";
+    "aspect-video w-full rounded-lg bg-black object-cover outline-1 -outline-offset-1 outline-solid outline-white/10";
 
 interface NewVideoPreviewProps {
     source: VideoSource;
@@ -47,8 +47,7 @@ function FileFrame({ file }: { file: File }): ReactNode {
 function EmptyFrame(): ReactNode {
     return (
         <div className="grid aspect-video w-full place-content-center justify-items-center gap-2 rounded-lg border border-dashed text-meta text-muted-foreground">
-            <VideoFramePlayHorizontalIcon className="size-7" aria-hidden="true" />O vídeo aparece
-            aqui
+            <FilmIcon className="size-7" aria-hidden="true" />O vídeo aparece aqui
         </div>
     );
 }

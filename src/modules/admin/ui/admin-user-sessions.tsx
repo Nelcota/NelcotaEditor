@@ -1,4 +1,4 @@
-import MonitorSmartphoneIcon from "~icons/solar/monitor-smartphone-linear";
+import MonitorSmartphoneIcon from "~icons/lucide/monitor-smartphone";
 import type { ReactNode } from "react";
 import type { AdminSessionView } from "#/modules/admin/admin-views";
 import { formatDateTime } from "#/shared/ui/format";

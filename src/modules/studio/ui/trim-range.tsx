@@ -145,7 +145,7 @@ export function TrimRange(props: TrimRangeProps): ReactNode {
                     onKeyDown={(event) => onKeyDown(edge, event)}
                     {...drag.handlers(edge)}
                     className={cn(
-                        "absolute top-1/2 z-20 grid h-10 w-4 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none place-items-center rounded-md bg-primary outline-none transition-colors not-disabled:hover:bg-primary/85 not-disabled:active:cursor-grabbing focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-not-allowed",
+                        "absolute top-1/2 z-20 grid h-10 w-4 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none place-items-center rounded-md bg-primary outline-none transition-colors not-disabled:hover:bg-primary/85 not-disabled:active:cursor-grabbing focus-visible:ring-4 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed",
                         // A 16px handle is hard to grab; an invisible margin widens the target to 40px.
                         "before:absolute before:-inset-x-3 before:inset-y-0 before:content-['']",
                         "after:h-4 after:w-0.5 after:rounded-full after:bg-white",
@@ -158,7 +158,7 @@ export function TrimRange(props: TrimRangeProps): ReactNode {
                     className={cn(
                         "pointer-events-none absolute -top-9 z-30 -translate-x-1/2 rounded-md px-2 py-1 text-xs font-semibold whitespace-nowrap tabular-nums",
                         limitMessage === null && "bg-foreground text-background",
-                        limitMessage !== null && "bg-destructive text-white",
+                        limitMessage !== null && "bg-destructive text-destructive-foreground",
                     )}
                     style={{ left: `${toPercent(window, active.seconds)}%` }}
                 >

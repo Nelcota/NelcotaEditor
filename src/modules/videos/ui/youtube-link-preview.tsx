@@ -1,6 +1,6 @@
-import CloseIcon from "~icons/solar/close-linear";
-import DangerCircleIcon from "~icons/solar/danger-circle-linear";
-import LinkIcon from "~icons/solar/link-linear";
+import XIcon from "~icons/lucide/x";
+import CircleAlertIcon from "~icons/lucide/circle-alert";
+import LinkIcon from "~icons/lucide/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import type { ReactNode, RefObject } from "react";
@@ -30,7 +30,7 @@ function PreviewCard({ thumbnailUrl, title, detail, onClear, clearButtonRef }: P
                 src={thumbnailUrl}
                 alt=""
                 referrerPolicy="no-referrer"
-                className="aspect-video w-full rounded-[5px] bg-muted object-cover outline outline-1 -outline-offset-1 outline-white/10"
+                className="aspect-video w-full rounded-[5px] bg-muted object-cover outline-1 -outline-offset-1 outline-solid outline-white/10"
             />
             <div className="grid min-w-0 gap-1">
                 {title}
@@ -47,7 +47,7 @@ function PreviewCard({ thumbnailUrl, title, detail, onClear, clearButtonRef }: P
                 onClick={onClear}
                 aria-label="Trocar o vídeo"
             >
-                <CloseIcon aria-hidden="true" />
+                <XIcon aria-hidden="true" />
             </Button>
         </div>
     );
@@ -117,7 +117,7 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
                 thumbnailUrl={thumbnailUrl}
                 title={
                     <p role="alert" className="flex gap-1.5 text-sm font-medium text-destructive">
-                        <DangerCircleIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                        <CircleAlertIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                         {UNAVAILABLE_MESSAGES[preview.reason]}
                     </p>
                 }

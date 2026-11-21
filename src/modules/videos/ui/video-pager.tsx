@@ -1,5 +1,5 @@
-import AltArrowLeftIcon from "~icons/solar/alt-arrow-left-linear";
-import AltArrowRightIcon from "~icons/solar/alt-arrow-right-linear";
+import ChevronLeftIcon from "~icons/lucide/chevron-left";
+import ChevronRightIcon from "~icons/lucide/chevron-right";
 import { clampPageIndex } from "#/modules/videos/ui/clamp-page-index";
 import { VIDEOS_PER_PAGE } from "#/modules/videos/ui/video-list-filter";
 import { Button } from "#/shared/ui/button";
@@ -61,7 +61,7 @@ export function VideoPager({ pageIndex, pageCount, itemCount, onPageChange }: Vi
                     className={BOUND_BUTTON_CLASS}
                     onClick={goToPreviousPage}
                 >
-                    <AltArrowLeftIcon aria-hidden="true" />
+                    <ChevronLeftIcon aria-hidden="true" />
                 </Button>
                 <Button
                     variant="ghost"
@@ -71,7 +71,7 @@ export function VideoPager({ pageIndex, pageCount, itemCount, onPageChange }: Vi
                     className={BOUND_BUTTON_CLASS}
                     onClick={goToNextPage}
                 >
-                    <AltArrowRightIcon aria-hidden="true" />
+                    <ChevronRightIcon aria-hidden="true" />
                 </Button>
             </div>
         </div>

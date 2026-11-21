@@ -31,7 +31,9 @@ const NOT_READY_LABELS: Record<ClipStatus, string> = {
     failed: "Não deu para renderizar",
 };
 
-const FRAME_CLASS = "aspect-[9/16] w-full overflow-hidden rounded-xl";
+// Every content frame (thumbnails, the original, clips) gets the same 1px inset outline.
+const FRAME_CLASS =
+    "aspect-[9/16] w-full overflow-hidden rounded-md bg-secondary outline-1 [&:fullscreen]:bg-black -outline-offset-1 outline-solid outline-black/10 dark:outline-white/10";
 
 /**
  * The clip at its real vertical shape with the same controls as the original, smaller. In narrow

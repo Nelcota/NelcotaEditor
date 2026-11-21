@@ -3,26 +3,29 @@ import type { ClipStudioView } from "#/modules/studio/clip-studio-view";
 import { isVideoFinished } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import type { ClipView } from "#/modules/clips/clip-view";
+import type { StudioDraft } from "#/modules/clips/clip-studio.schema";
 import { findCueAt } from "#/modules/studio/ui/caption-overlay";
 import { usePlaybackValue } from "#/modules/studio/ui/playback-clock";
 import { RenderRequestDialogs } from "#/modules/studio/ui/render-request-dialogs";
 import { StudioMessages } from "#/modules/studio/ui/studio-messages";
-import { ShortcutsHint } from "#/modules/studio/ui/studio-notices";
-import { StudioPanels } from "#/modules/studio/ui/studio-panels";
-import type { PhonePanel } from "#/modules/studio/ui/studio-panels";
-import { StudioTimeline } from "#/modules/studio/ui/studio-timeline";
+import { StudioStage } from "#/modules/studio/ui/studio-stage";
+import { StudioStepFooter } from "#/modules/studio/ui/studio-step-footer";
+import { StudioStepTools } from "#/modules/studio/ui/studio-step-tools";
+import { StudioStepper } from "#/modules/studio/ui/studio-steps";
+import type { StudioStep } from "#/modules/studio/ui/studio-steps";
+import { StudioToolPanel } from "#/modules/studio/ui/studio-tool-panel";
 import { StudioToolbar } from "#/modules/studio/ui/studio-toolbar";
-import { computeTimelineWindow } from "#/modules/studio/ui/timeline-geometry";
 import { useRenderRequest } from "#/modules/studio/ui/use-render-request";
 import { useStudioEditor } from "#/modules/studio/ui/use-studio-editor";
 import { useStudioPlayback } from "#/modules/studio/ui/use-studio-playback";
 import { useStudioShortcuts } from "#/modules/studio/ui/use-studio-shortcuts";
 import { useTrimMarks } from "#/modules/studio/ui/use-trim-marks";
+import { pluralize } from "#/shared/ui/pluralize";
 import { useIsAtLeastWidth } from "#/shared/ui/use-is-at-least-width";
 
-// Tailwind's lg breakpoint, where the timeline shows.
 // The Studio's own width, not the window's: the page frame and the video page's own columns
-// leave less than the window. Matches the @4xl/studio (56rem) variant.
+// leave less than the window. Matches the @4xl/studio (56rem) variant, where the stage and the
+// tools sit side by side and the timeline shows.
 const WIDE_STUDIO_MIN_PIXELS = 896;
 
 interface StudioWorkspaceProps {
@@ -32,7 +35,21 @@ interface StudioWorkspaceProps {
     onSelectClip: (clipId: string) => void;
 }
 
-/** The Studio for one clip: style, live preview, captions and the timeline, all on one draft. */
+function summarizeSteps(draft: StudioDraft): Record<StudioStep, string | null> {
+    const lengthSeconds = draft.endSeconds - draft.startSeconds;
+    const cueCount = draft.cues.length;
+
+    return {
+        trim: `${lengthSeconds.toFixed(1).replace(".", ",")} s`,
+        captions: `${cueCount} ${pluralize(cueCount, "bloco", "blocos")}`,
+        style: null,
+    };
+}
+
+/**
+ * The Studio for one clip, one step at a time: the trim, the captions, then their look. The
+ * preview stays on its stage throughout, and every step can render the draft.
+ */
 export function StudioWorkspace({
     video,
     studio,
@@ -45,7 +62,7 @@ export function StudioWorkspace({
     const videoRef = useRef<HTMLVideoElement>(null);
     const playback = useStudioPlayback(videoRef, draft);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-    const [phonePanel, setPhonePanel] = useState<PhonePanel>("captions");
+    const [step, setStep] = useState<StudioStep>("trim");
     const isRendering = isVideoFinished(video.status) === false;
     const renderRequest = useRenderRequest(editor, clip.sharePath);
     const durationSeconds = studio.videoDurationSeconds ?? draft.endSeconds;
@@ -73,13 +90,9 @@ export function StudioWorkspace({
         isRendering === false,
     );
 
-    const openCue = (index: number | null): void => {
+    const openCueFromTimeline = (index: number): void => {
         setOpenIndex(index);
-        setPhonePanel("captions");
-    };
-
-    const openCueAndSeek = (index: number): void => {
-        openCue(index);
+        setStep("captions");
         const cue = draft.cues[index];
 
         if (cue !== undefined) {
@@ -104,44 +117,52 @@ export function StudioWorkspace({
                 onSelectClip={onSelectClip}
                 editor={editor}
                 isRendering={isRendering}
-                onRender={renderRequest.request}
+                stepper={
+                    <StudioStepper
+                        step={step}
+                        summaries={summarizeSteps(draft)}
+                        onStepChange={setStep}
+                    />
+                }
             />
-            <StudioPanels
-                video={video}
-                editor={editor}
-                words={studio.words}
-                videoRef={videoRef}
-                playback={playback}
-                videoDurationSeconds={durationSeconds}
-                isRendering={isRendering}
-                playingIndex={playingIndex}
-                openIndex={openIndex}
-                onOpenCue={openCue}
-                phonePanel={phonePanel}
-                onPhonePanelChange={setPhonePanel}
-            />
-            {/* Not just hidden on phones: its filmstrip loads ten videos that nobody would see. */}
-            {isDesktop === true && (
-                <StudioTimeline
+            {/* From @4xl the pair fills the window's height, so nothing below the fold. */}
+            <div className="grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-2xl border @4xl/studio:h-[clamp(520px,calc(100dvh-320px),900px)] @4xl/studio:grid-cols-[minmax(0,1fr)_456px] @4xl/studio:grid-rows-[minmax(0,1fr)] @6xl/studio:grid-cols-[minmax(0,1fr)_520px]">
+                <StudioStage
+                    video={video}
                     editor={editor}
-                    window={computeTimelineWindow(
-                        draft,
-                        editor.applied,
-                        studio.videoDurationSeconds,
-                    )}
-                    sourceUrl={video.originalFileUrl}
-                    videoDurationSeconds={durationSeconds}
-                    clock={playback.clock}
-                    playingIndex={playingIndex}
-                    openIndex={openIndex}
-                    isLocked={isRendering}
-                    onOpen={openCueAndSeek}
-                    onSeek={playback.seek}
-                    onMarkStart={marks.markStart}
-                    onMarkEnd={marks.markEnd}
+                    videoRef={videoRef}
+                    playback={playback}
+                    isRendering={isRendering}
                 />
-            )}
-            <ShortcutsHint />
+                <StudioToolPanel
+                    step={step}
+                    footer={
+                        <StudioStepFooter
+                            step={step}
+                            onStepChange={setStep}
+                            editor={editor}
+                            isRendering={isRendering}
+                            onRender={renderRequest.request}
+                        />
+                    }
+                >
+                    <StudioStepTools
+                        step={step}
+                        video={video}
+                        studio={studio}
+                        editor={editor}
+                        playback={playback}
+                        marks={marks}
+                        videoDurationSeconds={durationSeconds}
+                        isDesktop={isDesktop}
+                        isRendering={isRendering}
+                        playingIndex={playingIndex}
+                        openIndex={openIndex}
+                        onOpenCue={setOpenIndex}
+                        onOpenCueFromTimeline={openCueFromTimeline}
+                    />
+                </StudioToolPanel>
+            </div>
             <RenderRequestDialogs editor={editor} renderRequest={renderRequest} />
         </div>
     );

@@ -1,6 +1,6 @@
-import MenuDotsIcon from "~icons/solar/menu-dots-linear";
-import PenIcon from "~icons/solar/pen-linear";
-import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
+import EllipsisIcon from "~icons/lucide/ellipsis";
+import PenIcon from "~icons/lucide/pen";
+import TrashIcon from "~icons/lucide/trash";
 import { useState } from "react";
 import { isVideoFinished, isVideoWorking } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
@@ -32,7 +32,7 @@ export function VideoActionsMenu({ video }: { video: VideoSummary }) {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon" aria-label="Mais ações do vídeo">
-                        <MenuDotsIcon aria-hidden="true" />
+                        <EllipsisIcon aria-hidden="true" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -48,7 +48,7 @@ export function VideoActionsMenu({ video }: { video: VideoSummary }) {
                         variant="destructive"
                         onSelect={() => setOpenDialog("delete")}
                     >
-                        <TrashBinTrashIcon aria-hidden="true" />
+                        <TrashIcon aria-hidden="true" />
                         Excluir vídeo
                     </DropdownMenuItem>
                 </DropdownMenuContent>

@@ -8,11 +8,12 @@ import {
 } from "#/modules/shell/ui/nav-sections";
 import type { NavSection, NavSectionState } from "#/modules/shell/ui/nav-sections";
 import { useHasWorkingVideo } from "#/modules/videos/ui/use-has-working-video";
+import { SectionIcon } from "#/modules/shell/ui/section-icon";
 import { cn } from "#/shared/ui/cn";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
 const TAB_CLASS =
-    "relative grid h-16 content-center justify-items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-[color,scale] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-6";
+    "relative grid h-16 content-center justify-items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-[color,scale] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring motion-safe:active:scale-[0.99] [&>svg]:size-6";
 
 const STATE_CLASSES: Record<NavSectionState, string> = {
     current: "text-foreground",
@@ -29,21 +30,22 @@ interface TabLinkProps {
 }
 
 function TabLink({ section, state, hasActivity }: TabLinkProps): ReactNode {
-    const Icon = section.icon;
-
     return (
         <Link
             to={section.path}
             aria-current={toAriaCurrent(state === "current")}
             className={cn(TAB_CLASS, STATE_CLASSES[state])}
         >
-            <Icon aria-hidden="true" />
+            <SectionIcon section={section} state={state} />
             {section.label}
             {hasActivity === true && (
-                <span
-                    aria-label="Processando"
-                    className="absolute top-3 start-[calc(50%+8px)] size-2 rounded-full bg-primary ring-2 ring-background"
-                />
+                <>
+                    <span
+                        aria-hidden="true"
+                        className="absolute top-3 start-[calc(50%+8px)] size-2 rounded-full bg-primary ring-2 ring-background"
+                    />
+                    <span className="sr-only">, processando</span>
+                </>
             )}
         </Link>
     );

@@ -53,7 +53,10 @@ export function ClipCard({ item }: { item: LibraryClip }): ReactNode {
         <li className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-3">
             <ClipPreview clip={clip} />
             <div className="grid min-w-0 gap-1.5">
-                <h2 className="line-clamp-2 leading-snug font-medium [overflow-wrap:anywhere]">
+                <h2
+                    title={clip.title}
+                    className="line-clamp-2 leading-snug font-medium [overflow-wrap:anywhere]"
+                >
                     {clip.title}
                 </h2>
                 <p className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-muted-foreground tabular-nums">

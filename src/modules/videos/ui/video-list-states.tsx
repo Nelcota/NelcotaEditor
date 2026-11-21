@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import AddIcon from "~icons/solar/add-linear";
-import RestartIcon from "~icons/solar/restart-linear";
-import MagnifierCloseIcon from "~icons/solar/magnifier-close-linear";
+import PlusIcon from "~icons/lucide/plus";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
+import SearchXIcon from "~icons/lucide/search-x";
 import { Link } from "@tanstack/react-router";
 import { HOST_NAME } from "#/modules/videos/crew-lines";
 import { WORKING_CREW } from "#/modules/videos/stage-crew";
@@ -57,7 +57,7 @@ export function FirstVideoEmptyState() {
             action={
                 <Button asChild size="lg" className="font-semibold">
                     <Link to="/" search={{ newVideo: true }}>
-                        <AddIcon aria-hidden="true" />
+                        <PlusIcon aria-hidden="true" />
                         Enviar o primeiro vídeo
                     </Link>
                 </Button>
@@ -74,7 +74,7 @@ export function VideoListLoadError({ onRetry }: { onRetry: () => void }) {
             description="Seus vídeos e cortes continuam salvos. Tente de novo; se continuar, recarregue a página."
             action={
                 <Button variant="secondary" onClick={onRetry}>
-                    <RestartIcon aria-hidden="true" />
+                    <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
             }
@@ -113,7 +113,7 @@ export function NoMatchState({ query, onClear }: { query: string; onClear: () =>
 
     return (
         <EmptyState
-            art={<MagnifierCloseIcon className="size-8 text-muted-foreground" aria-hidden="true" />}
+            art={<SearchXIcon className="size-8 text-muted-foreground" aria-hidden="true" />}
             title={copy.title}
             description={copy.description}
             action={

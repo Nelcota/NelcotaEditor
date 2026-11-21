@@ -3,7 +3,7 @@ import type { PlaybackClock } from "#/modules/studio/ui/playback-clock";
 import { clamp } from "#/modules/studio/ui/timeline-geometry";
 import type { StudioEditor } from "#/modules/studio/ui/use-studio-editor";
 
-interface TrimMarks {
+export interface TrimMarks {
     markStart: () => void;
     markEnd: () => void;
 }

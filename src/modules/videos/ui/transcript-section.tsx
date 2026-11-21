@@ -1,5 +1,5 @@
-import AltArrowDownIcon from "~icons/solar/alt-arrow-down-linear";
-import RestartIcon from "~icons/solar/restart-linear";
+import ChevronDownIcon from "~icons/lucide/chevron-down";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { TranscriptBody } from "#/modules/videos/ui/transcript-body";
@@ -28,7 +28,7 @@ function TranscriptLoadError({ message, onRetry }: { message: string; onRetry: (
         <div className="grid justify-items-start gap-3">
             <FormAlert message={message} />
             <Button variant="secondary" onClick={onRetry}>
-                <RestartIcon aria-hidden="true" />
+                <RotateCwIcon aria-hidden="true" />
                 Tentar de novo
             </Button>
         </div>
@@ -84,10 +84,10 @@ function TranscriptToggle({ isOpen, onToggle }: { isOpen: boolean; onToggle: () 
                     aria-controls={TRANSCRIPT_PANEL_ID}
                     aria-describedby={TRANSCRIPT_HINT_ID}
                     onClick={onToggle}
-                    className="group flex w-full items-center justify-between gap-3 rounded-lg text-start outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className="group flex w-full items-center justify-between gap-3 rounded-lg text-start outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
                     Transcrição
-                    <AltArrowDownIcon
+                    <ChevronDownIcon
                         className={cn(
                             "size-5 shrink-0 text-muted-foreground transition-transform group-hover:text-foreground",
                             isOpen === true && "rotate-180",

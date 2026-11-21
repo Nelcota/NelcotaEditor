@@ -22,7 +22,7 @@ function FailedVideosLink(): ReactNode {
         <Link
             to="/"
             search={{ status: "failed" }}
-            className="w-fit rounded text-xs font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none motion-safe:active:scale-[0.99]"
+            className="w-fit rounded text-xs font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring focus-visible:outline-none motion-safe:active:scale-[0.99]"
         >
             Ver vídeos com falha
         </Link>
@@ -83,7 +83,7 @@ export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps): 
                 <h2 id="crew-title" className="text-lg font-semibold">
                     O que a turma fez no período
                 </h2>
-                <ol className="grid gap-3 @lg:grid-cols-2 @4xl:grid-cols-4">
+                <ol className="grid grid-cols-2 gap-3 @4xl:grid-cols-4">
                     {CREW_STAGES.map((stage) => (
                         <CrewStageCard key={stage.status} stage={stage} stats={stats} />
                     ))}

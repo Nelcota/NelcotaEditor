@@ -1,6 +1,7 @@
-import AddIcon from "~icons/solar/add-linear";
-import CloseIcon from "~icons/solar/close-linear";
+import PlusIcon from "~icons/lucide/plus";
+import XIcon from "~icons/lucide/x";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { useOpenVideoTabs } from "#/modules/videos/ui/use-open-video-tabs";
@@ -11,7 +12,7 @@ import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
 const TAB_CLASS =
-    "group relative flex h-9 min-w-0 max-w-56 shrink items-center gap-2 rounded-xl ps-2.5 pe-1 text-sm font-medium text-muted-foreground transition-[color,background-color,box-shadow] hover:bg-foreground/5 hover:text-foreground has-[a[aria-current=page]]:bg-background has-[a[aria-current=page]]:text-foreground has-[a[aria-current=page]]:shadow-[0_1px_2px_rgb(0_0_0/0.06),0_0_0_1px_var(--border)]";
+    "group relative flex h-9 min-w-0 max-w-56 shrink items-center gap-2 rounded-xl border border-transparent ps-2.5 pe-1 text-sm font-medium text-muted-foreground transition-[color,background-color,box-shadow] hover:bg-foreground/5 hover:text-foreground has-[a[aria-current=page]]:bg-background has-[a[aria-current=page]]:text-foreground has-[a[aria-current=page]]:shadow-[0_1px_2px_rgb(0_0_0/0.06),0_0_0_1px_var(--border)]";
 
 /** Only the videos that still exist, in the order they were opened. */
 function toOpenVideos(videoIds: Array<string>, videos: Array<VideoSummary>): Array<VideoSummary> {
@@ -46,7 +47,7 @@ function VideoTab({ video, isCurrent, onClose }: VideoTabProps): ReactNode {
                 params={{ videoId: video.id }}
                 aria-current={toAriaCurrent(isCurrent)}
                 title={video.title}
-                className="flex min-w-0 flex-1 items-center gap-2 rounded-lg outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-4 focus-visible:after:ring-ring/70"
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-lg outline-none motion-safe:active:scale-[0.99] after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-4 focus-visible:after:ring-ring"
             >
                 <VideoMascot videoId={video.id} className="size-5 shrink-0" />
                 <span className="truncate">{video.title}</span>
@@ -56,11 +57,11 @@ function VideoTab({ video, isCurrent, onClose }: VideoTabProps): ReactNode {
                 onClick={onClose}
                 aria-label={`Fechar a aba de ${video.title}`}
                 className={cn(
-                    "relative z-10 grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 outline-none transition-[opacity,background-color,color] group-hover:opacity-100 pointer-coarse:opacity-100 hover:bg-foreground/8 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
+                    "relative z-10 grid size-7 shrink-0 place-items-center rounded-sm text-muted-foreground opacity-0 outline-none transition-[opacity,background-color,color] group-hover:opacity-100 pointer-coarse:opacity-100 hover:bg-foreground/8 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
                     isCurrent === true && "opacity-100",
                 )}
             >
-                <CloseIcon aria-hidden="true" className="size-4" />
+                <XIcon aria-hidden="true" className="size-4" />
             </button>
         </li>
     );
@@ -76,10 +77,19 @@ export function OpenVideoTabs(): ReactNode {
     const videosQuery = useVideosQuery();
     const currentVideoId = useParams({ strict: false, select: (params) => params.videoId });
     const openVideos = toOpenVideos(tabs.videoIds, videosQuery.data ?? []);
+    // The closed tab's button leaves with it; focus waits on the plus instead of falling to the page.
+    const newVideoRef = useRef<HTMLAnchorElement>(null);
 
     const closeTab = async (videoId: string): Promise<void> => {
         const nextVideoId = findNextVideoId(openVideos, videoId);
         tabs.close(videoId);
+
+        const newVideoLink = newVideoRef.current;
+
+        if (videoId !== currentVideoId && newVideoLink !== null) {
+            newVideoLink.focus();
+            return;
+        }
 
         if (videoId !== currentVideoId) {
             return;
@@ -109,13 +119,14 @@ export function OpenVideoTabs(): ReactNode {
             </ul>
             <HintTooltip label="Novo vídeo">
                 <Link
+                    ref={newVideoRef}
                     to="/"
                     search={{ newVideo: true }}
                     preload="intent"
                     aria-label="Novo vídeo"
-                    className="grid size-9 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className="grid size-9 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
-                    <AddIcon aria-hidden="true" className="size-5" />
+                    <PlusIcon aria-hidden="true" className="size-5" />
                 </Link>
             </HintTooltip>
         </nav>

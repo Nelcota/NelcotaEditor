@@ -1,5 +1,5 @@
-import AltArrowLeftIcon from "~icons/solar/alt-arrow-left-linear";
-import AltArrowRightIcon from "~icons/solar/alt-arrow-right-linear";
+import ChevronLeftIcon from "~icons/lucide/chevron-left";
+import ChevronRightIcon from "~icons/lucide/chevron-right";
 import type { ReactNode } from "react";
 import { ADMIN_PAGE_SIZE } from "#/modules/admin/admin-search";
 import { Button } from "#/shared/ui/button";
@@ -45,7 +45,7 @@ export function AdminPager({ page, totalCount, onPageChange }: AdminPagerProps):
                         }
                     }}
                 >
-                    <AltArrowLeftIcon aria-hidden="true" />
+                    <ChevronLeftIcon aria-hidden="true" />
                 </Button>
                 <Button
                     variant="ghost"
@@ -59,7 +59,7 @@ export function AdminPager({ page, totalCount, onPageChange }: AdminPagerProps):
                         }
                     }}
                 >
-                    <AltArrowRightIcon aria-hidden="true" />
+                    <ChevronRightIcon aria-hidden="true" />
                 </Button>
             </div>
         </div>

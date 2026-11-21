@@ -1,6 +1,6 @@
-import ChartSquareIcon from "~icons/solar/chart-square-linear";
-import UsersGroupRoundedIcon from "~icons/solar/users-group-rounded-linear";
-import VideoLibraryIcon from "~icons/solar/video-library-linear";
+import ChartColumnBigIcon from "~icons/lucide/chart-column-big";
+import UsersRoundIcon from "~icons/lucide/users-round";
+import SquarePlayIcon from "~icons/lucide/square-play";
 import { Link, Outlet } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { IconComponent } from "#/shared/ui/icon-component";
@@ -17,13 +17,13 @@ interface AdminTab {
 }
 
 const ADMIN_TABS: ReadonlyArray<AdminTab> = [
-    { path: "/admin", label: "Visão geral", icon: ChartSquareIcon, isExact: true },
-    { path: "/admin/users", label: "Usuários", icon: UsersGroupRoundedIcon, isExact: false },
-    { path: "/admin/videos", label: "Vídeos", icon: VideoLibraryIcon, isExact: false },
+    { path: "/admin", label: "Visão geral", icon: ChartColumnBigIcon, isExact: true },
+    { path: "/admin/users", label: "Usuários", icon: UsersRoundIcon, isExact: false },
+    { path: "/admin/videos", label: "Vídeos", icon: SquarePlayIcon, isExact: false },
 ];
 
 const TAB_CLASS =
-    "-mb-px flex min-h-11 items-center gap-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground outline-none transition-[color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:border-primary aria-[current=page]:text-foreground [&>svg]:size-5";
+    "-mb-px flex min-h-11 items-center gap-2 border-b-2 border-transparent text-sm font-semibold text-muted-foreground outline-none transition-[color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:text-foreground [&>svg]:size-5";
 
 function AdminNav(): ReactNode {
     return (

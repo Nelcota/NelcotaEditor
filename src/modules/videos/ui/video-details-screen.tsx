@@ -1,5 +1,5 @@
-import ArrowLeftIcon from "~icons/solar/arrow-left-linear";
-import RestartIcon from "~icons/solar/restart-linear";
+import ArrowLeftIcon from "~icons/lucide/arrow-left";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -59,7 +59,7 @@ function LoadErrorState({ message, onRetry }: { message: string; onRetry: () => 
                 action={
                     <div className="flex flex-wrap justify-center gap-2">
                         <Button variant="secondary" onClick={onRetry}>
-                            <RestartIcon aria-hidden="true" />
+                            <RotateCwIcon aria-hidden="true" />
                             Tentar de novo
                         </Button>
                         <Button asChild variant="ghost">
@@ -106,7 +106,11 @@ function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): Re
             )}
         >
             <div className={cn(PAGE_COLUMN_CLASS, "lg:overflow-y-auto")}>
-                <VideoHeader video={video} isInspectorShown={isInspectorShown} />
+                <VideoHeader
+                    video={video}
+                    isInspectorShown={isInspectorShown}
+                    isCompact={search.tab === "studio"}
+                />
                 <VideoPageTabs details={details} search={search} StudioTab={StudioTab} />
             </div>
             {isInspectorShown === true && (

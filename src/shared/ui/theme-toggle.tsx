@@ -1,5 +1,5 @@
-import MoonIcon from "~icons/solar/moon-linear";
-import SunIcon from "~icons/solar/sun-2-linear";
+import MoonIcon from "~icons/lucide/moon";
+import SunIcon from "~icons/lucide/sun";
 import { useHydrated } from "@tanstack/react-router";
 import { useEffect, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";

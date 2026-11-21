@@ -1,7 +1,7 @@
-import MenuDotsIcon from "~icons/solar/menu-dots-linear";
-import StopCircleIcon from "~icons/solar/stop-circle-linear";
-import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
-import UserRoundedIcon from "~icons/solar/user-rounded-linear";
+import EllipsisIcon from "~icons/lucide/ellipsis";
+import CircleStopIcon from "~icons/lucide/circle-stop";
+import TrashIcon from "~icons/lucide/trash";
+import UserIcon from "~icons/lucide/user";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -59,21 +59,21 @@ function VideoMenu({ video, showOwner, onConfirm }: VideoMenuProps): ReactNode {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label={`Ações de ${video.title}`}>
-                    <MenuDotsIcon aria-hidden="true" />
+                    <EllipsisIcon aria-hidden="true" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 {showOwner === true && (
                     <DropdownMenuItem asChild>
                         <Link to="/admin/users/$userId" params={{ userId: video.ownerId }}>
-                            <UserRoundedIcon aria-hidden="true" className="size-5" />
+                            <UserIcon aria-hidden="true" className="size-5" />
                             Ver conta
                         </Link>
                     </DropdownMenuItem>
                 )}
                 {isVideoCancellable(video.status) === true && (
                     <DropdownMenuItem onSelect={() => onConfirm(toCancelConfirmation(video))}>
-                        <StopCircleIcon aria-hidden="true" className="size-5" />
+                        <CircleStopIcon aria-hidden="true" className="size-5" />
                         Cancelar processamento
                     </DropdownMenuItem>
                 )}
@@ -83,7 +83,7 @@ function VideoMenu({ video, showOwner, onConfirm }: VideoMenuProps): ReactNode {
                     disabled={isWorking}
                     onSelect={() => onConfirm(toDeleteConfirmation(video))}
                 >
-                    <TrashBinTrashIcon aria-hidden="true" className="size-5" />
+                    <TrashIcon aria-hidden="true" className="size-5" />
                     <span className="grid">
                         Excluir vídeo
                         {isWorking === true && (
@@ -122,7 +122,7 @@ function VideoItem({ video, showOwner, onConfirm }: VideoMenuProps): ReactNode {
                     <Link
                         to="/admin/users/$userId"
                         params={{ userId: video.ownerId }}
-                        className="w-fit rounded-sm text-meta text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 [overflow-wrap:anywhere]"
+                        className="w-fit rounded-sm text-meta text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring [overflow-wrap:anywhere]"
                     >
                         {video.ownerName} · {video.ownerEmail}
                     </Link>

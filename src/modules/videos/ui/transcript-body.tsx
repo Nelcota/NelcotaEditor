@@ -32,7 +32,7 @@ function TranscriptToolbar({ query, onQueryChange, fullText }: TranscriptToolbar
                 value={query}
                 onValueChange={onQueryChange}
             />
-            <CopyTextButton text={fullText} label="Copiar transcrição" className="sm:ml-auto" />
+            <CopyTextButton text={fullText} label="Copiar transcrição" className="sm:ms-auto" />
         </div>
     );
 }

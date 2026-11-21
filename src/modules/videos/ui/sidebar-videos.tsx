@@ -12,7 +12,7 @@ import { normalizeForSearch } from "#/shared/ui/normalize-for-search";
  * centre 34) and the label on 56. The current row gets a bar on the window's edge.
  */
 export const SIDEBAR_ITEM_CLASS =
-    "relative flex h-10 items-center gap-3 rounded-xl px-3 text-base text-foreground/80 outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:bg-foreground/[0.07] aria-[current=page]:font-medium aria-[current=page]:text-foreground aria-[current=page]:before:absolute aria-[current=page]:before:-start-2.5 aria-[current=page]:before:h-5 aria-[current=page]:before:w-1 aria-[current=page]:before:rounded-full aria-[current=page]:before:bg-foreground [&>svg]:size-5 [&>svg]:shrink-0";
+    "relative flex h-10 items-center gap-3 rounded-xl px-3 text-base text-foreground/80 outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] aria-[current=page]:bg-foreground/[0.07] aria-[current=page]:font-medium aria-[current=page]:text-foreground aria-[current=page]:before:absolute aria-[current=page]:before:-start-2.5 aria-[current=page]:before:h-5 aria-[current=page]:before:w-1 aria-[current=page]:before:rounded-full aria-[current=page]:before:bg-foreground [&>svg]:size-5 [&>svg]:shrink-0";
 
 /** Section headers start on the icon column's leading edge (24px), left of the labels. */
 export function SidebarSectionTitle({ children }: { children: ReactNode }): ReactNode {

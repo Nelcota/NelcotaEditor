@@ -1,6 +1,6 @@
-import CheckCircleIcon from "~icons/solar/check-circle-linear";
-import CopyIcon from "~icons/solar/copy-linear";
-import DangerCircleIcon from "~icons/solar/danger-circle-linear";
+import CircleCheckIcon from "~icons/lucide/circle-check";
+import CopyIcon from "~icons/lucide/copy";
+import CircleAlertIcon from "~icons/lucide/circle-alert";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Button } from "#/shared/ui/button";
@@ -33,8 +33,8 @@ function toLabel(state: CopyState, idleLabel: string): string {
 
 const STATE_ICONS: Record<CopyState, ReactNode> = {
     idle: <CopyIcon aria-hidden="true" />,
-    copied: <CheckCircleIcon className="text-success" aria-hidden="true" />,
-    failed: <DangerCircleIcon className="text-destructive" aria-hidden="true" />,
+    copied: <CircleCheckIcon className="text-success" aria-hidden="true" />,
+    failed: <CircleAlertIcon className="text-destructive" aria-hidden="true" />,
 };
 
 /** Copies text to the clipboard; says so for a moment, and says it when the browser refuses. */

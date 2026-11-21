@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import RestartIcon from "~icons/solar/restart-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
@@ -37,7 +37,7 @@ export function OverviewLoadError({ onRetry }: { onRetry: () => void }) {
             description="Seus vídeos e cortes continuam salvos; só os números não vieram. Tente de novo."
             action={
                 <Button variant="secondary" onClick={onRetry}>
-                    <RestartIcon aria-hidden="true" />
+                    <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
             }

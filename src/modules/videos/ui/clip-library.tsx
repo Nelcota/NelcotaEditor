@@ -1,4 +1,4 @@
-import MagnifierCloseIcon from "~icons/solar/magnifier-close-linear";
+import SearchXIcon from "~icons/lucide/search-x";
 import { useState } from "react";
 import type { LibraryClip } from "#/modules/videos/video-views";
 import { DEFAULT_CLIP_ORDER, sortLibraryClips } from "#/modules/videos/ui/clip-order";
@@ -21,7 +21,7 @@ function describeCount(visibleCount: number, totalCount: number): string {
 function NoClipMatch({ query, onClear }: { query: string; onClear: () => void }) {
     return (
         <EmptyState
-            art={<MagnifierCloseIcon className="size-8 text-muted-foreground" aria-hidden="true" />}
+            art={<SearchXIcon className="size-8 text-muted-foreground" aria-hidden="true" />}
             title={`Nenhum corte com “${query.trim()}”`}
             description="A busca olha o título do corte e o do vídeo."
             action={
@@ -33,14 +33,19 @@ function NoClipMatch({ query, onClear }: { query: string; onClear: () => void })
     );
 }
 
-/** Two of twelve columns each from xl (six across), down to two across on phones. */
+/**
+ * Columns follow the page's own width, not the window's: the sidebar and the panel's padding
+ * take a third of a laptop screen, and six columns there left no room for a title or a label.
+ */
 function ClipGrid({ items }: { items: Array<LibraryClip> }) {
     return (
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
-            {items.map((item) => (
-                <ClipCard key={item.clip.id} item={item} />
-            ))}
-        </ul>
+        <div className="@container/clips">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-8 @2xl/clips:grid-cols-3 @2xl/clips:gap-x-6 @4xl/clips:grid-cols-4 @6xl/clips:grid-cols-5">
+                {items.map((item) => (
+                    <ClipCard key={item.clip.id} item={item} />
+                ))}
+            </ul>
+        </div>
     );
 }
 

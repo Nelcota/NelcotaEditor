@@ -1,17 +1,10 @@
-import CloseCircleIcon from "~icons/solar/close-circle-linear";
-import KeyboardIcon from "~icons/solar/keyboard-linear";
-import LockKeyholeIcon from "~icons/solar/lock-keyhole-minimalistic-linear";
-import WiFiOffIcon from "~icons/solar/wi-fi-off-linear";
+import WifiOffIcon from "~icons/lucide/wifi-off";
 import type { ReactNode } from "react";
 import type { ClipView } from "#/modules/clips/clip-view";
 import { ClipDownloadLink } from "#/modules/videos/ui/clip-download-link";
 import { RetryClipButton } from "#/modules/videos/ui/retry-clip-button";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
-import { Button } from "#/shared/ui/button";
 import { Progress } from "#/shared/ui/progress";
-import { useStoredFlag } from "#/shared/ui/use-stored-flag";
-
-const SHORTCUTS_DISMISSED_KEY = "nelcota:studio-shortcuts-dismissed";
 
 /** Covers the preview while Brasa renders the clip again. */
 export function RenderingOverlay({ progressPercent }: { progressPercent: number }): ReactNode {
@@ -27,15 +20,6 @@ export function RenderingOverlay({ progressPercent }: { progressPercent: number 
                 {progressPercent}% do total
             </p>
         </div>
-    );
-}
-
-export function LockedHint(): ReactNode {
-    return (
-        <p className="flex items-center gap-2 text-xs text-muted-foreground">
-            <LockKeyholeIcon className="size-4 shrink-0" aria-hidden="true" />A edição volta quando
-            o corte ficar pronto. Pode sair desta página.
-        </p>
     );
 }
 
@@ -79,7 +63,7 @@ export function RenderedNotice({ clip }: { clip: ClipView }): ReactNode {
                 <span className="font-semibold">Corte refeito.</span>{" "}
                 <span className="text-muted-foreground">O arquivo para baixar já é o novo.</span>
             </p>
-            <ClipDownloadLink clip={clip} label="Baixar" emphasis="secondary" />
+            <ClipDownloadLink clip={clip} label="Baixar corte" emphasis="secondary" />
         </div>
     );
 }
@@ -90,7 +74,7 @@ export function OfflineNotice(): ReactNode {
             role="status"
             className="flex items-center gap-3 rounded-xl border bg-popover px-4 py-3 text-sm"
         >
-            <WiFiOffIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <WifiOffIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
             <p>
                 <span className="font-semibold">Sem conexão.</span>{" "}
                 <span className="text-muted-foreground">
@@ -98,33 +82,6 @@ export function OfflineNotice(): ReactNode {
                     a conexão voltar.
                 </span>
             </p>
-        </div>
-    );
-}
-
-/** Shown until closed once: the keys that make editing quick. */
-export function ShortcutsHint(): ReactNode {
-    const dismissed = useStoredFlag(SHORTCUTS_DISMISSED_KEY);
-
-    if (dismissed.isOn === true) {
-        return null;
-    }
-
-    return (
-        <div className="hidden items-center gap-3 rounded-xl border bg-popover px-4 py-2 text-sm @4xl/studio:flex">
-            <KeyboardIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <p className="flex-1 text-muted-foreground">
-                <span className="font-semibold text-foreground">Atalhos:</span> Espaço tocar · J e L
-                voltam e avançam 5 s · [ e ] marcam início e fim · Ctrl+Z desfaz
-            </p>
-            <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Fechar os atalhos"
-                onClick={dismissed.toggle}
-            >
-                <CloseCircleIcon aria-hidden="true" />
-            </Button>
         </div>
     );
 }

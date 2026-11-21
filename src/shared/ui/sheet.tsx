@@ -1,4 +1,4 @@
-import CloseIcon from "~icons/solar/close-linear";
+import XIcon from "~icons/lucide/x";
 import * as React from "react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import { cn } from "#/shared/ui/cn";
@@ -45,8 +45,8 @@ function SheetContent({
                 {...props}
             >
                 {children}
-                <SheetPrimitive.Close className="absolute top-3 end-3 grid size-8 pointer-coarse:size-11 place-items-center rounded-md text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]">
-                    <CloseIcon className="size-5" aria-hidden="true" />
+                <SheetPrimitive.Close className="absolute top-3 end-3 grid size-8 pointer-coarse:size-11 place-items-center rounded-md text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]">
+                    <XIcon className="size-5" aria-hidden="true" />
                     <span className="sr-only">Fechar</span>
                 </SheetPrimitive.Close>
             </SheetPrimitive.Content>

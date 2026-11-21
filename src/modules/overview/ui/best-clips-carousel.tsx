@@ -1,6 +1,6 @@
-import StarIcon from "~icons/solar/star-linear";
-import AltArrowLeftIcon from "~icons/solar/alt-arrow-left-linear";
-import AltArrowRightIcon from "~icons/solar/alt-arrow-right-linear";
+import StarIcon from "~icons/lucide/star";
+import ChevronLeftIcon from "~icons/lucide/chevron-left";
+import ChevronRightIcon from "~icons/lucide/chevron-right";
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import type { RefObject } from "react";
@@ -43,7 +43,7 @@ function CarouselControls({ scroller }: { scroller: RefObject<HTMLUListElement |
                 className={EDGE_BUTTON_CLASS}
                 onClick={() => scrollBy(-1, canScrollBack)}
             >
-                <AltArrowLeftIcon aria-hidden="true" />
+                <ChevronLeftIcon aria-hidden="true" />
             </Button>
             <Button
                 variant="outline"
@@ -53,7 +53,7 @@ function CarouselControls({ scroller }: { scroller: RefObject<HTMLUListElement |
                 className={EDGE_BUTTON_CLASS}
                 onClick={() => scrollBy(1, canScrollForward)}
             >
-                <AltArrowRightIcon aria-hidden="true" />
+                <ChevronRightIcon aria-hidden="true" />
             </Button>
         </div>
     );
@@ -92,9 +92,9 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
                 </h2>
                 <Link
                     to="/clips"
-                    className="shrink-0 rounded text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
+                    className="shrink-0 rounded text-sm font-medium whitespace-nowrap text-muted-foreground transition-[color,scale] hover:text-foreground motion-safe:active:scale-[0.99] focus-visible:ring-4 focus-visible:ring-ring focus-visible:outline-none"
                 >
-                    Ver todos
+                    Ver todos os cortes
                 </Link>
             </div>
             {clips.length === 0 && <NoClipsInPeriod onWiden={onWiden} />}

@@ -1,4 +1,4 @@
-import TranslationIcon from "~icons/solar/translation-linear";
+import LanguagesIcon from "~icons/lucide/languages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -53,7 +53,7 @@ function LanguageSelect(props: {
     return (
         <div className="grid gap-2">
             <span className="flex items-center gap-2 text-sm font-medium">
-                <TranslationIcon aria-hidden="true" className="size-[18px] text-muted-foreground" />
+                <LanguagesIcon aria-hidden="true" className="size-[18px] text-muted-foreground" />
                 Idioma da transcrição
             </span>
             <SegmentedControl

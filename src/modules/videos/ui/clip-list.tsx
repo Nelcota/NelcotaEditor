@@ -9,7 +9,7 @@ import { Mascot } from "#/shared/ui/mascot";
 // Rows: 16px in on both sides (the panel's text line). The number badge is the row's icon column;
 // the open row's details start on the title line after it (16 + 28 + 12 = 56px).
 const ROW_CLASS =
-    "group flex min-h-16 w-full items-center gap-3 px-4 py-3 text-start outline-none transition-colors hover:bg-secondary/60 focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/70 aria-expanded:bg-secondary/60";
+    "group flex min-h-16 w-full items-center gap-3 px-4 py-3 text-start outline-none transition-colors hover:bg-secondary/60 focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring aria-expanded:bg-secondary/60";
 
 function ScoreOrState({ clip }: { clip: ClipView }): ReactNode {
     if (clip.status === "failed") {

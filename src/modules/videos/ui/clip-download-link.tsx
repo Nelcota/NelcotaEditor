@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import DownloadMinimalisticIcon from "~icons/solar/download-minimalistic-linear";
+import DownloadIcon from "~icons/lucide/download";
 import type { ClipView } from "#/modules/clips/clip-view";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
@@ -32,7 +32,7 @@ export function ClipDownloadLink(props: ClipDownloadLinkProps): ReactNode {
             className={cn("font-medium", className)}
         >
             <a href={downloadUrl} download>
-                <DownloadMinimalisticIcon aria-hidden="true" />
+                <DownloadIcon aria-hidden="true" />
                 <span className={labelClassName}>{label}</span>
             </a>
         </Button>

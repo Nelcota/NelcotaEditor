@@ -1,8 +1,8 @@
 import type { SVGProps } from "react";
 import { cn } from "#/shared/ui/cn";
 
-// Matches the Solar Linear icons: 24px grid, 1.5 stroke, circle radius 10.
-const STROKE_WIDTH = 1.5;
+// Matches the icons: 24px grid, 1.75 stroke, circle radius 10.
+const STROKE_WIDTH = 1.75;
 const RADIUS = 10;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 const ARC_LENGTH = CIRCUMFERENCE / 4;

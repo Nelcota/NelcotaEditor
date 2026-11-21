@@ -1,4 +1,4 @@
-import SortVerticalIcon from "~icons/solar/sort-vertical-linear";
+import ArrowUpDownIcon from "~icons/lucide/arrow-up-down";
 import { CLIP_ORDERS, CLIP_ORDER_LABELS, isClipOrder } from "#/modules/videos/ui/clip-order";
 import type { ClipOrder } from "#/modules/videos/ui/clip-order";
 import { SearchField } from "#/modules/videos/ui/search-field";
@@ -26,8 +26,8 @@ export function ClipsToolbar(props: ClipsToolbarProps) {
                 onValueChange={onQueryChange}
             />
             {/* Two fixed orders: both visible instead of a list that opens over the page. */}
-            <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
-                <SortVerticalIcon
+            <div className="flex w-full items-center gap-2 sm:ms-auto sm:w-auto">
+                <ArrowUpDownIcon
                     aria-hidden="true"
                     className="size-5 shrink-0 text-muted-foreground"
                 />

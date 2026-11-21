@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="studio.css" />
+        <script src="shell.js"></script>
+        <style>
+            body {
+                background: #fff;
+            }
+            .steps {
+                display: flex;
+                gap: 6px;
+                padding: 10px 16px;
+                border-bottom: 1px solid var(--line);
+            }
+            .step {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                height: 34px;
+                border-radius: 99px;
+                font-size: 13px;
+                font-weight: 550;
+                background: var(--secondary);
+            }
+            .step i {
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                display: grid;
+                place-items: center;
+                font: 600 11px "Geist";
+                font-style: normal;
+                background: var(--success);
+                color: #fff;
+            }
+            .step.on {
+                background: var(--fg);
+                color: #fff;
+            }
+            .step.on i {
+                background: #fff;
+                color: var(--fg);
+            }
+            .stagep {
+                background: var(--stage);
+                display: grid;
+                justify-items: center;
+                padding: 14px 0 10px;
+                gap: 8px;
+                color: rgb(255 255 255 / 0.7);
+                font-size: 12.5px;
+            }
+            .stagep .shot {
+                height: 300px;
+                border-radius: 12px;
+            }
+            .tool {
+                flex: 1;
+                display: grid;
+                align-content: start;
+                gap: 12px;
+                padding: 16px 0 0;
+                overflow: hidden;
+            }
+            .tool h2 {
+                font-size: 18px;
+                font-weight: 650;
+                padding: 0 16px;
+            }
+            .rail {
+                display: flex;
+                gap: 10px;
+                padding: 0 16px;
+                overflow: hidden;
+            }
+            .preset {
+                flex: none;
+                width: 118px;
+                display: grid;
+                gap: 6px;
+                font-size: 12.5px;
+                font-weight: 550;
+            }
+            .preset .im {
+                position: relative;
+                height: 84px;
+                border-radius: 10px;
+                background: #000 url(img/frame2.jpg) center 62% / cover;
+                display: grid;
+                place-items: center;
+                overflow: hidden;
+            }
+            .preset .im::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: rgb(0 0 0 / 0.25);
+            }
+            .preset .im b {
+                position: relative;
+                color: #fff;
+                text-transform: uppercase;
+                paint-order: stroke;
+                -webkit-text-stroke: 3px #000;
+                line-height: 1;
+            }
+            .preset.on .im {
+                box-shadow:
+                    0 0 0 2px #fff,
+                    0 0 0 4px var(--fg);
+            }
+            .fine {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 0 16px;
+                height: 44px;
+                padding: 0 12px;
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 550;
+            }
+            .fine small {
+                color: var(--muted);
+                font-weight: 400;
+                font-size: 13px;
+            }
+            .foot {
+                display: flex;
+                gap: 8px;
+                padding: 10px 16px 16px;
+                border-top: 1px solid var(--line);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="phone">
+            <div class="pbar">
+                <button class="btn icon" id="bk"></button>
+                <div class="ttl">
+                    <b>Perdidos em São Paulo</b><small>Corte 1 de 3 · salvo</small>
+                </div>
+                <span class="sp"></span>
+                <button class="btn icon sm" id="u"></button>
+            </div>
+            <div class="steps">
+                <span class="step"><i id="d1"></i>Trecho</span>
+                <span class="step"><i id="d2"></i>Legendas</span>
+                <span class="step on"><i>3</i>Estilo</span>
+            </div>
+            <div class="stagep">
+                <div class="shot">
+                    <div class="cap" style="--cap: 16px; -webkit-text-stroke: 4px #000">
+                        SÃO <em>PAULO.</em>
+                    </div>
+                </div>
+                <span class="num">0:02,8 / 0:21,6 · toque para pausar</span>
+            </div>
+            <div class="tool">
+                <h2>Como a legenda aparece</h2>
+                <div class="rail" id="rail"></div>
+                <div class="fine">
+                    <span id="fi"></span>Ajuste fino <small>cor, tamanho, posição</small
+                    ><span class="sp"></span><span id="fc"></span>
+                </div>
+            </div>
+            <div class="foot">
+                <button class="btn outline" id="bb" style="height: 44px"></button>
+                <button class="btn primary" id="rb" style="height: 44px; flex: 1"></button>
+            </div>
+        </div>
+        <script>
+            const I = icon;
+            bk.innerHTML = I("left", 20);
+            u.innerHTML = I("undo");
+            d1.innerHTML = I("check", 12);
+            d2.innerHTML = I("check", 12);
+            fi.innerHTML = I("sliders", 17);
+            fc.innerHTML = I("right", 16);
+            bb.innerHTML = I("left", 16) + "Legendas";
+            rb.innerHTML = I("render") + "Renderizar corte";
+            const PRESETS = [
+                ["Karaokê", "800 14px Montserrat", "#ffd60a", 1],
+                ["Impacto", "400 21px 'Bebas Neue'", "#4ade80"],
+                ["Bloco", "700 15px 'League Spartan'", "#c084fc"],
+                ["Clássica", "700 13px Inter", "#fff"],
+            ];
+            rail.innerHTML = PRESETS.map(
+                ([n, f, c, on]) =>
+                    `<div class="preset ${on ? "on" : ""}"><div class="im"><b style="font:${f}">São <em style="font-style:normal;color:${c}">Paulo.</em></b></div>${n}</div>`,
+            ).join("");
+        </script>
+    </body>
+</html>

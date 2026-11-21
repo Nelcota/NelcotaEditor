@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useId } from "react";
+import { useId, useState } from "react";
 import type { ReactNode } from "react";
 import { isVideoWorking } from "#/modules/video-records/video-status";
 import { toCrewLine } from "#/modules/videos/crew-lines";
@@ -16,8 +16,10 @@ import { Progress } from "#/shared/ui/progress";
 /** A frame of the video when there is one; its mascot on a sunken field otherwise. */
 function RowThumbnail({ video }: { video: VideoSummary }): ReactNode {
     const thumbnailUrl = video.thumbnailUrl;
+    // A frame that fails to load (deleted file, blocked host) falls back to the mascot too.
+    const [hasFailed, setHasFailed] = useState(false);
 
-    if (thumbnailUrl === null) {
+    if (thumbnailUrl === null || hasFailed === true) {
         return (
             <span className="grid h-[45px] w-20 shrink-0 sm:h-[63px] sm:w-28 place-items-center rounded-lg bg-secondary">
                 <VideoMascot videoId={video.id} className="size-7" />
@@ -31,7 +33,8 @@ function RowThumbnail({ video }: { video: VideoSummary }): ReactNode {
             alt=""
             loading="lazy"
             referrerPolicy="no-referrer"
-            className="h-[45px] w-20 shrink-0 sm:h-[63px] sm:w-28 rounded-lg bg-secondary object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+            onError={() => setHasFailed(true)}
+            className="h-[45px] w-20 shrink-0 sm:h-[63px] sm:w-28 rounded-lg bg-secondary object-cover outline-1 -outline-offset-1 outline-solid outline-black/10 dark:outline-white/10"
         />
     );
 }
@@ -60,7 +63,11 @@ interface RowMetaProps {
 /** Under the title: the facts when done, the way out of a failure, the crew's line while working. */
 function RowMeta({ video, titleId, actions }: RowMetaProps): ReactNode {
     if (video.status === "done") {
-        return <p className="text-meta text-muted-foreground">{describeDoneVideo(video)}</p>;
+        return (
+            <p className="text-meta text-muted-foreground tabular-nums">
+                {describeDoneVideo(video)}
+            </p>
+        );
     }
 
     if (video.status === "failed" || video.status === "cancelled") {
@@ -99,7 +106,7 @@ export function VideoListRow({ video }: { video: VideoSummary }): ReactNode {
                     to="/videos/$videoId"
                     params={{ videoId: video.id }}
                     title={video.title}
-                    className="line-clamp-2 rounded text-sm leading-snug font-medium break-words outline-none underline-offset-4 group-hover:underline after:absolute after:inset-0 focus-visible:after:ring-4 focus-visible:after:ring-inset focus-visible:after:ring-ring/70"
+                    className="line-clamp-2 rounded text-sm leading-snug font-medium break-words outline-none motion-safe:active:scale-[0.99] underline-offset-4 group-hover:underline after:absolute after:inset-0 focus-visible:after:ring-4 focus-visible:after:ring-inset focus-visible:after:ring-ring"
                 >
                     {video.title}
                 </Link>

@@ -1,4 +1,4 @@
-import RestartIcon from "~icons/solar/restart-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ComponentProps, ReactNode } from "react";
 import { retryClip } from "#/modules/videos/server/video-edit-functions";
@@ -39,7 +39,7 @@ export function RetryClipButton({
                 variant={variant}
                 className="font-medium"
             >
-                <RestartIcon aria-hidden="true" />
+                <RotateCwIcon aria-hidden="true" />
                 Refazer este corte
             </Button>
             {retry.isError === true && <FormAlert message={retry.error.message} />}

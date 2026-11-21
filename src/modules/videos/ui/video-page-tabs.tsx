@@ -1,6 +1,6 @@
-import ClapperboardIcon from "~icons/solar/clapperboard-linear";
-import Pen2Icon from "~icons/solar/pen-2-linear";
-import VideoFrameIcon from "~icons/solar/video-frame-linear";
+import ScissorsIcon from "~icons/lucide/scissors";
+import PencilIcon from "~icons/lucide/pencil";
+import SquarePlayIcon from "~icons/lucide/square-play";
 import { useNavigate } from "@tanstack/react-router";
 import type { ComponentType, ReactNode } from "react";
 import { isVideoFinished, isVideoResumable } from "#/modules/video-records/video-status";
@@ -71,9 +71,9 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
                 className="h-auto w-full justify-start gap-6 border-b px-0 pb-0 max-sm:gap-5 max-sm:[&_[role=tab]>svg]:hidden"
             >
                 <TabsTrigger value="clips" className="h-11 flex-none px-0 text-base font-semibold">
-                    <ClapperboardIcon aria-hidden="true" />
+                    <ScissorsIcon aria-hidden="true" />
                     Cortes
-                    <span className="rounded-full bg-secondary px-2 text-xs text-muted-foreground">
+                    <span className="rounded-lg bg-secondary px-2 text-xs text-muted-foreground tabular-nums">
                         {details.clips.length}
                     </span>
                 </TabsTrigger>
@@ -81,11 +81,11 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
                     value="original"
                     className="h-11 flex-none px-0 text-base font-semibold"
                 >
-                    <VideoFrameIcon aria-hidden="true" />
+                    <SquarePlayIcon aria-hidden="true" />
                     Original
                 </TabsTrigger>
                 <TabsTrigger value="studio" className="h-11 flex-none px-0 text-base font-semibold">
-                    <Pen2Icon aria-hidden="true" />
+                    <PencilIcon aria-hidden="true" />
                     Studio
                 </TabsTrigger>
             </TabsList>

@@ -1,4 +1,4 @@
-import DangerCircleIcon from "~icons/solar/danger-circle-linear";
+import CircleAlertIcon from "~icons/lucide/circle-alert";
 
 interface SourceProblemProps {
     id: string;
@@ -16,7 +16,7 @@ export function SourceProblem({ id, message }: SourceProblemProps) {
 
     return (
         <p id={id} className="flex items-start gap-1.5 text-sm text-destructive">
-            <DangerCircleIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <CircleAlertIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             {message}
         </p>
     );

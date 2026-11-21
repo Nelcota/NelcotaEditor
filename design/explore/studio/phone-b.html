@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="studio.css" />
+        <script src="shell.js"></script>
+        <style>
+            body {
+                background: #fff;
+            }
+            .top2 {
+                display: grid;
+                grid-template-columns: 132px minmax(0, 1fr);
+                gap: 14px;
+                padding: 14px 16px;
+                background: var(--inspector);
+                border-bottom: 1px solid var(--line);
+            }
+            .top2 .shot {
+                width: 132px;
+                border-radius: 10px;
+            }
+            .meta {
+                display: grid;
+                align-content: space-between;
+                font-size: 13px;
+                color: var(--muted);
+            }
+            .pb {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: var(--fg);
+                color: #fff;
+                display: grid;
+                place-items: center;
+            }
+            .lanep {
+                position: relative;
+                height: 30px;
+                overflow: clip;
+                overflow-clip-margin: 5px;
+            }
+            .lanep .strip {
+                border-radius: 6px;
+                overflow: hidden;
+            }
+            .chipbtn {
+                display: flex;
+                gap: 6px;
+            }
+            .chipbtn span {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                height: 32px;
+                padding: 0 10px;
+                border-radius: 8px;
+                background: #fff;
+                border: 1px solid var(--line-strong);
+                color: var(--fg);
+                font-weight: 550;
+                font-size: 13px;
+            }
+            .doc {
+                flex: 1;
+                overflow: hidden;
+                padding: 16px 18px;
+                display: grid;
+                align-content: start;
+                gap: 12px;
+            }
+            .doc h2 {
+                font-size: 17px;
+                font-weight: 650;
+            }
+            .doc h2 small {
+                font-weight: 400;
+                color: var(--muted);
+                font-size: 13px;
+            }
+            .para {
+                font-size: 18px;
+                line-height: 1.7;
+            }
+            .para time {
+                display: block;
+                font-size: 12px;
+                color: var(--muted);
+                line-height: 1.2;
+            }
+            .cue {
+                padding: 2px 1px;
+                border-radius: 5px;
+            }
+            .cue.done {
+                color: var(--muted);
+            }
+            .cue.play {
+                background: color-mix(in oklab, var(--primary) 13%, #fff);
+                color: var(--primary-ink);
+                box-shadow: inset 0 -2px 0 var(--primary);
+            }
+            .foot {
+                padding: 10px 16px 16px;
+                border-top: 1px solid var(--line);
+                display: grid;
+                gap: 8px;
+            }
+            .foot .changes {
+                justify-self: center;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="phone">
+            <div class="pbar">
+                <button class="btn icon" id="bk"></button>
+                <div class="ttl">
+                    <b>Perdidos em São Paulo</b><small>Corte 1 de 3 · rascunho salvo</small>
+                </div>
+                <span class="sp"></span>
+                <button class="btn icon sm" id="u"></button>
+                <button class="btn icon sm" id="r"></button>
+            </div>
+            <div class="top2">
+                <div class="shot">
+                    <div class="cap" style="--cap: 12px; -webkit-text-stroke: 3px #000">
+                        SÃO <em>PAULO.</em>
+                    </div>
+                </div>
+                <div class="meta">
+                    <div style="display: flex; align-items: center; gap: 12px">
+                        <button class="pb" id="pl"></button>
+                        <span
+                            class="num"
+                            style="color: var(--fg); font-size: 15px; font-weight: 550"
+                            >0:02,8<br /><small
+                                style="color: var(--muted); font-weight: 400; font-size: 12.5px"
+                                >de 0:21,6</small
+                            ></span
+                        >
+                    </div>
+                    <div style="display: grid; gap: 6px">
+                        <span class="num">Trecho 0:59 a 1:21</span>
+                        <div class="lanep"></div>
+                    </div>
+                    <div class="chipbtn"><span id="st"></span><span id="tr"></span></div>
+                </div>
+            </div>
+            <div class="doc">
+                <h2>Roteiro <small>· toque para corrigir</small></h2>
+                <div id="doc" style="display: grid; gap: 12px"></div>
+            </div>
+            <div class="foot">
+                <span class="changes">31 alterações não renderizadas</span>
+                <button class="btn primary" id="rb" style="height: 44px"></button>
+            </div>
+        </div>
+        <script>
+            const I = icon;
+            bk.innerHTML = I("left", 20);
+            u.innerHTML = I("undo");
+            r.innerHTML = I("redo");
+            pl.innerHTML = I("play", 17);
+            st.innerHTML = I("palette", 16) + "Estilo";
+            tr.innerHTML = I("scissors", 16) + "Trecho";
+            rb.innerHTML = I("render") + "Renderizar corte";
+            document.querySelector(".lanep").innerHTML =
+                `${strip(6, 3)}<span class="trimwin" style="left:22%;width:42%"></span>`;
+            const groups = [
+                [0, 4],
+                [4, 7],
+                [7, 11],
+                [11, 16],
+                [16, 19],
+            ];
+            doc.innerHTML = groups
+                .map(
+                    ([a, b]) =>
+                        `<p class="para"><time class="num">${clock(CUES[a][0])}</time>${CUES.slice(
+                            a,
+                            b,
+                        )
+                            .map((c, k) => {
+                                const i = a + k;
+                                const cls = i < PLAYING ? "done" : i === PLAYING ? "play" : "";
+                                return `<span class="cue ${cls}">${c[2]}</span>`;
+                            })
+                            .join(" ")}</p>`,
+                )
+                .join("");
+        </script>
+    </body>
+</html>

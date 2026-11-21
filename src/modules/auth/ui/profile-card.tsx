@@ -1,8 +1,8 @@
-import CheckIcon from "~icons/solar/check-linear";
-import LockPasswordIcon from "~icons/solar/lock-password-linear";
-import Logout2Icon from "~icons/solar/logout-2-linear";
-import PenIcon from "~icons/solar/pen-linear";
-import CameraIcon from "~icons/solar/camera-linear";
+import CheckIcon from "~icons/lucide/check";
+import KeyRoundIcon from "~icons/lucide/key-round";
+import LogOutIcon from "~icons/lucide/log-out";
+import PenIcon from "~icons/lucide/pen";
+import CameraIcon from "~icons/lucide/camera";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -27,7 +27,7 @@ function AvatarButton({ onClick }: { onClick: () => void }): ReactNode {
             type="button"
             onClick={onClick}
             aria-label="Trocar foto de perfil"
-            className="group relative shrink-0 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+            className="group relative shrink-0 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
         >
             <UserAvatar
                 name={user.name}
@@ -87,7 +87,7 @@ export function ProfileCard(): ReactNode {
                     Editar perfil
                 </Button>
                 <Button variant="secondary" onClick={() => setOpenDialog("password")}>
-                    <LockPasswordIcon aria-hidden="true" />
+                    <KeyRoundIcon aria-hidden="true" />
                     Trocar senha
                 </Button>
                 <Button
@@ -98,7 +98,7 @@ export function ProfileCard(): ReactNode {
                     disabled={isSigningOut}
                     aria-busy={isSigningOut}
                 >
-                    <Logout2Icon aria-hidden="true" />
+                    <LogOutIcon aria-hidden="true" />
                     Sair
                 </Button>
             </div>

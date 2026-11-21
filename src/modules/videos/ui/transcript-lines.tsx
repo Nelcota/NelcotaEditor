@@ -49,7 +49,7 @@ const TranscriptLine = memo(function TranscriptLine({
                 onClick={() => onSeek(line.startSeconds)}
                 aria-current={toAriaCurrent(isPlaying)}
                 className={cn(
-                    "grid w-full grid-cols-[3.5rem_minmax(0,1fr)] gap-3 rounded-lg px-2.5 py-2 text-left text-sm outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
+                    "grid w-full grid-cols-[3.5rem_minmax(0,1fr)] gap-3 rounded-lg px-2.5 py-2 text-start text-sm outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
                     "aria-[current=time]:bg-accent",
                 )}
             >

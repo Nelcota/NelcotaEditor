@@ -1,6 +1,6 @@
-import PauseBoldIcon from "~icons/solar/pause-bold";
-import PlayBoldIcon from "~icons/solar/play-bold";
-import VideocameraRecordIcon from "~icons/solar/videocamera-record-linear";
+import PauseIcon from "~icons/lucide-solid/pause";
+import PlayIcon from "~icons/lucide-solid/play";
+import VideoIcon from "~icons/lucide/video";
 import { useEffect, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import type { AspectRatio } from "#/modules/clips/clip-format";
@@ -13,10 +13,12 @@ import { formatClock } from "#/shared/ui/format";
 
 const TENTHS_PER_SECOND = 10;
 
+// The largest frame of the clip's shape that fits the stage, which is a size container: the
+// width is the smaller of the stage's width and what its height allows at that shape.
 const FRAME_CLASSES: Record<AspectRatio, string> = {
-    vertical: "aspect-[9/16] w-full max-w-[300px]",
-    square: "aspect-square w-full max-w-[380px]",
-    horizontal: "aspect-video w-full max-w-[520px]",
+    vertical: "aspect-[9/16] w-[min(100cqw,calc(100cqh*9/16))]",
+    square: "aspect-square w-[min(100cqw,100cqh)]",
+    horizontal: "aspect-video w-[min(100cqw,calc(100cqh*16/9))]",
 };
 
 interface StudioPreviewProps {
@@ -32,7 +34,7 @@ interface StudioPreviewProps {
 function NoPreview({ message }: { message: string }): ReactNode {
     return (
         <div className="absolute inset-0 z-20 grid content-center justify-items-center gap-2 bg-card p-6 text-center">
-            <VideocameraRecordIcon className="size-6 text-muted-foreground" aria-hidden="true" />
+            <VideoIcon className="size-6 text-muted-foreground" aria-hidden="true" />
             <p className="font-semibold">Sem prévia ao vivo</p>
             <p className="text-sm text-muted-foreground">{message}</p>
         </div>
@@ -48,11 +50,11 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
     const currentSeconds = currentTenths / TENTHS_PER_SECOND;
     const playedSeconds = Math.max(0, currentSeconds - draft.startSeconds);
     let label = "Tocar";
-    let Icon = PlayBoldIcon;
+    let Icon = PlayIcon;
 
     if (playback.isPlaying === true) {
         label = "Pausar";
-        Icon = PauseBoldIcon;
+        Icon = PauseIcon;
     }
 
     return (
@@ -63,7 +65,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
                 onClick={async () => {
                     await playback.togglePlay();
                 }}
-                className="grid size-9 pointer-coarse:size-11 place-items-center rounded-full outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="grid size-9 pointer-coarse:size-11 place-items-center rounded-full outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
             >
                 <Icon className="size-5" aria-hidden="true" />
             </button>
@@ -78,7 +80,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
                 step={1 / TENTHS_PER_SECOND}
                 value={currentSeconds}
                 onChange={(event) => playback.seek(Number(event.target.value))}
-                className="range-media min-w-0 flex-1 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring/70"
+                className="range-media min-w-0 flex-1 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring"
             />
         </div>
     );

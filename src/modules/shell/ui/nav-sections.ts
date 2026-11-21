@@ -1,8 +1,8 @@
-import Chart2Icon from "~icons/solar/chart-2-linear";
-import ClapperboardPlayIcon from "~icons/solar/clapperboard-play-linear";
-import ShieldUserIcon from "~icons/solar/shield-user-linear";
-import UserRoundedIcon from "~icons/solar/user-rounded-linear";
-import VideoLibraryIcon from "~icons/solar/video-library-linear";
+import ChartNoAxesColumnIcon from "~icons/lucide/chart-no-axes-column";
+import ScissorsIcon from "~icons/lucide/scissors";
+import SquarePlayIcon from "~icons/lucide/square-play";
+import ShieldIcon from "~icons/lucide/shield";
+import UserIcon from "~icons/lucide/user";
 import type { IconComponent } from "#/shared/ui/icon-component";
 
 export type SectionPath = "/" | "/clips" | "/overview" | "/admin" | "/account";
@@ -15,7 +15,7 @@ export interface NavSection {
 
 /**
  * "current" is the page you are on; "parent" is the section a deeper page belongs to (Vídeos while
- * a video is open), so the rail still says where you are.
+ * a video is open), so the navigation still says where you are.
  */
 export type NavSectionState = "current" | "parent" | "none";
 
@@ -24,19 +24,23 @@ const VIDEO_PAGE_PREFIX = "/videos/";
 const ADMIN_PATH = "/admin";
 
 export const NAV_SECTIONS: ReadonlyArray<NavSection> = [
-    { path: HOME_PATH, label: "Vídeos", icon: VideoLibraryIcon },
-    { path: "/clips", label: "Cortes", icon: ClapperboardPlayIcon },
-    { path: "/overview", label: "Painel", icon: Chart2Icon },
+    { path: HOME_PATH, label: "Vídeos", icon: SquarePlayIcon },
+    { path: "/clips", label: "Cortes", icon: ScissorsIcon },
+    { path: "/overview", label: "Painel", icon: ChartNoAxesColumnIcon },
 ];
 
 /** Shown to admins only; the admin routes and server functions check the role on their own. */
-export const ADMIN_SECTION: NavSection = { path: ADMIN_PATH, label: "Admin", icon: ShieldUserIcon };
+export const ADMIN_SECTION: NavSection = {
+    path: ADMIN_PATH,
+    label: "Admin",
+    icon: ShieldIcon,
+};
 
-/** Phones only: the rail's account menu becomes the last tab. */
+/** Phones only: the sidebar's account menu becomes the last tab. */
 export const ACCOUNT_SECTION: NavSection = {
     path: "/account",
     label: "Conta",
-    icon: UserRoundedIcon,
+    icon: UserIcon,
 };
 
 export function getSectionState(section: NavSection, pathname: string): NavSectionState {
