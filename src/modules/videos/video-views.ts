@@ -1,4 +1,5 @@
 import type { ClipView } from "#/modules/clips/clip-view";
+import type { ClipLength } from "#/modules/video-records/clip-length";
 import type { VideoSource, VideoStatus } from "#/modules/video-records/video-status";
 
 /** What the browser receives about a video. Dates travel as ISO strings. */
@@ -12,6 +13,7 @@ export interface VideoSummary {
     isCancelling: boolean;
     durationSeconds: number | null;
     requestedClipCount: number;
+    clipLength: ClipLength;
     readyClipCount: number;
     createdAt: string;
     /** When the current run was asked for; null for videos from before it was recorded. */

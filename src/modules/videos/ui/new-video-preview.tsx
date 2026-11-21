@@ -2,6 +2,7 @@ import VideoFramePlayHorizontalIcon from "~icons/solar/video-frame-play-horizont
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import { cn } from "#/shared/ui/cn";
 import { toYoutubeThumbnailUrl } from "#/modules/videos/youtube-preview";
 import {
     describeClipCount,
@@ -19,6 +20,7 @@ interface NewVideoPreviewProps {
     source: VideoSource;
     title: string;
     clipCount: number;
+    clipLengthLabel: string;
     languageLabel: string;
 }
 
@@ -72,9 +74,16 @@ function PreviewFrame({ source }: { source: VideoSource }): ReactNode {
     );
 }
 
-function Fact({ label, value }: { label: string; value: string }): ReactNode {
+interface FactProps {
+    label: string;
+    value: string;
+    /** Takes the whole row: a long value such as "Detectar automaticamente" wraps in half. */
+    isWide?: boolean;
+}
+
+function Fact({ label, value, isWide = false }: FactProps): ReactNode {
     return (
-        <div className="grid gap-0.5">
+        <div className={cn("grid gap-0.5", isWide === true && "col-span-2")}>
             <dt className="text-meta text-muted-foreground">{label}</dt>
             <dd className="text-sm font-bold">{value}</dd>
         </div>
@@ -86,6 +95,7 @@ export function NewVideoPreview({
     source,
     title,
     clipCount,
+    clipLengthLabel,
     languageLabel,
 }: NewVideoPreviewProps): ReactNode {
     const videoId = toLinkVideoId(source);
@@ -122,10 +132,9 @@ export function NewVideoPreview({
                 </div>
                 <dl className="mx-1 grid grid-cols-2 gap-x-4 gap-y-3 border-t pt-3 pb-1">
                     <Fact label="Cortes" value={describeClipCount(clipCount)} />
+                    <Fact label="Duração" value={clipLengthLabel} />
                     <Fact label="Formato" value="9:16 · legenda" />
-                    <div className="col-span-2">
-                        <Fact label="Idioma da fala" value={languageLabel} />
-                    </div>
+                    <Fact label="Idioma da fala" value={languageLabel} isWide />
                 </dl>
             </div>
         </aside>

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { CLIP_LENGTHS, DEFAULT_CLIP_LENGTH } from "#/modules/video-records/clip-length";
+import type { ClipLength } from "#/modules/video-records/clip-length";
 import {
     DEFAULT_CLIP_COUNT,
     MAX_CLIP_COUNT,
@@ -17,8 +19,21 @@ export const TRANSCRIPTION_LANGUAGE_LABELS: Record<TranscriptionLanguage, string
     es: "Espanhol",
 };
 
+export const CLIP_LENGTH_LABELS: Record<ClipLength, string> = {
+    short: "Curtos",
+    minute: "1 minuto",
+    free: "Livre",
+};
+
+export const CLIP_LENGTH_HINTS: Record<ClipLength, string> = {
+    short: "Cerca de 30 segundos cada",
+    minute: "Cerca de 1 minuto cada",
+    free: "Do tamanho que cada trecho pedir",
+};
+
 export const preferencesSchema = z.object({
     defaultClipCount: z.number().int().min(MIN_CLIP_COUNT).max(MAX_CLIP_COUNT),
+    defaultClipLength: z.enum(CLIP_LENGTHS),
     transcriptionLanguage: z.enum(TRANSCRIPTION_LANGUAGES),
 });
 
@@ -26,5 +41,6 @@ export type Preferences = z.infer<typeof preferencesSchema>;
 
 export const DEFAULT_PREFERENCES: Preferences = {
     defaultClipCount: DEFAULT_CLIP_COUNT,
+    defaultClipLength: DEFAULT_CLIP_LENGTH,
     transcriptionLanguage: "",
 };

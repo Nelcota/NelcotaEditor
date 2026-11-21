@@ -5,7 +5,11 @@ import {
     MIN_CLIP_SECONDS,
     MIN_SCORE,
 } from "#/modules/clips/clip-limits";
+import { CLIP_LENGTH_TARGETS } from "#/modules/clips/clip-length-targets";
+import { fitClipLength } from "#/modules/highlights/fit-clip-length";
+import type { TimeRange } from "#/modules/highlights/fit-clip-length";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import type { ClipLength } from "#/modules/video-records/clip-length";
 
 const START_PADDING_SECONDS = 0.15;
 const END_PADDING_SECONDS = 0.35;
@@ -25,11 +29,7 @@ interface NormalizeOptions {
     words: Array<TranscriptWord>;
     durationSeconds: number;
     maxCount: number;
-}
-
-interface TimeRange {
-    startSeconds: number;
-    endSeconds: number;
+    clipLength: ClipLength;
 }
 
 /** Moves the cut points to word boundaries so no word is chopped in half. */
@@ -49,17 +49,45 @@ function snapToWords(range: TimeRange, words: Array<TranscriptWord>): TimeRange 
     return { startSeconds: firstWord.startSeconds, endSeconds: lastWord.endSeconds };
 }
 
-/** Pads the cut a little so the first and last words are not clipped, without leaving the video. */
-function padRange(snapped: TimeRange, durationSeconds: number): TimeRange {
-    const startSeconds = Math.max(0, snapped.startSeconds - START_PADDING_SECONDS);
-    const paddedEndSeconds = snapped.endSeconds + END_PADDING_SECONDS;
-    // The padding must not push a clip that is already at the limit past MAX_CLIP_SECONDS.
-    const endSeconds = Math.min(durationSeconds, paddedEndSeconds, startSeconds + MAX_CLIP_SECONDS);
+interface EndPaddingLimits {
+    durationSeconds: number;
+    maxLengthSeconds: number;
+}
+
+/** Pads the end a little so the last word is not clipped, without leaving the video. */
+function padEnd(range: TimeRange, limits: EndPaddingLimits): TimeRange {
+    const startSeconds = range.startSeconds;
+    const paddedEndSeconds = range.endSeconds + END_PADDING_SECONDS;
+    // The padding must not push a clip that is already at its length limit past it.
+    const endSeconds = Math.min(
+        limits.durationSeconds,
+        paddedEndSeconds,
+        startSeconds + limits.maxLengthSeconds,
+    );
 
     return { startSeconds, endSeconds };
 }
 
-function fitRange(candidate: HighlightCandidate, options: NormalizeOptions): TimeRange | null {
+/** How far a clip may grow: up to the next accepted clip, and never past the video. */
+function findEndLimit(
+    range: TimeRange,
+    durationSeconds: number,
+    accepted: Array<TimeRange>,
+): number {
+    const laterStarts = accepted
+        .map((other) => other.startSeconds)
+        .filter((startSeconds) => startSeconds >= range.endSeconds);
+
+    return Math.min(durationSeconds, ...laterStarts);
+}
+
+function fitRange(
+    candidate: HighlightCandidate,
+    options: NormalizeOptions,
+    accepted: Array<TimeRange>,
+): TimeRange | null {
+    const durationSeconds = options.durationSeconds;
+    const target = CLIP_LENGTH_TARGETS[options.clipLength];
     const startSeconds = Math.max(0, candidate.startSeconds);
     const maxEnd = Math.min(candidate.endSeconds, startSeconds + MAX_CLIP_SECONDS);
     const snapped = snapToWords({ startSeconds, endSeconds: maxEnd }, options.words);
@@ -68,7 +96,17 @@ function fitRange(candidate: HighlightCandidate, options: NormalizeOptions): Tim
         return null;
     }
 
-    const padded = padRange(snapped, options.durationSeconds);
+    // The start is padded before the length is fitted, so trimming already counts the padding
+    // and the length limit never has to cut into the last word.
+    const paddedStart = Math.max(0, snapped.startSeconds - START_PADDING_SECONDS);
+    const startPadded = { startSeconds: paddedStart, endSeconds: snapped.endSeconds };
+    const fitted = fitClipLength({
+        range: startPadded,
+        words: options.words,
+        target,
+        endLimitSeconds: findEndLimit(startPadded, durationSeconds, accepted),
+    });
+    const padded = padEnd(fitted, { durationSeconds, maxLengthSeconds: target.trimAboveSeconds });
 
     if (padded.endSeconds - padded.startSeconds < MIN_CLIP_SECONDS) {
         return null;
@@ -132,7 +170,7 @@ export function normalizeHighlights(
     const accepted: Array<HighlightCandidate> = [];
 
     for (const candidate of byScore) {
-        const range = fitRange(candidate, options);
+        const range = fitRange(candidate, options, accepted);
 
         if (range === null || overlapsAny(range, accepted) === true) {
             continue;

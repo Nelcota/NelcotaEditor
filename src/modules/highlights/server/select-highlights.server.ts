@@ -116,7 +116,7 @@ async function requestCandidates(
     }
     const answer = await requestJsonCompletion(
         {
-            system: buildHighlightSystemPrompt(video.requestedClipCount),
+            system: buildHighlightSystemPrompt(video.requestedClipCount, video.clipLength),
             user: `Video title: ${video.title}\n\nTranscript:\n${transcript}`,
         },
         input.signal,
@@ -181,6 +181,7 @@ export async function ensureHighlights(input: HighlightSelectionInput): Promise<
         words,
         durationSeconds,
         maxCount: video.requestedClipCount,
+        clipLength: video.clipLength,
     });
 
     if (highlights.length === 0) {

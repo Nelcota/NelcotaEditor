@@ -28,6 +28,7 @@ import {
 } from "#/modules/video-records/upload-limits";
 import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/video-records/video-status";
 import { videos } from "#/modules/video-records/videos.schema";
+import { CLIP_LENGTHS } from "#/modules/video-records/clip-length";
 import { truncateText } from "#/modules/video-records/video-title";
 import {
     HTTP_BAD_REQUEST,
@@ -45,6 +46,7 @@ const uploadQuerySchema = z.object({
     fileName: z.string().trim().min(1).max(MAX_FILE_NAME_LENGTH),
     title: z.string().trim().max(MAX_TITLE_LENGTH).default(""),
     clipCount: z.coerce.number().int().min(MIN_CLIP_COUNT).max(MAX_CLIP_COUNT),
+    clipLength: z.enum(CLIP_LENGTHS),
     language: z.enum(TRANSCRIPTION_LANGUAGES),
 });
 
@@ -199,6 +201,7 @@ async function insertUploadedVideo(video: NewUploadedVideo): Promise<Response | 
                 sourcePath: stored.sourcePath,
                 sourceBytes: stored.sourceBytes,
                 requestedClipCount: query.clipCount,
+                clipLength: query.clipLength,
                 // "" is stored as is: it means "detect automatically", unlike null (videos from before 0002).
                 transcriptionLanguage: query.language,
                 processingStartedAt: new Date(),
@@ -252,7 +255,7 @@ async function saveUploadedVideo(upload: ValidUpload, userId: string): Promise<R
     return Response.json({ videoId }, { status: HTTP_CREATED });
 }
 
-/** POST /api/videos/upload?fileName=&title=&clipCount= with the raw file as the body. */
+/** POST /api/videos/upload?fileName=&title=&clipCount=&clipLength=&language= with the raw file as the body. */
 export async function handleVideoUpload(request: Request): Promise<Response> {
     const user = await getSessionUser(request.headers);
 

@@ -13,6 +13,7 @@ export async function findPreferences(userId: string): Promise<Preferences> {
     const rows = await db
         .select({
             defaultClipCount: userPreferences.defaultClipCount,
+            defaultClipLength: userPreferences.defaultClipLength,
             transcriptionLanguage: userPreferences.transcriptionLanguage,
         })
         .from(userPreferences)

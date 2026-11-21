@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
+import type { ClipLength } from "#/modules/video-records/clip-length";
 
 const uploadSuccessSchema = z.object({ videoId: z.uuid() });
 const uploadFailureSchema = z.object({ error: z.string() });
@@ -16,6 +17,7 @@ export interface UploadVideoInput {
     file: File;
     title: string;
     clipCount: number;
+    clipLength: ClipLength;
     language: TranscriptionLanguage;
 }
 
@@ -71,6 +73,7 @@ export function uploadVideoFile(
         fileName: file.name,
         title: input.title,
         clipCount: String(input.clipCount),
+        clipLength: input.clipLength,
         language: input.language,
     });
 

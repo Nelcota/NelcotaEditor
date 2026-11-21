@@ -48,6 +48,7 @@ export function toVideoSummary(video: Video, readyClipCount: number): VideoSumma
         isCancelling: video.cancelRequested && isVideoWorking(video.status),
         durationSeconds: video.durationSeconds,
         requestedClipCount: video.requestedClipCount,
+        clipLength: video.clipLength,
         readyClipCount,
         createdAt: video.createdAt.toISOString(),
         processingStartedAt: video.processingStartedAt?.toISOString() ?? null,

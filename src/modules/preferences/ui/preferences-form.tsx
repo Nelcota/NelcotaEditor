@@ -11,6 +11,7 @@ import { savePreferences } from "#/modules/preferences/server/preferences-functi
 import { PREFERENCES_QUERY_KEY } from "#/modules/preferences/ui/preferences-queries";
 import { SaveStatus } from "#/modules/preferences/ui/save-status";
 import { ClipCountStepper } from "#/modules/preferences/ui/clip-count-stepper";
+import { ClipLengthPicker } from "#/modules/preferences/ui/clip-length-picker";
 import { SegmentedControl } from "#/shared/ui/segmented-control";
 
 // Radix radio values cannot be "", so "detect automatically" is "auto" on screen only.
@@ -94,6 +95,14 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
                         value={preferences.defaultClipCount}
                         onValueChange={(defaultClipCount) =>
                             change({ ...preferences, defaultClipCount })
+                        }
+                    />
+                </PreferenceField>
+                <PreferenceField description="Também vem escolhida em cada vídeo novo; dá para mudar ao enviar.">
+                    <ClipLengthPicker
+                        value={preferences.defaultClipLength}
+                        onValueChange={(defaultClipLength) =>
+                            change({ ...preferences, defaultClipLength })
                         }
                     />
                 </PreferenceField>

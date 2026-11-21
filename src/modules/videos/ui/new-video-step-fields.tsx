@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { ClipLengthPicker } from "#/modules/preferences/ui/clip-length-picker";
+import type { ClipLength } from "#/modules/video-records/clip-length";
 import { MAX_TITLE_LENGTH } from "#/modules/video-records/upload-limits";
 import { ClipCountPicker } from "#/modules/videos/ui/clip-count-picker";
 import type { VideoSource } from "#/modules/videos/ui/video-source";
@@ -46,17 +48,31 @@ export function VideoStepFields({
 
 interface ClipsStepProps {
     clipCount: number;
+    clipLength: ClipLength;
     onClipCountChange: (count: number) => void;
+    onClipLengthChange: (clipLength: ClipLength) => void;
 }
 
-/** How many clips. */
-export function ClipsStepFields({ clipCount, onClipCountChange }: ClipsStepProps): ReactNode {
+/** How many clips, and how long each one should be. */
+export function ClipsStepFields({
+    clipCount,
+    clipLength,
+    onClipCountChange,
+    onClipLengthChange,
+}: ClipsStepProps): ReactNode {
     return (
-        <div className="grid gap-3">
-            <ClipCountPicker value={clipCount} onValueChange={onClipCountChange} disabled={false} />
-            <p className="max-w-prose text-sm text-muted-foreground">
-                Vídeos curtos podem render menos cortes. Funciona melhor com alguém falando.
-            </p>
+        <div className="grid gap-6">
+            <div className="grid gap-3">
+                <ClipCountPicker
+                    value={clipCount}
+                    onValueChange={onClipCountChange}
+                    disabled={false}
+                />
+                <p className="max-w-prose text-sm text-muted-foreground">
+                    Vídeos curtos podem render menos cortes. Funciona melhor com alguém falando.
+                </p>
+            </div>
+            <ClipLengthPicker value={clipLength} onValueChange={onClipLengthChange} />
         </div>
     );
 }

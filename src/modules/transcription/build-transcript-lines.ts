@@ -1,7 +1,7 @@
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 
 const MAX_LINE_SECONDS = 12;
-const SENTENCE_END = /[.!?…]$/;
+export const SENTENCE_END = /[.!?…]$/;
 
 export interface TranscriptLine {
     startSeconds: number;

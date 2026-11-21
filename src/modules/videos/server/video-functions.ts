@@ -33,6 +33,7 @@ import {
 import type { VideoDetails, VideoSummary } from "#/modules/videos/video-views";
 import { toStoredVideoTitle } from "#/modules/video-records/video-title";
 import { videos } from "#/modules/video-records/videos.schema";
+import { CLIP_LENGTHS } from "#/modules/video-records/clip-length";
 import { fetchYoutubePreview } from "#/modules/videos/server/fetch-youtube-preview.server";
 import {
     toCanonicalYoutubeUrl,
@@ -51,6 +52,7 @@ const youtubeVideoInputSchema = z.object({
         .refine((url) => toYoutubeVideoId(url) !== null, "Cole o link de um vídeo do YouTube.")
         .transform((url) => toCanonicalYoutubeUrl(url)),
     clipCount: z.number().int().min(MIN_CLIP_COUNT).max(MAX_CLIP_COUNT),
+    clipLength: z.enum(CLIP_LENGTHS),
     language: z.enum(TRANSCRIPTION_LANGUAGES),
 });
 
@@ -121,6 +123,7 @@ export const createYoutubeVideo = createServerFn({ method: "POST" })
                 source: "youtube",
                 sourceUrl: data.url,
                 requestedClipCount: data.clipCount,
+                clipLength: data.clipLength,
                 // "" is stored as is: it means "detect automatically", unlike null (videos from before 0002).
                 transcriptionLanguage: data.language,
                 processingStartedAt: new Date(),

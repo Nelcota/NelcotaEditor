@@ -71,6 +71,13 @@
       "when": 1795273970586,
       "tag": "0009_storage_bytes_and_timestamptz",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795275835099,
+      "tag": "0010_clip_length",
+      "breakpoints": true
     }
   ]
 }

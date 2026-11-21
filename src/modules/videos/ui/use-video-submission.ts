@@ -3,6 +3,7 @@ import type { UseMutationResult } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
+import type { ClipLength } from "#/modules/video-records/clip-length";
 import { uploadVideoFile } from "#/modules/videos/client/upload-video-file";
 import { createYoutubeVideo } from "#/modules/videos/server/video-functions";
 import { NoSourceError } from "#/modules/videos/ui/no-source-error";
@@ -13,18 +14,22 @@ import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 export interface Submission {
     source: VideoSource;
     clipCount: number;
+    clipLength: ClipLength;
     title: string;
     language: TranscriptionLanguage;
 }
 
 /** Creates the video from a link, or uploads the file with progress; returns the new video's id. */
 async function createVideo(
-    { source, clipCount, title, language }: Submission,
+    { source, clipCount, clipLength, title, language }: Submission,
     onUploadProgress: (percent: number) => void,
 ): Promise<string> {
     if (source.kind === "file") {
         onUploadProgress(0);
-        return uploadVideoFile({ file: source.file, clipCount, title, language }, onUploadProgress);
+        return uploadVideoFile(
+            { file: source.file, clipCount, clipLength, title, language },
+            onUploadProgress,
+        );
     }
 
     if (toLinkVideoId(source) === null) {
@@ -32,7 +37,7 @@ async function createVideo(
     }
 
     const created = await createYoutubeVideo({
-        data: { url: source.text.trim(), clipCount, language },
+        data: { url: source.text.trim(), clipCount, clipLength, language },
     });
 
     return created.videoId;

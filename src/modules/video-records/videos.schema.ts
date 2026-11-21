@@ -13,6 +13,7 @@ import {
     uuid,
 } from "drizzle-orm/pg-core";
 import { user } from "#/modules/auth/auth.schema";
+import { CLIP_LENGTHS, DEFAULT_CLIP_LENGTH } from "#/modules/video-records/clip-length";
 import { MAX_VIDEO_TITLE_LENGTH } from "#/modules/video-records/video-title";
 import {
     MAX_CLIP_COUNT,
@@ -23,6 +24,7 @@ import {
 
 export const videoStatusEnum = pgEnum("video_status", VIDEO_STATUSES);
 export const videoSourceEnum = pgEnum("video_source", VIDEO_SOURCES);
+export const clipLengthEnum = pgEnum("clip_length", CLIP_LENGTHS);
 
 export const videos = pgTable(
     "videos",
@@ -42,6 +44,8 @@ export const videos = pgTable(
         thumbnailPath: text("thumbnail_path"),
         durationSeconds: doublePrecision("duration_seconds"),
         requestedClipCount: integer("requested_clip_count").notNull(),
+        // Copied from the user's preferences (or picked when sending), like the clip count.
+        clipLength: clipLengthEnum("clip_length").notNull().default(DEFAULT_CLIP_LENGTH),
         // Copied from the user's preferences when the video is created; null = detect it.
         transcriptionLanguage: text("transcription_language"),
         status: videoStatusEnum("status").notNull().default("queued"),

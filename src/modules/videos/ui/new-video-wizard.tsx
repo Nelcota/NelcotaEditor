@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import type { FormEvent, ReactNode } from "react";
-import { TRANSCRIPTION_LANGUAGE_LABELS } from "#/modules/preferences/preferences";
+import {
+    CLIP_LENGTH_LABELS,
+    TRANSCRIPTION_LANGUAGE_LABELS,
+} from "#/modules/preferences/preferences";
 import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
+import type { ClipLength } from "#/modules/video-records/clip-length";
 import { LanguageStepFields } from "#/modules/videos/ui/language-step-fields";
 import { NewVideoPreview } from "#/modules/videos/ui/new-video-preview";
 import { ClipsStepFields, VideoStepFields } from "#/modules/videos/ui/new-video-step-fields";
@@ -21,6 +25,7 @@ const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente de 
 
 interface NewVideoWizardProps {
     defaultClipCount: number;
+    defaultClipLength: ClipLength;
     defaultLanguage: TranscriptionLanguage;
 }
 
@@ -31,10 +36,12 @@ interface NewVideoWizardProps {
  */
 export function NewVideoWizard({
     defaultClipCount,
+    defaultClipLength,
     defaultLanguage,
 }: NewVideoWizardProps): ReactNode {
     const [source, setSource] = useState<VideoSource>(EMPTY_SOURCE);
     const [clipCount, setClipCount] = useState(defaultClipCount);
+    const [clipLength, setClipLength] = useState<ClipLength>(defaultClipLength);
     const [title, setTitle] = useState("");
     const [language, setLanguage] = useState<TranscriptionLanguage>(defaultLanguage);
     const languageLabel = TRANSCRIPTION_LANGUAGE_LABELS[language];
@@ -62,7 +69,7 @@ export function NewVideoWizard({
             return;
         }
 
-        submission.mutate({ source, clipCount, title, language });
+        submission.mutate({ source, clipCount, clipLength, title, language });
     };
 
     return (
@@ -86,7 +93,12 @@ export function NewVideoWizard({
                         onTitleChange={setTitle}
                         onSourceChange={changeSource}
                     />
-                    <ClipsStepFields clipCount={clipCount} onClipCountChange={setClipCount} />
+                    <ClipsStepFields
+                        clipCount={clipCount}
+                        clipLength={clipLength}
+                        onClipCountChange={setClipCount}
+                        onClipLengthChange={setClipLength}
+                    />
                     <LanguageStepFields language={language} onLanguageChange={setLanguage} />
                     <UploadProgress percent={uploadPercent} />
                     {submission.isError === true && (
@@ -99,6 +111,7 @@ export function NewVideoWizard({
                     source={source}
                     title={title}
                     clipCount={clipCount}
+                    clipLengthLabel={CLIP_LENGTH_LABELS[clipLength]}
                     languageLabel={languageLabel}
                 />
             </div>
