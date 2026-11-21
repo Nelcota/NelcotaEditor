@@ -19,6 +19,14 @@ PostgreSQL (latest version, in Docker), Drizzle ORM, Better Auth, Zod. No manage
   use `cursor-not-allowed`, loading ones `cursor-progress`.
 - Every interactive element needs visible hover, press (`motion-safe:active:scale-[0.99]`) and
   focus (`focus-visible:ring-4`) states.
+- Interface copy never uses em or en dashes (— –). Use a comma, a colon, a period, "a" for ranges
+  (`0:59 a 1:21`) or "·" as a separator. `npm run check` fails on them; the AI prompt asks for none.
+
+## Running locally
+
+- "Run it locally" means `npm run local` (the `nelcota` entry in `.claude/launch.json`): it starts
+  Docker Desktop if needed, the services, the migrations, a rebuilt worker and the dev server.
+  Do not run those steps by hand one at a time.
 
 ## Tests
 
@@ -209,10 +217,11 @@ Use the Oxc toolchain for formatting and linting. Do not use Prettier or ESLint.
 After every change, before considering the task done:
 
 1. Format: `npx oxfmt`
-2. Lint: `npx oxlint`
-3. Fix every lint error and warning. Never disable a rule or add ignore comments to silence it.
+2. Check: `npm run check` (format check, lint, types and the copy rules below, in one command)
+3. Fix every error and warning. Never disable a rule or add ignore comments to silence it.
 
-Never leave unformatted or lint-failing code behind.
+Never leave unformatted or lint-failing code behind. The pre-commit hook in `.githooks/` runs
+`npm run check` and blocks the commit; never bypass it with `--no-verify`.
 Style: 4-space indentation, semicolons, double quotes.
 
 ## Self-review before finishing

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Format, lint, types and copy rules must pass before a commit (see `npm run check`).
+# Unformatted code reached git twice when this was only a written rule.
+npm run -s check || {
+    echo ""
+    echo "pre-commit: npm run check failed. Run \`npx oxfmt\` for formatting, fix the rest, then commit again."
+    exit 1
+}

@@ -7,6 +7,7 @@
     },
     "scripts": {
         "setup": "tsx scripts/setup.ts",
+        "local": "tsx scripts/run-local.ts",
         "dev": "vite dev",
         "build": "vite build",
         "start": "node .output/server/index.mjs",
@@ -20,7 +21,9 @@
         "db:studio": "drizzle-kit studio",
         "typecheck": "tsc --noEmit",
         "format": "oxfmt",
-        "lint": "oxlint"
+        "lint": "oxlint",
+        "check:copy": "tsx scripts/check-copy-dashes.ts",
+        "check": "oxfmt --check && oxlint && tsc --noEmit && tsx scripts/check-copy-dashes.ts"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.18",

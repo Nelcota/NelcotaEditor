@@ -72,11 +72,12 @@ function printNextSteps(): void {
         console.info("   Depois rode: npm run worker:restart");
     }
 
-    console.info(`\nAgora rode \`npm run dev\` e abra ${APP_URL}`);
+    console.info(`\nAgora rode \`npm run local\` e abra ${APP_URL}`);
 }
 
 createEnvFile();
 mkdirSync(STORAGE_DIRECTORY, { recursive: true });
+runStep("Enabling the git hooks in .githooks", "git config core.hooksPath .githooks");
 runStep("Starting PostgreSQL and Whisper", "docker compose up -d --wait postgres whisper");
 runStep("Applying database migrations", "npx drizzle-kit migrate");
 runStep("Building and starting the worker", "docker compose up -d --build worker");

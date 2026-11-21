@@ -1,0 +1,25 @@
+name: Check
+
+# Runs the same gate as the local pre-commit hook, so pull requests from any machine get it too.
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: npm
+            - run: npm ci
+            - run: npm run check
+            - name: Migrations match the schema snapshots
+              # drizzle-kit only reads the config here; it never connects to this address.
+              env:
+                  DATABASE_URL: postgres://ci:ci@localhost:5432/ci
+              run: npx drizzle-kit check

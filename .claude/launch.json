@@ -4,7 +4,7 @@
         {
             "name": "nelcota",
             "runtimeExecutable": "npm",
-            "runtimeArgs": ["run", "dev"],
+            "runtimeArgs": ["run", "local"],
             "port": 3210
         },
         {
