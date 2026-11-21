@@ -44,7 +44,7 @@ function DropdownMenuItem({
     ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
     variant?: "default" | "destructive";
-}) {
+}): React.ReactNode {
     return (
         <DropdownMenuPrimitive.Item
             data-slot="dropdown-menu-item"

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import DownloadMinimalisticIcon from "~icons/solar/download-minimalistic-linear";
 import type { ClipView } from "#/modules/clips/clip-view";
 import { Button } from "#/shared/ui/button";
@@ -16,7 +17,7 @@ interface ClipDownloadLinkProps {
 const EMPHASIS_VARIANTS = { primary: "default", secondary: "outline" } as const;
 
 /** Nothing to download until Brasa renders the clip. */
-export function ClipDownloadLink(props: ClipDownloadLinkProps) {
+export function ClipDownloadLink(props: ClipDownloadLinkProps): ReactNode {
     const { clip, label, emphasis = "primary", className, labelClassName } = props;
     const downloadUrl = clip.downloadUrl;
 

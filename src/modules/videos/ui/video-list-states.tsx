@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import AddIcon from "~icons/solar/add-linear";
 import RestartIcon from "~icons/solar/restart-linear";
 import MagnifierCloseIcon from "~icons/solar/magnifier-close-linear";
@@ -14,7 +15,7 @@ import { Skeleton } from "#/shared/ui/skeleton";
 const SKELETON_ROW_COUNT = 5;
 
 /** The toolbar's two rows over the same bordered list as `VideoGallery`, so nothing jumps. */
-export function VideoListLoading() {
+export function VideoListLoading(): ReactNode {
     return (
         <div role="status" className="grid gap-6">
             <span className="sr-only">Carregando vídeos</span>
