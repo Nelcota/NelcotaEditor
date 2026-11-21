@@ -6,6 +6,12 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "dev"],
             "port": 3210
+        },
+        {
+            "name": "landing",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["--prefix", "E:/NelcotaEditorLanding", "run", "dev"],
+            "port": 3220
         }
     ]
 }
