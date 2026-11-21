@@ -51,7 +51,7 @@ export function CrewStageCard({ stage, stats }: CrewStageCardProps): ReactNode {
             <div className="flex items-center gap-3">
                 <StageCrewMascot status={stage.status} className="size-11" />
                 <p className="leading-tight">
-                    <strong className="block font-extrabold">{name}</strong>
+                    <strong className="block font-semibold">{name}</strong>
                     <span className="text-sm text-muted-foreground">{stage.role}</span>
                 </p>
             </div>

@@ -103,7 +103,7 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
         return (
             <PreviewCard
                 thumbnailUrl={thumbnailUrl}
-                title={<p className="font-bold">Vídeo do YouTube</p>}
+                title={<p className="font-semibold">Vídeo do YouTube</p>}
                 detail="Não deu para conferir agora; dá para gerar mesmo assim."
                 onClear={onClear}
                 clearButtonRef={clearButtonRef}
@@ -116,7 +116,7 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
             <PreviewCard
                 thumbnailUrl={thumbnailUrl}
                 title={
-                    <p role="alert" className="flex gap-1.5 text-sm font-semibold text-destructive">
+                    <p role="alert" className="flex gap-1.5 text-sm font-medium text-destructive">
                         <DangerCircleIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                         {UNAVAILABLE_MESSAGES[preview.reason]}
                     </p>
@@ -132,7 +132,9 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
         <PreviewCard
             thumbnailUrl={preview.thumbnailUrl}
             title={
-                <p className="leading-snug font-bold [overflow-wrap:anywhere]">{preview.title}</p>
+                <p className="leading-snug font-semibold [overflow-wrap:anywhere]">
+                    {preview.title}
+                </p>
             }
             detail={
                 <>

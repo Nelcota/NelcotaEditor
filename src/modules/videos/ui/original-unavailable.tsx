@@ -25,7 +25,7 @@ export function OriginalUnavailable({
                     className="absolute inset-0 size-full object-cover opacity-40"
                 />
             )}
-            <div className="absolute inset-0 grid content-center justify-items-center gap-2 p-6 text-center text-sm font-semibold text-white">
+            <div className="absolute inset-0 grid content-center justify-items-center gap-2 p-6 text-center text-sm font-medium text-white">
                 {thumbnailUrl === null && <VideoMascot videoId={video.id} className="size-14" />}
                 {thumbnailUrl !== null && <StageCrewMascot status="queued" className="size-12" />}
                 <p className="max-w-sm">{message}</p>

@@ -20,7 +20,7 @@ export function HintTooltip({ label, shortcut, children }: HintTooltipProps): Re
             <TooltipContent>
                 {label}
                 {shortcut !== undefined && (
-                    <kbd className="ml-1.5 font-sans font-bold opacity-70">{shortcut}</kbd>
+                    <kbd className="ml-1.5 font-sans font-semibold opacity-70">{shortcut}</kbd>
                 )}
             </TooltipContent>
         </Tooltip>

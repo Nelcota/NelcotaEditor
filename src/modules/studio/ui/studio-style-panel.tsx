@@ -77,7 +77,7 @@ const COLOR_OPTIONS = CAPTION_COLORS.map((value) => ({
 
 function FieldLabel({ icon: Icon, children }: { icon: IconComponent; children: string }) {
     return (
-        <span className="flex items-center gap-2 text-sm font-bold">
+        <span className="flex items-center gap-2 text-sm font-semibold">
             <Icon className="size-5 text-muted-foreground" aria-hidden="true" />
             {children}
         </span>
@@ -181,7 +181,7 @@ export function StudioStylePanel({ editor, isLocked }: StudioStylePanelProps): R
         >
             <h2
                 id="studio-style-title"
-                className="sr-only @4xl/studio:not-sr-only @4xl/studio:flex @4xl/studio:items-center @4xl/studio:gap-2 @4xl/studio:border-b @4xl/studio:px-4 @4xl/studio:py-3 @4xl/studio:text-lg @4xl/studio:leading-tight @4xl/studio:font-extrabold"
+                className="sr-only @4xl/studio:not-sr-only @4xl/studio:flex @4xl/studio:items-center @4xl/studio:gap-2 @4xl/studio:border-b @4xl/studio:px-4 @4xl/studio:py-3 @4xl/studio:text-lg @4xl/studio:leading-tight @4xl/studio:font-semibold"
             >
                 <Pallete2Icon
                     className="hidden size-5 text-muted-foreground @4xl/studio:block"

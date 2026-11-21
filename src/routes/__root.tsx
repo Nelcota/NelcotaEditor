@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { THEME_COLOR_META, THEME_HEAD_SCRIPT } from "#/modules/shell/theme-head";
 import appCss from "#/styles.css?url";
 
 interface RouterContext {
@@ -12,22 +13,23 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         meta: [
             { charSet: "utf-8" },
             { name: "viewport", content: "width=device-width, initial-scale=1" },
-            { name: "color-scheme", content: "dark" },
-            // Matches --background so the mobile browser bar blends with the app.
-            { name: "theme-color", content: "#0d0d0f" },
+            { name: "color-scheme", content: "light" },
+            THEME_COLOR_META,
             { title: "Nelcota: cortes com legenda" },
         ],
         links: [
             { rel: "stylesheet", href: appCss },
             { rel: "icon", type: "image/png", href: "/favicon.png" },
         ],
+        scripts: [THEME_HEAD_SCRIPT],
     }),
     shellComponent: RootDocument,
 });
 
 function RootDocument({ children }: { children: ReactNode }): ReactNode {
     return (
-        <html lang="pt-BR">
+        // The theme script adds the "dark" class before React hydrates; that difference is expected.
+        <html lang="pt-BR" suppressHydrationWarning>
             <head>
                 <HeadContent />
             </head>

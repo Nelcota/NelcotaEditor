@@ -7,7 +7,7 @@ import { Mascot } from "#/shared/ui/mascot";
 export function ScoreChip({ score }: { score: number }): ReactNode {
     return (
         <span
-            className="inline-flex items-center gap-1 rounded-full bg-muted py-0.5 ps-1 pe-2.5 text-xs font-bold whitespace-nowrap tabular-nums"
+            className="inline-flex items-center gap-1 rounded-full bg-muted py-0.5 ps-1 pe-2.5 text-xs font-semibold whitespace-nowrap tabular-nums"
             title={`Nota do Brilho: ${score} de ${SCORE_SCALE}`}
         >
             <Mascot index={STAGE_CREW.selecting} className="size-5" />
@@ -15,7 +15,7 @@ export function ScoreChip({ score }: { score: number }): ReactNode {
             {/* One item, so the chip's gap never splits the score from its scale. */}
             <span>
                 {score}
-                <span className="font-semibold text-muted-foreground">/{SCORE_SCALE}</span>
+                <span className="font-medium text-muted-foreground">/{SCORE_SCALE}</span>
             </span>
         </span>
     );

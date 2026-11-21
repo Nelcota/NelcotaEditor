@@ -8,6 +8,7 @@ import { SidebarSections } from "#/modules/videos/ui/sidebar-sections";
 import { BrandMark } from "#/shared/ui/brand-logo";
 import { cn } from "#/shared/ui/cn";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
+import { ThemeToggle } from "#/shared/ui/theme-toggle";
 
 interface AppSidebarProps {
     isCollapsed: boolean;
@@ -34,7 +35,7 @@ function CollapseButton({ isCollapsed, onToggle }: CollapseButtonProps): ReactNo
                 onClick={onToggle}
                 aria-label={label}
                 aria-expanded={isCollapsed === false}
-                className="grid size-10 place-items-center rounded-lg text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="grid size-10 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <SidebarMinimalisticIcon className="size-5" aria-hidden="true" />
             </button>
@@ -63,7 +64,7 @@ export function AppSidebar({ isCollapsed, onToggleCollapsed }: AppSidebarProps):
         <div className="flex h-full min-h-0 flex-col gap-1">
             <div
                 className={cn(
-                    "flex items-center gap-2.5 px-1.5 pb-3",
+                    "flex items-center gap-1 px-1.5 pb-3",
                     isCollapsed === true && "flex-col px-0",
                 )}
             >
@@ -76,13 +77,18 @@ export function AppSidebar({ isCollapsed, onToggleCollapsed }: AppSidebarProps):
                         isCollapsed === false && "me-auto",
                     )}
                 >
-                    <BrandMark className="size-10" />
+                    <BrandMark className="size-9" />
                     {isCollapsed === false && (
-                        <span className="text-lg font-extrabold tracking-tight">Nelcota</span>
+                        <span className="text-xl leading-none font-bold tracking-[0.01em]">
+                            NELCOTA
+                        </span>
                     )}
                 </Link>
                 {onToggleCollapsed !== undefined && (
-                    <CollapseButton isCollapsed={isCollapsed} onToggle={onToggleCollapsed} />
+                    <>
+                        <ThemeToggle />
+                        <CollapseButton isCollapsed={isCollapsed} onToggle={onToggleCollapsed} />
+                    </>
                 )}
             </div>
             <div className="pb-2">

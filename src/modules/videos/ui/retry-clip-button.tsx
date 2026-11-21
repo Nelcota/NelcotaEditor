@@ -37,7 +37,7 @@ export function RetryClipButton({
                 disabled={isDisabled || retry.isPending}
                 aria-busy={retry.isPending}
                 variant={variant}
-                className="font-semibold"
+                className="font-medium"
             >
                 <RestartIcon aria-hidden="true" />
                 Refazer este corte

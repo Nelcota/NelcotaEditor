@@ -16,7 +16,7 @@ export function FileDropZone({ onDragLeave, onDrop }: FileDropZoneProps) {
             className="grid min-h-52 place-items-center content-center gap-2 rounded-2xl border border-dashed border-primary bg-primary/8 p-6 text-center"
         >
             <UploadIcon className="size-7" aria-hidden="true" />
-            <p className="font-bold">Solte para enviar</p>
+            <p className="font-semibold">Solte para enviar</p>
             <p className="text-sm text-muted-foreground">Um arquivo de vídeo por vez</p>
         </div>
     );

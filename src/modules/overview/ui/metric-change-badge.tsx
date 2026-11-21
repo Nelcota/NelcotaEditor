@@ -28,7 +28,7 @@ export function MetricChangeBadge({ change }: { change: MetricChange }) {
     return (
         <span
             className={cn(
-                "inline-flex items-center gap-0.5 font-bold tabular-nums",
+                "inline-flex items-center gap-0.5 font-semibold tabular-nums",
                 TONE_CLASSES[change.tone],
             )}
         >

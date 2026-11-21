@@ -117,7 +117,7 @@ function VideoItem({ video, showOwner, onConfirm }: VideoMenuProps): ReactNode {
     return (
         <li className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2 border-b py-3 last:border-b-0">
             <div className="grid min-w-0 gap-1">
-                <p className="font-semibold [overflow-wrap:anywhere]">{video.title}</p>
+                <p className="font-medium [overflow-wrap:anywhere]">{video.title}</p>
                 {showOwner === true && (
                     <Link
                         to="/admin/users/$userId"

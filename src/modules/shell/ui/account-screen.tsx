@@ -22,8 +22,11 @@ export function AccountScreen(): ReactNode {
             <header>
                 {/* The heading names the page like every other tab; the greeting is what shows. */}
                 <h1 className="sr-only">Conta</h1>
-                <p className="text-3xl font-extrabold tracking-tight">Oi, {firstName}!</p>
-                <p className="mt-1 max-w-prose text-muted-foreground">
+                <p className="eyebrow">Sua conta</p>
+                <p className="mt-3 text-heading font-normal tracking-[-0.04em] sm:text-heading-md">
+                    Oi, {firstName}!
+                </p>
+                <p className="mt-2 max-w-prose text-muted-foreground">
                     A turma trabalha do jeito que você deixar aqui.
                 </p>
             </header>

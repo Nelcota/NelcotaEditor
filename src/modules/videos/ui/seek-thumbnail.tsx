@@ -43,9 +43,11 @@ export function SeekThumbnail({ fileUrl, seconds, clipRank }: SeekThumbnailProps
                 preload="metadata"
                 className="hidden aspect-video w-40 rounded-lg border-2 border-white bg-black object-cover @xl:block"
             />
-            <span className="rounded-md bg-black/85 px-2 py-1 text-xs font-bold whitespace-nowrap text-white tabular-nums">
+            <span className="rounded-md bg-black/85 px-2 py-1 text-xs font-semibold whitespace-nowrap text-white tabular-nums">
                 {formatClock(seconds)}
-                {clipRank !== null && <span className="text-primary"> · Corte {clipRank}</span>}
+                {clipRank !== null && (
+                    <span className="text-[oklch(0.8_0.11_257)]"> · Corte {clipRank}</span>
+                )}
             </span>
         </div>
     );

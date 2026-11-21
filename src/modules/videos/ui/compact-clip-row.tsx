@@ -20,8 +20,8 @@ export function CompactClipRow({ item }: { item: LibraryClip }): ReactNode {
         <li className="grid grid-cols-[56px_minmax(0,1fr)] items-start gap-x-4 gap-y-3 border-b py-3 last:border-b-0 lg:grid-cols-[56px_minmax(0,1fr)_auto] lg:items-center">
             <ClipPreview clip={clip} />
             <div className="grid min-w-0 gap-1">
-                <h2 className="leading-snug font-extrabold">{clip.title}</h2>
-                <p className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold text-muted-foreground tabular-nums">
+                <h2 className="leading-snug font-semibold">{clip.title}</h2>
+                <p className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-muted-foreground tabular-nums">
                     <ScoreChip score={clip.score} />
                     <span className="min-w-0">
                         <SourceVideoLink item={item} />

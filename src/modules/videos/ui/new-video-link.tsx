@@ -25,7 +25,7 @@ export function NewVideoLink({ emphasis, isCompact = false }: NewVideoLinkProps)
             size="lg"
             className={cn(
                 // A longer label (another language) wraps inside the pill instead of spilling out.
-                "h-auto min-h-11 w-full rounded-full py-2 text-center font-bold whitespace-normal",
+                "h-auto min-h-11 w-full rounded-full py-2 text-center font-semibold whitespace-normal",
                 isCompact === true && "mx-auto size-11 w-11 p-0 has-[>svg]:px-0",
             )}
         >

@@ -21,7 +21,7 @@ const HIDDEN_STORAGE_KEY = "nelcota:recent-videos-hidden";
 
 function lineToneClass(video: VideoSummary): string {
     if (isVideoWorking(video.status) === true || video.status === "queued") {
-        return "text-primary";
+        return "text-primary-ink";
     }
 
     if (video.status === "failed") {
@@ -63,7 +63,7 @@ function RecentVideo({ video, isCurrent, isCollapsed }: RecentVideoProps) {
                 <MarkedVideoMascot video={video} className="size-8" />
                 {isCollapsed === false && (
                     <span className="grid min-w-0 flex-1 gap-0.5">
-                        <span className="truncate text-sm font-semibold" title={video.title}>
+                        <span className="truncate text-sm font-medium" title={video.title}>
                             {video.title}
                         </span>
                         <span className={cn("truncate text-xs", lineToneClass(video))}>
@@ -120,7 +120,7 @@ function RecentVideosHeading({
                 aria-expanded={isHidden === false}
                 aria-controls={listId}
                 onClick={onToggle}
-                className="flex min-h-8 w-full items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-start text-xs font-bold tracking-wider text-muted-foreground uppercase transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="flex min-h-8 w-full items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-start font-mono text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <span className="flex items-center gap-2">
                     <HistoryIcon aria-hidden="true" className="size-4" />
@@ -150,7 +150,7 @@ function SeeAllLink(): ReactNode {
     return (
         <Link
             to="/"
-            className="flex h-9 items-center justify-center rounded-lg text-sm font-semibold text-muted-foreground transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+            className="flex h-9 items-center justify-center rounded-lg text-sm font-medium text-muted-foreground transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
         >
             Ver todos
         </Link>

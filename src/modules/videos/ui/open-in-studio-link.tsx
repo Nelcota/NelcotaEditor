@@ -17,7 +17,7 @@ export function OpenInStudioLink(props: OpenInStudioLinkProps): ReactNode {
     const { videoId, clipId, className, placeClassName } = props;
 
     return (
-        <Button asChild variant="outline" className={cn("font-semibold", className)}>
+        <Button asChild variant="outline" className={cn("font-medium", className)}>
             <Link
                 to="/videos/$videoId"
                 params={{ videoId }}

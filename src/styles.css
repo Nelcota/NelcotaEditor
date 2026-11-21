@@ -1,77 +1,113 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@700&family=Bebas+Neue&family=League+Spartan:wght@700&family=Inter:wght@700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..700&family=Montserrat:wght@700&family=Bebas+Neue&family=League+Spartan:wght@700&family=Inter:wght@700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
 /*
- * The app is dark only. Tailwind's default `dark:` follows the OS setting, so on a light-mode OS the
- * shadcn bases lost their dark states. Bind `dark:` to the document instead.
+ * Light by default, like the landing page; dark only when the person picks it with the toggle
+ * (the theme script adds the "dark" class before the first paint). See DESIGN.md.
  */
-@custom-variant dark (&:where(:root, :root *));
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* Nelcota is a dark tool: videos read better on a dark canvas. See DESIGN.md. */
+/* Visual system shared with the landing page (E:/NelcotaEditorLanding): lavender page, white cards, blue. */
 :root {
-    color-scheme: dark;
+    color-scheme: light;
 
-    --background: oklch(0.16 0.004 286);
-    --foreground: oklch(0.97 0.002 286);
-    --card: oklch(0.2 0.005 286);
-    --card-foreground: oklch(0.97 0.002 286);
-    --popover: oklch(0.22 0.005 286);
-    --popover-foreground: oklch(0.97 0.002 286);
-    --primary: oklch(0.71 0.19 148);
-    --primary-foreground: oklch(0.2 0.045 150);
-    --secondary: oklch(0.27 0.006 286);
-    --secondary-foreground: oklch(0.97 0.002 286);
-    --muted: oklch(0.25 0.006 286);
-    --muted-foreground: oklch(0.72 0.012 286);
-    --accent: oklch(0.29 0.008 286);
-    --accent-foreground: oklch(0.97 0.002 286);
-    /* Lighter than the usual red so it reads as text on raised surfaces; labels on it are dark. */
-    --destructive: oklch(0.7 0.19 25);
-    --destructive-foreground: oklch(0.2 0.05 25);
-    /* Turned away from the primary green so "finished" does not read as "main action". */
-    --success: oklch(0.76 0.14 175);
-    --border: oklch(0.3 0.006 286);
-    /* Field borders: 3:1 against popover and background (WCAG 1.4.11). */
-    --input: oklch(0.52 0.006 286);
-    --ring: oklch(0.71 0.19 148);
+    --background: oklch(0.9653 0.0053 286.3);
+    --foreground: oklch(0.2115 0.0117 254.088);
+    --card: oklch(1 0 0);
+    --card-foreground: var(--foreground);
+    --popover: oklch(1 0 0);
+    --popover-foreground: var(--foreground);
+    --primary: oklch(0.5683 0.1821 257.313);
+    /* Blue text and links: a step darker than the fill so small text keeps 4.5:1 on white. */
+    --primary-ink: oklch(0.52 0.1821 257.313);
+    /* Darker fill so white labels keep 4.5:1 across the whole button gradient, in both themes. */
+    --primary-solid: oklch(0.48 0.1821 257.313);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: color-mix(in oklab, var(--foreground) 6%, transparent);
+    --secondary-foreground: var(--foreground);
+    --muted: color-mix(in oklab, var(--foreground) 5%, transparent);
+    --muted-foreground: color-mix(in oklab, var(--foreground) 65%, var(--card));
+    --accent: color-mix(in oklab, var(--foreground) 8%, transparent);
+    --accent-foreground: var(--foreground);
+    --destructive: oklch(0.55 0.21 27);
+    --destructive-foreground: oklch(1 0 0);
+    /* Turned away from the primary blue so "finished" does not read as "main action". */
+    --success: oklch(0.56 0.12 165);
+    --border: color-mix(in oklab, var(--foreground) 10%, transparent);
+    --card-border: color-mix(in oklab, var(--foreground) 10%, transparent);
+    /* Field borders: 3:1 against the card and the page (WCAG 1.4.11). */
+    --input: color-mix(in oklab, var(--foreground) 42%, var(--card));
+    --ring: var(--primary);
     /* Charts: the period being looked at, and the one before it (drawn dashed). */
-    --chart-current: oklch(0.7 0.15 245);
-    --chart-previous: oklch(0.72 0.012 286);
-    --radius: 0.75rem;
-    --selection: color-mix(in oklab, var(--primary) 35%, transparent);
-    --scrollbar-thumb: var(--border);
-    --scrollbar-thumb-hover: var(--input);
+    --chart-current: var(--primary);
+    --chart-previous: color-mix(in oklab, var(--foreground) 45%, var(--card));
+    --radius: 0.5rem;
+    --selection: color-mix(in oklab, var(--primary) 30%, transparent);
+    --scrollbar-thumb: #cfd0d5;
+    --scrollbar-track: #e4e6ec;
+    /* Range inputs sit on video frames (player, Studio), so they stay white in both themes. */
     --range-track: oklch(1 0 0 / 0.25);
     --range-fill: oklch(1 0 0);
 
     accent-color: var(--primary);
-    scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
-/*
- * Type scale one step above Tailwind's default: small grey text on a dark canvas was hard to read.
- * See DESIGN.md › Type and icons.
- */
+:root.dark {
+    color-scheme: dark;
+
+    --background: oklch(0.16 0.004 286);
+    --foreground: oklch(0.9851 0 0);
+    --card: oklch(0.2 0.005 286);
+    --popover: oklch(0.22 0.005 286);
+    --primary-ink: oklch(0.72 0.15 257.313);
+    --destructive: oklch(0.7 0.19 25);
+    --destructive-foreground: oklch(0.2 0.05 25);
+    --success: oklch(0.76 0.14 175);
+    --input: color-mix(in oklab, var(--foreground) 38%, var(--card));
+    --chart-current: oklch(0.7 0.15 257.313);
+    --scrollbar-thumb: color-mix(in oklab, var(--foreground) 22%, var(--background));
+    --scrollbar-track: color-mix(in oklab, var(--foreground) 8%, var(--background));
+}
+
+/* People who ask for more contrast get firmer borders and a darker scrollbar thumb. */
+@media (prefers-contrast: more) {
+    :root,
+    :root.dark {
+        --border: color-mix(in oklab, var(--foreground) 35%, transparent);
+        --card-border: color-mix(in oklab, var(--foreground) 35%, transparent);
+        --scrollbar-thumb: color-mix(in oklab, var(--foreground) 50%, var(--background));
+    }
+}
+
+/* Type scale one step above Tailwind's default, the same as the landing page. See DESIGN.md. */
 @theme {
     --text-xs: 0.8125rem;
-    --text-xs--line-height: calc(1.125 / 0.8125);
+    --text-xs--line-height: 1.54;
     --text-sm: 0.9375rem;
-    --text-sm--line-height: calc(1.375 / 0.9375);
+    --text-sm--line-height: 1.5;
     /* Secondary lines (meta under titles, counts): 14px, in rem so it follows the browser size. */
     --text-meta: 0.875rem;
     --text-meta--line-height: calc(1.25 / 0.875);
+    --text-heading: 1.625rem;
+    --text-heading--line-height: 1.1;
+    --text-heading-md: 2rem;
+    --text-heading-md--line-height: 1.1;
 }
 
 @theme inline {
-    --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
+    --color-card-border: var(--card-border);
     --color-popover: var(--popover);
     --color-popover-foreground: var(--popover-foreground);
     --color-primary: var(--primary);
+    --color-primary-ink: var(--primary-ink);
+    --color-primary-solid: var(--primary-solid);
     --color-primary-foreground: var(--primary-foreground);
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
@@ -88,9 +124,10 @@
     --color-chart-current: var(--chart-current);
     --color-chart-previous: var(--chart-previous);
     --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
+    --radius-md: calc(var(--radius) - 1.5px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
 
     /* The crew member of the running stage bobs while it works. Use with motion-safe:. */
     --animate-crew-work: crew-work 1.4s ease-in-out infinite;
@@ -113,7 +150,7 @@
 
 @layer base {
     * {
-        @apply border-border outline-ring/70;
+        @apply border-border outline-ring;
     }
 
     ::selection {
@@ -161,25 +198,31 @@
         touch-action: manipulation;
     }
 
+    /*
+     * A 4px strip with a slim thumb, as on the landing page. Any non-auto scrollbar-width or
+     * scrollbar-color would switch the WebKit pseudo-elements off, so the standard properties are only
+     * for browsers without them (Firefox).
+     */
     ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
+        width: 4px;
+        height: 4px;
     }
 
     ::-webkit-scrollbar-track,
     ::-webkit-scrollbar-corner {
-        background: transparent;
+        background: var(--scrollbar-track);
     }
 
     ::-webkit-scrollbar-thumb {
-        border: 2px solid transparent;
-        border-radius: 9999px;
-        background-color: var(--scrollbar-thumb);
-        background-clip: padding-box;
+        border-radius: 1px;
+        background: var(--scrollbar-thumb);
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-        background-color: var(--scrollbar-thumb-hover);
+    @supports not selector(::-webkit-scrollbar) {
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
     }
 
     html,
@@ -361,4 +404,54 @@
         background: #fff;
         color: #000;
     }
+}
+
+/* The theme toggle swaps every colour at once; transitions would fade each element on its own. */
+:root[data-switching-theme],
+:root[data-switching-theme] *,
+:root[data-switching-theme] *::before,
+:root[data-switching-theme] *::after {
+    transition: none !important;
+}
+
+/* Small mono label above page titles, wrapped in blue brackets: "[ BIBLIOTECA ]". As on the landing. */
+@utility eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+
+    &::before {
+        content: "[ ";
+        color: var(--primary);
+    }
+
+    &::after {
+        content: " ]";
+        color: var(--primary);
+    }
+}
+
+/* Faint square grid behind page intros, fading towards the bottom, as on the landing page. */
+@utility grid-backdrop {
+    background-image:
+        linear-gradient(
+            to right,
+            color-mix(in oklab, var(--foreground) 5%, transparent) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            to bottom,
+            color-mix(in oklab, var(--foreground) 5%, transparent) 1px,
+            transparent 1px
+        );
+    background-size: 4.75rem 4.75rem;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+/* Blue field behind showcase panels (sign-in), the same as behind the landing's hero screenshot. */
+@utility showcase-gradient {
+    background-image: linear-gradient(160deg, #2b4fd8, #1e3fae 55%, #2f6df0);
 }

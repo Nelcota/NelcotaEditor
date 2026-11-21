@@ -17,7 +17,7 @@ export function DeleteAccountSection(): ReactNode {
             </p>
             <Button
                 variant="outline"
-                className="font-semibold text-destructive not-disabled:hover:text-destructive"
+                className="font-medium text-destructive not-disabled:hover:text-destructive"
                 onClick={() => setIsDialogOpen(true)}
             >
                 <TrashBinTrashIcon aria-hidden="true" />

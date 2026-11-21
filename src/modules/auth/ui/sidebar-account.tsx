@@ -31,9 +31,9 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
             <DropdownMenu>
                 <div
                     className={cn(
-                        "flex w-full min-w-0 items-center rounded-xl border transition-colors",
-                        isAccountPage === true && "bg-accent",
-                        isCollapsed === true && "justify-center border-transparent",
+                        "flex w-full min-w-0 items-center rounded-xl border border-card-border bg-card transition-colors",
+                        isAccountPage === true && "border-primary/30 bg-primary/5",
+                        isCollapsed === true && "justify-center border-transparent bg-transparent",
                     )}
                 >
                     {isCollapsed === false && (
@@ -44,7 +44,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
                         >
                             <UserAvatar name={user.name} image={user.image} className="size-10" />
                             <span className="grid min-w-0 flex-1">
-                                <span title={user.name} className="truncate text-sm font-bold">
+                                <span title={user.name} className="truncate text-sm font-semibold">
                                     {user.name}
                                 </span>
                                 <span

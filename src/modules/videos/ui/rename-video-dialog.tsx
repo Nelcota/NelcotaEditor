@@ -91,7 +91,7 @@ function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
                     <Button
                         type="submit"
                         size="lg"
-                        className="justify-self-end font-semibold"
+                        className="justify-self-end font-medium"
                         disabled={isSubmitting}
                         aria-busy={isSubmitting}
                     >

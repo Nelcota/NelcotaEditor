@@ -123,7 +123,7 @@ export function StudioTimeline(props: StudioTimelineProps): ReactNode {
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <h2
                     id="studio-timeline-title"
-                    className="flex items-center gap-2 text-lg leading-tight font-extrabold"
+                    className="flex items-center gap-2 text-lg leading-tight font-semibold"
                 >
                     <ScissorsIcon className="size-5 text-muted-foreground" aria-hidden="true" />
                     Trecho do original

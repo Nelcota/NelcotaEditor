@@ -6,11 +6,17 @@ export function BrandMark({ className }: { className?: string }) {
     return <Mascot index={BRAND_MASCOT_INDEX} className={cn("size-8", className)} />;
 }
 
-export function BrandLogo() {
+/** Ghost plus the uppercase NELCOTA wordmark, as on the landing; the ghost is the only colour. */
+export function BrandLogo({ className }: { className?: string }) {
     return (
-        <span className="inline-flex items-center gap-2 text-lg font-extrabold tracking-tight">
-            <BrandMark />
-            Nelcota
+        <span
+            className={cn(
+                "inline-flex items-center gap-2 text-xl leading-none font-bold tracking-[0.01em] text-foreground",
+                className,
+            )}
+        >
+            <BrandMark className="size-[1.3em]" />
+            NELCOTA
         </span>
     );
 }

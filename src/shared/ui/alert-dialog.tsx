@@ -26,7 +26,7 @@ function AlertDialogOverlay({
         <AlertDialogPrimitive.Overlay
             data-slot="alert-dialog-overlay"
             className={cn(
-                "fixed inset-0 z-50 bg-black/70 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+                "fixed inset-0 z-50 bg-black/35 backdrop-blur-[2px] dark:bg-black/70 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
                 className,
             )}
             {...props}
@@ -48,7 +48,7 @@ function AlertDialogContent({
                 data-slot="alert-dialog-content"
                 data-size={size}
                 className={cn(
-                    "group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border bg-card p-6 ease-out data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:duration-300 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-98 data-[size=default]:sm:max-w-lg",
+                    "group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-card-border bg-card shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] p-6 ease-out data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:duration-300 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-98 data-[size=default]:sm:max-w-lg",
                     className,
                 )}
                 {...props}
@@ -91,7 +91,7 @@ function AlertDialogTitle({
         <AlertDialogPrimitive.Title
             data-slot="alert-dialog-title"
             className={cn(
-                "text-xl font-extrabold tracking-tight sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
+                "text-xl font-semibold tracking-tight sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
                 className,
             )}
             {...props}

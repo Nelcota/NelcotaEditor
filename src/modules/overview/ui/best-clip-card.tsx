@@ -11,11 +11,11 @@ export function BestClipCard({ item }: { item: LibraryClip }) {
         <li className="grid snap-start content-start gap-2">
             <ClipPreview clip={clip} />
             <div className="grid gap-1">
-                <p className="flex items-center gap-2 text-xs font-bold text-muted-foreground tabular-nums">
+                <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground tabular-nums">
                     <ScoreChip score={clip.score} />
                     {formatClock(clip.endSeconds - clip.startSeconds)}
                 </p>
-                <p className="line-clamp-2 text-sm leading-snug font-semibold">{clip.title}</p>
+                <p className="line-clamp-2 text-sm leading-snug font-medium">{clip.title}</p>
                 <Link
                     to="/videos/$videoId"
                     params={{ videoId: item.videoId }}

@@ -54,7 +54,7 @@ export function UserAvatar({ name, image, className }: UserAvatarProps): ReactNo
     }
 
     return (
-        <span className={cn(FRAME_CLASS, "text-xs font-bold", className)} aria-hidden="true">
+        <span className={cn(FRAME_CLASS, "text-xs font-semibold", className)} aria-hidden="true">
             {toInitials(name)}
         </span>
     );

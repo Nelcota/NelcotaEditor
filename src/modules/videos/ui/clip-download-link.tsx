@@ -29,7 +29,7 @@ export function ClipDownloadLink(props: ClipDownloadLinkProps): ReactNode {
         <Button
             asChild
             variant={EMPHASIS_VARIANTS[emphasis]}
-            className={cn("font-semibold", className)}
+            className={cn("font-medium", className)}
         >
             <a href={downloadUrl} download>
                 <DownloadMinimalisticIcon aria-hidden="true" />

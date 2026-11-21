@@ -62,7 +62,7 @@ function HoverPreview({
 
 function DefaultPreview({ seconds }: { seconds: number }): ReactNode {
     return (
-        <span className="rounded-md bg-black/80 px-2 py-1 text-xs font-bold text-white tabular-nums">
+        <span className="rounded-md bg-black/80 px-2 py-1 text-xs font-semibold text-white tabular-nums">
             {formatClock(seconds)}
         </span>
     );

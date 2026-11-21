@@ -50,7 +50,7 @@ export function VideoListRow({ video }: { video: VideoSummary }): ReactNode {
                     to="/videos/$videoId"
                     params={{ videoId: video.id }}
                     title={video.title}
-                    className="line-clamp-2 rounded font-bold break-words underline-offset-4 outline-none group-hover:underline after:absolute after:inset-0 focus-visible:ring-4 focus-visible:ring-ring/70 max-sm:col-span-2 motion-safe:active:scale-[0.99]"
+                    className="line-clamp-2 rounded font-semibold break-words underline-offset-4 outline-none group-hover:underline after:absolute after:inset-0 focus-visible:ring-4 focus-visible:ring-ring/70 max-sm:col-span-2 motion-safe:active:scale-[0.99]"
                 >
                     {video.title}
                 </Link>

@@ -16,7 +16,7 @@ interface BadgeStyle {
 
 const WORKING_STYLE: BadgeStyle = {
     icon: Spinner,
-    className: "bg-primary/15 text-primary",
+    className: "bg-primary/15 text-primary-ink",
 };
 
 const BADGE_STYLES: Partial<Record<VideoStatus, BadgeStyle>> = {
@@ -41,7 +41,7 @@ export function VideoStatusBadge({ status }: { status: VideoStatus }) {
     return (
         <span
             className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
+                "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
                 style.className,
             )}
         >

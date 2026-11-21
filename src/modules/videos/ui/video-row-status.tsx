@@ -66,7 +66,7 @@ export function VideoRowStatus(props: VideoRowStatusProps): ReactNode {
 
     if (video.status === "done") {
         return (
-            <span className="font-bold text-foreground">
+            <span className="font-semibold text-foreground">
                 {readyClipCount} {pluralize(readyClipCount, "corte pronto", "cortes prontos")}
             </span>
         );

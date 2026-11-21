@@ -20,10 +20,10 @@ interface StatProps {
 function Stat({ label, value, note, isAlert = false }: StatProps): ReactNode {
     return (
         <div className="grid content-start gap-1 rounded-2xl border bg-popover p-4 sm:p-5">
-            <p className="text-sm font-semibold text-muted-foreground">{label}</p>
+            <p className="text-sm font-medium text-muted-foreground">{label}</p>
             <p
                 className={cn(
-                    "text-2xl font-extrabold tracking-tight whitespace-nowrap tabular-nums",
+                    "text-2xl font-semibold tracking-tight whitespace-nowrap tabular-nums",
                     isAlert === true && "text-destructive",
                 )}
             >
@@ -101,7 +101,7 @@ function Panel({ title, link, children }: PanelProps): ReactNode {
     return (
         <section className="grid content-start gap-4">
             <div className="flex items-baseline justify-between gap-4">
-                <h2 className="text-lg font-bold">{title}</h2>
+                <h2 className="text-lg font-semibold">{title}</h2>
                 {link}
             </div>
             {children}
@@ -110,7 +110,7 @@ function Panel({ title, link, children }: PanelProps): ReactNode {
 }
 
 const PANEL_LINK_CLASS =
-    "rounded-sm text-sm font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/70";
+    "rounded-sm text-sm font-medium text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/70";
 
 function RecentFailures({ overview }: { overview: AdminOverview }): ReactNode {
     const failures = overview.recentFailures;

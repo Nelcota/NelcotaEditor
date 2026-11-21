@@ -70,7 +70,7 @@ function StorageWarning({ usedPercent, quotaBytes }: StorageWarningProps) {
                 className="mt-0.5 size-5 shrink-0 text-destructive"
             />
             <p>
-                <span className="font-bold">{title}</span>
+                <span className="font-semibold">{title}</span>
                 <span className="text-muted-foreground">
                     {`. ${usedPercent}% dos ${formatBytes(quotaBytes)} em uso. Exclua vídeos antigos ou baixe os cortes e apague os originais para liberar espaço.`}
                 </span>
@@ -98,15 +98,15 @@ export function StorageBreakdown({ storage, quotaBytes, videoCount }: StorageBre
             className="grid gap-3 rounded-2xl border bg-popover p-4 sm:p-5"
         >
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h3 id="storage-title" className="flex items-center gap-2 font-bold">
+                <h3 id="storage-title" className="flex items-center gap-2 font-semibold">
                     <ServerSquareIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                     Espaço em disco
                 </h3>
                 <p className="text-sm text-muted-foreground tabular-nums">
-                    <span className="font-bold text-foreground">
+                    <span className="font-semibold text-foreground">
                         {formatBytes(totalBytes)}
-                    </span> em{" "}
-                    {videoCount} {pluralize(videoCount, "vídeo", "vídeos")}
+                    </span>{" "}
+                    em {videoCount} {pluralize(videoCount, "vídeo", "vídeos")}
                 </p>
             </div>
             {usedPercent >= WARNING_PERCENT && (

@@ -9,7 +9,7 @@ export function ClipReasonDisclosure({ reason }: { reason: string }): ReactNode 
 
     return (
         <details className="group text-sm">
-            <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded text-xs font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded text-xs font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&::-webkit-details-marker]:hidden">
                 Por que este corte
                 <AltArrowDownIcon
                     aria-hidden="true"

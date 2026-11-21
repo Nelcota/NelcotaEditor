@@ -61,7 +61,7 @@ export function FirstVideoEmptyState() {
             title={`Oi! Eu sou o ${HOST_NAME}.`}
             description="Cole um link do YouTube ou envie um arquivo e a equipe começa: Faísca baixa, Tinta transcreve, Brilho escolhe os melhores momentos e Brasa faz os cortes."
             action={
-                <Button asChild size="lg" className="rounded-full font-bold">
+                <Button asChild size="lg" className="rounded-full font-semibold">
                     <Link to="/" search={{ newVideo: true }}>
                         <AddIcon aria-hidden="true" />
                         Enviar o primeiro vídeo

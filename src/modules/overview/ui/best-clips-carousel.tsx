@@ -86,13 +86,13 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
     return (
         <section className="@container/clips flex min-w-0 flex-col gap-4 rounded-2xl border bg-popover p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
-                <h2 className="flex items-center gap-2 text-lg leading-tight font-extrabold">
+                <h2 className="flex items-center gap-2 text-lg leading-tight font-semibold">
                     <StarIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                     Melhores cortes do período
                 </h2>
                 <Link
                     to="/clips"
-                    className="shrink-0 rounded text-sm font-semibold whitespace-nowrap text-muted-foreground hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
+                    className="shrink-0 rounded text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
                 >
                     Ver todos
                 </Link>

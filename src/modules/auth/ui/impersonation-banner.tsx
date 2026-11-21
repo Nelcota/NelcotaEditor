@@ -20,7 +20,7 @@ export function ImpersonationBanner(): ReactNode {
             role="status"
             className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm"
         >
-            <UserSpeakIcon className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            <UserSpeakIcon className="size-5 shrink-0 text-primary-ink" aria-hidden="true" />
             <p className="min-w-0 flex-[1_1_16rem]">
                 Você está vendo o Nelcota como <strong>{currentUser.name}</strong> (
                 {currentUser.email}). O que fizer aqui vale para a conta dessa pessoa.

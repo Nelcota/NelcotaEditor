@@ -16,7 +16,7 @@ function BrilhoReason({ clip }: { clip: ClipView }) {
         <div className="flex gap-3 rounded-xl border bg-background/40 p-3 text-sm">
             <Mascot index={STAGE_CREW.selecting} className="size-7 shrink-0" />
             <p className="max-w-prose">
-                <span className="font-bold">
+                <span className="font-semibold">
                     Brilho deu {clip.score}/{SCORE_SCALE}
                 </span>
                 {clip.reason.length > 0 && (
@@ -78,7 +78,7 @@ export function SelectedClipPanel({
                 <ClipPreview key={clip.id} clip={clip} />
             </div>
             <div className="grid min-w-0 content-start gap-2">
-                <p className="flex flex-wrap gap-x-3 gap-y-1 text-meta font-bold text-muted-foreground tabular-nums">
+                <p className="flex flex-wrap gap-x-3 gap-y-1 text-meta font-semibold text-muted-foreground tabular-nums">
                     <span className="whitespace-nowrap">
                         CORTE {rank} DE {total}
                     </span>
@@ -89,7 +89,7 @@ export function SelectedClipPanel({
                 </p>
                 <h2
                     id="selected-clip-title"
-                    className="text-lg leading-snug font-extrabold text-balance sm:text-xl"
+                    className="text-lg leading-snug font-semibold text-balance sm:text-xl"
                 >
                     {clip.title}
                 </h2>

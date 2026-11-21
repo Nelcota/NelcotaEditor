@@ -90,7 +90,7 @@ export function VideoHeader({ video }: { video: VideoSummary }) {
             <VideoThumbnail video={video} />
             <div className="grid min-w-0 flex-1 gap-2.5">
                 <div className="flex items-start gap-3">
-                    <h1 className="min-w-0 flex-1 line-clamp-2 text-2xl leading-tight font-extrabold tracking-tight text-balance [overflow-wrap:anywhere] sm:text-[30px]">
+                    <h1 className="min-w-0 flex-1 line-clamp-2 text-2xl leading-tight font-medium tracking-[-0.03em] text-balance [overflow-wrap:anywhere] sm:text-[30px]">
                         {video.title}
                     </h1>
                     <VideoActionsMenu video={video} />

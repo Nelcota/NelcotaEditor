@@ -33,7 +33,7 @@ function NoPreview({ message }: { message: string }): ReactNode {
     return (
         <div className="absolute inset-0 z-20 grid content-center justify-items-center gap-2 bg-card p-6 text-center">
             <VideocameraRecordIcon className="size-6 text-muted-foreground" aria-hidden="true" />
-            <p className="font-bold">Sem prévia ao vivo</p>
+            <p className="font-semibold">Sem prévia ao vivo</p>
             <p className="text-sm text-muted-foreground">{message}</p>
         </div>
     );
@@ -67,7 +67,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
             >
                 <Icon className="size-5" aria-hidden="true" />
             </button>
-            <span className="text-xs font-bold tabular-nums">
+            <span className="text-xs font-semibold tabular-nums">
                 {formatClock(playedSeconds)} / {formatClock(lengthSeconds)}
             </span>
             <input

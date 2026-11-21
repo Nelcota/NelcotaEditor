@@ -6,7 +6,7 @@ import { cn } from "#/shared/ui/cn";
 const QUICK_COUNTS: ReadonlyArray<number> = [3, 5, 8, 10];
 
 const OPTION_CLASS =
-    "grid h-9 pointer-coarse:h-11 place-items-center rounded-lg text-sm font-bold text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:enabled:active:scale-[0.99] aria-pressed:bg-foreground aria-pressed:text-background disabled:cursor-not-allowed disabled:opacity-50";
+    "grid h-9 pointer-coarse:h-11 place-items-center rounded-lg text-sm font-semibold text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:enabled:active:scale-[0.99] aria-pressed:bg-foreground aria-pressed:text-background disabled:cursor-not-allowed disabled:opacity-50";
 
 interface ClipCountPickerProps {
     value: number;
@@ -19,7 +19,7 @@ export function ClipCountPicker({ value, onValueChange, disabled }: ClipCountPic
 
     return (
         <fieldset className="grid gap-2" disabled={disabled}>
-            <legend className="mb-2 text-sm font-semibold">Quantos cortes?</legend>
+            <legend className="mb-2 text-sm font-medium">Quantos cortes?</legend>
             <div className="grid grid-cols-5 gap-1 rounded-xl bg-secondary p-1">
                 {QUICK_COUNTS.map((count) => (
                     <button
@@ -39,7 +39,7 @@ export function ClipCountPicker({ value, onValueChange, disabled }: ClipCountPic
                     type="button"
                     aria-pressed={isOtherOpen}
                     onClick={() => setIsOtherOpen(true)}
-                    className={cn(OPTION_CLASS, "font-semibold")}
+                    className={cn(OPTION_CLASS, "font-medium")}
                 >
                     Outro
                 </button>

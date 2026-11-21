@@ -45,7 +45,7 @@ const STEP_MASCOT_STYLES: Record<StepState, string> = {
 
 const STEP_LABEL_STYLES: Record<StepState, string> = {
     done: "text-muted-foreground",
-    current: "font-semibold",
+    current: "font-medium",
     upcoming: "text-muted-foreground",
 };
 
@@ -91,7 +91,7 @@ function StageHeadline({ video }: { video: VideoSummary }) {
     return (
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
             <div>
-                <p className="text-lg font-bold">{describeStage(video)}</p>
+                <p className="text-lg font-semibold">{describeStage(video)}</p>
                 <p className="text-sm text-foreground">{toCrewLine(video)}</p>
             </div>
             <p className="text-sm text-muted-foreground tabular-nums">

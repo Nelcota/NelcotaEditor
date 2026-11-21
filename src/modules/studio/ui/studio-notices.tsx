@@ -21,7 +21,7 @@ export function RenderingOverlay({ progressPercent }: { progressPercent: number 
             className="absolute inset-0 z-30 grid content-center justify-items-center gap-2.5 bg-background/95 p-6 text-center"
         >
             <StageCrewMascot status="rendering" isWorking className="size-12" />
-            <p className="font-bold">Brasa está refazendo o corte</p>
+            <p className="font-semibold">Brasa está refazendo o corte</p>
             <Progress value={progressPercent} className="w-4/5" />
             <p className="text-xs text-muted-foreground tabular-nums">
                 {progressPercent}% do total
@@ -53,7 +53,7 @@ export function RenderFailedBanner({ videoId, clip }: RenderFailedBannerProps): 
         >
             <StageCrewMascot status="failed" className="size-8" />
             <p className="min-w-0 flex-1 text-sm">
-                <span className="font-bold">Não foi possível refazer o corte.</span>{" "}
+                <span className="font-semibold">Não foi possível refazer o corte.</span>{" "}
                 <span className="text-muted-foreground">
                     Guarda barrou a renderização. Suas alterações continuam aqui.
                 </span>
@@ -76,7 +76,7 @@ export function RenderedNotice({ clip }: { clip: ClipView }): ReactNode {
         >
             <StageCrewMascot status="done" className="size-7" />
             <p className="flex-1">
-                <span className="font-bold">Corte refeito.</span>{" "}
+                <span className="font-semibold">Corte refeito.</span>{" "}
                 <span className="text-muted-foreground">O arquivo para baixar já é o novo.</span>
             </p>
             <ClipDownloadLink clip={clip} label="Baixar" emphasis="secondary" />
@@ -92,7 +92,7 @@ export function OfflineNotice(): ReactNode {
         >
             <WiFiOffIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
             <p>
-                <span className="font-bold">Sem conexão.</span>{" "}
+                <span className="font-semibold">Sem conexão.</span>{" "}
                 <span className="text-muted-foreground">
                     Pode continuar editando: as alterações ficam neste navegador e são salvas quando
                     a conexão voltar.
@@ -114,7 +114,7 @@ export function ShortcutsHint(): ReactNode {
         <div className="hidden items-center gap-3 rounded-xl border bg-popover px-4 py-2 text-sm @4xl/studio:flex">
             <KeyboardIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
             <p className="flex-1 text-muted-foreground">
-                <span className="font-bold text-foreground">Atalhos:</span> Espaço tocar · J e L
+                <span className="font-semibold text-foreground">Atalhos:</span> Espaço tocar · J e L
                 voltam e avançam 5 s · [ e ] marcam início e fim · Ctrl+Z desfaz
             </p>
             <Button

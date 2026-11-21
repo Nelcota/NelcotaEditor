@@ -9,10 +9,10 @@ export function CrewStatTile({ stat }: { stat: CrewStat }) {
     return (
         <div className="grid content-start gap-2 rounded-2xl border bg-popover p-4 sm:p-5">
             <StageCrewMascot status={stat.stage} className="size-9" />
-            <dd className="text-[32px] leading-none font-extrabold tracking-tight tabular-nums">
+            <dd className="text-[32px] leading-none font-semibold tracking-tight tabular-nums">
                 {stat.value}
             </dd>
-            <dt className="text-sm font-bold first-letter:uppercase">{stat.label}</dt>
+            <dt className="text-sm font-semibold first-letter:uppercase">{stat.label}</dt>
             <dd className="text-xs text-muted-foreground tabular-nums">
                 {CREW_NAMES[stat.stage]} · {stat.detail}
             </dd>

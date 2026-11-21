@@ -60,14 +60,14 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
             className="gap-6"
         >
             <TabsList variant="line" className="h-auto w-full justify-start gap-6 border-b pb-0">
-                <TabsTrigger value="clips" className="h-11 flex-none px-0 text-base font-bold">
+                <TabsTrigger value="clips" className="h-11 flex-none px-0 text-base font-semibold">
                     <ClapperboardIcon aria-hidden="true" />
                     Cortes
                     <span className="rounded-full bg-secondary px-2 text-xs text-muted-foreground">
                         {details.clips.length}
                     </span>
                 </TabsTrigger>
-                <TabsTrigger value="studio" className="h-11 flex-none px-0 text-base font-bold">
+                <TabsTrigger value="studio" className="h-11 flex-none px-0 text-base font-semibold">
                     <Pen2Icon aria-hidden="true" />
                     Studio
                 </TabsTrigger>
