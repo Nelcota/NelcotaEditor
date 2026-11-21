@@ -30,7 +30,11 @@ export function toCue(words: Array<CaptionWord>): CaptionCue | null {
         return null;
     }
 
-    return { startSeconds: firstWord.startSeconds, endSeconds: lastWord.endSeconds, words };
+    return {
+        startSeconds: firstWord.startSeconds,
+        endSeconds: lastWord.endSeconds,
+        words,
+    };
 }
 
 /** Short groups of words, broken at punctuation and pauses: how captions read best on a phone. */
@@ -73,7 +77,10 @@ export function wordsInsideRange(words: Array<CaptionWord>, range: TimeRange): A
             (word) =>
                 word.startSeconds >= range.startSeconds && word.startSeconds < range.endSeconds,
         )
-        .map((word) => ({ ...word, endSeconds: Math.min(word.endSeconds, range.endSeconds) }));
+        .map((word) => ({
+            ...word,
+            endSeconds: Math.min(word.endSeconds, range.endSeconds),
+        }));
 }
 
 /** Moves cue times so 0 is the start of the clip, as the subtitles file expects. */

@@ -1,6 +1,6 @@
-import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 import { videos } from "#/modules/videos/videos.schema";
+import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const transcripts = pgTable("transcripts", {
     videoId: uuid("video_id")
