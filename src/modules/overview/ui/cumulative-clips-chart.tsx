@@ -15,7 +15,11 @@ import type { CumulativePoint } from "#/modules/overview/ui/cumulative-point";
 import { CumulativeTooltip } from "#/modules/overview/ui/cumulative-tooltip";
 
 const CHART_HEIGHT = 260;
-const AXIS_TICK = { fill: "var(--muted-foreground)", fontSize: 11 };
+const AXIS_TICK = {
+    fill: "var(--muted-foreground)",
+    fontSize: 12,
+    style: { fontVariantNumeric: "tabular-nums" },
+};
 const GRADIENT_ID = "cumulative-clips-fill";
 
 function toPoints(stats: OverviewStats): Array<CumulativePoint> {
@@ -50,7 +54,7 @@ export function CumulativeClipsChart({ stats }: { stats: OverviewStats }) {
 
     return (
         <section className="grid min-w-0 content-start gap-2 rounded-2xl border bg-popover p-4 sm:p-5">
-            <h2 className="flex items-center gap-2 text-lg font-extrabold">
+            <h2 className="flex items-center gap-2 text-lg leading-tight font-extrabold">
                 <GraphUpIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 Cortes acumulados
             </h2>

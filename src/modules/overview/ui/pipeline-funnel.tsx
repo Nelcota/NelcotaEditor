@@ -26,7 +26,7 @@ export function PipelineFunnel({ funnel }: { funnel: OverviewFunnel }) {
     return (
         <section className="@container/funnel grid min-w-0 content-start gap-4 rounded-2xl border bg-popover p-4 sm:p-5">
             <div className="grid gap-1">
-                <h2 className="flex items-center gap-2 text-lg font-extrabold">
+                <h2 className="flex items-center gap-2 text-lg leading-tight font-extrabold">
                     <FilterIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                     Do envio ao corte
                 </h2>

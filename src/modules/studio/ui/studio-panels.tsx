@@ -42,11 +42,16 @@ export function StudioPanels(props: StudioPanelsProps): ReactNode {
     const { video, editor, playback, isRendering, phonePanel } = props;
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[260px_minmax(0,1fr)_360px]">
-            <div className={cn("order-3 lg:order-1 lg:block", phonePanel !== "style" && "hidden")}>
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 @4xl/studio:grid-cols-[260px_minmax(0,1fr)_360px]">
+            <div
+                className={cn(
+                    "order-3 @4xl/studio:order-1 @4xl/studio:block",
+                    phonePanel !== "style" && "hidden",
+                )}
+            >
                 <StudioStylePanel editor={editor} isLocked={isRendering} />
             </div>
-            <div className="order-1 grid justify-items-center gap-2 lg:order-2">
+            <div className="order-1 grid justify-items-center gap-2 @4xl/studio:order-2">
                 <StudioPreview
                     draft={editor.draft}
                     videoRef={props.videoRef}
@@ -65,7 +70,7 @@ export function StudioPanels(props: StudioPanelsProps): ReactNode {
                 value={phonePanel}
                 options={PHONE_PANELS}
                 onValueChange={props.onPhonePanelChange}
-                className="order-2 lg:hidden"
+                className="order-2 @4xl/studio:hidden"
             />
             <CaptionList
                 editor={editor}
@@ -76,11 +81,11 @@ export function StudioPanels(props: StudioPanelsProps): ReactNode {
                 onSeek={playback.seek}
                 isLocked={isRendering}
                 className={cn(
-                    "order-3 max-h-[70dvh] lg:flex lg:h-[600px]",
+                    "order-3 max-h-[70dvh] @4xl/studio:flex @4xl/studio:h-[600px]",
                     phonePanel !== "captions" && "hidden",
                 )}
             />
-            <div className={cn("order-3 lg:hidden", phonePanel !== "trim" && "hidden")}>
+            <div className={cn("order-3 @4xl/studio:hidden", phonePanel !== "trim" && "hidden")}>
                 <MobileTrim
                     editor={editor}
                     videoDurationSeconds={props.videoDurationSeconds}

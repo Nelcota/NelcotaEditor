@@ -177,19 +177,19 @@ export function StudioStylePanel({ editor, isLocked }: StudioStylePanelProps): R
     return (
         <section
             aria-labelledby="studio-style-title"
-            className="lg:rounded-2xl lg:border lg:bg-popover"
+            className="@4xl/studio:rounded-2xl @4xl/studio:border @4xl/studio:bg-popover"
         >
             <h2
                 id="studio-style-title"
-                className="sr-only lg:not-sr-only lg:flex lg:items-center lg:gap-2 lg:border-b lg:px-4 lg:py-3 lg:text-base lg:font-extrabold"
+                className="sr-only @4xl/studio:not-sr-only @4xl/studio:flex @4xl/studio:items-center @4xl/studio:gap-2 @4xl/studio:border-b @4xl/studio:px-4 @4xl/studio:py-3 @4xl/studio:text-lg @4xl/studio:leading-tight @4xl/studio:font-extrabold"
             >
                 <Pallete2Icon
-                    className="hidden size-5 text-muted-foreground lg:block"
+                    className="hidden size-5 text-muted-foreground @4xl/studio:block"
                     aria-hidden="true"
                 />
                 Estilo
             </h2>
-            <div className="lg:p-4">
+            <div className="@4xl/studio:p-4">
                 <StudioStyleFields editor={editor} isLocked={isLocked} />
             </div>
         </section>

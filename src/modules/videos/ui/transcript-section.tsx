@@ -72,7 +72,7 @@ function TranscriptContent({ videoId, currentSeconds, onSeek }: TranscriptSectio
 function TranscriptToggle({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) {
     return (
         <div className="grid gap-0.5">
-            <h2 id="transcript-title" className="text-lg font-extrabold">
+            <h2 id="transcript-title" className="text-lg leading-tight font-extrabold">
                 <button
                     type="button"
                     aria-expanded={isOpen}

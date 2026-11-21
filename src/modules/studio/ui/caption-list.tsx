@@ -115,7 +115,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
             <div className="flex items-center gap-2 border-b px-4 py-2.5">
                 <h2
                     id="studio-captions-title"
-                    className="flex items-center gap-2 text-base font-extrabold"
+                    className="flex items-center gap-2 text-lg leading-tight font-extrabold"
                 >
                     <SubtitlesIcon className="size-5 text-muted-foreground" aria-hidden="true" />
                     Legendas

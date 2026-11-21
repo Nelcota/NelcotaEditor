@@ -18,10 +18,12 @@ import { useStudioEditor } from "#/modules/studio/ui/use-studio-editor";
 import { useStudioPlayback } from "#/modules/studio/ui/use-studio-playback";
 import { useStudioShortcuts } from "#/modules/studio/ui/use-studio-shortcuts";
 import { useTrimMarks } from "#/modules/studio/ui/use-trim-marks";
-import { useMediaQuery } from "#/shared/ui/use-media-query";
+import { useIsAtLeastWidth } from "#/shared/ui/use-is-at-least-width";
 
 // Tailwind's lg breakpoint, where the timeline shows.
-const DESKTOP_MEDIA_QUERY = "(min-width: 64rem)";
+// The Studio's own width, not the window's: with the sidebar open a 1024 px window leaves the
+// Studio about 650 px, too narrow for three columns. Matches the @4xl/studio (56rem) variant.
+const WIDE_STUDIO_MIN_PIXELS = 896;
 
 interface StudioWorkspaceProps {
     video: VideoSummary;
@@ -56,7 +58,8 @@ export function StudioWorkspace({
     const playingIndex = usePlaybackValue(playback.clock, (seconds) =>
         findCueAt(draft.cues, seconds),
     );
-    const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
+    const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
+    const isDesktop = useIsAtLeastWidth(rootElement, WIDE_STUDIO_MIN_PIXELS);
 
     useStudioShortcuts(
         {
@@ -85,7 +88,10 @@ export function StudioWorkspace({
     };
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
+        <div
+            ref={setRootElement}
+            className="@container/studio grid grid-cols-[minmax(0,1fr)] gap-4"
+        >
             <StudioMessages
                 videoId={video.id}
                 clip={clip}

@@ -23,19 +23,19 @@ function StudioLoading(): ReactNode {
         <div
             aria-busy="true"
             aria-label="Carregando o Studio"
-            className="grid grid-cols-[minmax(0,1fr)] gap-4"
+            className="@container/studio grid grid-cols-[minmax(0,1fr)] gap-4"
         >
             <div className="flex gap-3">
                 <Skeleton className="h-10 w-96 max-w-full" />
                 <span className="flex-1" />
                 <Skeleton className="hidden h-10 w-48 sm:block" />
             </div>
-            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[260px_minmax(0,1fr)_360px]">
-                <Skeleton className="hidden h-[560px] rounded-2xl lg:block" />
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 @4xl/studio:grid-cols-[260px_minmax(0,1fr)_360px]">
+                <Skeleton className="hidden h-[560px] rounded-2xl @4xl/studio:block" />
                 <Skeleton className="mx-auto aspect-[9/16] w-full max-w-[300px] rounded-2xl" />
                 <Skeleton className="h-[600px] rounded-2xl" />
             </div>
-            <Skeleton className="hidden h-40 rounded-2xl lg:block" />
+            <Skeleton className="hidden h-40 rounded-2xl @4xl/studio:block" />
         </div>
     );
 }

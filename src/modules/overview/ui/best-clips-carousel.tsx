@@ -85,7 +85,7 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
     return (
         <section className="@container/clips flex min-w-0 flex-col gap-4 rounded-2xl border bg-popover p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
-                <h2 className="flex items-center gap-2 text-lg font-extrabold">
+                <h2 className="flex items-center gap-2 text-lg leading-tight font-extrabold">
                     <StarIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                     Melhores cortes do período
                 </h2>

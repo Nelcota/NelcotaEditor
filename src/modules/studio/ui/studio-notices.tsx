@@ -111,7 +111,7 @@ export function ShortcutsHint(): ReactNode {
     }
 
     return (
-        <div className="hidden items-center gap-3 rounded-xl border bg-popover px-4 py-2 text-sm lg:flex">
+        <div className="hidden items-center gap-3 rounded-xl border bg-popover px-4 py-2 text-sm @4xl/studio:flex">
             <KeyboardIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
             <p className="flex-1 text-muted-foreground">
                 <span className="font-bold text-foreground">Atalhos:</span> Espaço tocar · J e L

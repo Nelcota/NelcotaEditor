@@ -23,7 +23,10 @@ function AccountSection(props: AccountSectionProps): ReactNode {
     return (
         <section aria-labelledby={props.id} className="grid gap-4">
             <div>
-                <h2 id={props.id} className="flex items-center gap-2 text-lg font-extrabold">
+                <h2
+                    id={props.id}
+                    className="flex items-center gap-2 text-lg leading-tight font-extrabold"
+                >
                     <Icon aria-hidden="true" className="size-5 text-muted-foreground" />
                     {props.title}
                 </h2>
