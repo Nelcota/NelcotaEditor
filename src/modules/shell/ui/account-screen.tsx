@@ -7,6 +7,7 @@ import { DeleteAccountDisclosure } from "#/modules/shell/ui/delete-account-discl
 import { CREW_NAMES } from "#/modules/videos/crew-lines";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { CrewUsagePanel } from "#/modules/videos/ui/crew-usage-panel";
+import { PageHeader } from "#/shared/ui/page-header";
 
 const SECTION_MASCOT_CLASS = "size-11 shrink-0";
 
@@ -18,18 +19,11 @@ export function AccountScreen(): ReactNode {
     const firstName = useFirstName();
 
     return (
-        <div className="grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-10">
-            <header>
-                {/* The heading names the page like every other tab; the greeting is what shows. */}
-                <h1 className="sr-only">Conta</h1>
-                <p className="eyebrow">Sua conta</p>
-                <p className="mt-3 text-heading font-normal tracking-[-0.04em] sm:text-heading-md">
-                    Oi, {firstName}!
-                </p>
-                <p className="mt-2 max-w-prose text-muted-foreground">
-                    A turma trabalha do jeito que você deixar aqui.
-                </p>
-            </header>
+        <div className="grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-8">
+            <PageHeader
+                title="Conta"
+                description={`Oi, ${firstName}! A turma trabalha do jeito que você deixar aqui.`}
+            />
             <ProfileCard />
             <section aria-labelledby="preferences-title" className="grid gap-3">
                 <AccountSectionHeading

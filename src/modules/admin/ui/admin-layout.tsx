@@ -58,7 +58,6 @@ export function AdminLayout(): ReactNode {
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
             <div className="grid gap-6">
                 <PageHeader
-                    eyebrow="Administração"
                     title="Admin"
                     description="Contas, vídeos e a saúde do processamento em todo o Nelcota."
                 />

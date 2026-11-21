@@ -10,11 +10,13 @@ interface OpenInStudioLinkProps {
     className?: string;
     /** E.g. `max-sm:sr-only` in a narrow row: it shows "Editar" and the name stays whole. */
     placeClassName?: string;
+    /** E.g. `sr-only` for an icon-only button; the whole name is then read out. */
+    labelClassName?: string;
 }
 
 /** Takes the clip to the Studio tab, where its stretch, captions and look are edited. */
 export function OpenInStudioLink(props: OpenInStudioLinkProps): ReactNode {
-    const { videoId, clipId, className, placeClassName } = props;
+    const { videoId, clipId, className, placeClassName, labelClassName } = props;
 
     return (
         <Button asChild variant="outline" className={cn("font-medium", className)}>
@@ -24,7 +26,7 @@ export function OpenInStudioLink(props: OpenInStudioLinkProps): ReactNode {
                 search={{ tab: "studio", clip: clipId }}
             >
                 <Pen2Icon aria-hidden="true" />
-                <span>
+                <span className={labelClassName}>
                     Editar<span className={placeClassName}> no Studio</span>
                 </span>
             </Link>

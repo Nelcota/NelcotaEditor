@@ -8,16 +8,14 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                // A vertical gradient with a lighter border, as on the landing page. The ring is the
-                // same blue as the fill; the offset gap keeps it from reading as a bigger button.
+                // One flat blue; the offset gap keeps the same-blue ring from reading as a bigger button.
                 default:
-                    "border border-[color-mix(in_oklab,var(--primary-solid)_75%,white)] bg-[linear-gradient(180deg,color-mix(in_oklab,var(--primary-solid)_80%,white),var(--primary-solid))] text-primary-foreground shadow-[0_8px_22px_-10px_color-mix(in_oklab,var(--primary)_60%,transparent),inset_0_1px_0_rgba(255,255,255,0.2)] not-disabled:hover:brightness-110 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    "bg-primary-solid text-primary-foreground not-disabled:hover:bg-[color-mix(in_oklab,var(--primary-solid)_88%,black)] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 destructive:
                     "bg-destructive font-medium text-destructive-foreground not-disabled:hover:bg-destructive/90",
                 outline:
                     "border border-card-border bg-card not-disabled:hover:bg-accent not-disabled:hover:text-accent-foreground",
-                secondary:
-                    "bg-secondary text-secondary-foreground not-disabled:hover:bg-foreground/10",
+                secondary: "bg-secondary text-secondary-foreground not-disabled:hover:bg-accent",
                 ghost: "not-disabled:hover:bg-secondary not-disabled:hover:text-accent-foreground",
                 link: "text-primary-ink underline-offset-4 not-disabled:hover:underline",
             },

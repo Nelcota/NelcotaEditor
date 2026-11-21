@@ -33,7 +33,6 @@ export function ClipsScreen() {
     return (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
             <PageHeader
-                eyebrow="Seus cortes"
                 title="Cortes"
                 description="Os cortes prontos de todos os vídeos. Assista, baixe ou ajuste no Studio."
             />

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Layout do zero · 3 direções</title>
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500&display=swap"
+        />
+        <style>
+            :root {
+                --bg: #f5f5f3;
+                --ink: #171715;
+                --muted: #66665f;
+                --line: rgba(22, 22, 20, 0.1);
+            }
+            * {
+                box-sizing: border-box;
+                margin: 0;
+            }
+            body {
+                font:
+                    15px/1.5 "Geist",
+                    system-ui,
+                    sans-serif;
+                color: var(--ink);
+                background: var(--bg);
+                padding: 40px 32px 80px;
+            }
+            .wrap {
+                max-width: 1440px;
+                margin: 0 auto;
+                display: grid;
+                gap: 56px;
+            }
+            h1 {
+                font-size: 32px;
+                font-weight: 650;
+                letter-spacing: -0.02em;
+            }
+            .lede {
+                color: var(--muted);
+                max-width: 70ch;
+                margin-top: 8px;
+            }
+            section {
+                display: grid;
+                gap: 16px;
+            }
+            .head {
+                display: flex;
+                align-items: baseline;
+                gap: 12px;
+            }
+            .tag {
+                font:
+                    500 13px/1 "Geist Mono",
+                    monospace;
+                padding: 5px 8px;
+                border-radius: 6px;
+                background: var(--ink);
+                color: #fff;
+            }
+            h2 {
+                font-size: 22px;
+                font-weight: 600;
+            }
+            .points {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+            }
+            .points div {
+                padding: 14px 16px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: #fff;
+                font-size: 14px;
+                color: var(--muted);
+            }
+            .points b {
+                display: block;
+                color: var(--ink);
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 16px;
+            }
+            .shots.with-phone {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 220px;
+            }
+            figure {
+                display: grid;
+                gap: 6px;
+            }
+            figcaption {
+                font-size: 13px;
+                color: var(--muted);
+            }
+            img {
+                width: 100%;
+                display: block;
+                border-radius: 10px;
+                border: 1px solid var(--line);
+                background: #fff;
+            }
+            details {
+                border-top: 1px solid var(--line);
+                padding-top: 12px;
+            }
+            summary {
+                cursor: pointer;
+                font-weight: 500;
+            }
+            details .shots {
+                margin-top: 12px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header>
+                <h1>Layout do zero · 3 direções</h1>
+                <p class="lede">
+                    Nada do visual da landing: sem lavanda, sem colchetes, sem moldura com grade.
+                    Cada direção muda a organização do app inteiro e define suas linhas de grid
+                    (abra "ver linhas" em cada uma). Os dados são os seus vídeos reais. Escolha uma
+                    e eu reconstruo todas as telas nela.
+                </p>
+            </header>
+
+            <section>
+                <div class="head">
+                    <span class="tag">HOJE</span>
+                    <h2>Como está</h2>
+                </div>
+                <div class="shots">
+                    <figure>
+                        <img src="renders/current-home.jpg" alt="" />
+                        <figcaption>Início</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="renders/current-video.jpg" alt="" />
+                        <figcaption>Página do vídeo</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section>
+                <div class="head">
+                    <span class="tag">A</span>
+                    <h2>Mesa: lista e vídeo lado a lado</h2>
+                </div>
+                <div class="points">
+                    <div>
+                        <b>Organização</b>Trilho de ícones de 64px, lista de vídeos fixa (340px) e o
+                        vídeo aberto à direita. Início e página do vídeo viram uma tela só, como um
+                        e-mail.
+                    </div>
+                    <div>
+                        <b>Cortes</b>O corte vertical toca grande à esquerda; a lista de cortes abre
+                        o escolhido com motivo e ações. Original, Transcrição e Studio em abas.
+                    </div>
+                    <div>
+                        <b>Grid</b>Ícones centrados em 32. Lista: caixa 72, texto 80, fim 396.
+                        Vídeo: texto e fim a 32px das bordas. Botão principal preto, cantos de 8px.
+                    </div>
+                </div>
+                <div class="shots with-phone">
+                    <figure>
+                        <img src="renders/a-video.png" alt="" />
+                        <figcaption>Vídeos (lista + vídeo aberto)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="renders/a-clips.png" alt="" />
+                        <figcaption>Cortes de todos os vídeos</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="renders/a-phone.png" alt="" />
+                        <figcaption>Celular: abas embaixo</figcaption>
+                    </figure>
+                </div>
+                <details>
+                    <summary>Ver linhas</summary>
+                    <div class="shots">
+                        <img src="renders/a-videoguides.png" alt="" /><img
+                            src="renders/a-clipsguides.png"
+                            alt=""
+                        />
+                    </div>
+                </details>
+            </section>
+
+            <section>
+                <div class="head">
+                    <span class="tag">B</span>
+                    <h2>Topo: sem barra lateral, página inteira</h2>
+                </div>
+                <div class="points">
+                    <div>
+                        <b>Organização</b>Uma barra de 64px no topo com Vídeos, Cortes, Painel,
+                        busca (Ctrl K), Novo vídeo e avatar. A tela toda fica para o conteúdo.
+                    </div>
+                    <div>
+                        <b>Vídeos</b>Galeria de capas 16:9 com status na própria capa. No vídeo:
+                        original grande com os trechos dos cortes marcados na barra, cortes na
+                        coluna da direita.
+                    </div>
+                    <div>
+                        <b>Grid</b>12 colunas, margem 40, calha 24; tudo na barra centrado em y 32.
+                        Botão principal azul, cantos de 10px.
+                    </div>
+                </div>
+                <div class="shots with-phone">
+                    <figure>
+                        <img src="renders/b-home.png" alt="" />
+                        <figcaption>Vídeos (galeria)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="renders/b-video.png" alt="" />
+                        <figcaption>Página do vídeo</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="renders/b-phone.png" alt="" />
+                        <figcaption>Celular: abas + botão Novo</figcaption>
+                    </figure>
+                </div>
+                <details>
+                    <summary>Ver linhas</summary>
+                    <div class="shots">
+                        <img src="renders/b-homeguides.png" alt="" /><img
+                            src="renders/b-videoguides.png"
+                            alt=""
+                        />
+                    </div>
+                </details>
+            </section>
+
+            <section>
+                <div class="head">
+                    <span class="tag">C</span>
+                    <h2>Cortes primeiro: o resultado é a tela inicial</h2>
+                </div>
+                <div class="points">
+                    <div>
+                        <b>Organização</b>O início mostra os cortes prontos, em prateleiras por
+                        vídeo, maiores notas primeiro. Vídeos e Painel ficam na barra lateral
+                        (248px).
+                    </div>
+                    <div>
+                        <b>Vídeo</b>Modo palco: lista de cortes, o corte tocando no centro em fundo
+                        escuro, e à direita o motivo do Brilho e as ações.
+                    </div>
+                    <div>
+                        <b>Grid</b>Barra: caixa 12, ícones em 34, texto 56. Página: margem 40. Verde
+                        da marca (o fantasma) como cor principal, botões em pílula.
+                    </div>
+                </div>
+                <div class="shots with-phone">
+                    <figure>
+                        <img src="renders/c-home.png" alt="" />
+                        <figcaption>Início = Cortes</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="renders/c-video.png" alt="" />
+                        <figcaption>Página do vídeo (palco)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="renders/c-phone.png" alt="" />
+                        <figcaption>Celular: cortes em 2 colunas</figcaption>
+                    </figure>
+                </div>
+                <details>
+                    <summary>Ver linhas</summary>
+                    <div class="shots">
+                        <img src="renders/c-homeguides.png" alt="" /><img
+                            src="renders/c-videoguides.png"
+                            alt=""
+                        />
+                    </div>
+                </details>
+            </section>
+        </div>
+    </body>
+</html>

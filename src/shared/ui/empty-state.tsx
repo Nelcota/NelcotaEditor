@@ -10,8 +10,7 @@ interface EmptyStateProps {
 /** The one empty/error placeholder used across the app, so they never drift apart. */
 export function EmptyState({ art, title, description, action }: EmptyStateProps) {
     return (
-        <div className="relative isolate flex flex-col items-center gap-3 overflow-hidden rounded-md border border-card-border bg-card px-6 py-14 text-center">
-            <div aria-hidden="true" className="absolute inset-0 -z-10 grid-backdrop" />
+        <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-card-border bg-muted px-6 py-14 text-center">
             {art}
             <p className="text-lg font-medium tracking-tight text-balance [overflow-wrap:anywhere]">
                 {title}

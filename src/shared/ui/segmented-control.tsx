@@ -42,7 +42,7 @@ export function SegmentedControl<Value extends string>({
                 onValueChange(option.value);
             }}
             className={cn(
-                "grid auto-cols-fr grid-flow-col gap-1 rounded-xl border bg-background p-1",
+                "grid auto-cols-fr grid-flow-col gap-0.5 rounded-xl bg-secondary p-1",
                 className,
             )}
         >
@@ -51,7 +51,7 @@ export function SegmentedControl<Value extends string>({
                     key={option.value}
                     value={option.value}
                     aria-label={option.ariaLabel}
-                    className="min-h-8 rounded-md px-2 py-1 text-sm leading-tight font-medium text-balance text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-foreground data-[state=checked]:text-background motion-safe:enabled:active:scale-[0.99]"
+                    className="min-h-8 rounded-lg px-3 py-1 text-sm leading-tight font-medium text-balance text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-background data-[state=checked]:text-foreground data-[state=checked]:shadow-sm dark:data-[state=checked]:bg-accent motion-safe:enabled:active:scale-[0.99]"
                 >
                     {option.label}
                 </RadioGroup.Item>

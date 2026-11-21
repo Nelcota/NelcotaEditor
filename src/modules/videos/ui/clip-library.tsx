@@ -4,7 +4,7 @@ import type { LibraryClip } from "#/modules/videos/video-views";
 import { DEFAULT_CLIP_ORDER, sortLibraryClips } from "#/modules/videos/ui/clip-order";
 import type { ClipOrder } from "#/modules/videos/ui/clip-order";
 import { ClipsToolbar } from "#/modules/videos/ui/clips-toolbar";
-import { CompactClipRow } from "#/modules/videos/ui/compact-clip-row";
+import { ClipCard } from "#/modules/videos/ui/clip-card";
 import { searchLibraryClips } from "#/modules/videos/ui/library-clip-search";
 import { pluralize } from "#/shared/ui/pluralize";
 import { Button } from "#/shared/ui/button";
@@ -25,7 +25,7 @@ function NoClipMatch({ query, onClear }: { query: string; onClear: () => void })
             title={`Nenhum corte com “${query.trim()}”`}
             description="A busca olha o título do corte e o do vídeo."
             action={
-                <Button variant="secondary" className="rounded-full" onClick={onClear}>
+                <Button variant="secondary" onClick={onClear}>
                     Limpar busca
                 </Button>
             }
@@ -33,11 +33,12 @@ function NoClipMatch({ query, onClear }: { query: string; onClear: () => void })
     );
 }
 
-function ClipRows({ items }: { items: Array<LibraryClip> }) {
+/** Two of twelve columns each from xl (six across), down to two across on phones. */
+function ClipGrid({ items }: { items: Array<LibraryClip> }) {
     return (
-        <ul className="rounded-2xl border bg-popover px-4 sm:px-5">
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 xl:grid-cols-6">
             {items.map((item) => (
-                <CompactClipRow key={item.clip.id} item={item} />
+                <ClipCard key={item.clip.id} item={item} />
             ))}
         </ul>
     );
@@ -50,7 +51,7 @@ export function ClipLibrary({ items }: { items: Array<LibraryClip> }) {
     const visibleItems = sortLibraryClips(searchLibraryClips(items, query), order);
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
             <ClipsToolbar
                 query={query}
                 onQueryChange={setQuery}
@@ -61,7 +62,7 @@ export function ClipLibrary({ items }: { items: Array<LibraryClip> }) {
             {visibleItems.length === 0 && (
                 <NoClipMatch query={query} onClear={() => setQuery("")} />
             )}
-            {visibleItems.length > 0 && <ClipRows items={visibleItems} />}
+            {visibleItems.length > 0 && <ClipGrid items={visibleItems} />}
         </div>
     );
 }

@@ -15,19 +15,6 @@ import { Skeleton } from "#/shared/ui/skeleton";
 
 const SKELETON_CLIP_COUNT = 4;
 
-/** Phones have no sidebar, so they get the way back here. */
-function BackLink() {
-    return (
-        <Link
-            to="/"
-            className="inline-flex w-fit items-center gap-1.5 rounded-md text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] md:hidden"
-        >
-            <ArrowLeftIcon className="size-4" aria-hidden="true" />
-            Seus vídeos
-        </Link>
-    );
-}
-
 function LoadingState() {
     return (
         <div className="grid gap-8" aria-busy="true" aria-label="Carregando vídeo">
@@ -55,11 +42,11 @@ function LoadErrorState({ message, onRetry }: { message: string; onRetry: () => 
             description={`${message} Ele pode ter sido excluído em outra aba ou o link está incompleto.`}
             action={
                 <div className="flex flex-wrap justify-center gap-2">
-                    <Button variant="secondary" className="rounded-full" onClick={onRetry}>
+                    <Button variant="secondary" onClick={onRetry}>
                         <RestartIcon aria-hidden="true" />
                         Tentar de novo
                     </Button>
-                    <Button asChild variant="ghost" className="rounded-full">
+                    <Button asChild variant="ghost">
                         <Link to="/">
                             <ArrowLeftIcon aria-hidden="true" />
                             Voltar para seus vídeos
@@ -99,8 +86,7 @@ export function VideoDetailsScreen({ videoId, search, StudioTab }: VideoDetailsS
     const video = details.video;
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
-            <BackLink />
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
             <VideoHeader video={video} />
             <VideoPageTabs details={details} search={search} StudioTab={StudioTab} />
         </div>

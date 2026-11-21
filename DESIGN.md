@@ -1,9 +1,10 @@
 # Nelcota — design brief
 
-Nelcota turns long videos into vertical short clips with captions. Since 2026-11-21 the app uses
-the landing page's visual system (`E:/NelcotaEditorLanding`, see its DESIGN.md): soft lavender-grey
-page, white cards, thin frame lines, one blue accent. Light by default; dark only when the person
-picks it with the toggle in the sidebar (saved in `localStorage`, applied before the first paint).
+Nelcota turns long videos into vertical short clips with captions. Since 2026-11-21 (direction B of
+`design/explore/rebuild/`, picked by the owner) the app has its own neutral system, no longer the
+landing page's: white page, grey sunken controls, one flat blue, no sidebar. Light by default; dark only
+when the person picks it with the toggle in the top bar (saved in `localStorage`, applied before the
+first paint).
 
 ## Principles
 
@@ -15,22 +16,23 @@ picks it with the toggle in the sidebar (saved in `localStorage`, applied before
 
 ## Tokens (`src/styles.css`)
 
-| Token                                          | Use                                               |
-| ---------------------------------------------- | ------------------------------------------------- |
-| `background` (lavender grey, dark: near-black) | Page and sidebar                                  |
-| `card` (white, dark: raised grey)              | Panels and list rows, `card-border` = ink at 10%  |
-| `primary` (blue, oklch 0.5683 0.1821 257.313)  | Focus ring, progress, icons of the current item   |
-| `primary-solid`                                | Primary button gradient (white label keeps 4.5:1) |
-| `primary-ink`                                  | Blue text and links                               |
-| `muted-foreground` (ink at 65%)                | Secondary text                                    |
-| `success` (teal)                               | Finished videos and clips                         |
-| `destructive` (red)                            | Failures and delete                               |
+| Token                                  | Use                                                      |
+| -------------------------------------- | -------------------------------------------------------- |
+| `background` (white, dark: near-black) | Page and top bar                                         |
+| `card` (white, dark: raised grey)      | Panels, `card-border` = ink at 10%                       |
+| `secondary` / `muted` (light grey)     | Sunken tracks: segmented controls, filters, placeholders |
+| `primary` (blue, oklch 0.58 0.21 263)  | Focus ring, progress, selected clip number               |
+| `primary-solid`                        | The one primary button, flat (white label keeps 4.5:1)   |
+| `primary-ink`                          | Blue text and links                                      |
+| `muted-foreground`                     | Secondary text                                           |
+| `success` (teal)                       | Finished videos and clip scores                          |
+| `destructive` (red)                    | Failures and delete                                      |
 
-- Font: Geist (400 to 600), Geist Mono for eyebrows and small uppercase labels. Page titles weight
-  400, tracking -0.04em, with a mono eyebrow in blue brackets above (`[ BIBLIOTECA ]`, `eyebrow` utility).
-- Radius: cards 6.5px (`rounded-md`), buttons and inputs 12px (`rounded-xl`).
-- The page sits between two vertical rules (`border-x` on `main`) over a faint grid (`grid-backdrop`).
-- Scrollbar: a 4px strip, as on the landing page.
+- Font: Geist (400 to 600). Page titles 28px semibold, tracking -0.02em, one muted line under them.
+  No eyebrows, no grid backdrop, no gradients.
+- Radius: controls 10px (`rounded-xl`), panels and covers 12px (`rounded-md`, `rounded-2xl`), small
+  chips 8px (`rounded-lg`). Buttons are never pills; round is kept for avatars, dots and the big play button.
+- Scrollbar: a 4px strip.
 - The caption highlight in rendered clips stays yellow (#FFE500): it is part of the clip, not the UI,
   and yellow reads best over any video frame.
 
@@ -38,17 +40,17 @@ picks it with the toggle in the sidebar (saved in `localStorage`, applied before
 
 Raised one step on 2026-11-19: small grey text on the dark canvas was hard to read.
 
-| Use                                                 | Size                            |
-| --------------------------------------------------- | ------------------------------- |
-| Captions, counts, dates (`text-xs`)                 | 13px                            |
-| Secondary lines: crew lines, metadata (`text-meta`) | 14px                            |
-| Body, buttons, fields, lists (`text-sm`)            | 15px                            |
-| Sidebar items, inputs (`text-base`)                 | 16px                            |
-| Section titles (`text-lg`)                          | 18px                            |
-| Page title                                          | 30px                            |
-| Icons in buttons, fields, selects, menus            | 20px                            |
-| Sidebar icons                                       | 22px (items at least 44px tall) |
-| Small icons beside text                             | 16px                            |
+| Use                                                 | Size                  |
+| --------------------------------------------------- | --------------------- |
+| Captions, counts, dates (`text-xs`)                 | 13px                  |
+| Secondary lines: crew lines, metadata (`text-meta`) | 14px                  |
+| Body, buttons, fields, lists (`text-sm`)            | 15px                  |
+| Inputs (`text-base`)                                | 16px                  |
+| Section titles (`text-lg`)                          | 18px                  |
+| Page title                                          | 30px                  |
+| Icons in buttons, fields, selects, menus            | 20px                  |
+| Phone tab bar icons                                 | 24px (tabs 64px tall) |
+| Small icons beside text                             | 16px                  |
 
 - `text-xs` and `text-sm` are redefined in the `@theme` block of `src/styles.css`; never go below 13px.
 - One icon set: Solar (linear). Icons help people find things: section titles, filters, sorts, metadata
@@ -63,7 +65,7 @@ Each drawing has one meaning only:
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, rail, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
-  (`src/modules/videos/video-mascot.ts`). Rail, list, sidebar and video header.
+  (`src/modules/videos/video-mascot.ts`). Gallery cards and the video header.
 - **Objects (16–31) are the crew**, one per stage (`src/modules/videos/stage-crew.ts`):
 
 | Stage        | Crew      | Why                                                                |
@@ -90,6 +92,9 @@ Each drawing has one meaning only:
 - Decoration must carry information. No glows, gradients, icon tiles or looping animation in forms
   and dialogs; the mascots appear where they mean something (a video, a stage at work).
 - Left-align forms and dialogs; one primary button, right-aligned in dialogs.
+- Navigation: the top bar holds Vídeos, Cortes, Painel (and Admin for admins), "Novo vídeo" and the
+  account menu (Conta, photo, sign out). Phones get a tab bar with Vídeos, Cortes, a central "Novo
+  vídeo" and Painel; Admin moves into the account menu.
 
 ## Interaction rules (from CLAUDE.md)
 
@@ -108,8 +113,10 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Page rhythm:** sections of a page are 32px apart (`gap-8`); a section's title and its content 16px
   (`gap-4`); items in a list or grid 12–20px; parts of one card 8–12px. Card padding 16px on phones, 20–24px
   from `sm` up.
-- **Page frame:** content up to 1200px wide, centred; side padding 16px on phones and 32px from `md`;
-  36px above the page title, 48px at the bottom.
+- **Page frame:** one frame line shared by the top bar, the page and the phone tab bar
+  (`PAGE_FRAME_CLASS`): 16px on phones, 32px from `md`, 40px from `xl`, content up to 1440px. Pages sit
+  on a 12-column grid with a 24px gutter: the video gallery is 3 of 12 per card, clips 2 of 12, the video
+  page 8 (original, transcript) + 4 (clips panel).
 - **Reading width:** paragraphs (page descriptions, clip reasons, empty states) stop at about 65
   characters (`max-w-prose`).
 - **Control heights:** 40px for buttons, inputs, selects, chips and search in toolbars and cards; 44px for
@@ -121,18 +128,13 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
   content they act on.
 - **Edge lines** (gridline pass, 2026-11-21, set by Claude at the person's request): measured on
   ink, not boxes, within 1px.
-    - Page: text and boxes start on the panel's content edge; cards are `p-4 sm:p-5` everywhere, so
-      every card's text shares one line (16px in on phones, 20px from `sm`).
-    - Sidebar: row boxes 12px in; icon column centred at 35px; labels at 58px. Recent-video mascots
-      centre on the icon column (they overflow a 22px slot) so their titles start on the label line.
-      Section headers start on the icon column's leading edge. Trailing glyphs (collapse, Recentes
-      chevron, account menu) share one centre line.
-    - Phone top bar: the logo starts and the menu glyph ends on the frame line (16px).
+    - Frame: the logo's ghost starts and the avatar ends on the frame line (40 and 1400 at 1440px,
+      16 and 374 at 390px). Page titles, filter tracks, search fields and gallery covers start or end on
+      the same lines.
+    - Top bar: every item centres on y = 32 (28 on phones, 56px bar). Section links are 40px boxes.
+    - Video page clips panel: heading, row numbers and the clip preview share one text line 20px in.
     - Tabs (video page, admin) have no side padding: the first label's icon sits on the text line.
-    - Dialogs: the close glyph ends on `--dialog-padding` and centres on the title, for mouse and
-      touch sizes.
-    - Horizontal snap scrollers with an inset for focus rings set the same `scroll-padding`, or the
-      first item snaps past the text line.
+    - Dialogs: the close glyph ends on `--dialog-padding` and centres on the title.
 
 ## Decisions log
 
@@ -201,3 +203,4 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 | 2026-11-21 | Interface review of Início, Cortes, Painel and Conta: loading skeletons take each screen's current shape (bordered lists, crew cards) and announce through `role="status"`; the best-clips arrows leave the scroll animation to CSS (`motion-safe:scroll-smooth`) so reduced motion jumps; an empty Painel metric says why under "Sem dados"; on phones a video row's title takes the menu's column and the meta line runs under the frame, and a clip row's Baixar and Copiar título become 40px icons so its actions share one row; the disk bar's clips slice uses `chart-current` (green stays the primary action); Brilho's score is the same pill everywhere; chart axes at 13px; Conta aligns to the same left edge as the other tabs, keeps the greeting with a screen-reader "Conta" heading, and says "Excluir conta" once less                                                  | Measured at 320 and 1280px: titles had 88px on phones, clip rows took a row per action, skeletons showed replaced layouts, and a JS smooth scroll ignored reduced motion |
 
 Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/studio/index.html`.
+| 2026-11-21 | Layout rebuilt from scratch, direction B "Topo" (board `design/explore/rebuild/index.html`): no sidebar; one top bar with the sections, "Novo vídeo" and the account; phone tab bar with a central "Novo vídeo"; 12-column page; videos as a 16:9 cover gallery with the state on the cover; Cortes as a 9:16 grid; video page 8 + 4 with the clips panel beside the original; neutral tokens replace the landing system (no lavender, eyebrows, grid backdrop or gradient button); "Início" is now "Vídeos" | The person asked to stop copying the landing and redo the whole layout; picked B from three directions |

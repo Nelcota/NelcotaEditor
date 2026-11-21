@@ -35,7 +35,8 @@ const STATUS_PREDICATES: Record<VideoFilter, (status: VideoStatus) => boolean> =
     cancelled: (status) => status === "cancelled",
 };
 
-export const VIDEOS_PER_PAGE = 20;
+// Divides into every gallery width (1, 2, 3 and 4 columns), so no page ends on a half row.
+export const VIDEOS_PER_PAGE = 24;
 
 function isVideoFilter(value: unknown): value is VideoFilter {
     return VIDEO_FILTERS.some((filter) => filter === value);

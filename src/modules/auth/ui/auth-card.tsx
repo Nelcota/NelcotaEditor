@@ -17,9 +17,8 @@ function MascotShowcase(): ReactNode {
     return (
         <div
             aria-hidden="true"
-            className="relative isolate hidden content-center gap-10 overflow-hidden rounded-xl showcase-gradient p-12 text-white lg:grid"
+            className="hidden content-center gap-10 rounded-2xl bg-secondary p-12 lg:grid"
         >
-            <div className="absolute inset-0 -z-10 opacity-40 grid-backdrop [--foreground:white]" />
             <div className="mx-auto grid w-full max-w-xl grid-cols-8 gap-3.5">
                 {ALL_MASCOT_INDEXES.map((index) => (
                     <Mascot
@@ -30,10 +29,10 @@ function MascotShowcase(): ReactNode {
                 ))}
             </div>
             <div className="mx-auto max-w-md text-center">
-                <p className="text-heading font-normal tracking-[-0.035em] sm:text-heading-md">
-                    Vídeos longos viram <span className="font-semibold">cortes virais</span>
+                <p className="text-heading font-semibold tracking-[-0.02em]">
+                    Vídeos longos viram cortes verticais
                 </p>
-                <p className="mt-3 text-white/80">
+                <p className="mt-3 text-muted-foreground">
                     Cada vídeo ganha um mascote, e uma equipe cuida de cada etapa: um baixa, outro
                     transcreve, outro escolhe os melhores momentos e o último faz os cortes.
                 </p>
@@ -45,15 +44,11 @@ function MascotShowcase(): ReactNode {
 export function AuthCard({ title, description, footer, children }: AuthCardProps): ReactNode {
     return (
         <main className="grid min-h-dvh lg:grid-cols-[minmax(380px,1fr)_1.1fr] lg:gap-2 lg:p-2">
-            <div className="relative isolate flex justify-center px-4 py-8 lg:items-center">
-                <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 grid-backdrop"
-                />
+            <div className="flex justify-center px-4 py-8 lg:items-center">
                 <div className="grid w-full max-w-sm gap-6">
                     <BrandLogo />
                     <div>
-                        <h1 className="text-heading font-normal tracking-[-0.04em] sm:text-heading-md">
+                        <h1 className="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em]">
                             {title}
                         </h1>
                         <p className="mt-2 text-muted-foreground">{description}</p>

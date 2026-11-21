@@ -29,7 +29,7 @@ export function RouteErrorScreen({ error, reset }: ErrorComponentProps) {
             title="Algo deu errado"
             description="Não foi possível mostrar esta página. Tente de novo; se continuar, volte ao início."
             actions={
-                <Button className="rounded-full" onClick={retry}>
+                <Button onClick={retry}>
                     <RestartIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>

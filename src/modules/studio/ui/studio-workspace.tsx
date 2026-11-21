@@ -21,8 +21,8 @@ import { useTrimMarks } from "#/modules/studio/ui/use-trim-marks";
 import { useIsAtLeastWidth } from "#/shared/ui/use-is-at-least-width";
 
 // Tailwind's lg breakpoint, where the timeline shows.
-// The Studio's own width, not the window's: with the sidebar open a 1024 px window leaves the
-// Studio about 650 px, too narrow for three columns. Matches the @4xl/studio (56rem) variant.
+// The Studio's own width, not the window's: the page frame and the video page's own columns
+// leave less than the window. Matches the @4xl/studio (56rem) variant.
 const WIDE_STUDIO_MIN_PIXELS = 896;
 
 interface StudioWorkspaceProps {

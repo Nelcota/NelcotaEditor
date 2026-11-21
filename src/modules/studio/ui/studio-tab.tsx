@@ -47,7 +47,7 @@ function NotReady({ details, onShowClips }: Pick<StudioTabProps, "details" | "on
             title="O Studio abre quando os cortes ficarem prontos"
             description="Sem a transcrição e os cortes ainda não dá para editar trecho nem legendas. Acompanhe o andamento em Cortes."
             action={
-                <Button variant="secondary" className="rounded-full" onClick={onShowClips}>
+                <Button variant="secondary" onClick={onShowClips}>
                     <FilmIcon aria-hidden="true" />
                     Acompanhar em Cortes
                 </Button>
@@ -110,7 +110,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
                 action={
                     <Button
                         variant="secondary"
-                        className="rounded-full"
+
                         onClick={async () => {
                             await Promise.all([studioQuery.refetch(), wordsQuery.refetch()]);
                         }}

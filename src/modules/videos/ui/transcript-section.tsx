@@ -22,7 +22,7 @@ function TranscriptLoadError({ message, onRetry }: { message: string; onRetry: (
     return (
         <div className="grid justify-items-start gap-3">
             <FormAlert message={message} />
-            <Button variant="secondary" className="rounded-full" onClick={onRetry}>
+            <Button variant="secondary" onClick={onRetry}>
                 <RestartIcon aria-hidden="true" />
                 Tentar de novo
             </Button>

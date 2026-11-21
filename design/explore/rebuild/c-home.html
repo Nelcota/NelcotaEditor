@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>C · Cortes primeiro · início</title>
+        <link rel="stylesheet" href="rebuild.css" />
+        <link rel="stylesheet" href="c.css" />
+    </head>
+    <body
+        data-nav="clips"
+        data-guides="box@12:caixa; centre@34:ícones; text@56:texto; trail@236:fim; text@288:margem; trail@1400:margem"
+    >
+        <div class="app">
+            <div id="side"></div>
+            <main class="main">
+                <header class="head">
+                    <div class="grow">
+                        <h1>Cortes</h1>
+                        <p class="meta muted">
+                            15 cortes prontos de 7 vídeos, os melhores primeiro
+                        </p>
+                    </div>
+                    <div class="field" style="width: 260px">
+                        <span data-i="search"></span>Buscar corte
+                    </div>
+                    <div class="segmented">
+                        <span>Recentes</span><span class="on">Maior nota</span>
+                    </div>
+                </header>
+                <section class="shelf">
+                    <div class="shelf-head">
+                        <span class="mascot" style="background-position: 66.67% 33.33%"></span>
+                        <div class="grow">
+                            <p class="title">ESSA HISTÓRIA DA URSO ESTÁ INDO LONGE DE MAIS</p>
+                            <p class="xs muted">3 cortes · 20:25 · YouTube · 19/11</p>
+                        </div>
+                        <span class="btn sm ghost">Abrir vídeo<span data-i="right"></span></span>
+                    </div>
+                    <div class="shelf-row" id="s1"></div>
+                </section>
+                <section class="shelf">
+                    <div class="shelf-head">
+                        <span class="mascot" style="background-position: 0 0"></span>
+                        <div class="grow">
+                            <p class="title">PRIMEIRO ROLE DE VW ID4</p>
+                            <p class="xs muted">3 cortes · 13:00 · YouTube · 20/11</p>
+                        </div>
+                        <span class="btn sm ghost">Abrir vídeo<span data-i="right"></span></span>
+                    </div>
+                    <div class="shelf-row" id="s2"></div>
+                </section>
+            </main>
+        </div>
+        <script src="c-side.js"></script>
+        <script src="icons.js"></script>
+        <script src="clips-data.js"></script>
+        <script>
+            function shelf(target, list) {
+                var host = document.querySelector(target);
+                list.forEach(function (c) {
+                    var el = document.createElement("article");
+                    el.className = "clip-card";
+                    el.innerHTML =
+                        '<div class="vertical" style="background-image:url(img/' +
+                        c.img +
+                        ')"><p class="cap">' +
+                        c.cap +
+                        "</p>" +
+                        '<span class="score-badge"><span class="mascot obj" style="width:16px;height:16px;background-position:66.67% 100%"></span>' +
+                        c.s +
+                        "</span>" +
+                        '<span class="badge-on-media" style="right:8px;bottom:8px">' +
+                        c.d +
+                        "</span></div>" +
+                        '<p class="title clamp-2">' +
+                        c.t +
+                        "</p>";
+                    host.appendChild(el);
+                });
+            }
+            shelf("#s1", [CLIPS[0], CLIPS[1], CLIPS[6]]);
+            shelf("#s2", [CLIPS[2], CLIPS[4], CLIPS[5]]);
+        </script>
+        <script src="guides.js"></script>
+    </body>
+</html>

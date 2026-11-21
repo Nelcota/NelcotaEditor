@@ -25,8 +25,9 @@ interface VideoListToolbarProps {
     onSortChange: (sort: VideoSort) => void;
 }
 
+// Drawn like the segmented control (a sunken track, the current one raised), but these are links.
 const CHIP_CLASS =
-    "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background aria-[current=page]:hover:bg-foreground/90";
+    "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium whitespace-nowrap text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:bg-background aria-[current=page]:text-foreground aria-[current=page]:shadow-sm dark:aria-[current=page]:bg-accent";
 
 const FILTER_ICONS: Record<VideoFilter, IconComponent> = {
     all: Widget2Icon,
@@ -51,7 +52,7 @@ function FilterChips({ filter, counts }: FilterChipsProps) {
     return (
         <nav
             aria-label="Filtrar por situação"
-            className="-mx-4 -my-1 flex w-[calc(100%+2rem)] min-w-0 gap-1.5 overflow-x-auto px-4 py-1 [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,#000_85%,transparent)] sm:mx-0 sm:w-auto sm:flex-wrap sm:overflow-visible sm:px-0"
+            className="flex max-w-full min-w-0 gap-0.5 overflow-x-auto rounded-xl bg-secondary p-1 [scrollbar-width:none]"
         >
             {VIDEO_FILTERS.filter((option) => isChipShown(option, filter, counts[option])).map(
                 (option) => {
@@ -67,7 +68,7 @@ function FilterChips({ filter, counts }: FilterChipsProps) {
                             aria-current={toAriaCurrent(option === filter)}
                             className={CHIP_CLASS}
                         >
-                            <Icon aria-hidden="true" className="size-5" />
+                            <Icon aria-hidden="true" className="size-4" />
                             {VIDEO_FILTER_LABELS[option]}
                             <span className="text-xs tabular-nums opacity-70">
                                 {counts[option]}
@@ -100,7 +101,7 @@ function SortSelect({ sort, onSortChange }: SortSelectProps) {
                 value={sort}
                 options={SORT_OPTIONS}
                 onValueChange={(value) => onSortChange(toVideoSort(value))}
-                className="flex-1 rounded-full [&>button]:rounded-full max-sm:[&>button]:text-xs max-sm:[&>button]:whitespace-nowrap sm:flex-none"
+                className="flex-1 [&>button]:whitespace-nowrap sm:flex-none"
             />
         </div>
     );
@@ -109,31 +110,22 @@ function SortSelect({ sort, onSortChange }: SortSelectProps) {
 export function VideoListToolbar(props: VideoListToolbarProps) {
     const { query, onQueryChange, filter, counts, totalLabel, sort, onSortChange } = props;
 
-    // Two rows, each a group: find and order on top, narrow by status below with the count
-    // trailing, so the count no longer sits between the chips and the sort.
+    // One row on wide screens: narrow by status on the leading side, find and order trailing.
+    // Phones stack them, each full width.
     return (
-        <div className="grid gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-                <SearchField
-                    label="Buscar por título"
-                    placeholder="Buscar por título"
-                    value={query}
-                    onValueChange={onQueryChange}
-                />
-                <SortSelect sort={sort} onSortChange={onSortChange} />
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                <FilterChips filter={filter} counts={counts} />
-                <span
-                    aria-hidden="true"
-                    className="text-meta whitespace-nowrap text-muted-foreground tabular-nums"
-                >
-                    {totalLabel}
-                </span>
-                <p role="status" className="sr-only">
-                    {totalLabel}
-                </p>
-            </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+            <FilterChips filter={filter} counts={counts} />
+            <p role="status" className="sr-only">
+                {totalLabel}
+            </p>
+            <span className="hidden flex-1 lg:block" />
+            <SearchField
+                label="Buscar por título"
+                placeholder="Buscar por título"
+                value={query}
+                onValueChange={onQueryChange}
+            />
+            <SortSelect sort={sort} onSortChange={onSortChange} />
         </div>
     );
 }

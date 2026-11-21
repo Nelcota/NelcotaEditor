@@ -17,7 +17,6 @@ export function PreferencesSection(): ReactNode {
                 <FormAlert message="Não foi possível carregar suas preferências." />
                 <Button
                     variant="secondary"
-                    className="rounded-full"
                     onClick={async () => {
                         await preferencesQuery.refetch();
                     }}

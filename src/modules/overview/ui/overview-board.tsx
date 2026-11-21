@@ -59,7 +59,7 @@ function TimeAndFailures({ stats }: { stats: OverviewStats }): ReactNode {
 /**
  * Direction "Equipe" (DESIGN.md): each crew member shows what they did in the period, in the
  * order the work flows, then time and failures, the best clips and the trend. Columns follow the
- * board's own width (container queries), so the open sidebar does not squeeze them.
+ * board's own width (container queries), so a narrow window does not squeeze them.
  */
 export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps): ReactNode {
     const videosSent = stats.metrics.videosSent;

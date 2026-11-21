@@ -41,7 +41,7 @@ export function ClipsToolbar(props: ClipsToolbarProps) {
                             onOrderChange(value);
                         }
                     }}
-                    className="flex-1 rounded-full [&>button]:rounded-full sm:flex-none"
+                    className="flex-1 sm:flex-none"
                 />
             </div>
             <span
