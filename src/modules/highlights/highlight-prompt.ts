@@ -2,7 +2,7 @@ import {
     IDEAL_MAX_CLIP_SECONDS,
     IDEAL_MIN_CLIP_SECONDS,
     MAX_CLIP_SECONDS,
-} from "#/modules/highlights/highlight-limits";
+} from "#/modules/clips/clip-limits";
 
 /** Ask for a few extra candidates: some get dropped when they overlap or are too short. */
 const EXTRA_CANDIDATES = 3;

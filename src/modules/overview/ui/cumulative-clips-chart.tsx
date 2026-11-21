@@ -49,8 +49,8 @@ export function CumulativeClipsChart({ stats }: { stats: OverviewStats }) {
     const previousTotal = stats.metrics.clipsReady.previous ?? 0;
 
     return (
-        <section className="grid min-w-0 content-start gap-2 rounded-2xl border bg-card p-4 sm:p-5">
-            <h2 className="flex items-center gap-2 text-lg font-bold">
+        <section className="grid min-w-0 content-start gap-2 rounded-2xl border bg-popover p-4 sm:p-5">
+            <h2 className="flex items-center gap-2 text-lg font-extrabold">
                 <GraphUpIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 Cortes acumulados
             </h2>

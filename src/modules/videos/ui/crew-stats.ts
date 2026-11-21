@@ -1,4 +1,4 @@
-import type { VideoStatus } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 import type { UsageSummary } from "#/modules/videos/video-views";
 
 const SECONDS_PER_MINUTE = 60;

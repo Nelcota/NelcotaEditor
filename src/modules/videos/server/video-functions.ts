@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { rm } from "node:fs/promises";
 import { createServerFn } from "@tanstack/react-start";
-import { and, eq, notInArray } from "drizzle-orm";
+import { and, eq, notInArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
@@ -10,23 +10,29 @@ import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/preferences";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import {
     countReadyClips,
-    findOwnedVideo,
     listUserVideos,
-    listVideoClips,
-    toClipView,
     toVideoSummary,
 } from "#/modules/videos/server/video-queries.server";
-import { resetVideoToQueued } from "#/modules/videos/server/video-progress.server";
+import { listVideoClips } from "#/modules/clips/server/clip-views.server";
+import { toClipView } from "#/modules/clips/server/clip-views.server";
+import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
+import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
+import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
+import {
+    VIDEO_ALREADY_PROCESSING_MESSAGE,
+    canMoveVideoTo,
+    resetVideoToQueued,
+} from "#/modules/video-records/server/video-progress.server";
+import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import {
     MAX_CLIP_COUNT,
     MIN_CLIP_COUNT,
     WORKING_VIDEO_STATUSES,
-    isVideoCancellable,
     isVideoResumable,
-} from "#/modules/videos/video-status";
+} from "#/modules/video-records/video-status";
 import type { VideoDetails, VideoSummary } from "#/modules/videos/video-views";
-import { toStoredVideoTitle } from "#/modules/videos/video-title";
-import { videos } from "#/modules/videos/videos.schema";
+import { toStoredVideoTitle } from "#/modules/video-records/video-title";
+import { videos } from "#/modules/video-records/videos.schema";
 import { fetchYoutubePreview } from "#/modules/videos/server/fetch-youtube-preview.server";
 import {
     toCanonicalYoutubeUrl,
@@ -101,20 +107,26 @@ export const createYoutubeVideo = createServerFn({ method: "POST" })
     .handler(async ({ context, data }): Promise<{ videoId: string }> => {
         const userId = context.user.id;
         const videoId = randomUUID();
+        // Looked up before the transaction: a slow YouTube must not hold the user's start lock.
         const title = await resolveYoutubeTitle(data.url);
 
-        await db.insert(videos).values({
-            id: videoId,
-            userId,
-            title,
-            source: "youtube",
-            sourceUrl: data.url,
-            requestedClipCount: data.clipCount,
-            // "" is stored as is: it means "detect automatically", unlike null (videos from before 0002).
-            transcriptionLanguage: data.language,
-            processingStartedAt: new Date(),
+        await runVideoStartTransaction(userId, async ({ transaction, jobDatabase }) => {
+            await assertCanStartAnotherVideo(userId, transaction);
+            // The download size is unknown up front, so only an account that is already full is refused.
+            await assertStorageAvailable({ userId, incomingBytes: 0 }, transaction);
+            await transaction.insert(videos).values({
+                id: videoId,
+                userId,
+                title,
+                source: "youtube",
+                sourceUrl: data.url,
+                requestedClipCount: data.clipCount,
+                // "" is stored as is: it means "detect automatically", unlike null (videos from before 0002).
+                transcriptionLanguage: data.language,
+                processingStartedAt: new Date(),
+            });
+            await enqueueVideoProcessing({ videoId, userId }, jobDatabase);
         });
-        await enqueueVideoProcessing(videoId);
         return { videoId };
     });
 
@@ -130,12 +142,30 @@ export const retryVideo = createServerFn({ method: "POST" })
             );
         }
 
-        await db
-            .update(clips)
-            .set({ status: "pending" })
-            .where(and(eq(clips.videoId, video.id), eq(clips.status, "failed")));
-        await resetVideoToQueued(video.id);
-        await enqueueVideoProcessing(video.id);
+        const userId = context.user.id;
+        // All or nothing: failed clips must not turn pending on a video another retry already
+        // took, and the job is sent only with the reset that needs it.
+        const isReset = await runVideoStartTransaction(
+            userId,
+            async ({ transaction, jobDatabase }) => {
+                await assertCanStartAnotherVideo(userId, transaction);
+
+                if ((await resetVideoToQueued(video.id, transaction)) === false) {
+                    return false;
+                }
+
+                await transaction
+                    .update(clips)
+                    .set({ status: "pending" })
+                    .where(and(eq(clips.videoId, video.id), eq(clips.status, "failed")));
+                await enqueueVideoProcessing({ videoId: video.id, userId }, jobDatabase);
+                return true;
+            },
+        );
+
+        if (isReset === false) {
+            throw new UserFacingError(VIDEO_ALREADY_PROCESSING_MESSAGE);
+        }
     });
 
 export const cancelVideo = createServerFn({ method: "POST" })
@@ -143,18 +173,22 @@ export const cancelVideo = createServerFn({ method: "POST" })
     .validator(videoIdInputSchema)
     .handler(async ({ context, data }): Promise<void> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
+        const isQueued = sql`${videos.status} = 'queued'`;
+        // One statement, so a video that finishes in between is never flagged. The flag stops a
+        // running worker step; a video still in the queue has none, so it is cancelled at once.
+        const cancelledRows = await db
+            .update(videos)
+            .set({
+                cancelRequested: true,
+                status: sql`CASE WHEN ${isQueued} THEN 'cancelled'::video_status ELSE ${videos.status} END`,
+                finishedAt: sql`CASE WHEN ${isQueued} THEN ${sql.param(new Date(), videos.finishedAt)} ELSE ${videos.finishedAt} END`,
+            })
+            .where(and(eq(videos.id, video.id), canMoveVideoTo("cancelled")))
+            .returning({ id: videos.id });
 
-        if (isVideoCancellable(video.status) === false) {
+        if (cancelledRows.length === 0) {
             throw new UserFacingError("Este vídeo não está sendo processado.");
         }
-
-        // The flag stops a running worker step. A video still in the queue is cancelled at once;
-        // the status condition keeps that from overwriting a worker that picked it up meanwhile.
-        await db.update(videos).set({ cancelRequested: true }).where(eq(videos.id, video.id));
-        await db
-            .update(videos)
-            .set({ status: "cancelled", finishedAt: new Date() })
-            .where(and(eq(videos.id, video.id), eq(videos.status, "queued")));
     });
 
 export const deleteVideo = createServerFn({ method: "POST" })

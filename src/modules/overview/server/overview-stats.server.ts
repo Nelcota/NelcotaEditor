@@ -15,13 +15,10 @@ import {
     countVideos,
     listClipStatuses,
     listFinishedVideos,
-    listReadyClips,
 } from "#/modules/overview/server/overview-rows.server";
-import type {
-    OverviewClipRow,
-    OverviewVideoRow,
-} from "#/modules/overview/server/overview-rows.server";
-import { toClipView } from "#/modules/videos/server/video-queries.server";
+import type { OverviewVideoRow } from "#/modules/overview/server/overview-rows.server";
+import { listReadyClipsSince, toClipView } from "#/modules/clips/server/clip-views.server";
+import type { ReadyClipRow } from "#/modules/clips/server/clip-views.server";
 import type { LibraryClip } from "#/modules/videos/video-views";
 
 const BEST_CLIP_COUNT = 10;
@@ -85,7 +82,7 @@ function summarizeVideoMetrics(window: PeriodWindow, rows: Array<OverviewVideoRo
     };
 }
 
-function summarizeClipMetrics(window: PeriodWindow, rows: Array<OverviewClipRow>) {
+function summarizeClipMetrics(window: PeriodWindow, rows: Array<ReadyClipRow>) {
     return {
         clipsReady: summarizeMetric(
             bucketByDay(window, rows, (row) => ({ date: row.clip.createdAt, value: 1 })),
@@ -120,7 +117,7 @@ async function buildFunnel(
     };
 }
 
-function pickBestClips(window: PeriodWindow, rows: Array<OverviewClipRow>): Array<LibraryClip> {
+function pickBestClips(window: PeriodWindow, rows: Array<ReadyClipRow>): Array<LibraryClip> {
     return rows
         .filter((row) => isInCurrentPeriod(window, row.clip.createdAt))
         .toSorted((first, second) => second.clip.score - first.clip.score)
@@ -146,7 +143,7 @@ export async function summarizeOverview(
     const window = createPeriodWindow(periodDays, new Date());
     const [videoRows, clipRows, videoCounts] = await Promise.all([
         listFinishedVideos(userId, window.previousStart),
-        listReadyClips(userId, window.previousStart),
+        listReadyClipsSince(userId, window.previousStart),
         countVideos(userId),
     ]);
     const metrics: OverviewMetrics = {

@@ -1,5 +1,5 @@
 import CheckIcon from "~icons/solar/check-linear";
-import type { VideoStatus } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { toCrewLine } from "#/modules/videos/crew-lines";
 import { CancelVideoButton } from "#/modules/videos/ui/cancel-video-button";
@@ -92,7 +92,7 @@ function StageHeadline({ video }: { video: VideoSummary }) {
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
             <div>
                 <p className="text-lg font-bold">{describeStage(video)}</p>
-                <p className="text-sm text-primary">{toCrewLine(video)}</p>
+                <p className="text-sm text-foreground">{toCrewLine(video)}</p>
             </div>
             <p className="text-sm text-muted-foreground tabular-nums">
                 {describeProgress(video.progressPercent, secondsLeft)}

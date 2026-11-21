@@ -1,16 +1,16 @@
 import { queryOptions } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { getVideoDetails, listVideos } from "#/modules/videos/server/video-functions";
-import { isVideoFinished } from "#/modules/videos/video-status";
-import type { VideoStatus } from "#/modules/videos/video-status";
+import { isVideoFinished } from "#/modules/video-records/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 
 const POLL_INTERVAL_MILLISECONDS = 2_500;
 // A queued video can wait hours behind a long one; its row changes only when the worker starts it.
 const QUEUED_POLL_INTERVAL_MILLISECONDS = 10_000;
 
 export const VIDEOS_QUERY_KEY = ["videos"];
-// The Studio's query carries the whole transcript and is refreshed on its own when a render ends
-// (the clip it shows comes from the video details, which do refresh).
+// The Studio's queries (the whole transcript's words, each clip's draft) are refreshed on their
+// own when a render ends (the clip it shows comes from the video details, which do refresh).
 const STUDIO_KEY_SEGMENT = "studio";
 
 function isRefreshedAfterChanges(queryKey: ReadonlyArray<unknown>): boolean {
@@ -28,7 +28,7 @@ export async function invalidateVideoQueries(queryClient: QueryClient): Promise<
     });
 }
 
-function pollWhileProcessing(statuses: Array<VideoStatus>): number | false {
+export function pollWhileProcessing(statuses: Array<VideoStatus>): number | false {
     const unfinished = statuses.filter((status) => isVideoFinished(status) === false);
 
     if (unfinished.length === 0) {
@@ -42,19 +42,14 @@ function pollWhileProcessing(statuses: Array<VideoStatus>): number | false {
     return POLL_INTERVAL_MILLISECONDS;
 }
 
+/**
+ * The whole list, fetched on load and after changes. It does not poll itself: useVideosQuery
+ * polls the light progress endpoint and refetches this only when a video changes stage.
+ */
 export function videosQueryOptions() {
     return queryOptions({
         queryKey: VIDEOS_QUERY_KEY,
         queryFn: () => listVideos(),
-        refetchInterval: (query) => {
-            const videos = query.state.data;
-
-            if (videos === undefined) {
-                return false;
-            }
-
-            return pollWhileProcessing(videos.map((video) => video.status));
-        },
     });
 }
 

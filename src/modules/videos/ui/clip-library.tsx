@@ -6,7 +6,7 @@ import type { ClipOrder } from "#/modules/videos/ui/clip-order";
 import { ClipRow } from "#/modules/videos/ui/clip-row";
 import { ClipsToolbar } from "#/modules/videos/ui/clips-toolbar";
 import { searchLibraryClips } from "#/modules/videos/ui/library-clip-search";
-import { pluralize } from "#/modules/videos/ui/pluralize";
+import { pluralize } from "#/shared/ui/pluralize";
 import { SourceVideoLink } from "#/modules/videos/ui/source-video-link";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";

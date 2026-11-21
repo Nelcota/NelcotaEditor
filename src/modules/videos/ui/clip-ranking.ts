@@ -1,5 +1,6 @@
-import { isVideoFinished } from "#/modules/videos/video-status";
-import type { ClipView, VideoDetails } from "#/modules/videos/video-views";
+import { isVideoFinished } from "#/modules/video-records/video-status";
+import type { VideoDetails } from "#/modules/videos/video-views";
+import type { ClipView } from "#/modules/clips/clip-view";
 
 /** While processing, the requested clips that have no row yet are shown as waiting slots. */
 export function countPlaceholders(details: VideoDetails): number {

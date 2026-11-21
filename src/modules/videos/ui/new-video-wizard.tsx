@@ -6,7 +6,7 @@ import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
 import { LanguageStepFields } from "#/modules/videos/ui/language-step-fields";
 import { NewVideoPreview } from "#/modules/videos/ui/new-video-preview";
 import { ClipsStepFields, VideoStepFields } from "#/modules/videos/ui/new-video-step-fields";
-import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { UploadProgress } from "#/modules/videos/ui/upload-progress";
 import { useIsLinkBlocked } from "#/modules/videos/ui/use-is-link-blocked";
 import { useVideoSubmission } from "#/modules/videos/ui/use-video-submission";

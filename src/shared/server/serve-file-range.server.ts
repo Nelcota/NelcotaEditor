@@ -2,13 +2,15 @@ import { stat } from "node:fs/promises";
 import { parseByteRange } from "#/shared/server/byte-range.server";
 import type { ByteRange } from "#/shared/server/byte-range.server";
 import { createFileStream } from "#/shared/server/file-stream.server";
+import { isFileNotFoundError } from "#/shared/server/fs-errors";
+import {
+    HTTP_NOT_FOUND,
+    HTTP_NOT_MODIFIED,
+    HTTP_PARTIAL_CONTENT,
+    HTTP_RANGE_NOT_SATISFIABLE,
+} from "#/shared/server/http-response";
 
-const HTTP_PARTIAL_CONTENT = 206;
-const HTTP_RANGE_NOT_SATISFIABLE = 416;
-const HTTP_NOT_MODIFIED = 304;
-const HTTP_NOT_FOUND = 404;
 const MILLISECONDS = 1000;
-const MISSING_FILE_CODE = "ENOENT";
 
 interface FileOnDisk {
     absolutePath: string;
@@ -31,10 +33,6 @@ function partialResponse(file: FileOnDisk, range: ByteRange, headers: Headers): 
     });
 }
 
-function isMissingFileError(error: unknown): boolean {
-    return error instanceof Error && "code" in error && error.code === MISSING_FILE_CODE;
-}
-
 interface FileFacts {
     size: number;
     /** Whole seconds: HTTP dates carry no milliseconds. */
@@ -52,7 +50,7 @@ async function readFileFacts(absolutePath: string): Promise<FileFacts | null> {
 
         return { size: stats.size, modifiedSeconds: Math.floor(stats.mtimeMs / MILLISECONDS) };
     } catch (error) {
-        if (isMissingFileError(error) === true) {
+        if (isFileNotFoundError(error) === true) {
             return null;
         }
 

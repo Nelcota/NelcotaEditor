@@ -171,6 +171,10 @@ Modular monolith: one folder per business context under `src/modules/`.
 - `src/shared/ui/`: generic components with no business rules. `src/shared/server/`: cross-cutting server infrastructure (env, email).
 - `src/db/`: the database client and `schema.ts`, which only re-exports each module's tables.
 - Dependencies point one way: `routes → modules → shared`. `shared` never imports from `modules`.
+- Modules import only from lower layers, never sideways or up: `shell` · `overview` · `studio`, then
+  `videos` (the library), `processing`, `highlights`, `clips`, `transcription` · `preferences`,
+  `video-records` (the video row, its statuses and transitions), `auth`. The exact map and each file-level
+  exception (with its reason) live in `scripts/check-module-boundaries.ts`; `npm run check` enforces them.
 - Server-only files end in `.server.ts`; TanStack Start fails the build if client code imports them. Server functions (`createServerFn`) stay in plain `.ts` files, since the client imports them to make the RPC call. Types the client needs never live in a `.server.ts` file.
 - Hexagonal layers (`domain/`, `application/`, `ports/`, `adapters/`) only inside modules that talk to external systems (payments, AI model providers, email) or hold real business rules. Add a port only when there are two adapters, or a second one is close.
 - Import alias: `#/` only.

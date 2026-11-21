@@ -8,7 +8,7 @@ services:
             POSTGRES_PASSWORD: nelcota
             POSTGRES_DB: nelcota
         ports:
-            - "5433:5432"
+            - "127.0.0.1:5433:5432"
         volumes:
             - postgres-data:/var/lib/postgresql
         healthcheck:
@@ -29,7 +29,7 @@ services:
             WHISPER__NUM_WORKERS: "4"
             WHISPER__CPU_THREADS: "2"
         ports:
-            - "8000:8000"
+            - "127.0.0.1:8000:8000"
         volumes:
             - whisper-models:/home/ubuntu/.cache/huggingface/hub
         restart: unless-stopped

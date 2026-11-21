@@ -1,4 +1,4 @@
-import type { VideoSource, VideoStatus } from "#/modules/videos/video-status";
+import type { VideoSource, VideoStatus } from "#/modules/video-records/video-status";
 
 export const VIDEO_STATUS_LABELS: Record<VideoStatus, string> = {
     queued: "Na fila",

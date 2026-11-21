@@ -1,7 +1,7 @@
 import LinkRoundIcon from "~icons/solar/link-round-linear";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { setClipSharing } from "#/modules/videos/server/clip-edit-functions";
-import type { ClipView } from "#/modules/videos/video-views";
+import { setClipSharing } from "#/modules/clips/server/clip-sharing-functions";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import { CopyTextButton } from "#/shared/ui/copy-text-button";

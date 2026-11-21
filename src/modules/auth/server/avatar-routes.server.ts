@@ -21,28 +21,21 @@ import {
     readAvatarSize,
 } from "#/modules/auth/server/avatar-photo-size.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
-
-const HTTP_BAD_REQUEST = 400;
-const HTTP_UNAUTHORIZED = 401;
-const HTTP_NOT_FOUND = 404;
-const HTTP_PAYLOAD_TOO_LARGE = 413;
-const HTTP_UNSUPPORTED_MEDIA_TYPE = 415;
-
-const FILE_NOT_FOUND_CODE = "ENOENT";
+import { isFileNotFoundError } from "#/shared/server/fs-errors";
+import {
+    HTTP_BAD_REQUEST,
+    HTTP_NOT_FOUND,
+    HTTP_PAYLOAD_TOO_LARGE,
+    HTTP_UNAUTHORIZED,
+    HTTP_UNSUPPORTED_MEDIA_TYPE,
+    errorResponse,
+} from "#/shared/server/http-response";
 
 class AvatarTooLargeError extends Error {
     constructor() {
         super(`Avatar is larger than ${MAX_AVATAR_BYTES} bytes`);
         this.name = "AvatarTooLargeError";
     }
-}
-
-function errorResponse(status: number, message: string): Response {
-    return Response.json({ error: message }, { status });
-}
-
-function isFileNotFound(error: unknown): boolean {
-    return error instanceof Error && "code" in error && error.code === FILE_NOT_FOUND_CODE;
 }
 
 /** Reads the body but stops as soon as it passes the limit, whatever Content-Length claimed. */
@@ -162,7 +155,7 @@ export async function serveAvatar(request: Request): Promise<Response> {
         return photoResponse(await readAvatarPhoto(user.id, extension), extension);
     } catch (error) {
         // The row can briefly point at a photo that a newer upload already replaced.
-        if (isFileNotFound(error) === true) {
+        if (isFileNotFoundError(error) === true) {
             return new Response(null, { status: HTTP_NOT_FOUND });
         }
 

@@ -1,5 +1,5 @@
 import { STAGE_CREW } from "#/modules/videos/stage-crew";
-import type { VideoStatus } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 import { cn } from "#/shared/ui/cn";
 import { Mascot } from "#/shared/ui/mascot";
 

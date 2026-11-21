@@ -1,5 +1,6 @@
 import RestartIcon from "~icons/solar/restart-linear";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ComponentProps, ReactNode } from "react";
 import { retryClip } from "#/modules/videos/server/video-edit-functions";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
@@ -10,10 +11,17 @@ interface RetryClipButtonProps {
     clipId: string;
     /** The worker is busy with this video, so the clip cannot go back to the queue yet. */
     isDisabled: boolean;
+    /** Outline where another filled button is already the view's primary action. */
+    variant?: ComponentProps<typeof Button>["variant"];
 }
 
 /** Sends one failed clip back to Brasa; the rest of the video stays as it is. */
-export function RetryClipButton({ videoId, clipId, isDisabled }: RetryClipButtonProps) {
+export function RetryClipButton({
+    videoId,
+    clipId,
+    isDisabled,
+    variant = "default",
+}: RetryClipButtonProps): ReactNode {
     const queryClient = useQueryClient();
     const retry = useMutation({
         mutationFn: () => retryClip({ data: { videoId, clipId } }),
@@ -28,6 +36,7 @@ export function RetryClipButton({ videoId, clipId, isDisabled }: RetryClipButton
                 onClick={() => retry.mutate()}
                 disabled={isDisabled || retry.isPending}
                 aria-busy={retry.isPending}
+                variant={variant}
                 className="font-semibold"
             >
                 <RestartIcon aria-hidden="true" />

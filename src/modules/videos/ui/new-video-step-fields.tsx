@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { MAX_TITLE_LENGTH } from "#/modules/videos/upload-limits";
+import { MAX_TITLE_LENGTH } from "#/modules/video-records/upload-limits";
 import { ClipCountPicker } from "#/modules/videos/ui/clip-count-picker";
 import type { VideoSource } from "#/modules/videos/ui/video-source";
 import { VideoSourceField } from "#/modules/videos/ui/video-source-field";

@@ -1,18 +1,16 @@
 import { rm } from "node:fs/promises";
 import path from "node:path";
-import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { toOverallPercent } from "#/modules/processing/processing-stages";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 import { transcripts } from "#/modules/transcription/transcription.schema";
 import { extractAudioChunks } from "#/modules/transcription/server/extract-audio-chunks.server";
 import type { AudioChunk } from "#/modules/transcription/server/extract-audio-chunks.server";
+import { findTranscriptWords } from "#/modules/transcription/server/find-transcript-words.server";
 import {
     ensureWhisperModel,
     transcribeAudioChunk,
 } from "#/modules/transcription/server/whisper-client.server";
 import type { ChunkTranscription } from "#/modules/transcription/server/whisper-client.server";
-import { updateVideoStage } from "#/modules/videos/server/video-progress.server";
 import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
@@ -28,21 +26,6 @@ const PERCENT = 100;
 interface Transcription {
     words: Array<TranscriptWord>;
     language: string | null;
-}
-
-async function findTranscriptWords(videoId: string): Promise<Array<TranscriptWord> | null> {
-    const rows = await db
-        .select({ words: transcripts.words })
-        .from(transcripts)
-        .where(eq(transcripts.videoId, videoId))
-        .limit(1);
-    const transcript = rows[0];
-
-    if (transcript === undefined) {
-        return null;
-    }
-
-    return transcript.words;
 }
 
 interface ChunksToTranscribe {
@@ -78,14 +61,13 @@ interface TranscriptRequest {
     /** The video's language (from the user's preferences); null lets Whisper detect it. */
     language: string | null;
     signal: AbortSignal;
+    /** Records this step's own progress (0 to 100); the pipeline maps it onto the whole run. */
+    saveProgress: (stagePercent: number) => Promise<void>;
 }
 
 /** Splits the audio, transcribes it and always removes the WAV chunks, which can be large. */
-async function transcribeAudio(
-    request: TranscriptRequest,
-    saveProgress: (stagePercent: number) => Promise<void>,
-): Promise<Transcription> {
-    const { videoId, sourcePath, language, signal } = request;
+async function transcribeAudio(request: TranscriptRequest): Promise<Transcription> {
+    const { videoId, sourcePath, language, signal, saveProgress } = request;
     const audioDirectory = resolveStoragePath(path.posix.join(getVideoDirectory(videoId), "audio"));
 
     try {
@@ -111,20 +93,17 @@ async function transcribeAudio(
 
 /** Returns the word-level transcript, creating it only when it does not exist yet. */
 export async function ensureTranscript(request: TranscriptRequest): Promise<Array<TranscriptWord>> {
-    const videoId = request.videoId;
+    const { videoId, saveProgress } = request;
     const existingWords = await findTranscriptWords(videoId);
 
     if (existingWords !== null) {
         return existingWords;
     }
 
-    const saveProgress = (stagePercent: number): Promise<void> =>
-        updateVideoStage(videoId, "transcribing", toOverallPercent("transcribing", stagePercent));
-
     await saveProgress(0);
     await ensureWhisperModel();
 
-    const transcription = await transcribeAudio(request, saveProgress);
+    const transcription = await transcribeAudio(request);
     await db.insert(transcripts).values({ videoId, ...transcription });
     return transcription.words;
 }

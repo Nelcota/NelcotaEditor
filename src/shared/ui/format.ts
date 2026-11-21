@@ -3,6 +3,19 @@ const SECONDS_PER_HOUR = 3600;
 const MINUTES_PER_HOUR = 60;
 const BYTES_PER_UNIT = 1024;
 const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"];
+// Server (UTC) and browser must agree on the day, or dates near midnight mismatch on hydration.
+// Mirrors the server's business time zone, which lives in server-only code.
+const DISPLAY_TIME_ZONE = "America/Sao_Paulo";
+
+const wholeNumberFormatter = new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+});
+
+const oneDecimalFormatter = new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+});
 // Keeps a number on the same line as its unit ("5 GB" never splits).
 const NO_BREAK_SPACE = " ";
 
@@ -53,12 +66,13 @@ export function formatBytes(bytes: number): string {
     );
     const value = bytes / BYTES_PER_UNIT ** unitIndex;
     // Whole bytes have no decimals; larger units show one.
-    const decimals = Math.min(1, unitIndex);
+    let formatter = oneDecimalFormatter;
 
-    const formattedValue = new Intl.NumberFormat("pt-BR", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-    }).format(value);
+    if (unitIndex === 0) {
+        formatter = wholeNumberFormatter;
+    }
+
+    const formattedValue = formatter.format(value);
 
     return `${formattedValue}${NO_BREAK_SPACE}${BYTE_UNITS[unitIndex] ?? "B"}`;
 }
@@ -68,12 +82,14 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: DISPLAY_TIME_ZONE,
 });
 
 const dayFormatter = new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: DISPLAY_TIME_ZONE,
 });
 
 /** "2026-11-19T20:41:00Z" → "19/11/2026". */

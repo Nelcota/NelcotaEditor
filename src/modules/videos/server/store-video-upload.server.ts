@@ -1,7 +1,7 @@
 import { mkdir, open, rm } from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
-import { MAX_UPLOAD_BYTES } from "#/modules/videos/upload-limits";
+import { MAX_UPLOAD_BYTES } from "#/modules/video-records/upload-limits";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 
 const SOURCE_FILE_NAME = "source";
@@ -46,7 +46,7 @@ async function copyChunks(
 async function writeBodyToFile(
     body: ReadableStream<Uint8Array>,
     absolutePath: string,
-): Promise<void> {
+): Promise<number> {
     const fileHandle = await open(absolutePath, "w");
     let writtenBytes = 0;
 
@@ -59,6 +59,8 @@ async function writeBodyToFile(
     if (writtenBytes === 0) {
         throw new EmptyUploadError();
     }
+
+    return writtenBytes;
 }
 
 export async function removeVideoDirectory(videoId: string): Promise<void> {
@@ -70,22 +72,26 @@ interface UploadTarget {
     extension: string;
 }
 
-/** Saves the upload as the video's source file and returns its relative path. */
+export interface StoredUpload {
+    sourcePath: string;
+    sourceBytes: number;
+}
+
+/** Saves the upload as the video's source file and returns its relative path and size. */
 export async function storeVideoUpload(
     body: ReadableStream<Uint8Array>,
     target: UploadTarget,
-): Promise<string> {
+): Promise<StoredUpload> {
     const videoDirectory = getVideoDirectory(target.videoId);
     const sourcePath = path.posix.join(videoDirectory, `${SOURCE_FILE_NAME}${target.extension}`);
 
     await mkdir(resolveStoragePath(videoDirectory), { recursive: true });
 
     try {
-        await writeBodyToFile(body, resolveStoragePath(sourcePath));
+        const sourceBytes = await writeBodyToFile(body, resolveStoragePath(sourcePath));
+        return { sourcePath, sourceBytes };
     } catch (error) {
         await removeVideoDirectory(target.videoId);
         throw error;
     }
-
-    return sourcePath;
 }

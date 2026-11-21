@@ -1,5 +1,6 @@
 import path from "node:path";
 import { z } from "zod";
+import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 
 // ffprobe prints numbers as strings ("12.345000") and "N/A" when unknown, which coerces to NaN and fails.
@@ -54,7 +55,7 @@ export async function probeMedia(absolutePath: string): Promise<MediaInfo> {
         "format=duration:stream=codec_type",
         "-of",
         "json",
-        absolutePath,
+        ...localFileInput(absolutePath),
     ]);
     const probe = parseProbeOutput(output, absolutePath);
     const streamTypes = probe.streams.map((stream) => stream.codec_type);

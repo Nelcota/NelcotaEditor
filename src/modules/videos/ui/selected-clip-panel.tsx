@@ -1,12 +1,12 @@
 import { STAGE_CREW } from "#/modules/videos/stage-crew";
-import type { ClipView } from "#/modules/videos/video-views";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { ClipDownloadLink } from "#/modules/videos/ui/clip-download-link";
 import { ClipPreview } from "#/modules/videos/ui/clip-preview";
 import { SCORE_SCALE } from "#/modules/videos/ui/clip-score";
 import { CopyTitleButton } from "#/modules/videos/ui/copy-title-button";
 import { RetryClipButton } from "#/modules/videos/ui/retry-clip-button";
 import { ShareClipButton } from "#/modules/videos/ui/share-clip-button";
-import { OpenInStudioLink } from "#/modules/videos/ui/studio/open-in-studio-link";
+import { OpenInStudioLink } from "#/modules/videos/ui/open-in-studio-link";
 import { formatClock } from "#/shared/ui/format";
 import { Mascot } from "#/shared/ui/mascot";
 

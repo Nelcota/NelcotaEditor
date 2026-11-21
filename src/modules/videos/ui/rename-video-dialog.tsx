@@ -2,9 +2,9 @@ import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { updateVideoTitle } from "#/modules/videos/server/video-edit-functions";
-import { renameVideoFormSchema } from "#/modules/videos/video-title";
+import { renameVideoFormSchema } from "#/modules/video-records/video-title";
 import type { VideoSummary } from "#/modules/videos/video-views";
-import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import {

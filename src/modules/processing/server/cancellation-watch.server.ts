@@ -1,4 +1,4 @@
-import { isCancelRequested } from "#/modules/videos/server/video-progress.server";
+import { isCancelRequested } from "#/modules/video-records/server/video-progress.server";
 
 const POLL_INTERVAL_MILLISECONDS = 2_000;
 

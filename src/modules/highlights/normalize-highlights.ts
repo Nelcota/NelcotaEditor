@@ -1,10 +1,10 @@
-import { truncateText } from "#/modules/videos/video-title";
+import { truncateText } from "#/modules/video-records/video-title";
 import {
     MAX_CLIP_SECONDS,
     MAX_SCORE,
     MIN_CLIP_SECONDS,
     MIN_SCORE,
-} from "#/modules/highlights/highlight-limits";
+} from "#/modules/clips/clip-limits";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 
 const START_PADDING_SECONDS = 0.15;

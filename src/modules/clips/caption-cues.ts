@@ -1,7 +1,8 @@
 import type { CaptionCue, CaptionWord } from "#/modules/clips/clip-studio.schema";
 
 const MAX_WORDS_PER_CUE = 3;
-const MAX_GAP_SECONDS = 0.6;
+const MAX_GAP_HUNDREDTHS = 60;
+const HUNDREDTHS_PER_SECOND = 100;
 const SENTENCE_END = /[.!?…,;:]$/;
 
 function startsNewCue(cueWords: Array<CaptionWord>, word: CaptionWord): boolean {
@@ -19,7 +20,12 @@ function startsNewCue(cueWords: Array<CaptionWord>, word: CaptionWord): boolean 
         return true;
     }
 
-    return word.startSeconds - previousWord.endSeconds > MAX_GAP_SECONDS;
+    // Compared in hundredths: in floats 2.6 - 2.0 is 0.6000000000000001 and broke a 0.60 s pause.
+    const gapHundredths = Math.round(
+        (word.startSeconds - previousWord.endSeconds) * HUNDREDTHS_PER_SECOND,
+    );
+
+    return gapHundredths > MAX_GAP_HUNDREDTHS;
 }
 
 export function toCue(words: Array<CaptionWord>): CaptionCue | null {

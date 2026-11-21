@@ -1,11 +1,12 @@
 import { openAsBlob } from "node:fs";
-import OpenAI, { toFile } from "openai";
+import OpenAI, { APIConnectionError, toFile } from "openai";
 import { z } from "zod";
+import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/transcript-word";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
-import { MAX_CAPTION_WORD_LENGTH } from "#/modules/clips/clip-studio.schema";
 import { AUDIO_CHUNK_SECONDS } from "#/modules/transcription/server/extract-audio-chunks.server";
 import type { AudioChunk } from "#/modules/transcription/server/extract-audio-chunks.server";
 import { getEnvironment } from "#/shared/server/env.server";
+import { UserFacingError } from "#/shared/server/user-facing-error";
 
 // speaches implements the OpenAI audio API and ignores the key, but the SDK requires one.
 const LOCAL_API_KEY = "speaches";
@@ -31,6 +32,21 @@ export interface ChunkTranscription {
     words: Array<TranscriptWord>;
 }
 
+/**
+ * The Whisper server being down or too slow is something the person can wait out, so it gets a
+ * message instead of the generic failure. APIConnectionTimeoutError extends APIConnectionError.
+ */
+function toUserFacingError(error: unknown): unknown {
+    if (error instanceof APIConnectionError) {
+        return new UserFacingError(
+            "A transcrição está indisponível agora. Tente de novo em alguns minutos.",
+            { cause: error },
+        );
+    }
+
+    return error;
+}
+
 function createWhisperClient(): OpenAI {
     const environment = getEnvironment();
 
@@ -47,7 +63,11 @@ export async function ensureWhisperModel(): Promise<void> {
     const client = createWhisperClient();
 
     // A speaches-only route, so it goes through the SDK's generic POST (same retries and errors).
-    await client.post(`/models/${environment.WHISPER_MODEL}`);
+    try {
+        await client.post(`/models/${environment.WHISPER_MODEL}`);
+    } catch (error) {
+        throw toUserFacingError(error);
+    }
 }
 
 function toLanguageOption(language: string): { language?: string } {
@@ -121,16 +141,22 @@ export async function transcribeAudioChunk(
     const environment = getEnvironment();
     const client = createWhisperClient();
     const audio = await toFile(await openAsBlob(chunk.absolutePath), "audio.wav");
-    const transcription = await client.audio.transcriptions.create(
-        {
-            file: audio,
-            model: environment.WHISPER_MODEL,
-            response_format: "verbose_json",
-            timestamp_granularities: ["word"],
-            ...toLanguageOption(resolveLanguage(videoLanguage)),
-        },
-        { signal },
-    );
+    let transcription: unknown = null;
+
+    try {
+        transcription = await client.audio.transcriptions.create(
+            {
+                file: audio,
+                model: environment.WHISPER_MODEL,
+                response_format: "verbose_json",
+                timestamp_granularities: ["word"],
+                ...toLanguageOption(resolveLanguage(videoLanguage)),
+            },
+            { signal },
+        );
+    } catch (error) {
+        throw toUserFacingError(error);
+    }
 
     return toChunkTranscription(transcription, chunk.offsetSeconds);
 }

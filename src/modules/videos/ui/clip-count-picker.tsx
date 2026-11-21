@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ClipCountStepper } from "#/modules/videos/ui/clip-count-stepper";
+import { ClipCountStepper } from "#/modules/preferences/ui/clip-count-stepper";
 import { cn } from "#/shared/ui/cn";
 
 /** The counts people pick most; anything else from 1 to 10 is under "Outro". */

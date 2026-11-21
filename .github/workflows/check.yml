@@ -17,7 +17,8 @@ jobs:
                   node-version: 24
                   cache: npm
             - run: npm ci
-            - run: npm run check
+            - name: Format, lint, types, copy rules and unit tests
+              run: npm run check
             - name: Migrations match the schema snapshots
               # drizzle-kit only reads the config here; it never connects to this address.
               env:

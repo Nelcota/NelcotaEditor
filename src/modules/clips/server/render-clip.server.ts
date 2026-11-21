@@ -15,6 +15,7 @@ import type { ClipStatus } from "#/modules/clips/clip-status";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 
@@ -90,8 +91,7 @@ function buildFfmpegArguments(clip: Clip, sourceAbsolutePath: string): Array<str
         "-y",
         "-ss",
         clip.startSeconds.toFixed(TIME_DECIMALS),
-        "-i",
-        sourceAbsolutePath,
+        ...localFileInput(sourceAbsolutePath),
         "-t",
         durationSeconds.toFixed(TIME_DECIMALS),
         "-vf",

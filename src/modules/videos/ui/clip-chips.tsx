@@ -1,9 +1,9 @@
-import type { ClipView } from "#/modules/videos/video-views";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { cn } from "#/shared/ui/cn";
 
 // Grows to two lines instead of cutting the title: picking a clip means reading its name.
 const CHIP_CLASS =
-    "inline-flex min-h-10 max-w-80 items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pr-3 pl-1.5 text-sm font-bold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
+    "group inline-flex min-h-10 max-w-80 items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pr-3 pl-1.5 text-sm font-bold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
 
 interface ClipChipsProps {
     clips: Array<ClipView>;
@@ -18,11 +18,15 @@ function ScoreOrState({ clip }: { clip: ClipView }) {
     }
 
     if (clip.status !== "done") {
-        return <span className="text-xs text-muted-foreground">montando</span>;
+        return (
+            <span className="text-xs text-muted-foreground group-aria-pressed:text-background/75">
+                montando
+            </span>
+        );
     }
 
     return (
-        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary tabular-nums">
+        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
             {clip.score}
         </span>
     );
@@ -61,11 +65,11 @@ export function ClipChips({
                     title={clip.title}
                     className={cn(
                         CHIP_CLASS,
-                        "aria-pressed:border-primary aria-pressed:bg-primary/12",
+                        "aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:hover:bg-foreground/90",
                         clip.status === "failed" && "border-destructive/50",
                     )}
                 >
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary text-xs tabular-nums">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary text-xs text-secondary-foreground tabular-nums">
                         {index + 1}
                     </span>
                     <span className="line-clamp-2 text-start leading-snug">{clip.title}</span>

@@ -3,12 +3,10 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
-import { videos } from "#/modules/videos/videos.schema";
+import { videos } from "#/modules/video-records/videos.schema";
+import { isFileNotFoundError } from "#/shared/server/fs-errors";
+import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 import { resolveStoragePath } from "#/shared/server/storage.server";
-
-const HTTP_UNAUTHORIZED = 401;
-const HTTP_NOT_FOUND = 404;
-const MISSING_FILE_CODE = "ENOENT";
 
 const videoIdSchema = z.uuid();
 
@@ -27,16 +25,12 @@ async function findOwnedThumbnailPath(videoId: string, userId: string): Promise<
     return row.thumbnailPath;
 }
 
-function isMissingFileError(error: unknown): boolean {
-    return error instanceof Error && "code" in error && error.code === MISSING_FILE_CODE;
-}
-
 /** The row can outlive its file (storage cleaned by hand); that is a 404, not a server error. */
 async function readThumbnail(thumbnailPath: string): Promise<Buffer | null> {
     try {
         return await readFile(resolveStoragePath(thumbnailPath));
     } catch (error) {
-        if (isMissingFileError(error) === true) {
+        if (isFileNotFoundError(error) === true) {
             return null;
         }
 

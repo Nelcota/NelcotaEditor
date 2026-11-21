@@ -4,9 +4,10 @@ import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
 import { summarizeUsage } from "#/modules/videos/server/usage-summary.server";
-import { CLIP_VIEW_COLUMNS, toClipView } from "#/modules/videos/server/video-queries.server";
+import { CLIP_VIEW_COLUMNS } from "#/modules/clips/server/clip-views.server";
+import { toClipView } from "#/modules/clips/server/clip-views.server";
 import type { LibraryClip, UsageSummary } from "#/modules/videos/video-views";
-import { videos } from "#/modules/videos/videos.schema";
+import { videos } from "#/modules/video-records/videos.schema";
 
 /** Every ready clip of the signed-in user, newest first. */
 export const listLibraryClips = createServerFn({ method: "GET" })

@@ -1,4 +1,4 @@
-import type { VideoStatus } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 
 export interface StageRange {
     startPercent: number;

@@ -12,11 +12,22 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     PASSWORD_TOO_LONG: "A senha nova é longa demais.",
     CREDENTIAL_ACCOUNT_NOT_FOUND: "Esta conta não tem senha para trocar.",
     [VIDEOS_STILL_PROCESSING_CODE]: "Cancele os vídeos em processamento antes de excluir a conta.",
+    MISSING_RESPONSE: "Aguarde a verificação de segurança terminar e tente de novo.",
+    VERIFICATION_FAILED: "A verificação de segurança falhou. Tente de novo.",
 };
+
+const HTTP_TOO_MANY_REQUESTS = 429;
+const TOO_MANY_ATTEMPTS_MESSAGE =
+    "Muitas tentativas seguidas. Espere alguns minutos e tente de novo.";
 
 const FALLBACK_MESSAGE = "Não foi possível concluir. Confira sua conexão e tente de novo.";
 
-export function toAuthErrorMessage(code: string | undefined): string {
+/** The rate limit answers 429 without a code, so the status decides that one. */
+export function toAuthErrorMessage(code: string | undefined, status?: number): string {
+    if (status === HTTP_TOO_MANY_REQUESTS) {
+        return TOO_MANY_ATTEMPTS_MESSAGE;
+    }
+
     if (code === undefined) {
         return FALLBACK_MESSAGE;
     }

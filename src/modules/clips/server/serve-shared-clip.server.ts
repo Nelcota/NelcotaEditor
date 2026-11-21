@@ -4,8 +4,8 @@ import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import { respondWithFileRange } from "#/shared/server/serve-file-range.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
+import { HTTP_NOT_FOUND } from "#/shared/server/http-response";
 
-const HTTP_NOT_FOUND = 404;
 // 24 random bytes in base64url are always 32 characters.
 const shareTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{32}$/);
 

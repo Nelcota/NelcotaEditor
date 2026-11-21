@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { RefObject } from "react";
-import type { ClipView } from "#/modules/videos/video-views";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { findClipAt } from "#/modules/videos/ui/clip-ranking";
 
 interface ClipStudio {

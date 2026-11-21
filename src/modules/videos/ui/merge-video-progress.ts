@@ -1,0 +1,50 @@
+import type { VideoProgress } from "#/modules/videos/server/video-progress-functions";
+import type { VideoSummary } from "#/modules/videos/video-views";
+
+function withProgress(video: VideoSummary, progress: VideoProgress | undefined): VideoSummary {
+    if (progress === undefined) {
+        return video;
+    }
+
+    if (
+        progress.progressPercent === video.progressPercent &&
+        progress.isCancelling === video.isCancelling
+    ) {
+        return video;
+    }
+
+    return {
+        ...video,
+        progressPercent: progress.progressPercent,
+        isCancelling: progress.isCancelling,
+    };
+}
+
+/**
+ * The list with the polled numbers written in, or null when it must be fetched again: a video
+ * finished, moved to another stage (its thumbnail, original and counts change with it) or is gone.
+ */
+export function mergeVideoProgress(
+    list: Array<VideoSummary>,
+    watchedIds: Array<string>,
+    progress: Array<VideoProgress>,
+): Array<VideoSummary> | null {
+    const progressById = new Map(progress.map((entry) => [entry.id, entry]));
+    const listById = new Map(list.map((video) => [video.id, video]));
+
+    if (
+        watchedIds.some(
+            (videoId) => progressById.get(videoId)?.status !== listById.get(videoId)?.status,
+        ) === true
+    ) {
+        return null;
+    }
+
+    const merged = list.map((video) => withProgress(video, progressById.get(video.id)));
+
+    if (merged.every((video, index) => video === list[index]) === true) {
+        return list;
+    }
+
+    return merged;
+}

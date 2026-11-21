@@ -1,6 +1,5 @@
-import type { AspectRatio, CaptionStyle } from "#/modules/clips/clip-format";
-import type { ClipStatus } from "#/modules/clips/clip-status";
-import type { VideoSource, VideoStatus } from "#/modules/videos/video-status";
+import type { ClipView } from "#/modules/clips/clip-view";
+import type { VideoSource, VideoStatus } from "#/modules/video-records/video-status";
 
 /** What the browser receives about a video. Dates travel as ISO strings. */
 export interface VideoSummary {
@@ -22,23 +21,6 @@ export interface VideoSummary {
     thumbnailUrl: string | null;
     /** Where the original plays from; null until it is fully on disk. */
     originalFileUrl: string | null;
-}
-
-export interface ClipView {
-    id: string;
-    position: number;
-    title: string;
-    reason: string;
-    startSeconds: number;
-    endSeconds: number;
-    score: number;
-    status: ClipStatus;
-    aspectRatio: AspectRatio;
-    captionStyle: CaptionStyle;
-    fileUrl: string | null;
-    downloadUrl: string | null;
-    /** Where anyone with the link can watch it; null while the clip is not shared. */
-    sharePath: string | null;
 }
 
 export interface VideoDetails {

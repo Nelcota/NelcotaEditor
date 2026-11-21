@@ -2,7 +2,7 @@ import CalendarIcon from "~icons/solar/calendar-linear";
 import ClockCircleIcon from "~icons/solar/clock-circle-linear";
 import SquareArrowRightUpIcon from "~icons/solar/square-arrow-right-up-linear";
 import UploadIcon from "~icons/solar/upload-linear";
-import { isVideoFinished } from "#/modules/videos/video-status";
+import { isVideoFinished } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoActionsMenu } from "#/modules/videos/ui/video-actions-menu";
 import { VideoMascot } from "#/modules/videos/ui/video-mascot";

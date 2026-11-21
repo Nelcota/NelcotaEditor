@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { CREW_NAMES } from "#/modules/videos/crew-lines";
-import type { VideoStatus } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 
 const WORKING_STAGES: ReadonlyArray<VideoStatus> = [

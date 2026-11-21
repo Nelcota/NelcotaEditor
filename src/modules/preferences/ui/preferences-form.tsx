@@ -10,7 +10,7 @@ import type { Preferences, TranscriptionLanguage } from "#/modules/preferences/p
 import { savePreferences } from "#/modules/preferences/server/preferences-functions";
 import { PREFERENCES_QUERY_KEY } from "#/modules/preferences/ui/preferences-queries";
 import { SaveStatus } from "#/modules/preferences/ui/save-status";
-import { ClipCountStepper } from "#/modules/videos/ui/clip-count-stepper";
+import { ClipCountStepper } from "#/modules/preferences/ui/clip-count-stepper";
 import { SegmentedControl } from "#/shared/ui/segmented-control";
 
 // Radix radio values cannot be "", so "detect automatically" is "auto" on screen only.

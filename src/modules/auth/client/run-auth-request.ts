@@ -1,7 +1,7 @@
 import { toAuthErrorMessage } from "#/modules/auth/auth-error-message";
 
 interface AuthResult {
-    error: { code?: string } | null;
+    error: { code?: string; status?: number } | null;
 }
 
 /**
@@ -17,7 +17,7 @@ export async function runAuthRequest(request: () => Promise<AuthResult>): Promis
             return null;
         }
 
-        return toAuthErrorMessage(error.code);
+        return toAuthErrorMessage(error.code, error.status);
     } catch (error) {
         console.warn("Auth request failed", error);
         return toAuthErrorMessage(undefined);

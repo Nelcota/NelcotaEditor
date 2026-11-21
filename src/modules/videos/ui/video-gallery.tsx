@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { VideoStatus } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoCard } from "#/modules/videos/ui/video-card";
 import { VideoPager } from "#/modules/videos/ui/video-pager";

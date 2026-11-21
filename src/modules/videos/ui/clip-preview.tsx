@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import type { ReactNode } from "react";
 import type { ClipStatus } from "#/modules/clips/clip-status";
-import type { VideoStatus } from "#/modules/videos/video-status";
-import type { ClipView } from "#/modules/videos/video-views";
+import type { VideoStatus } from "#/modules/video-records/video-status";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { cn } from "#/shared/ui/cn";
 import {

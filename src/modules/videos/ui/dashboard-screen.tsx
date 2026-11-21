@@ -1,11 +1,10 @@
 import AddIcon from "~icons/solar/add-linear";
-import { useQuery } from "@tanstack/react-query";
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
 import type { DashboardSearch } from "#/modules/videos/ui/dashboard-search";
 import { NewVideoDialog } from "#/modules/videos/ui/new-video-dialog";
 import { ALL_FILTER } from "#/modules/videos/ui/video-list-filter";
 import { VideoList } from "#/modules/videos/ui/video-list";
-import { videosQueryOptions } from "#/modules/videos/ui/video-queries";
+import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 import { Button } from "#/shared/ui/button";
 import { PageHeader } from "#/shared/ui/page-header";
 
@@ -25,7 +24,7 @@ function withNewVideo(search: DashboardSearch, isOpen: boolean): DashboardSearch
  * visit too, where the empty state carries the only primary button.
  */
 function MobileNewVideoButton() {
-    const videosQuery = useQuery(videosQueryOptions());
+    const videosQuery = useVideosQuery();
     const videos = videosQuery.data;
 
     if (videos === undefined || videos.length === 0) {

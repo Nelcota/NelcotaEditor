@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cancelVideo, retryVideo } from "#/modules/videos/server/video-functions";
-import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 
 const RESUME_FALLBACK_MESSAGE =

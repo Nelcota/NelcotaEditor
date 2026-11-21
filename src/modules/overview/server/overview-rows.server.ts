@@ -3,11 +3,9 @@ import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { transcripts } from "#/modules/transcription/transcription.schema";
-import { CLIP_VIEW_COLUMNS } from "#/modules/videos/server/video-queries.server";
-import type { ClipViewRow } from "#/modules/videos/server/video-queries.server";
-import { FINISHED_VIDEO_STATUSES } from "#/modules/videos/video-status";
-import type { VideoStatus } from "#/modules/videos/video-status";
-import { videos } from "#/modules/videos/videos.schema";
+import { FINISHED_VIDEO_STATUSES } from "#/modules/video-records/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
+import { videos } from "#/modules/video-records/videos.schema";
 
 export interface OverviewVideoRow {
     id: string;
@@ -17,12 +15,6 @@ export interface OverviewVideoRow {
     processingStartedAt: Date | null;
     durationSeconds: number | null;
     hasTranscript: boolean;
-}
-
-export interface OverviewClipRow {
-    clip: ClipViewRow;
-    videoId: string;
-    videoTitle: string;
 }
 
 /** Finished videos created or finished since `since`; in-progress ones stay out of the numbers. */
@@ -68,16 +60,6 @@ export async function listClipStatuses(
         .select({ videoId: clips.videoId, status: clips.status })
         .from(clips)
         .where(inArray(clips.videoId, videoIds));
-}
-
-export async function listReadyClips(userId: string, since: Date): Promise<Array<OverviewClipRow>> {
-    return db
-        .select({ clip: CLIP_VIEW_COLUMNS, videoId: videos.id, videoTitle: videos.title })
-        .from(clips)
-        .innerJoin(videos, eq(videos.id, clips.videoId))
-        .where(
-            and(eq(videos.userId, userId), eq(clips.status, "done"), gte(clips.createdAt, since)),
-        );
 }
 
 export async function countVideos(userId: string): Promise<{ total: number; inProgress: number }> {

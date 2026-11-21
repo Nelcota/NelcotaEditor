@@ -11,7 +11,7 @@ import {
     isVideoFinished,
     isVideoResumable,
     isVideoWorking,
-} from "#/modules/videos/video-status";
+} from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoDialogs } from "#/modules/videos/ui/video-dialogs";
 import type { VideoDialog } from "#/modules/videos/ui/video-dialogs";

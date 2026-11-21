@@ -24,9 +24,9 @@ export function PipelineFunnel({ funnel }: { funnel: OverviewFunnel }) {
     const readyShare = formatShare(funnel.ready, funnel.sent);
 
     return (
-        <section className="@container/funnel grid min-w-0 content-start gap-4 rounded-2xl border bg-card p-4 sm:p-5">
+        <section className="@container/funnel grid min-w-0 content-start gap-4 rounded-2xl border bg-popover p-4 sm:p-5">
             <div className="grid gap-1">
-                <h2 className="flex items-center gap-2 text-lg font-bold">
+                <h2 className="flex items-center gap-2 text-lg font-extrabold">
                     <FilterIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                     Do envio ao corte
                 </h2>

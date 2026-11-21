@@ -3,10 +3,10 @@ import PlayCircleIcon from "~icons/solar/play-circle-linear";
 import ScissorsIcon from "~icons/solar/scissors-linear";
 import UploadIcon from "~icons/solar/upload-linear";
 import { Link } from "@tanstack/react-router";
-import { isVideoFinished } from "#/modules/videos/video-status";
-import type { VideoSource } from "#/modules/videos/video-status";
+import { isVideoFinished } from "#/modules/video-records/video-status";
+import type { VideoSource } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
-import { pluralize } from "#/modules/videos/ui/pluralize";
+import { pluralize } from "#/shared/ui/pluralize";
 import { useVideoRowActions } from "#/modules/videos/ui/use-video-row-actions";
 import {
     CancelledOverlay,

@@ -17,7 +17,11 @@ export function DeleteAccountSection(): ReactNode {
                     precisam ser cancelados antes.
                 </p>
             </div>
-            <Button variant="destructive" onClick={() => setIsDialogOpen(true)}>
+            <Button
+                variant="outline"
+                className="font-semibold text-destructive not-disabled:hover:text-destructive"
+                onClick={() => setIsDialogOpen(true)}
+            >
                 <TrashBinTrashIcon aria-hidden="true" />
                 Excluir conta
             </Button>

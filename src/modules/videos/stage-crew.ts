@@ -1,4 +1,4 @@
-import type { VideoStatus } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 
 /**
  * The crew: one "object" mascot (indexes 16–31 of the shared sprite set) per processing stage.

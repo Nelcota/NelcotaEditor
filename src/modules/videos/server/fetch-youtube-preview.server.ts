@@ -3,14 +3,16 @@ import { toYoutubeThumbnailUrl } from "#/modules/videos/youtube-preview";
 import type { YoutubePreview } from "#/modules/videos/youtube-preview";
 import { YOUTUBE_VIDEO_ID_PATTERN } from "#/modules/videos/youtube-url";
 import { UserFacingError } from "#/shared/server/user-facing-error";
+import {
+    HTTP_BAD_REQUEST,
+    HTTP_FORBIDDEN,
+    HTTP_NOT_FOUND,
+    HTTP_UNAUTHORIZED,
+} from "#/shared/server/http-response";
 
 const OEMBED_ENDPOINT = "https://www.youtube.com/oembed";
 const WATCH_URL = "https://www.youtube.com/watch?v=";
 const TIMEOUT_MILLISECONDS = 5_000;
-const HTTP_BAD_REQUEST = 400;
-const HTTP_UNAUTHORIZED = 401;
-const HTTP_FORBIDDEN = 403;
-const HTTP_NOT_FOUND = 404;
 
 const PRIVATE_STATUSES: ReadonlyArray<number> = [HTTP_UNAUTHORIZED, HTTP_FORBIDDEN];
 const MISSING_STATUSES: ReadonlyArray<number> = [HTTP_BAD_REQUEST, HTTP_NOT_FOUND];

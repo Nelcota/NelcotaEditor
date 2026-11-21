@@ -1,14 +1,13 @@
 import HistoryIcon from "~icons/solar/history-linear";
 import AltArrowDownIcon from "~icons/solar/alt-arrow-down-linear";
-import { useQuery } from "@tanstack/react-query";
 import { useId } from "react";
 import type { ReactNode } from "react";
 import { Link, useMatch } from "@tanstack/react-router";
 import { toCrewLine } from "#/modules/videos/crew-lines";
-import { isVideoWorking } from "#/modules/videos/video-status";
+import { isVideoWorking } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { MarkedVideoMascot } from "#/modules/videos/ui/marked-video-mascot";
-import { videosQueryOptions } from "#/modules/videos/ui/video-queries";
+import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 import { cn } from "#/shared/ui/cn";
 import { CollapsibleTooltip } from "#/shared/ui/collapsible-tooltip";
 import { Progress } from "#/shared/ui/progress";
@@ -157,7 +156,7 @@ function SeeAllLink(): ReactNode {
 
 /** The latest videos, each saying where it is in the voice of its crew member. */
 export function RecentVideos({ isCollapsed }: { isCollapsed: boolean }) {
-    const videosQuery = useQuery(videosQueryOptions());
+    const videosQuery = useVideosQuery();
     const videos = videosQuery.data;
     const videoMatch = useMatch({ from: "/_app/videos/$videoId", shouldThrow: false });
     const currentVideoId = videoMatch?.params.videoId;

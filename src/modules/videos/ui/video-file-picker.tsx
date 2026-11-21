@@ -1,6 +1,6 @@
 import UploadIcon from "~icons/solar/upload-linear";
 import { useId } from "react";
-import { ALLOWED_VIDEO_EXTENSIONS } from "#/modules/videos/upload-limits";
+import { ALLOWED_VIDEO_EXTENSIONS } from "#/modules/video-records/upload-limits";
 import { SourceProblem } from "#/modules/videos/ui/source-problem";
 import { cn } from "#/shared/ui/cn";
 

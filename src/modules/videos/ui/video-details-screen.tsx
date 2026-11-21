@@ -2,10 +2,12 @@ import ArrowLeftIcon from "~icons/solar/arrow-left-linear";
 import RestartIcon from "~icons/solar/restart-linear";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import type { ComponentType } from "react";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { VideoHeader } from "#/modules/videos/ui/video-header";
 import type { VideoPageSearch } from "#/modules/videos/ui/video-page-search";
 import { VideoPageTabs } from "#/modules/videos/ui/video-page-tabs";
+import type { StudioTabProps } from "#/modules/videos/ui/video-page-tabs";
 import { videoDetailsQueryOptions } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
@@ -72,9 +74,10 @@ function LoadErrorState({ message, onRetry }: { message: string; onRetry: () => 
 interface VideoDetailsScreenProps {
     videoId: string;
     search: VideoPageSearch;
+    StudioTab: ComponentType<StudioTabProps>;
 }
 
-export function VideoDetailsScreen({ videoId, search }: VideoDetailsScreenProps) {
+export function VideoDetailsScreen({ videoId, search, StudioTab }: VideoDetailsScreenProps) {
     const detailsQuery = useQuery(videoDetailsQueryOptions(videoId));
     const details = detailsQuery.data;
 
@@ -99,7 +102,7 @@ export function VideoDetailsScreen({ videoId, search }: VideoDetailsScreenProps)
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
             <BackLink />
             <VideoHeader video={video} />
-            <VideoPageTabs details={details} search={search} />
+            <VideoPageTabs details={details} search={search} StudioTab={StudioTab} />
         </div>
     );
 }

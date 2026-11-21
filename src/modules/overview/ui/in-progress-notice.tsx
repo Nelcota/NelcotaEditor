@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { pluralize } from "#/modules/videos/ui/pluralize";
+import { pluralize } from "#/shared/ui/pluralize";
 
 export function InProgressNotice({ count }: { count: number }) {
     if (count === 0) {

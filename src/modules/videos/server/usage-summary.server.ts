@@ -1,19 +1,15 @@
-import path from "node:path";
 import { and, count, eq, gte, sum } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import type { StorageUsage, UsageSummary } from "#/modules/videos/video-views";
-import { videos } from "#/modules/videos/videos.schema";
+import { videos } from "#/modules/video-records/videos.schema";
 import { getEnvironment } from "#/shared/server/env.server";
-import { measureDirectoryBytes } from "#/shared/server/directory-size.server";
 import { startOfBusinessMonth } from "#/shared/server/business-time-zone";
-import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
-import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 
-const CLIPS_DIRECTORY_NAME = "clips";
 const BYTES_PER_GIGABYTE = 1024 * 1024 * 1024;
-const EMPTY_STORAGE: StorageUsage = { totalBytes: 0, clipBytes: 0, sourceBytes: 0 };
-const STORAGE_SCAN_CONCURRENCY = 8;
+
+/** The database or the open transaction that holds the user's start lock. */
+type QueryExecutor = Pick<typeof db, "select">;
 
 interface VideoCounts {
     total: number;
@@ -26,19 +22,19 @@ function startOfCurrentMonth(): Date {
     return startOfBusinessMonth(new Date());
 }
 
-/** SUM over no rows is null (zero seconds); anything non-numeric is a broken query, not zero. */
-function toSeconds(sumText: string | null | undefined): number {
+/** SUM over no rows is null (zero); anything non-numeric is a broken query, not zero. */
+function toSumNumber(sumText: string | null | undefined): number {
     if (sumText === null || sumText === undefined) {
         return 0;
     }
 
-    const seconds = Number(sumText);
+    const total = Number(sumText);
 
-    if (Number.isFinite(seconds) === false) {
-        throw new TypeError(`Expected a numeric duration sum, got "${sumText.slice(0, 40)}"`);
+    if (Number.isFinite(total) === false) {
+        throw new TypeError(`Expected a numeric sum, got "${sumText.slice(0, 40)}"`);
     }
 
-    return seconds;
+    return total;
 }
 
 async function countVideos(userId: string): Promise<VideoCounts> {
@@ -55,7 +51,7 @@ async function countVideos(userId: string): Promise<VideoCounts> {
     return {
         total: totalRow?.total ?? 0,
         ready: readyRow?.ready ?? 0,
-        seconds: toSeconds(readyRow?.seconds),
+        seconds: toSumNumber(readyRow?.seconds),
     };
 }
 
@@ -85,38 +81,45 @@ async function countSelectedClips(userId: string): Promise<number> {
     return rows[0]?.selected ?? 0;
 }
 
-async function measureVideoStorage(videoId: string): Promise<StorageUsage> {
-    const videoDirectory = getVideoDirectory(videoId);
-    const clipsDirectory = path.posix.join(videoDirectory, CLIPS_DIRECTORY_NAME);
-    const [totalBytes, clipBytes] = await Promise.all([
-        measureDirectoryBytes(resolveStoragePath(videoDirectory)),
-        measureDirectoryBytes(resolveStoragePath(clipsDirectory)),
-    ]);
+export function getStorageQuotaBytes(): number {
+    const environment = getEnvironment();
 
-    // Both are measured at once; a clip written in between must not make the rest negative.
-    return { totalBytes, clipBytes, sourceBytes: Math.max(0, totalBytes - clipBytes) };
+    return environment.STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIGABYTE;
 }
 
-function addStorage(total: StorageUsage, usage: StorageUsage): StorageUsage {
-    return {
-        totalBytes: total.totalBytes + usage.totalBytes,
-        clipBytes: total.clipBytes + usage.clipBytes,
-        sourceBytes: total.sourceBytes + usage.sourceBytes,
-    };
-}
-
-async function measureUserStorage(userId: string): Promise<StorageUsage> {
-    const userVideos = await db
-        .select({ id: videos.id })
+async function sumSourceBytes(userId: string, executor: QueryExecutor): Promise<number> {
+    const rows = await executor
+        .select({ bytes: sum(videos.sourceBytes) })
         .from(videos)
         .where(eq(videos.userId, userId));
-    // Each video walks its folder tree; a capped fan-out keeps a long history from flooding the
-    // file-system thread pool that every other request also needs.
-    const perVideo = await runWithConcurrency(userVideos, STORAGE_SCAN_CONCURRENCY, (video) =>
-        measureVideoStorage(video.id),
-    );
 
-    return perVideo.reduce(addStorage, EMPTY_STORAGE);
+    return toSumNumber(rows[0]?.bytes);
+}
+
+async function sumClipBytes(userId: string, executor: QueryExecutor): Promise<number> {
+    const rows = await executor
+        .select({ bytes: sum(clips.outputBytes) })
+        .from(clips)
+        .innerJoin(videos, eq(videos.id, clips.videoId))
+        .where(eq(videos.userId, userId));
+
+    return toSumNumber(rows[0]?.bytes);
+}
+
+/**
+ * Sums the sizes saved with each file instead of walking the disk. Sizes not known yet (a download
+ * in progress, rows the worker has not backfilled) count as 0 until they are written.
+ */
+export async function measureUserStorage(
+    userId: string,
+    executor: QueryExecutor,
+): Promise<StorageUsage> {
+    const [sourceBytes, clipBytes] = await Promise.all([
+        sumSourceBytes(userId, executor),
+        sumClipBytes(userId, executor),
+    ]);
+
+    return { totalBytes: sourceBytes + clipBytes, clipBytes, sourceBytes };
 }
 
 /** The queries do not depend on each other, so they all run at once. */
@@ -127,7 +130,7 @@ export async function summarizeUsage(userId: string): Promise<UsageSummary> {
             countSelectedClips(userId),
             countReadyClips(userId, null),
             countReadyClips(userId, startOfCurrentMonth()),
-            measureUserStorage(userId),
+            measureUserStorage(userId, db),
         ]);
 
     return {
@@ -138,6 +141,6 @@ export async function summarizeUsage(userId: string): Promise<UsageSummary> {
         readyClipCount,
         clipsThisMonth,
         storage,
-        storageQuotaBytes: getEnvironment().STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIGABYTE,
+        storageQuotaBytes: getStorageQuotaBytes(),
     };
 }

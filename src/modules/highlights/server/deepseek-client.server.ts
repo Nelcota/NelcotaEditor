@@ -1,6 +1,7 @@
 import OpenAI, { APIError, APIUserAbortError, AuthenticationError } from "openai";
 import { z } from "zod";
 import { getEnvironment } from "#/shared/server/env.server";
+import { HTTP_PAYMENT_REQUIRED } from "#/shared/server/http-response";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 // DeepSeek speaks the OpenAI chat API, so the official SDK brings retries, timeouts and typed errors.
@@ -8,7 +9,6 @@ const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
 const REQUEST_TIMEOUT_MILLISECONDS = 180_000;
 const MAX_RETRIES = 2;
 const TEMPERATURE = 0.3;
-const HTTP_PAYMENT_REQUIRED = 402;
 
 // The SDK types the answer but does not check it at runtime.
 const chatResponseSchema = z.object({

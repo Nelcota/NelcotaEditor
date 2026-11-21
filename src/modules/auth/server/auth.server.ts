@@ -1,18 +1,22 @@
 import { betterAuth } from "better-auth";
 import type { User } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
+import { z } from "zod";
 import { db } from "#/db/database.server";
 import { VIDEOS_STILL_PROCESSING_CODE } from "#/modules/auth/auth-error-message";
 import { MAX_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "#/modules/auth/auth-forms.schema";
 import { account, session, user, verification } from "#/modules/auth/auth.schema";
+import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
+import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
+import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
 import {
     deleteVideoFiles,
     hasWorkingVideos,
     listUserVideoIds,
-} from "#/modules/videos/server/delete-user-videos.server";
+} from "#/modules/video-records/server/delete-user-videos.server";
 import { getEnvironment, InvalidEnvironmentError } from "#/shared/server/env.server";
 
 const MIN_SECRET_LENGTH = 32;
@@ -77,6 +81,26 @@ async function assertNameFits(fields: { name?: unknown }): Promise<void> {
     }
 }
 
+const DELETE_USER_PATH = "/delete-user";
+
+const deleteUserBodySchema = z.object({ password: z.string().min(1) });
+
+/**
+ * Better Auth skips the password on /delete-user when the session is under a day old, so anyone
+ * at an unlocked computer could erase the account. The password is required every time.
+ */
+const requirePasswordToDeleteUser = createAuthMiddleware(async (ctx) => {
+    if (ctx.path !== DELETE_USER_PATH) {
+        return;
+    }
+
+    const result = deleteUserBodySchema.safeParse(ctx.body);
+
+    if (result.success === false) {
+        throw new APIError("BAD_REQUEST", { message: "Digite sua senha para excluir a conta." });
+    }
+});
+
 export const auth = betterAuth({
     baseURL: environment.BETTER_AUTH_URL,
     secret: readAuthSecret(),
@@ -95,12 +119,19 @@ export const auth = betterAuth({
         cookieCache: { enabled: true, maxAge: SESSION_COOKIE_CACHE_SECONDS },
     },
     user: {
-        // Better Auth checks the password sent with the request before calling the hook.
+        // The before hook requires a password, and Better Auth checks it before calling beforeDelete.
         deleteUser: {
             enabled: true,
             beforeDelete: prepareUserDeletion,
             afterDelete: removeDeletedUserFiles,
         },
+    },
+    hooks: {
+        before: requirePasswordToDeleteUser,
+    },
+    rateLimit: AUTH_RATE_LIMIT,
+    advanced: {
+        ipAddress: { ipAddressHeaders: getClientIpHeaders() },
     },
     databaseHooks: {
         user: {
@@ -108,5 +139,6 @@ export const auth = betterAuth({
             update: { before: assertNameFits },
         },
     },
-    plugins: [tanstackStartCookies()],
+    // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
+    plugins: [...buildCaptchaPlugins(), tanstackStartCookies()],
 });

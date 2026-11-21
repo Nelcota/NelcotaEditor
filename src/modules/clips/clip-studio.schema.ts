@@ -7,9 +7,9 @@ import {
     DEFAULT_CAPTION_FONT,
 } from "#/modules/clips/caption-style";
 import { ASPECT_RATIOS, CAPTION_STYLES } from "#/modules/clips/clip-format";
-import { MAX_CLIP_SECONDS, MIN_CLIP_SECONDS } from "#/modules/highlights/highlight-limits";
+import { MAX_CLIP_SECONDS, MIN_CLIP_SECONDS } from "#/modules/clips/clip-limits";
+import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/transcript-word";
 
-export const MAX_CAPTION_WORD_LENGTH = 60;
 export const MAX_CAPTION_WORDS_PER_CUE = 30;
 // A 90-second clip spoken fast has about 300 words; one word per cue is the worst case.
 export const MAX_CAPTION_CUES = 400;
@@ -28,6 +28,32 @@ export const captionWordSchema = z.object({
     endSeconds: secondsSchema,
 });
 
+export type CaptionWord = z.infer<typeof captionWordSchema>;
+
+/**
+ * Each word ends after it starts and starts after the one before it ends. A word out of order
+ * became a subtitle event that ends where it starts: a caption that never shows.
+ */
+function hasOrderedWords(words: Array<CaptionWord>): boolean {
+    return words.every((word, index) => {
+        const previousWord = words[index - 1];
+
+        if (word.endSeconds < word.startSeconds) {
+            return false;
+        }
+
+        if (previousWord === undefined) {
+            return true;
+        }
+
+        if (word.startSeconds < previousWord.startSeconds) {
+            return false;
+        }
+
+        return word.startSeconds >= previousWord.endSeconds - TIME_TOLERANCE_SECONDS;
+    });
+}
+
 export const captionCueSchema = z.object({
     startSeconds: secondsSchema,
     endSeconds: secondsSchema,
@@ -37,10 +63,13 @@ export const captionCueSchema = z.object({
         .max(
             MAX_CAPTION_WORDS_PER_CUE,
             `Uma legenda pode ter até ${MAX_CAPTION_WORDS_PER_CUE} palavras. Divida em duas.`,
+        )
+        .refine(
+            hasOrderedWords,
+            "As palavras de uma legenda precisam estar em ordem, sem se sobrepor.",
         ),
 });
 
-export type CaptionWord = z.infer<typeof captionWordSchema>;
 export type CaptionCue = z.infer<typeof captionCueSchema>;
 
 const draftFieldsSchema = z.object({

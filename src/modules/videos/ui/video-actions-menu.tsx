@@ -2,7 +2,7 @@ import MenuDotsIcon from "~icons/solar/menu-dots-linear";
 import PenIcon from "~icons/solar/pen-linear";
 import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
 import { useState } from "react";
-import { isVideoFinished, isVideoWorking } from "#/modules/videos/video-status";
+import { isVideoFinished, isVideoWorking } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoDialogs } from "#/modules/videos/ui/video-dialogs";
 import type { VideoDialog } from "#/modules/videos/ui/video-dialogs";

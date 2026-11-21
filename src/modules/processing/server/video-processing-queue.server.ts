@@ -1,9 +1,14 @@
+import type { Db as JobDatabase } from "pg-boss";
 import { z } from "zod";
 import { getJobQueue } from "#/shared/server/job-queue.server";
 
 export const PROCESS_VIDEO_QUEUE = "process-video";
 
 const SIX_HOURS_IN_SECONDS = 6 * 60 * 60;
+// A worker refreshes the heartbeat every 30 s while it runs the job. When it dies (restart, crash,
+// another replica going away), the job is failed a minute later instead of blocking the video's
+// next job for hours, and no worker has to assume it is the only one.
+const JOB_HEARTBEAT_SECONDS = 60;
 
 export const processVideoJobSchema = z.object({ videoId: z.uuid() });
 
@@ -38,12 +43,43 @@ export function ensureProcessVideoQueue(): Promise<void> {
     return queueReadyPromise;
 }
 
-export async function enqueueVideoProcessing(videoId: string): Promise<void> {
+export interface VideoProcessingRequest {
+    videoId: string;
+    userId: string;
+}
+
+/**
+ * Pass the jobDatabase of an open transaction to send the job with the row that needs it: both
+ * commit or neither does, so a failed request leaves no orphan job and no video without a job.
+ */
+export async function enqueueVideoProcessing(
+    request: VideoProcessingRequest,
+    jobDatabase: JobDatabase | null,
+): Promise<void> {
+    const { videoId, userId } = request;
+
     if (videoId.trim().length === 0) {
         throw new RangeError("Cannot enqueue processing for a video without an id");
     }
 
+    if (userId.trim().length === 0) {
+        throw new RangeError(`Cannot enqueue processing of video ${videoId} without its owner`);
+    }
+
     await ensureProcessVideoQueue();
     const jobQueue = await getJobQueue();
-    await jobQueue.send(PROCESS_VIDEO_QUEUE, { videoId }, { singletonKey: videoId });
+    // The group lets the worker run one video per person at a time, so nobody waits behind
+    // another person's whole batch.
+    const options = {
+        singletonKey: videoId,
+        group: { id: userId },
+        heartbeatSeconds: JOB_HEARTBEAT_SECONDS,
+    };
+
+    if (jobDatabase === null) {
+        await jobQueue.send(PROCESS_VIDEO_QUEUE, { videoId }, options);
+        return;
+    }
+
+    await jobQueue.send(PROCESS_VIDEO_QUEUE, { videoId }, { ...options, db: jobDatabase });
 }

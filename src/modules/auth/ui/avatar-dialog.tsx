@@ -7,7 +7,7 @@ import { applyAvatarChange } from "#/modules/auth/client/apply-avatar-change";
 import { AvatarMascotPicker } from "#/modules/auth/ui/avatar-mascot-picker";
 import { forgetCurrentUser } from "#/modules/auth/ui/current-user-query";
 import { AvatarPhotoPanel } from "#/modules/auth/ui/avatar-photo-panel";
-import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import {
     Dialog,
     DialogContent,

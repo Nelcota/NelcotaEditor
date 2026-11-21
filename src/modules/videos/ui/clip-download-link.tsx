@@ -1,5 +1,5 @@
 import DownloadMinimalisticIcon from "~icons/solar/download-minimalistic-linear";
-import type { ClipView } from "#/modules/videos/video-views";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { Button } from "#/shared/ui/button";
 
 interface ClipDownloadLinkProps {

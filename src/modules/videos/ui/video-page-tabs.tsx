@@ -1,24 +1,37 @@
 import ClapperboardIcon from "~icons/solar/clapperboard-linear";
 import Pen2Icon from "~icons/solar/pen-2-linear";
 import { useNavigate } from "@tanstack/react-router";
-import type { ReactNode } from "react";
-import { isVideoFinished, isVideoResumable } from "#/modules/videos/video-status";
+import type { ComponentType, ReactNode } from "react";
+import { isVideoFinished, isVideoResumable } from "#/modules/video-records/video-status";
 import type { VideoDetails } from "#/modules/videos/video-views";
 import { ProcessingPanel } from "#/modules/videos/ui/processing-panel";
 import { ResumePanel } from "#/modules/videos/ui/resume-panel";
-import { StudioTab } from "#/modules/videos/ui/studio/studio-tab";
 import { VideoClipsSection } from "#/modules/videos/ui/video-clips-section";
 import type { VideoPageSearch, VideoPageTab } from "#/modules/videos/ui/video-page-search";
 import { VIDEO_PAGE_TABS } from "#/modules/videos/ui/video-page-search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/tabs";
 
+/** What the page gives the Studio tab. */
+export interface StudioTabProps {
+    details: VideoDetails;
+    /** The clip asked for in the address; the best clip when absent or unknown. */
+    clipId: string | undefined;
+    onSelectClip: (clipId: string) => void;
+    onShowClips: () => void;
+}
+
 interface VideoPageTabsProps {
     details: VideoDetails;
     search: VideoPageSearch;
+    /**
+     * The Studio module builds on this one, so the route hands its tab in instead of the page
+     * importing it.
+     */
+    StudioTab: ComponentType<StudioTabProps>;
 }
 
 /** Cortes to watch and pick, Studio to edit one: the tab lives in the address, so it survives reloads. */
-export function VideoPageTabs({ details, search }: VideoPageTabsProps): ReactNode {
+export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps): ReactNode {
     const navigate = useNavigate();
     const video = details.video;
     const tab = search.tab ?? "clips";

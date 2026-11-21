@@ -1,20 +1,18 @@
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
-import { toOverallPercent } from "#/modules/processing/processing-stages";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import {
     buildTranscriptLines,
     formatTranscriptLines,
-} from "#/modules/highlights/build-transcript-lines";
+} from "#/modules/transcription/build-transcript-lines";
 import { buildHighlightSystemPrompt } from "#/modules/highlights/highlight-prompt";
 import { normalizeHighlights } from "#/modules/highlights/normalize-highlights";
 import type { HighlightCandidate } from "#/modules/highlights/normalize-highlights";
 import { requestJsonCompletion } from "#/modules/highlights/server/deepseek-client.server";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
-import { updateVideoStage } from "#/modules/videos/server/video-progress.server";
-import type { Video } from "#/modules/videos/videos.schema";
+import type { Video } from "#/modules/video-records/videos.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 // Used when the model leaves the score out: the middle of the 1–100 scale ranks it neutrally.
@@ -71,6 +69,8 @@ export interface HighlightSelectionInput {
     words: Array<TranscriptWord>;
     durationSeconds: number;
     signal: AbortSignal;
+    /** Records this step's own progress (0 to 100); the pipeline maps it onto the whole run. */
+    saveProgress: (stagePercent: number) => Promise<void>;
 }
 
 function toCandidates(highlightClips: Array<HighlightClip>): Array<HighlightCandidate> {
@@ -153,12 +153,18 @@ async function saveHighlights(
         };
     });
 
-    return db.insert(clips).values(rows).returning();
+    // A slot another run already filled keeps its clip (UNIQUE video_id, position), so a second
+    // selection can never duplicate the video's clips; the stored set is what gets rendered.
+    await db
+        .insert(clips)
+        .values(rows)
+        .onConflictDoNothing({ target: [clips.videoId, clips.position] });
+    return findClips(videoId);
 }
 
 /** Returns the clips of the video, asking DeepSeek to choose them only the first time. */
 export async function ensureHighlights(input: HighlightSelectionInput): Promise<Array<Clip>> {
-    const { video, words, durationSeconds } = input;
+    const { video, words, durationSeconds, saveProgress } = input;
     const existingClips = await findClips(video.id);
 
     if (existingClips.length > 0) {
@@ -169,7 +175,7 @@ export async function ensureHighlights(input: HighlightSelectionInput): Promise<
         throw new UserFacingError(NO_SPEECH_MESSAGE);
     }
 
-    await updateVideoStage(video.id, "selecting", toOverallPercent("selecting", 0));
+    await saveProgress(0);
     const candidates = await requestCandidates(input);
     const highlights = normalizeHighlights(candidates, {
         words,

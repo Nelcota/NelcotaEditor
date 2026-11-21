@@ -1,4 +1,4 @@
-import { isVideoWorking } from "#/modules/videos/video-status";
+import { isVideoWorking } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoMascot } from "#/modules/videos/ui/video-mascot";
 

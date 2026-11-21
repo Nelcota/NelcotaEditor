@@ -86,12 +86,12 @@ export function MetricCard({ definition, metric }: MetricCardProps) {
     });
 
     return (
-        <section className="grid gap-2 rounded-2xl border bg-card p-4 sm:p-5">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+        <section className="grid gap-2 rounded-2xl border bg-popover p-4 sm:p-5">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
                 <MetricIcon aria-hidden="true" className="size-5 shrink-0" />
                 {definition.label}
                 <MetricHelp label={definition.label} help={definition.help} />
-            </h2>
+            </h3>
             <div className="flex items-end justify-between gap-3">
                 <div className="grid min-w-0 flex-1 gap-2">
                     <MetricValue definition={definition} value={metric.current} />

@@ -10,6 +10,7 @@ import { FormAlert } from "#/shared/ui/form-alert";
 import { Skeleton } from "#/shared/ui/skeleton";
 
 const TRANSCRIPT_PANEL_ID = "transcript-panel";
+const TRANSCRIPT_HINT_ID = "transcript-hint";
 
 interface TranscriptSectionProps {
     videoId: string;
@@ -21,7 +22,7 @@ function TranscriptLoadError({ message, onRetry }: { message: string; onRetry: (
     return (
         <div className="grid justify-items-start gap-3">
             <FormAlert message={message} />
-            <Button variant="secondary" onClick={onRetry}>
+            <Button variant="secondary" className="rounded-full" onClick={onRetry}>
                 <RestartIcon aria-hidden="true" />
                 Tentar de novo
             </Button>
@@ -67,31 +68,33 @@ function TranscriptContent({ videoId, currentSeconds, onSeek }: TranscriptSectio
     );
 }
 
+/** The section title is the toggle itself, so the heading and the control read as one. */
 function TranscriptToggle({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) {
     return (
-        <button
-            type="button"
-            aria-expanded={isOpen}
-            aria-controls={TRANSCRIPT_PANEL_ID}
-            onClick={onToggle}
-            className="group flex items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
-        >
-            <span>
-                <span id="transcript-title" className="block text-lg font-extrabold">
+        <div className="grid gap-0.5">
+            <h2 id="transcript-title" className="text-lg font-extrabold">
+                <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={TRANSCRIPT_PANEL_ID}
+                    aria-describedby={TRANSCRIPT_HINT_ID}
+                    onClick={onToggle}
+                    className="group flex w-full items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                >
                     Transcrição
-                </span>
-                <span className="block text-sm text-muted-foreground">
-                    Toque numa fala para levar o vídeo original até ela.
-                </span>
-            </span>
-            <AltArrowDownIcon
-                className={cn(
-                    "size-5 shrink-0 text-muted-foreground transition-transform group-hover:text-foreground",
-                    isOpen === true && "rotate-180",
-                )}
-                aria-hidden="true"
-            />
-        </button>
+                    <AltArrowDownIcon
+                        className={cn(
+                            "size-5 shrink-0 text-muted-foreground transition-transform group-hover:text-foreground",
+                            isOpen === true && "rotate-180",
+                        )}
+                        aria-hidden="true"
+                    />
+                </button>
+            </h2>
+            <p id={TRANSCRIPT_HINT_ID} className="text-sm text-muted-foreground">
+                Toque numa fala para levar o vídeo original até ela.
+            </p>
+        </div>
     );
 }
 

@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { deleteVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/video-views";
-import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import {
     AlertDialog,

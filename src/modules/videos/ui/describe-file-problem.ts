@@ -1,4 +1,4 @@
-import { ALLOWED_VIDEO_EXTENSIONS, MAX_UPLOAD_BYTES } from "#/modules/videos/upload-limits";
+import { ALLOWED_VIDEO_EXTENSIONS, MAX_UPLOAD_BYTES } from "#/modules/video-records/upload-limits";
 
 /** Checked before uploading so a wrong file fails at once; the server checks again either way. */
 export function describeFileProblem(file: File): string | null {

@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { VideoSummary } from "#/modules/videos/video-views";
-import { pluralize } from "#/modules/videos/ui/pluralize";
+import { pluralize } from "#/shared/ui/pluralize";
 import { useVideoListControls } from "#/modules/videos/ui/use-video-list-controls";
 import { useVideoPage } from "#/modules/videos/ui/use-video-page";
 import { VideoGallery } from "#/modules/videos/ui/video-gallery";

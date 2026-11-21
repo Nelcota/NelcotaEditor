@@ -29,8 +29,8 @@ function MascotShowcase(): ReactNode {
                 ))}
             </div>
             <div className="mx-auto max-w-md text-center">
-                <p className="text-3xl font-extrabold tracking-tight">
-                    Vídeos longos viram <span className="text-primary">cortes virais</span>
+                <p className="text-2xl font-extrabold tracking-tight">
+                    Vídeos longos viram cortes virais
                 </p>
                 <p className="mt-2.5 text-muted-foreground">
                     Cada vídeo ganha um mascote, e uma equipe cuida de cada etapa: um baixa, outro
@@ -49,7 +49,7 @@ export function AuthCard({ title, description, footer, children }: AuthCardProps
                     <BrandLogo />
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
-                        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+                        <p className="mt-1 text-muted-foreground">{description}</p>
                     </div>
                     {children}
                     <p className="text-center text-sm text-muted-foreground">

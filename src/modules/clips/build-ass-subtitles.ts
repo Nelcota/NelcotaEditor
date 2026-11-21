@@ -162,7 +162,7 @@ function buildGroupEvents(
 ): Array<string> {
     const highlightColour = toAssColour(options.color);
 
-    return group.map((word, index) => {
+    return group.flatMap((word, index) => {
         const start = word.startSeconds;
         const nextWord = group[index + 1];
         const nextStart = nextWord?.startSeconds ?? nextGroupStart;
@@ -173,10 +173,19 @@ function buildGroupEvents(
         // The minimum length must not push a word over the next one: two caption lines would
         // show at once. When there is no room at all, the word keeps its tiny slot.
         const end = Math.min(stretchedEnd, Math.max(nextStart, start + Number.EPSILON));
+        const formattedStart = formatAssTime(start);
+        const formattedEnd = formatAssTime(end);
+
+        // A slot under a hundredth rounds to an event that ends where it starts; drop it rather
+        // than write a line that never shows.
+        if (formattedEnd === formattedStart) {
+            return [];
+        }
+
         const highlightedIndex = resolveHighlightedIndex(options.style, index);
         const text = buildGroupText(group, highlightedIndex, highlightColour);
 
-        return `Dialogue: 0,${formatAssTime(start)},${formatAssTime(end)},Caption,,0,0,0,,${text}`;
+        return [`Dialogue: 0,${formattedStart},${formattedEnd},Caption,,0,0,0,,${text}`];
     });
 }
 

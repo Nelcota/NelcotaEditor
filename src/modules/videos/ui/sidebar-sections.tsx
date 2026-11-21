@@ -2,14 +2,13 @@ import Chart2Icon from "~icons/solar/chart-2-linear";
 import ClapperboardPlayIcon from "~icons/solar/clapperboard-play-linear";
 import Home2Icon from "~icons/solar/home-2-linear";
 import UserCircleIcon from "~icons/solar/user-circle-linear";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
 import type { IconComponent } from "#/shared/ui/icon-component";
-import { isVideoWorking } from "#/modules/videos/video-status";
+import { isVideoWorking } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import type { NavItemState } from "#/modules/videos/ui/sidebar-nav-item";
 import { SidebarNavContent, sidebarNavItemClass } from "#/modules/videos/ui/sidebar-nav-item";
-import { videosQueryOptions } from "#/modules/videos/ui/video-queries";
+import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 import { CollapsibleTooltip } from "#/shared/ui/collapsible-tooltip";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
@@ -98,7 +97,7 @@ function SectionLink({ section, state, isCollapsed, count, hasActivity }: Sectio
 /** The places in the app; the card at the bottom keeps the quick account menu too. */
 export function SidebarSections({ isCollapsed }: { isCollapsed: boolean }) {
     const pathname = useLocation({ select: (location) => location.pathname });
-    const videosQuery = useQuery(videosQueryOptions());
+    const videosQuery = useVideosQuery();
     const videos = videosQuery.data;
     const counts = countSectionItems(videos);
     const hasWorkingVideo = videos?.some((video) => isVideoWorking(video.status) === true);

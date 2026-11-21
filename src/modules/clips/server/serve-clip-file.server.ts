@@ -3,12 +3,11 @@ import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { clips } from "#/modules/clips/clips.schema";
-import { videos } from "#/modules/videos/videos.schema";
+import { videos } from "#/modules/video-records/videos.schema";
 import { respondWithFileRange } from "#/shared/server/serve-file-range.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
+import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 
-const HTTP_UNAUTHORIZED = 401;
-const HTTP_NOT_FOUND = 404;
 const MAX_DOWNLOAD_NAME_LENGTH = 80;
 const FALLBACK_DOWNLOAD_NAME = "corte";
 const DOWNLOAD_EXTENSION = ".mp4";

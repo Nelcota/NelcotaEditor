@@ -23,7 +23,9 @@
         "format": "oxfmt",
         "lint": "oxlint",
         "check:copy": "tsx scripts/check-copy-dashes.ts",
-        "check": "oxfmt --check && oxlint && tsc --noEmit && tsx scripts/check-copy-dashes.ts"
+        "check:boundaries": "tsx scripts/check-module-boundaries.ts",
+        "test": "tsx --test \"src/**/*.test.ts\"",
+        "check": "oxfmt --check && oxlint && tsc --noEmit && tsx scripts/check-copy-dashes.ts && tsx scripts/check-module-boundaries.ts && tsx --test \"src/**/*.test.ts\""
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.18",

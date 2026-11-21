@@ -25,27 +25,32 @@ export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps) {
     return (
         <div
             className={cn(
-                "@container grid gap-4 transition-opacity",
+                "@container grid gap-8 transition-opacity",
                 isStale === true && "opacity-55",
             )}
             aria-busy={isStale}
         >
             <InProgressNotice count={stats.inProgressCount} />
-            {stats.metrics.videosSent.previous === 0 && (
-                <p className="text-sm text-muted-foreground">
-                    Nada no período anterior para comparar: as variações aparecem a partir do
-                    próximo período.
-                </p>
-            )}
-            <div className="grid gap-3 @lg:grid-cols-2 @3xl:grid-cols-3">
-                {METRIC_DEFINITIONS.map((definition) => (
-                    <MetricCard
-                        key={definition.key}
-                        definition={definition}
-                        metric={metrics[definition.key]}
-                    />
-                ))}
-            </div>
+            <section aria-labelledby="overview-metrics-title" className="grid gap-3">
+                <h2 id="overview-metrics-title" className="sr-only">
+                    Números do período
+                </h2>
+                {metrics.videosSent.previous === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                        Nada no período anterior para comparar: as variações aparecem a partir do
+                        próximo período.
+                    </p>
+                )}
+                <div className="grid gap-3 @lg:grid-cols-2 @3xl:grid-cols-3">
+                    {METRIC_DEFINITIONS.map((definition) => (
+                        <MetricCard
+                            key={definition.key}
+                            definition={definition}
+                            metric={metrics[definition.key]}
+                        />
+                    ))}
+                </div>
+            </section>
             <div className="grid gap-4 @4xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
                 <CumulativeClipsChart stats={stats} />
                 <PipelineFunnel funnel={stats.funnel} />

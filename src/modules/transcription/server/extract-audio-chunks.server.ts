@@ -1,5 +1,6 @@
 import { mkdir, readdir, rm } from "node:fs/promises";
 import path from "node:path";
+import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 
 /**
@@ -22,8 +23,7 @@ export interface AudioChunk {
 function buildSplitArguments(sourceAbsolutePath: string, outputDirectory: string): Array<string> {
     return [
         "-y",
-        "-i",
-        sourceAbsolutePath,
+        ...localFileInput(sourceAbsolutePath),
         "-vn",
         "-ac",
         String(MONO_CHANNEL_COUNT),

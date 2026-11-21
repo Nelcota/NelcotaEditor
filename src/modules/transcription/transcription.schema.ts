@@ -1,5 +1,5 @@
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
-import { videos } from "#/modules/videos/videos.schema";
+import { videos } from "#/modules/video-records/videos.schema";
 import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const transcripts = pgTable("transcripts", {
@@ -8,5 +8,5 @@ export const transcripts = pgTable("transcripts", {
         .references(() => videos.id, { onDelete: "cascade" }),
     language: text("language"),
     words: jsonb("words").$type<Array<TranscriptWord>>().notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

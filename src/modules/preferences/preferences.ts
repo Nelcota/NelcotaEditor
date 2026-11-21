@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { DEFAULT_CLIP_COUNT, MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/videos/video-status";
+import {
+    DEFAULT_CLIP_COUNT,
+    MAX_CLIP_COUNT,
+    MIN_CLIP_COUNT,
+} from "#/modules/video-records/video-status";
 
 /** "" means "detect automatically"; the rest are ISO 639-1 codes Whisper understands. */
 export const TRANSCRIPTION_LANGUAGES = ["", "pt", "en", "es"] as const;

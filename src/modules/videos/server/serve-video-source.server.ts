@@ -3,13 +3,11 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
-import { isOriginalPlayable } from "#/modules/videos/video-status";
-import { videos } from "#/modules/videos/videos.schema";
+import { isOriginalPlayable } from "#/modules/video-records/video-status";
+import { videos } from "#/modules/video-records/videos.schema";
 import { respondWithFileRange } from "#/shared/server/serve-file-range.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
-
-const HTTP_UNAUTHORIZED = 401;
-const HTTP_NOT_FOUND = 404;
+import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 
 const videoIdSchema = z.uuid();
 

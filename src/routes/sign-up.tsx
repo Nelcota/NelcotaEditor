@@ -1,4 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+import { getCaptchaSiteKey } from "#/modules/auth/server/captcha-functions";
 import { getCurrentUser } from "#/modules/auth/server/get-current-user";
 import { SignUpScreen } from "#/modules/auth/ui/sign-up-screen";
 
@@ -11,5 +13,12 @@ export const Route = createFileRoute("/sign-up")({
             throw redirect({ to: "/overview" });
         }
     },
-    component: SignUpScreen,
+    loader: async () => ({ captchaSiteKey: await getCaptchaSiteKey() }),
+    component: SignUpPage,
 });
+
+function SignUpPage(): ReactNode {
+    const { captchaSiteKey } = Route.useLoaderData();
+
+    return <SignUpScreen captchaSiteKey={captchaSiteKey} />;
+}

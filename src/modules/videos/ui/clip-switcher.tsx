@@ -1,7 +1,7 @@
 import SkipNextBoldIcon from "~icons/solar/skip-next-bold";
 import SkipPreviousBoldIcon from "~icons/solar/skip-previous-bold";
 import type { ReactNode } from "react";
-import type { ClipView } from "#/modules/videos/video-views";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { ControlButton } from "#/shared/ui/media-player/control-button";
 
 interface ClipSwitcherProps {

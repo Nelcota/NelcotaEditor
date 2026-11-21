@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { FilterableVideoList } from "#/modules/videos/ui/filterable-video-list";
 import type { VideoFilter } from "#/modules/videos/ui/video-list-filter";
 import {
@@ -6,10 +5,10 @@ import {
     VideoListLoadError,
     VideoListLoading,
 } from "#/modules/videos/ui/video-list-states";
-import { videosQueryOptions } from "#/modules/videos/ui/video-queries";
+import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 
 export function VideoList({ filter }: { filter: VideoFilter }) {
-    const videosQuery = useQuery(videosQueryOptions());
+    const videosQuery = useVideosQuery();
     const videos = videosQuery.data;
 
     if (videosQuery.isError === true && videos === undefined) {

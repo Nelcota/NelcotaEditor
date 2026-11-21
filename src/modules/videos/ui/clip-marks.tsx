@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ClipView } from "#/modules/videos/video-views";
+import type { ClipView } from "#/modules/clips/clip-view";
 import { cn } from "#/shared/ui/cn";
 import { toBarPercent } from "#/shared/ui/media-player/seek-bar";
 

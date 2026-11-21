@@ -7,6 +7,8 @@ import { signInSchema } from "#/modules/auth/auth-forms.schema";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/auth-card";
+import { CaptchaField } from "#/modules/auth/ui/captcha-field";
+import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/use-captcha";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { toErrorMessages } from "#/shared/ui/form-errors";
@@ -37,8 +39,14 @@ function focusFirstInvalidField(hasErrors: (name: SignInFieldName) => boolean): 
     input.focus();
 }
 
-export function SignInScreen(): ReactNode {
+interface SignInScreenProps {
+    /** Cloudflare Turnstile site key; null when the check is turned off. */
+    captchaSiteKey: string | null;
+}
+
+export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
     const router = useRouter();
+    const captcha = useCaptcha(captchaSiteKey);
     const queryClient = useQueryClient();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
@@ -57,9 +65,19 @@ export function SignInScreen(): ReactNode {
         },
         onSubmit: async ({ value }) => {
             setErrorMessage(null);
-            const failure = await runAuthRequest(() => authClient.signIn.email(value));
+
+            if (captcha.isWaitingForToken() === true) {
+                setErrorMessage(CAPTCHA_PENDING_MESSAGE);
+                return;
+            }
+
+            const fetchOptions = { headers: captcha.buildHeaders() };
+            const failure = await runAuthRequest(() =>
+                authClient.signIn.email({ ...value, fetchOptions }),
+            );
 
             if (failure !== null) {
+                captcha.renew();
                 setErrorMessage(failure);
                 return;
             }
@@ -116,6 +134,7 @@ export function SignInScreen(): ReactNode {
                         />
                     )}
                 </form.Field>
+                <CaptchaField captcha={captcha} />
                 <FormAlert message={errorMessage} />
                 <form.Subscribe selector={(state) => state.isSubmitting}>
                     {(isSubmitting) => (

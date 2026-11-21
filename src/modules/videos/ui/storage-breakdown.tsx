@@ -1,7 +1,7 @@
 import DangerTriangleIcon from "~icons/solar/danger-triangle-linear";
 import ServerSquareIcon from "~icons/solar/server-square-linear";
 import type { StorageUsage } from "#/modules/videos/video-views";
-import { pluralize } from "#/modules/videos/ui/pluralize";
+import { pluralize } from "#/shared/ui/pluralize";
 import { cn } from "#/shared/ui/cn";
 import { formatBytes } from "#/shared/ui/format";
 

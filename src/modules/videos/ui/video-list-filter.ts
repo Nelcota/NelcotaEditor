@@ -8,8 +8,8 @@ import {
     rowPaginationFeature,
     tableFeatures,
 } from "@tanstack/react-table";
-import { isVideoFinished } from "#/modules/videos/video-status";
-import type { VideoStatus } from "#/modules/videos/video-status";
+import { isVideoFinished } from "#/modules/video-records/video-status";
+import type { VideoStatus } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { normalizeForSearch } from "#/shared/ui/normalize-for-search";
 
