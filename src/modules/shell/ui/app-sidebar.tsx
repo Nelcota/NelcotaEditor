@@ -64,8 +64,11 @@ export function AppSidebar({ isCollapsed, onToggleCollapsed }: AppSidebarProps):
         <div className="flex h-full min-h-0 flex-col gap-1">
             <div
                 className={cn(
-                    "flex items-center gap-1 px-1.5 pb-3",
-                    isCollapsed === true && "flex-col px-0",
+                    "flex items-center gap-1 pb-3",
+                    // No trailing inset: the collapse glyph then shares the trailing centre line
+                    // with the Recentes chevron and the account menu.
+                    isCollapsed === false && "ps-1.5",
+                    isCollapsed === true && "flex-col",
                 )}
             >
                 <Link

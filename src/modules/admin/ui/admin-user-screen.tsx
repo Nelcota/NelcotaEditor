@@ -72,7 +72,10 @@ function UsageFacts({ details }: { details: AdminUserDetails }): ReactNode {
     return (
         <dl className="grid grid-cols-2 gap-3 @2xl:grid-cols-4">
             {facts.map((fact) => (
-                <div key={fact.label} className="grid gap-1 rounded-2xl border bg-popover p-4">
+                <div
+                    key={fact.label}
+                    className="grid gap-1 rounded-2xl border bg-popover p-4 sm:p-5"
+                >
                     <dt className="text-sm font-medium text-muted-foreground">{fact.label}</dt>
                     <dd className="text-lg font-semibold tabular-nums">{fact.value}</dd>
                 </div>

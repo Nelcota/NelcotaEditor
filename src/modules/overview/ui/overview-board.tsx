@@ -36,7 +36,7 @@ function TimeAndFailures({ stats }: { stats: OverviewStats }): ReactNode {
     return (
         <section
             aria-label="Tempo e falhas"
-            className="grid gap-5 rounded-2xl border bg-popover p-5 @lg:grid-cols-2"
+            className="grid gap-5 rounded-2xl border bg-popover p-4 sm:p-5 @lg:grid-cols-2"
         >
             <CompactMetric
                 definition={findMetricDefinition("averageProcessingSeconds")}

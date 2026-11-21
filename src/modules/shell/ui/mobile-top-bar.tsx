@@ -17,7 +17,9 @@ export function MobileTopBar(): ReactNode {
     useEffect(() => router.subscribe("onResolved", () => setIsMenuOpen(false)), [router]);
 
     return (
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-1 border-b bg-background/80 px-4 backdrop-blur-xl md:hidden">
+        // The trailing inset is smaller so the menu glyph, not its 40px box, ends on the same
+        // 16px line the logo starts on.
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-1 border-b bg-background/80 ps-4 pe-1.5 backdrop-blur-xl md:hidden">
             <Link
                 to="/"
                 aria-label="Nelcota, ir para o início"

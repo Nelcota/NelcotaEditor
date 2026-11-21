@@ -23,13 +23,15 @@ const ADMIN_TABS: ReadonlyArray<AdminTab> = [
 ];
 
 const TAB_CLASS =
-    "-mb-px flex min-h-11 items-center gap-2 border-b-2 border-transparent px-3 text-sm font-medium text-muted-foreground outline-none transition-[color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:border-primary aria-[current=page]:text-foreground [&>svg]:size-5";
+    "-mb-px flex min-h-11 items-center gap-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground outline-none transition-[color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:border-primary aria-[current=page]:text-foreground [&>svg]:size-5";
 
 function AdminNav(): ReactNode {
     return (
         <nav
             aria-label="Seções do admin"
-            className="flex gap-1 overflow-x-auto overflow-y-hidden border-b"
+            // Tabs without side padding, like the video page tabs: the first label starts on the
+            // page's text line and the underline spans exactly the label.
+            className="flex gap-6 overflow-x-auto overflow-y-hidden border-b"
         >
             {ADMIN_TABS.map((tab) => {
                 const Icon = tab.icon;

@@ -16,5 +16,12 @@
         "eqeqeq": "error",
         "curly": "error"
     },
-    "ignorePatterns": ["src/routeTree.gen.ts", "drizzle/**", "storage/**", ".output/**"]
+    "ignorePatterns": [
+        "src/routeTree.gen.ts",
+        "drizzle/**",
+        "storage/**",
+        ".output/**",
+        // Third-party skills installed with `npx skills add`; they keep their upstream style.
+        ".claude/skills/**"
+    ]
 }

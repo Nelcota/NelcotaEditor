@@ -55,12 +55,16 @@ function RecentVideo({ video, isCurrent, isCollapsed }: RecentVideoProps) {
                 params={{ videoId: video.id }}
                 aria-current={toAriaCurrent(isCurrent)}
                 className={cn(
-                    "flex min-w-0 items-center gap-3 rounded-xl px-2.5 py-2 outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
+                    "flex min-w-0 items-center gap-3 rounded-xl px-3 py-2 outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
                     isCurrent === true && "bg-accent hover:bg-accent",
                     isCollapsed === true && "justify-center px-0",
                 )}
             >
-                <MarkedVideoMascot video={video} className="size-8" />
+                {/* The 32px mascot overflows a column as wide as the section icons, so it
+                    centres on their column and the title starts on their label line. */}
+                <span className="flex w-[22px] shrink-0 justify-center">
+                    <MarkedVideoMascot video={video} className="size-8" />
+                </span>
                 {isCollapsed === false && (
                     <span className="grid min-w-0 flex-1 gap-0.5">
                         <span className="truncate text-sm font-medium" title={video.title}>

@@ -119,6 +119,20 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Same piece, same size:** the search field is 288px wide from `sm` up and full width on phones.
 - **Phones:** nothing sits alone on a row that it does not need; actions go full width under the
   content they act on.
+- **Edge lines** (gridline pass, 2026-11-21, set by Claude at the person's request): measured on
+  ink, not boxes, within 1px.
+    - Page: text and boxes start on the panel's content edge; cards are `p-4 sm:p-5` everywhere, so
+      every card's text shares one line (16px in on phones, 20px from `sm`).
+    - Sidebar: row boxes 12px in; icon column centred at 35px; labels at 58px. Recent-video mascots
+      centre on the icon column (they overflow a 22px slot) so their titles start on the label line.
+      Section headers start on the icon column's leading edge. Trailing glyphs (collapse, Recentes
+      chevron, account menu) share one centre line.
+    - Phone top bar: the logo starts and the menu glyph ends on the frame line (16px).
+    - Tabs (video page, admin) have no side padding: the first label's icon sits on the text line.
+    - Dialogs: the close glyph ends on `--dialog-padding` and centres on the title, for mouse and
+      touch sizes.
+    - Horizontal snap scrollers with an inset for focus rings set the same `scroll-padding`, or the
+      first item snaps past the text line.
 
 ## Decisions log
 

@@ -9,7 +9,7 @@ export function DeleteAccountSection(): ReactNode {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     return (
-        <div className="flex flex-col gap-4 rounded-2xl border border-destructive/40 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex flex-col gap-4 rounded-2xl border border-destructive/40 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
             {/* The disclosure above already says "Excluir conta"; the button says it once more. */}
             <p className="max-w-prose text-sm text-muted-foreground">
                 Apaga a conta e tudo o que a equipe fez para você. Vídeos em processamento precisam
