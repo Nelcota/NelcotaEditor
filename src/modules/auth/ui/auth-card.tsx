@@ -56,7 +56,7 @@ export function AuthCard({ title, description, footer, children }: AuthCardProps
                         {footer.text}{" "}
                         <Link
                             to={footer.linkTo}
-                            className="rounded font-bold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+                            className="rounded font-bold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                         >
                             {footer.linkLabel}
                         </Link>

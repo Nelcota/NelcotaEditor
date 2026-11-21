@@ -15,6 +15,11 @@ import {
     AVATAR_CONTENT_TYPES,
     detectAvatarFormat,
 } from "#/modules/auth/server/avatar-photo-format.server";
+import {
+    MAX_AVATAR_SIDE_PIXELS,
+    isAvatarSizeAllowed,
+    readAvatarSize,
+} from "#/modules/auth/server/avatar-photo-size.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 
 const HTTP_BAD_REQUEST = 400;
@@ -83,6 +88,19 @@ async function storeAvatar(userId: string, upload: Uint8Array): Promise<Response
 
     if (extension === null) {
         return errorResponse(HTTP_UNSUPPORTED_MEDIA_TYPE, "Use uma foto PNG, JPG ou WebP.");
+    }
+
+    const size = readAvatarSize(upload, extension);
+
+    if (size === null) {
+        return errorResponse(HTTP_UNSUPPORTED_MEDIA_TYPE, "Não foi possível ler essa foto.");
+    }
+
+    if (isAvatarSizeAllowed(size) === false) {
+        return errorResponse(
+            HTTP_PAYLOAD_TOO_LARGE,
+            `A foto pode ter até ${MAX_AVATAR_SIDE_PIXELS} × ${MAX_AVATAR_SIDE_PIXELS} pixels.`,
+        );
     }
 
     await writeAvatarPhoto(userId, extension, upload);

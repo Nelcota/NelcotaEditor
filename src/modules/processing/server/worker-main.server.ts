@@ -9,8 +9,9 @@ import {
 } from "#/modules/processing/server/video-processing-queue.server";
 import { markVideoCancelled } from "#/modules/videos/server/video-progress.server";
 import { WORKING_VIDEO_STATUSES } from "#/modules/videos/video-status";
+import type { VideoStatus } from "#/modules/videos/video-status";
 import { videos } from "#/modules/videos/videos.schema";
-import { getJobQueue } from "#/shared/server/job-queue.server";
+import { getJobQueue, setJobQueueRole } from "#/shared/server/job-queue.server";
 
 /**
  * There is a single worker, so any job still "active" when it starts was orphaned by a restart.
@@ -33,11 +34,15 @@ async function releaseOrphanedJobs(): Promise<void> {
  * Videos left half-done by a previous worker (restart, crash) are queued again,
  * unless the user had asked to cancel them.
  */
+// "queued" too: a job can die before the first stage update (or never be enqueued, if the queue
+// failed right after the row was inserted). The stately queue drops a duplicate send.
+const RESUMABLE_ON_START_STATUSES: Array<VideoStatus> = ["queued", ...WORKING_VIDEO_STATUSES];
+
 async function requeueInterruptedVideos(): Promise<void> {
     const interrupted = await db
         .select({ id: videos.id, cancelRequested: videos.cancelRequested })
         .from(videos)
-        .where(inArray(videos.status, WORKING_VIDEO_STATUSES));
+        .where(inArray(videos.status, RESUMABLE_ON_START_STATUSES));
 
     for (const video of interrupted) {
         if (video.cancelRequested === true) {
@@ -75,6 +80,7 @@ async function handleJob(jobData: unknown): Promise<void> {
 }
 
 async function startWorker(): Promise<void> {
+    setJobQueueRole("worker");
     await ensureProcessVideoQueue();
     const jobQueue = await getJobQueue();
 

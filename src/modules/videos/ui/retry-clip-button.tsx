@@ -1,7 +1,7 @@
 import RestartIcon from "~icons/solar/restart-linear";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { retryClip } from "#/modules/videos/server/video-edit-functions";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 
@@ -18,7 +18,7 @@ export function RetryClipButton({ videoId, clipId, isDisabled }: RetryClipButton
     const retry = useMutation({
         mutationFn: () => retryClip({ data: { videoId, clipId } }),
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
         },
     });
 

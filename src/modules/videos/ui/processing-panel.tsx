@@ -86,7 +86,7 @@ function describeProgress(progressPercent: number, secondsLeft: number | null): 
 
 /** The stage in words and how far the whole video is; the step list shows who is at work. */
 function StageHeadline({ video }: { video: VideoSummary }) {
-    const secondsLeft = useProcessingTimeLeft(video.createdAt, video.progressPercent);
+    const secondsLeft = useProcessingTimeLeft(video.processingStartedAt, video.progressPercent);
 
     return (
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">

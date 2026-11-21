@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cancelVideo, retryVideo } from "#/modules/videos/server/video-functions";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 
 interface VideoRowActions {
     resume: () => void;
@@ -13,7 +13,7 @@ interface VideoRowActions {
 export function useVideoRowActions(videoId: string): VideoRowActions {
     const queryClient = useQueryClient();
     const refreshVideos = async (): Promise<void> => {
-        await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+        await invalidateVideoQueries(queryClient);
     };
     const resumption = useMutation({
         mutationFn: () => retryVideo({ data: { videoId } }),

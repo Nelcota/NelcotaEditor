@@ -1,4 +1,6 @@
+import { stat } from "node:fs/promises";
 import { toOverallPercent } from "#/modules/processing/processing-stages";
+import { MAX_UPLOAD_BYTES } from "#/modules/videos/upload-limits";
 import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/videos/video-status";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { downloadYoutubeVideo } from "#/modules/videos/server/download-youtube-video.server";
@@ -8,6 +10,7 @@ import {
     updateVideoStage,
 } from "#/modules/videos/server/video-progress.server";
 import { ensureVideoThumbnail } from "#/modules/videos/server/video-thumbnail.server";
+import { toStoredVideoTitle } from "#/modules/videos/video-title";
 import type { Video } from "#/modules/videos/videos.schema";
 import { probeMedia } from "#/shared/server/media-probe.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
@@ -32,8 +35,10 @@ async function obtainSourcePath(video: Video, signal: AbortSignal): Promise<stri
         saveProgress,
     );
 
-    if (downloaded.title.length > 0) {
-        await renameVideo(video.id, downloaded.title);
+    const title = toStoredVideoTitle(downloaded.title);
+
+    if (title !== null) {
+        await renameVideo(video.id, title);
     }
 
     return downloaded.sourcePath;
@@ -61,6 +66,14 @@ export async function prepareVideoSource(video: Video, signal: AbortSignal): Pro
 
     if (durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
         throw new UserFacingError("O vídeo é longo demais. O máximo é 3 horas.");
+    }
+
+    // yt-dlp limits each format to 4 GB, but video and audio are merged after that check:
+    // the same 5 GB ceiling as uploads is enforced on the final file, whatever its origin.
+    const fileStats = await stat(resolveStoragePath(sourcePath));
+
+    if (fileStats.size > MAX_UPLOAD_BYTES) {
+        throw new UserFacingError("O vídeo é grande demais. O máximo é 5 GB.");
     }
 
     const source = { sourcePath, durationSeconds };

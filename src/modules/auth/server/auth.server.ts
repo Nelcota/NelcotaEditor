@@ -5,7 +5,7 @@ import { APIError } from "better-auth/api";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { db } from "#/db/database.server";
 import { VIDEOS_STILL_PROCESSING_CODE } from "#/modules/auth/auth-error-message";
-import { MIN_PASSWORD_LENGTH } from "#/modules/auth/auth-forms.schema";
+import { MAX_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "#/modules/auth/auth-forms.schema";
 import { account, session, user, verification } from "#/modules/auth/auth.schema";
 import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
 import {
@@ -16,6 +16,7 @@ import {
 import { getEnvironment, InvalidEnvironmentError } from "#/shared/server/env.server";
 
 const MIN_SECRET_LENGTH = 32;
+const SESSION_COOKIE_CACHE_SECONDS = 5 * 60;
 
 const environment = getEnvironment();
 
@@ -56,6 +57,26 @@ async function removeDeletedUserFiles(deletedUser: User): Promise<void> {
     await deleteAvatarPhotos(userId);
 }
 
+/**
+ * Better Auth's sign-up and update-user endpoints accept a name of any length; the form's limit is
+ * only for the user's convenience, so the server enforces it too. Updates without a name pass.
+ */
+async function assertNameFits(fields: { name?: unknown }): Promise<void> {
+    const name = fields.name;
+
+    if (name === undefined) {
+        return;
+    }
+
+    if (typeof name !== "string" || name.trim().length === 0) {
+        throw new APIError("BAD_REQUEST", { message: "Digite seu nome." });
+    }
+
+    if (Array.from(name.trim()).length > MAX_NAME_LENGTH) {
+        throw new APIError("BAD_REQUEST", { message: "Nome muito longo." });
+    }
+}
+
 export const auth = betterAuth({
     baseURL: environment.BETTER_AUTH_URL,
     secret: readAuthSecret(),
@@ -67,12 +88,24 @@ export const auth = betterAuth({
         enabled: true,
         minPasswordLength: MIN_PASSWORD_LENGTH,
     },
+    session: {
+        // Every server function and every video range request reads the session; a signed cookie
+        // answers that for 5 minutes instead of the database. Trade-off (decided 2026-11-21): a
+        // session ended elsewhere keeps working here for up to 5 minutes.
+        cookieCache: { enabled: true, maxAge: SESSION_COOKIE_CACHE_SECONDS },
+    },
     user: {
         // Better Auth checks the password sent with the request before calling the hook.
         deleteUser: {
             enabled: true,
             beforeDelete: prepareUserDeletion,
             afterDelete: removeDeletedUserFiles,
+        },
+    },
+    databaseHooks: {
+        user: {
+            create: { before: assertNameFits },
+            update: { before: assertNameFits },
         },
     },
     plugins: [tanstackStartCookies()],

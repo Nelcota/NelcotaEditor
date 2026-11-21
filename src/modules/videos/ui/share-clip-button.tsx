@@ -2,7 +2,7 @@ import LinkRoundIcon from "~icons/solar/link-round-linear";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { setClipSharing } from "#/modules/videos/server/clip-edit-functions";
 import type { ClipView } from "#/modules/videos/video-views";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import { CopyTextButton } from "#/shared/ui/copy-text-button";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -20,7 +20,7 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
         mutationFn: (isShared: boolean) =>
             setClipSharing({ data: { videoId, clipId: clip.id, isShared } }),
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
         },
     });
 

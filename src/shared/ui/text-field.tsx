@@ -10,12 +10,17 @@ interface TextFieldProps extends Omit<ComponentProps<"input">, "onChange"> {
     onValueChange: (value: string) => void;
 }
 
-function describedBy(hasErrors: boolean, errorId: string): string | undefined {
-    if (hasErrors === false) {
-        return undefined;
+/** The error when there is one, otherwise the hint, so screen readers read what is on screen. */
+function describedBy(hasErrors: boolean, id: string, hasHint: boolean): string | undefined {
+    if (hasErrors === true) {
+        return `${id}-error`;
     }
 
-    return errorId;
+    if (hasHint === true) {
+        return `${id}-hint`;
+    }
+
+    return undefined;
 }
 
 export function TextField({
@@ -35,13 +40,15 @@ export function TextField({
             <Input
                 id={id}
                 aria-invalid={hasErrors}
-                aria-describedby={describedBy(hasErrors, errorId)}
+                aria-describedby={describedBy(hasErrors, id, hint !== undefined)}
                 onChange={(event) => onValueChange(event.target.value)}
                 className="h-11"
                 {...inputProps}
             />
             {hint !== undefined && hasErrors === false && (
-                <p className="text-xs text-muted-foreground">{hint}</p>
+                <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+                    {hint}
+                </p>
             )}
             {hasErrors === true && (
                 <p id={errorId} className="text-sm text-destructive">

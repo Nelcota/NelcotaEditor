@@ -6,11 +6,14 @@ import type { StorageUsage, UsageSummary } from "#/modules/videos/video-views";
 import { videos } from "#/modules/videos/videos.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 import { measureDirectoryBytes } from "#/shared/server/directory-size.server";
+import { startOfBusinessMonth } from "#/shared/server/business-time-zone";
+import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 
 const CLIPS_DIRECTORY_NAME = "clips";
 const BYTES_PER_GIGABYTE = 1024 * 1024 * 1024;
 const EMPTY_STORAGE: StorageUsage = { totalBytes: 0, clipBytes: 0, sourceBytes: 0 };
+const STORAGE_SCAN_CONCURRENCY = 8;
 
 interface VideoCounts {
     total: number;
@@ -18,17 +21,21 @@ interface VideoCounts {
     seconds: number;
 }
 
+/** "This month" on the users' calendar (São Paulo), not the server process' time zone. */
 function startOfCurrentMonth(): Date {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
+    return startOfBusinessMonth(new Date());
 }
 
-/** Postgres returns sums as text and an empty sum as null. */
+/** SUM over no rows is null (zero seconds); anything non-numeric is a broken query, not zero. */
 function toSeconds(sumText: string | null | undefined): number {
-    const seconds = Number(sumText ?? 0);
+    if (sumText === null || sumText === undefined) {
+        return 0;
+    }
+
+    const seconds = Number(sumText);
 
     if (Number.isFinite(seconds) === false) {
-        return 0;
+        throw new TypeError(`Expected a numeric duration sum, got "${sumText.slice(0, 40)}"`);
     }
 
     return seconds;
@@ -103,7 +110,11 @@ async function measureUserStorage(userId: string): Promise<StorageUsage> {
         .select({ id: videos.id })
         .from(videos)
         .where(eq(videos.userId, userId));
-    const perVideo = await Promise.all(userVideos.map((video) => measureVideoStorage(video.id)));
+    // Each video walks its folder tree; a capped fan-out keeps a long history from flooding the
+    // file-system thread pool that every other request also needs.
+    const perVideo = await runWithConcurrency(userVideos, STORAGE_SCAN_CONCURRENCY, (video) =>
+        measureVideoStorage(video.id),
+    );
 
     return perVideo.reduce(addStorage, EMPTY_STORAGE);
 }

@@ -1,23 +1,24 @@
 import RestartIcon from "~icons/solar/restart-linear";
 import SubtitlesIcon from "~icons/solar/subtitles-linear";
 import TargetIcon from "~icons/solar/target-linear";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CaptionCue, CaptionWord } from "#/modules/clips/clip-studio.schema";
 import { pluralize } from "#/modules/videos/ui/pluralize";
-import { findCueAt } from "#/modules/videos/ui/studio/caption-overlay";
 import { CueEditor } from "#/modules/videos/ui/studio/cue-editor";
 import { cueText, transcriptWordsOf } from "#/modules/videos/ui/studio/cue-editing";
 import type { StudioEditor } from "#/modules/videos/ui/studio/use-studio-editor";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
+import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { cn } from "#/shared/ui/cn";
 import { formatClock } from "#/shared/ui/format";
 
 interface CaptionListProps {
     editor: StudioEditor;
     words: Array<CaptionWord>;
-    currentSeconds: number;
+    /** The cue being spoken; -1 when none. */
+    playingIndex: number;
     openIndex: number | null;
     onOpen: (index: number | null) => void;
     onSeek: (seconds: number) => void;
@@ -66,15 +67,29 @@ function isCueEdited(cue: CaptionCue, words: Array<CaptionWord>): boolean {
     return cueText({ ...cue, words: original }) !== cueText(cue);
 }
 
+/** Positions of the cues whose text differs from the transcript. */
+function findEditedCueIndexes(cues: Array<CaptionCue>, words: Array<CaptionWord>): Set<number> {
+    const editedIndexes = new Set<number>();
+
+    for (const [index, cue] of cues.entries()) {
+        if (isCueEdited(cue, words) === true) {
+            editedIndexes.add(index);
+        }
+    }
+
+    return editedIndexes;
+}
+
 /**
  * Every caption of the clip in order. The one being spoken is marked and kept in view while the
  * clip plays; scrolling by hand stops that until "Voltar ao trecho tocando".
  */
 export function CaptionList(props: CaptionListProps): ReactNode {
-    const { editor, words, currentSeconds, openIndex, onOpen, onSeek, isLocked } = props;
+    const { editor, words, playingIndex, openIndex, onOpen, onSeek, isLocked } = props;
     const draft = editor.draft;
     const cues = draft.cues;
-    const playingIndex = findCueAt(cues, currentSeconds);
+    // Each check scans the whole transcript; the list re-renders every frame while the clip plays.
+    const editedIndexes = useMemo(() => findEditedCueIndexes(cues, words), [cues, words]);
     const listRef = useRef<HTMLDivElement>(null);
     const [isFollowing, setIsFollowing] = useState(true);
 
@@ -109,16 +124,17 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                     · {cues.length} {pluralize(cues.length, "bloco", "blocos")}
                 </span>
                 <span className="flex-1" />
-                <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    title="Voltar tudo ao original"
-                    aria-label="Voltar todas as legendas ao texto original"
-                    disabled={isLocked}
-                    onClick={editor.resetAllCaptions}
-                >
-                    <RestartIcon aria-hidden="true" />
-                </Button>
+                <HintTooltip label="Voltar tudo ao original">
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="Voltar todas as legendas ao texto original"
+                        disabled={isLocked}
+                        onClick={editor.resetAllCaptions}
+                    >
+                        <RestartIcon aria-hidden="true" />
+                    </Button>
+                </HintTooltip>
             </div>
             {draft.captionStyle === "none" && <CaptionsOffNotice editor={editor} />}
             <div
@@ -163,7 +179,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                                 onSeek(cue.startSeconds);
                             }}
                             className={cn(
-                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 border-b px-4 py-2.5 text-left text-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:ring-inset",
+                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 border-b px-4 py-2.5 text-left text-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset",
                                 index === playingIndex &&
                                     "bg-primary/10 shadow-[inset_3px_0_0_var(--primary)]",
                             )}
@@ -173,7 +189,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                             </time>
                             <span
                                 className={cn(
-                                    isCueEdited(cue, words) === true &&
+                                    editedIndexes.has(index) === true &&
                                         "underline decoration-primary decoration-2 underline-offset-4",
                                 )}
                             >
@@ -187,7 +203,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                 <button
                     type="button"
                     onClick={() => setIsFollowing(true)}
-                    className="absolute bottom-3 left-1/2 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full bg-foreground px-3 text-sm font-bold whitespace-nowrap text-background shadow-lg outline-none focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+                    className="absolute bottom-3 left-1/2 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full bg-foreground px-3 text-sm font-bold whitespace-nowrap text-background outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                 >
                     <TargetIcon className="size-4" aria-hidden="true" />
                     Voltar ao trecho tocando

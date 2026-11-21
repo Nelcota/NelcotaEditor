@@ -3,7 +3,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
+import { z } from "zod";
 import { clips } from "#/modules/clips/clips.schema";
+import type { CaptionWord } from "#/modules/clips/clip-studio.schema";
 import {
     clipStudioInputSchema,
     renderClipDraftInputSchema,
@@ -11,7 +13,7 @@ import {
 } from "#/modules/clips/clip-studio.schema";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import type {
-    ClipStudioView,
+    ClipStudioState,
     RenderDraftResult,
     SaveDraftResult,
 } from "#/modules/videos/clip-studio-view";
@@ -28,24 +30,39 @@ import { findOwnedVideo, toClipView } from "#/modules/videos/server/video-querie
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { resolveStoragePath } from "#/shared/server/storage.server";
 
+const studioWordsInputSchema = z.object({ videoId: z.uuid() });
+
 const nextDraftVersion = sql`${clips.studioDraftVersion} + 1`;
 
 export const getClipStudio = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
     .validator(clipStudioInputSchema)
-    .handler(async ({ context, data }): Promise<ClipStudioView> => {
+    .handler(async ({ context, data }): Promise<ClipStudioState> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
-        const clip = await findClipOfVideo(video.id, data.clipId);
-        const words = await findTranscriptWords(video.id);
+        // Ownership is settled; the clip and the transcript do not depend on each other.
+        const [clip, words] = await Promise.all([
+            findClipOfVideo(video.id, data.clipId),
+            findTranscriptWords(video.id),
+        ]);
 
+        // The words build the applied draft here, but the browser gets them once per video
+        // from getStudioWords instead of again with every clip.
         return {
             clip: toClipView(clip),
             applied: toAppliedDraft(clip, words),
             draft: readStoredDraft(clip),
             draftVersion: clip.studioDraftVersion,
-            words,
             videoDurationSeconds: video.durationSeconds,
         };
+    });
+
+/** The video's transcript words, shared by every clip the Studio opens. */
+export const getStudioWords = createServerFn({ method: "GET" })
+    .middleware([authMiddleware])
+    .validator(studioWordsInputSchema)
+    .handler(async ({ context, data }): Promise<Array<CaptionWord>> => {
+        const video = await findOwnedVideo(data.videoId, context.user.id);
+        return findTranscriptWords(video.id);
     });
 
 /**

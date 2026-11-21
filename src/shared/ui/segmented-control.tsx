@@ -52,7 +52,7 @@ export function SegmentedControl<Value extends string>({
                     key={option.value}
                     value={option.value}
                     aria-label={option.ariaLabel}
-                    className="h-8 rounded-md px-2 text-sm font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-secondary data-[state=checked]:text-foreground motion-safe:active:scale-[0.99]"
+                    className="min-h-8 rounded-md px-2 py-1 text-sm leading-tight font-semibold text-balance text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-secondary data-[state=checked]:text-foreground motion-safe:active:scale-[0.99]"
                 >
                     {option.label}
                 </RadioGroup.Item>

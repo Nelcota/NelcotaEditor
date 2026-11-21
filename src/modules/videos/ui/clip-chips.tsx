@@ -2,7 +2,7 @@ import type { ClipView } from "#/modules/videos/video-views";
 import { cn } from "#/shared/ui/cn";
 
 const CHIP_CLASS =
-    "inline-flex h-10 max-w-72 items-center gap-2 rounded-full border bg-popover py-0 pr-3 pl-1.5 text-sm font-bold outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]";
+    "inline-flex h-10 max-w-72 items-center gap-2 rounded-full border bg-popover py-0 pr-3 pl-1.5 text-sm font-bold outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
 
 interface ClipChipsProps {
     clips: Array<ClipView>;

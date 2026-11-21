@@ -2,6 +2,8 @@ import { openAsBlob } from "node:fs";
 import OpenAI, { toFile } from "openai";
 import { z } from "zod";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import { MAX_CAPTION_WORD_LENGTH } from "#/modules/clips/clip-studio.schema";
+import { AUDIO_CHUNK_SECONDS } from "#/modules/transcription/server/extract-audio-chunks.server";
 import type { AudioChunk } from "#/modules/transcription/server/extract-audio-chunks.server";
 import { getEnvironment } from "#/shared/server/env.server";
 
@@ -56,13 +58,22 @@ function toLanguageOption(language: string): { language?: string } {
     return { language };
 }
 
-/** Whisper sometimes reports a slightly negative start or an end before the start; clamp both. */
+function clampToChunk(seconds: number): number {
+    return Math.min(AUDIO_CHUNK_SECONDS, Math.max(0, seconds));
+}
+
+/**
+ * Whisper sometimes reports a slightly negative start, an end before the start, or an end past
+ * the chunk. Clamping to the chunk keeps words of neighbouring chunks from overlapping, which the
+ * Studio draft rejects. Words are cut to the caption limit (a spoken URL can be longer).
+ */
 function toTranscriptWord(word: WhisperWord, offsetSeconds: number): TranscriptWord {
-    const startSeconds = Math.max(0, word.start);
-    const endSeconds = Math.max(startSeconds, word.end);
+    const startSeconds = clampToChunk(word.start);
+    const endSeconds = Math.max(startSeconds, clampToChunk(word.end));
+    const text = Array.from(word.word.trim()).slice(0, MAX_CAPTION_WORD_LENGTH).join("");
 
     return {
-        text: word.word.trim(),
+        text,
         startSeconds: startSeconds + offsetSeconds,
         endSeconds: endSeconds + offsetSeconds,
     };
@@ -77,7 +88,7 @@ function toTranscriptWords(
         .filter((word) => word.text.length > 0);
 }
 
-/** The video's own language wins; otherwise the server-wide WHISPER_LANGUAGE (may be empty). */
+/** The video's own choice wins, "" (detect automatically) included; null is a video from before 0002. */
 function resolveLanguage(videoLanguage: string | null): string {
     if (videoLanguage !== null) {
         return videoLanguage;

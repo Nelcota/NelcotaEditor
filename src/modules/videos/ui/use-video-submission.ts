@@ -8,7 +8,7 @@ import { createYoutubeVideo } from "#/modules/videos/server/video-functions";
 import { NoSourceError } from "#/modules/videos/ui/no-source-error";
 import { toLinkVideoId } from "#/modules/videos/ui/video-source";
 import type { VideoSource } from "#/modules/videos/ui/video-source";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 
 export interface Submission {
     source: VideoSource;
@@ -51,7 +51,7 @@ export function useVideoSubmission(): VideoSubmission {
     const submission = useMutation({
         mutationFn: (input: Submission) => createVideo(input, setUploadPercent),
         onSuccess: async (videoId) => {
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
             await navigate({ to: "/videos/$videoId", params: { videoId } });
         },
         onError: () => setUploadPercent(null),

@@ -1,6 +1,6 @@
 import VideoFramePlayHorizontalIcon from "~icons/solar/video-frame-play-horizontal-linear";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { toYoutubeThumbnailUrl } from "#/modules/videos/youtube-preview";
 import {
@@ -23,21 +23,22 @@ interface NewVideoPreviewProps {
 
 /** A frame from the chosen file, read straight from the computer; nothing is uploaded for it. */
 function FileFrame({ file }: { file: File }): ReactNode {
-    const fileUrl = useMemo(() => URL.createObjectURL(file), [file]);
+    // Created, attached and revoked by the same effect: a memoized URL could be revoked by one
+    // cleanup and then reused (Strict Mode runs effects twice), or replaced without being revoked.
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        return () => URL.revokeObjectURL(fileUrl);
-    }, [fileUrl]);
+        const video = videoRef.current;
+        const objectUrl = URL.createObjectURL(file);
 
-    return (
-        <video
-            src={`${fileUrl}#t=1`}
-            muted
-            playsInline
-            preload="metadata"
-            className={FRAME_CLASS}
-        />
-    );
+        if (video !== null) {
+            video.src = `${objectUrl}#t=1`;
+        }
+
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [file]);
+
+    return <video ref={videoRef} muted playsInline preload="metadata" className={FRAME_CLASS} />;
 }
 
 function EmptyFrame(): ReactNode {
@@ -116,7 +117,9 @@ export function NewVideoPreview({
                     <p className="line-clamp-2 leading-snug font-extrabold break-words">
                         {text.title}
                     </p>
-                    <p className="truncate text-[14px] text-muted-foreground">{text.detail}</p>
+                    <p title={text.detail} className="truncate text-[14px] text-muted-foreground">
+                        {text.detail}
+                    </p>
                 </div>
                 <dl className="mx-1 grid grid-cols-2 gap-x-4 gap-y-3 border-t pt-3 pb-1">
                     <Fact label="Cortes" value={describeClipCount(clipCount)} />

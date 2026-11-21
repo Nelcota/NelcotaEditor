@@ -20,7 +20,9 @@ export function SelectedFile({ file, disabled, onClear }: SelectedFileProps) {
                 />
             </span>
             <div className="min-w-0 flex-1">
-                <p className="truncate font-bold">{file.name}</p>
+                <p title={file.name} className="truncate font-bold">
+                    {file.name}
+                </p>
                 <p className="text-[14px] text-muted-foreground">
                     Arquivo do computador · {formatBytes(file.size)}
                 </p>

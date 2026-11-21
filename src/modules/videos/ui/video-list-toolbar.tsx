@@ -12,7 +12,7 @@ import type { VideoFilter } from "#/modules/videos/ui/video-list-filter";
 import { VIDEO_SORTS, VIDEO_SORT_LABELS, toVideoSort } from "#/modules/videos/ui/video-sort";
 import type { VideoSort } from "#/modules/videos/ui/video-sort";
 import type { IconComponent } from "#/shared/ui/icon-component";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
+import { SegmentedControl } from "#/shared/ui/segmented-control";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
 interface VideoListToolbarProps {
@@ -26,7 +26,7 @@ interface VideoListToolbarProps {
 }
 
 const CHIP_CLASS =
-    "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background";
+    "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background";
 
 const FILTER_ICONS: Record<VideoFilter, IconComponent> = {
     all: Widget2Icon,
@@ -83,26 +83,24 @@ interface SortSelectProps {
     onSortChange: (sort: VideoSort) => void;
 }
 
+const SORT_OPTIONS = VIDEO_SORTS.map((value) => ({ value, label: VIDEO_SORT_LABELS[value] }));
+
+/** Three fixed orders: all visible at once instead of a list that opens over the page. */
 function SortSelect({ sort, onSortChange }: SortSelectProps) {
     return (
-        <Select value={sort} onValueChange={(value) => onSortChange(toVideoSort(value))}>
-            <SelectTrigger
-                aria-label="Ordenar vídeos"
-                className="w-full rounded-full sm:ml-auto sm:w-48"
-            >
-                <span className="flex min-w-0 items-center gap-2">
-                    <SortVerticalIcon aria-hidden="true" className="text-muted-foreground" />
-                    <SelectValue />
-                </span>
-            </SelectTrigger>
-            <SelectContent align="end">
-                {VIDEO_SORTS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                        {VIDEO_SORT_LABELS[option]}
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+        <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+            <SortVerticalIcon
+                aria-hidden="true"
+                className="size-5 shrink-0 text-muted-foreground"
+            />
+            <SegmentedControl
+                label="Ordenar vídeos"
+                value={sort}
+                options={SORT_OPTIONS}
+                onValueChange={(value) => onSortChange(toVideoSort(value))}
+                className="flex-1 rounded-full [&>button]:rounded-full sm:flex-none"
+            />
+        </div>
     );
 }
 

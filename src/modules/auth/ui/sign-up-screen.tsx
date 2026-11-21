@@ -54,6 +54,8 @@ export function SignUpScreen(): ReactNode {
                             id="name"
                             label="Nome"
                             autoComplete="name"
+                            autoCapitalize="words"
+                            enterKeyHint="next"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -68,6 +70,9 @@ export function SignUpScreen(): ReactNode {
                             label="Email"
                             type="email"
                             autoComplete="email"
+                            spellCheck={false}
+                            autoCapitalize="none"
+                            enterKeyHint="next"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -82,6 +87,7 @@ export function SignUpScreen(): ReactNode {
                             label="Senha"
                             type="password"
                             autoComplete="new-password"
+                            enterKeyHint="go"
                             hint={NEW_PASSWORD_HINT}
                             value={field.state.value}
                             onBlur={field.handleBlur}

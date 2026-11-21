@@ -10,12 +10,16 @@ import type { Preferences, TranscriptionLanguage } from "#/modules/preferences/p
 import { savePreferences } from "#/modules/preferences/server/preferences-functions";
 import { PREFERENCES_QUERY_KEY } from "#/modules/preferences/ui/preferences-queries";
 import { SaveStatus } from "#/modules/preferences/ui/save-status";
-import { ClipCountSelect } from "#/modules/videos/ui/clip-count-select";
-import { Label } from "#/shared/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
+import { ClipCountStepper } from "#/modules/videos/ui/clip-count-stepper";
+import { SegmentedControl } from "#/shared/ui/segmented-control";
 
-// Radix Select cannot use "" as a value, so "detect automatically" is "auto" on screen only.
+// Radix radio values cannot be "", so "detect automatically" is "auto" on screen only.
 const AUTO_OPTION = "auto";
+
+const LANGUAGE_OPTIONS = TRANSCRIPTION_LANGUAGES.map((language) => ({
+    value: toOptionValue(language),
+    label: TRANSCRIPTION_LANGUAGE_LABELS[language],
+}));
 
 function toOptionValue(language: TranscriptionLanguage): string {
     if (language === "") {
@@ -44,27 +48,20 @@ function LanguageSelect(props: {
     value: TranscriptionLanguage;
     onValueChange: (language: TranscriptionLanguage) => void;
 }): ReactNode {
+    // Four fixed choices: all visible at once instead of a list that opens over the page.
     return (
         <div className="grid gap-2">
-            <Label htmlFor="transcription-language">
+            <span className="flex items-center gap-2 text-sm font-semibold">
                 <TranslationIcon aria-hidden="true" className="size-[18px] text-muted-foreground" />
                 Idioma da transcrição
-            </Label>
-            <Select
+            </span>
+            <SegmentedControl
+                label="Idioma da transcrição"
                 value={toOptionValue(props.value)}
+                options={LANGUAGE_OPTIONS}
                 onValueChange={(value) => props.onValueChange(fromOptionValue(value))}
-            >
-                <SelectTrigger id="transcription-language" className="h-11 w-full">
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    {TRANSCRIPTION_LANGUAGES.map((language) => (
-                        <SelectItem key={language} value={toOptionValue(language)}>
-                            {TRANSCRIPTION_LANGUAGE_LABELS[language]}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+                className="grid-flow-row grid-cols-2"
+            />
         </div>
     );
 }
@@ -89,7 +86,7 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
         <div className="@container grid gap-5 rounded-2xl border bg-popover p-5 sm:p-6">
             <div className="grid gap-6 @2xl:grid-cols-2">
                 <PreferenceField description="Já vem escolhido quando você adiciona um vídeo; dá para mudar em cada um.">
-                    <ClipCountSelect
+                    <ClipCountStepper
                         id="default-clip-count"
                         label="Cortes por vídeo"
                         value={preferences.defaultClipCount}

@@ -27,7 +27,7 @@ function AvatarButton({ onClick }: { onClick: () => void }): ReactNode {
             type="button"
             onClick={onClick}
             aria-label="Trocar foto de perfil"
-            className="group relative shrink-0 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+            className="group relative shrink-0 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
         >
             <UserAvatar
                 name={user.name}
@@ -73,8 +73,12 @@ export function ProfileCard(): ReactNode {
         <div className="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border bg-popover p-5 sm:p-6">
             <AvatarButton onClick={() => setOpenDialog("photo")} />
             <div className="grid min-w-0 flex-[1_1_10rem] gap-0.5">
-                <p className="truncate text-xl font-extrabold tracking-tight">{user.name}</p>
-                <p className="truncate text-muted-foreground">{user.email}</p>
+                <p title={user.name} className="truncate text-xl font-extrabold tracking-tight">
+                    {user.name}
+                </p>
+                <p title={user.email} className="truncate text-muted-foreground">
+                    {user.email}
+                </p>
                 {hasChangedPassword === true && <PasswordChangedNote />}
             </div>
             <div className="flex w-full flex-wrap gap-2 sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-none">

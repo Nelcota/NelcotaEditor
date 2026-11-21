@@ -78,8 +78,10 @@ export function assertVideoEditable(video: Video): void {
 export function assertDraftFitsVideo(draft: StudioDraft, video: Video): void {
     const durationSeconds = video.durationSeconds;
 
+    // A clip only exists after the source was probed, so a missing duration is inconsistent data:
+    // refuse rather than skip the check.
     if (durationSeconds === null) {
-        return;
+        throw new UserFacingError("Não foi possível ler a duração do vídeo.");
     }
 
     if (draft.endSeconds > durationSeconds + TIME_TOLERANCE_SECONDS) {

@@ -31,6 +31,9 @@ interface DownloadOptions {
 function buildYtDlpArguments(url: string, outputTemplate: string): Array<string> {
     return [
         "--no-playlist",
+        // Second guard behind the server schema: never walk more than one entry of a list.
+        "--playlist-items",
+        "1",
         "--js-runtimes",
         "node",
         "--format",
@@ -44,7 +47,7 @@ function buildYtDlpArguments(url: string, outputTemplate: string): Array<string>
         "--max-filesize",
         MAX_FILE_SIZE,
         "--match-filter",
-        `duration < ${MAX_VIDEO_DURATION_SECONDS}`,
+        `duration <= ${MAX_VIDEO_DURATION_SECONDS}`,
         "--output",
         outputTemplate,
         "--progress",

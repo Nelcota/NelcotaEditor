@@ -21,7 +21,6 @@ import type { AspectRatio, CaptionStyle } from "#/modules/clips/clip-format";
 import type { StudioEditor } from "#/modules/videos/ui/studio/use-studio-editor";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { SegmentedControl } from "#/shared/ui/segmented-control";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
 
 const STYLE_LABELS: Record<CaptionStyle, string> = {
     karaoke: "Karaokê",
@@ -36,6 +35,20 @@ const RATIO_LABELS: Record<AspectRatio, string> = {
 };
 
 const STYLE_OPTIONS = CAPTION_STYLES.map((value) => ({ value, label: STYLE_LABELS[value] }));
+// Each name written in its own face, so the choice is made by looking, not by reading.
+const FONT_OPTIONS = CAPTION_FONTS.map((value) => {
+    const face = CAPTION_FONT_FACES[value];
+
+    return {
+        value,
+        ariaLabel: face.label,
+        label: (
+            <span className="uppercase" style={{ fontFamily: `"${face.family}", sans-serif` }}>
+                {face.label}
+            </span>
+        ),
+    };
+});
 const RATIO_OPTIONS = ASPECT_RATIOS.map((value) => ({ value, label: RATIO_LABELS[value] }));
 const SIZE_OPTIONS = CAPTION_SIZES.map((value) => ({ value, label: CAPTION_SIZE_LABELS[value] }));
 const POSITION_OPTIONS = CAPTION_POSITIONS.map((value) => ({
@@ -67,40 +80,16 @@ function FieldLabel({ icon: Icon, children }: { icon: IconComponent; children: s
 function FontPicker({ editor, isLocked }: StudioStylePanelProps): ReactNode {
     const draft = editor.draft;
 
+    // Four fixed fonts: all visible at once, so they can be compared without opening a list.
     return (
-        <Select
+        <SegmentedControl
+            label="Fonte da legenda"
             value={draft.captionFont}
+            options={FONT_OPTIONS}
             disabled={isLocked || draft.captionStyle === "none"}
-            onValueChange={(selected) => {
-                const captionFont = CAPTION_FONTS.find((font) => font === selected);
-
-                if (captionFont === undefined) {
-                    return;
-                }
-
-                editor.updateSettings({ captionFont });
-            }}
-        >
-            <SelectTrigger aria-label="Fonte da legenda" className="h-10 w-full">
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-                {CAPTION_FONTS.map((font) => {
-                    const face = CAPTION_FONT_FACES[font];
-
-                    return (
-                        <SelectItem key={font} value={font}>
-                            <span
-                                className="text-base uppercase"
-                                style={{ fontFamily: `"${face.family}", sans-serif` }}
-                            >
-                                {face.label}
-                            </span>
-                        </SelectItem>
-                    );
-                })}
-            </SelectContent>
-        </Select>
+            onValueChange={(captionFont) => editor.updateSettings({ captionFont })}
+            className="grid-flow-row grid-cols-2"
+        />
     );
 }
 

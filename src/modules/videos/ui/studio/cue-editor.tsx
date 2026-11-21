@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { formatPreciseClock, parseClockInput } from "#/modules/clips/clip-time";
 import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/clip-studio.schema";
 import {
+    MIN_CUE_SECONDS,
     cueLimits,
     cueText,
     editCueText,
@@ -14,9 +15,20 @@ import {
     transcriptWordsOf,
 } from "#/modules/videos/ui/studio/cue-editing";
 import { Button } from "#/shared/ui/button";
+import { HintTooltip } from "#/shared/ui/hint-tooltip";
 
 const UNREADABLE_TIME_MESSAGE = "Use segundos (8,5) ou minutos e segundos (1:08,5).";
 const OUT_OF_RANGE_MESSAGE = "Fora do espaço livre entre os blocos vizinhos.";
+const CUE_TIME_ERROR_ID = "cue-time-error";
+
+function describeError(error: string | null): string | undefined {
+    if (error === null) {
+        return undefined;
+    }
+
+    return CUE_TIME_ERROR_ID;
+}
+const TOO_SHORT_MESSAGE = "Uma legenda precisa durar pelo menos 0,2 s.";
 const WHITESPACE = /\s+/;
 
 interface CueEditorProps {
@@ -67,7 +79,9 @@ function TimeField({
                         onCommit(event.currentTarget.value);
                     }
                 }}
-                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm tabular-nums outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+                aria-describedby={describeError(error)}
+                enterKeyHint="done"
+                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-base tabular-nums outline-none transition-colors hover:border-ring/60 sm:text-sm focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/70 aria-invalid:border-destructive"
             />
         </label>
     );
@@ -122,6 +136,11 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
             return;
         }
 
+        if (endSeconds - startSeconds < MIN_CUE_SECONDS) {
+            setTimeError(TOO_SHORT_MESSAGE);
+            return;
+        }
+
         setTimeError(null);
 
         if (startSeconds === cue.startSeconds && endSeconds === cue.endSeconds) {
@@ -169,7 +188,7 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
                         onClose();
                     }
                 }}
-                className="h-11 w-full rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/50"
+                className="h-11 w-full rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/70"
             />
             <div className="grid grid-cols-[1fr_1fr_auto_auto] items-center gap-2">
                 <TimeField
@@ -184,33 +203,35 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
                     error={timeError}
                     onCommit={(typed) => commitTime("end", typed)}
                 />
-                <Button
-                    variant="outline"
-                    size="icon"
-                    title="Dividir no cursor"
-                    aria-label="Dividir o bloco onde está o cursor"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={split}
-                >
-                    <ScissorsIcon aria-hidden="true" />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    title="Voltar ao original"
-                    aria-label="Voltar este bloco ao texto original"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => {
-                        const original = resetCue(cue, words);
-                        setText(cueText(original));
-                        onReplace([original]);
-                    }}
-                >
-                    <RestartIcon aria-hidden="true" />
-                </Button>
+                <HintTooltip label="Dividir no cursor">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="Dividir o bloco onde está o cursor"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={split}
+                    >
+                        <ScissorsIcon aria-hidden="true" />
+                    </Button>
+                </HintTooltip>
+                <HintTooltip label="Voltar ao original">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="Voltar este bloco ao texto original"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => {
+                            const original = resetCue(cue, words);
+                            setText(cueText(original));
+                            onReplace([original]);
+                        }}
+                    >
+                        <RestartIcon aria-hidden="true" />
+                    </Button>
+                </HintTooltip>
             </div>
             {timeError !== null && (
-                <p role="alert" className="text-xs text-destructive">
+                <p id={CUE_TIME_ERROR_ID} role="alert" className="text-xs text-destructive">
                     {timeError}
                 </p>
             )}

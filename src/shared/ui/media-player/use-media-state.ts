@@ -17,6 +17,25 @@ const STATE_EVENTS = [
 const WAIT_START_EVENTS = ["waiting"];
 const WAIT_END_EVENTS = ["playing", "canplay", "pause", "error"];
 
+const MEDIA_STATE_KEYS: ReadonlyArray<keyof MediaState> = [
+    "isPlaying",
+    "isWaiting",
+    "currentSeconds",
+    "durationSeconds",
+    "bufferedSeconds",
+    "volume",
+    "isMuted",
+    "playbackRate",
+];
+
+function keepIfUnchanged(previous: MediaState, next: MediaState): MediaState {
+    if (MEDIA_STATE_KEYS.some((key) => previous[key] !== next[key]) === false) {
+        return previous;
+    }
+
+    return next;
+}
+
 /** Mirrors the video element's state into React, so the custom controls can draw it. */
 export function useMediaState(videoRef: RefObject<HTMLVideoElement | null>): MediaState {
     const [state, setState] = useState<MediaState>(INITIAL_MEDIA_STATE);
@@ -29,7 +48,10 @@ export function useMediaState(videoRef: RefObject<HTMLVideoElement | null>): Med
         }
 
         let isWaiting = false;
-        const refresh = (): void => setState(readMediaState(video, isWaiting));
+        // "progress" and repeated events often change nothing; keeping the same object skips a
+        // re-render of the whole player.
+        const refresh = (): void =>
+            setState((previous) => keepIfUnchanged(previous, readMediaState(video, isWaiting)));
         const startWaiting = (): void => {
             isWaiting = true;
             refresh();

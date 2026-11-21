@@ -1,14 +1,17 @@
 import PauseBoldIcon from "~icons/solar/pause-bold";
 import PlayBoldIcon from "~icons/solar/play-bold";
 import VideocameraRecordIcon from "~icons/solar/videocamera-record-linear";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import type { AspectRatio } from "#/modules/clips/clip-format";
 import type { StudioDraft } from "#/modules/clips/clip-studio.schema";
 import { CaptionOverlay } from "#/modules/videos/ui/studio/caption-overlay";
+import { usePlaybackValue } from "#/modules/videos/ui/studio/playback-clock";
 import type { StudioPlayback } from "#/modules/videos/ui/studio/use-studio-playback";
 import { cn } from "#/shared/ui/cn";
 import { formatClock } from "#/shared/ui/format";
+
+const TENTHS_PER_SECOND = 10;
 
 const FRAME_CLASSES: Record<AspectRatio, string> = {
     vertical: "aspect-[9/16] w-full max-w-[300px]",
@@ -38,7 +41,12 @@ function NoPreview({ message }: { message: string }): ReactNode {
 
 function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" | "playback">) {
     const lengthSeconds = draft.endSeconds - draft.startSeconds;
-    const playedSeconds = Math.max(0, playback.currentSeconds - draft.startSeconds);
+    // The slider steps by a tenth, so the controls re-render ten times a second, not every frame.
+    const currentTenths = usePlaybackValue(playback.clock, (seconds) =>
+        Math.round(seconds * TENTHS_PER_SECOND),
+    );
+    const currentSeconds = currentTenths / TENTHS_PER_SECOND;
+    const playedSeconds = Math.max(0, currentSeconds - draft.startSeconds);
     let label = "Tocar";
     let Icon = PlayBoldIcon;
 
@@ -55,7 +63,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
                 onClick={async () => {
                     await playback.togglePlay();
                 }}
-                className="grid size-9 place-items-center rounded-full outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+                className="grid size-9 pointer-coarse:size-11 place-items-center rounded-full outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <Icon className="size-5" aria-hidden="true" />
             </button>
@@ -67,10 +75,10 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
                 aria-label="Posição no corte"
                 min={draft.startSeconds}
                 max={draft.endSeconds}
-                step={0.1}
-                value={playback.currentSeconds}
+                step={1 / TENTHS_PER_SECOND}
+                value={currentSeconds}
                 onChange={(event) => playback.seek(Number(event.target.value))}
-                className="h-1 min-w-0 flex-1 cursor-pointer accent-white"
+                className="range-media min-w-0 flex-1 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring/70"
             />
         </div>
     );
@@ -80,6 +88,23 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
 export function StudioPreview(props: StudioPreviewProps): ReactNode {
     const { draft, videoRef, playback, sourceUrl, overlay } = props;
     const [hasPlaybackError, setHasPlaybackError] = useState(false);
+    // Only the first start goes in the media fragment: a changing src reloads the whole video
+    // (new requests, a black flash, lost position) on every trim. Later trims seek instead.
+    const [firstStartSeconds] = useState(draft.startSeconds);
+    const startSeconds = draft.startSeconds;
+    const endSeconds = draft.endSeconds;
+
+    useEffect(() => {
+        const video = videoRef.current;
+
+        if (video === null || video.paused === false) {
+            return;
+        }
+
+        if (video.currentTime < startSeconds || video.currentTime > endSeconds) {
+            video.currentTime = startSeconds;
+        }
+    }, [videoRef, startSeconds, endSeconds]);
 
     return (
         <div
@@ -91,8 +116,10 @@ export function StudioPreview(props: StudioPreviewProps): ReactNode {
         >
             {sourceUrl !== null && (
                 <video
+                    disablePictureInPicture
+                    disableRemotePlayback
                     ref={videoRef}
-                    src={`${sourceUrl}#t=${draft.startSeconds}`}
+                    src={`${sourceUrl}#t=${firstStartSeconds}`}
                     preload="auto"
                     playsInline
                     onError={() => setHasPlaybackError(true)}
@@ -102,7 +129,7 @@ export function StudioPreview(props: StudioPreviewProps): ReactNode {
                     className="absolute inset-0 size-full cursor-pointer object-cover"
                 />
             )}
-            <CaptionOverlay draft={draft} currentSeconds={playback.currentSeconds} />
+            <CaptionOverlay draft={draft} clock={playback.clock} />
             {sourceUrl === null && (
                 <NoPreview message="O vídeo original ainda não está disponível. Você pode editar; o resultado aparece depois de renderizar." />
             )}

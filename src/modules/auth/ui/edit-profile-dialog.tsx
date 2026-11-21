@@ -1,9 +1,11 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { profileNameSchema } from "#/modules/auth/auth-forms.schema";
 import { renameUser } from "#/modules/auth/server/profile-functions";
+import { forgetCurrentUser } from "#/modules/auth/ui/current-user-query";
 import { Button } from "#/shared/ui/button";
 import {
     Dialog,
@@ -47,6 +49,7 @@ function ReadOnlyEmail({ email }: { email: string }): ReactNode {
 
 function EditProfileForm({ onDone }: { onDone: () => void }): ReactNode {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -63,7 +66,9 @@ function EditProfileForm({ onDone }: { onDone: () => void }): ReactNode {
                 return;
             }
 
-            // The signed-in user lives in the route context, so reload it to show the new name.
+            // The signed-in user lives in the route context (and its cache), so reload it to show
+            // the new name.
+            await forgetCurrentUser(queryClient);
             await router.invalidate();
             onDone();
         },
@@ -84,6 +89,7 @@ function EditProfileForm({ onDone }: { onDone: () => void }): ReactNode {
                         id="profile-name"
                         label="Nome"
                         autoComplete="name"
+                        autoCapitalize="words"
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onValueChange={field.handleChange}

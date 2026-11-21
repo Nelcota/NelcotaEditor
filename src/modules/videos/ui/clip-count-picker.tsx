@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { ClipCountSelect } from "#/modules/videos/ui/clip-count-select";
+import { ClipCountStepper } from "#/modules/videos/ui/clip-count-stepper";
 import { cn } from "#/shared/ui/cn";
 
 /** The counts people pick most; anything else from 1 to 10 is under "Outro". */
 const QUICK_COUNTS: ReadonlyArray<number> = [3, 5, 8, 10];
 
 const OPTION_CLASS =
-    "grid h-9 place-items-center rounded-[9px] text-sm font-bold text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99] aria-pressed:bg-popover aria-pressed:text-foreground aria-pressed:shadow-sm disabled:cursor-not-allowed disabled:opacity-50";
+    "grid h-9 pointer-coarse:h-11 place-items-center rounded-[9px] text-sm font-bold text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-pressed:bg-popover aria-pressed:text-foreground aria-pressed:ring-1 aria-pressed:ring-border disabled:cursor-not-allowed disabled:opacity-50";
 
 interface ClipCountPickerProps {
     value: number;
@@ -45,7 +45,7 @@ export function ClipCountPicker({ value, onValueChange, disabled }: ClipCountPic
                 </button>
             </div>
             {isOtherOpen === true && (
-                <ClipCountSelect
+                <ClipCountStepper
                     id="new-video-clip-count"
                     label="Quantidade de cortes"
                     value={value}

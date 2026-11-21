@@ -68,13 +68,36 @@ export function toVideoSummary(video: Video, readyClipCount: number): VideoSumma
         requestedClipCount: video.requestedClipCount,
         readyClipCount,
         createdAt: video.createdAt.toISOString(),
+        processingStartedAt: video.processingStartedAt?.toISOString() ?? null,
         sourceUrl: video.sourceUrl,
         thumbnailUrl: toThumbnailUrl(video),
         originalFileUrl: toOriginalFileUrl(video),
     };
 }
 
-function toSharePath(clip: Clip): string | null {
+/**
+ * The clip columns a ClipView needs. Lists are polled every few seconds, and a full row also
+ * carries the caption cues and the Studio draft (hundreds of words each) that no list shows.
+ */
+export const CLIP_VIEW_COLUMNS = {
+    id: clips.id,
+    position: clips.position,
+    title: clips.title,
+    reason: clips.reason,
+    startSeconds: clips.startSeconds,
+    endSeconds: clips.endSeconds,
+    score: clips.score,
+    status: clips.status,
+    aspectRatio: clips.aspectRatio,
+    captionStyle: clips.captionStyle,
+    outputPath: clips.outputPath,
+    shareToken: clips.shareToken,
+    createdAt: clips.createdAt,
+};
+
+export type ClipViewRow = Pick<Clip, keyof typeof CLIP_VIEW_COLUMNS>;
+
+function toSharePath(clip: ClipViewRow): string | null {
     if (clip.shareToken === null) {
         return null;
     }
@@ -82,7 +105,7 @@ function toSharePath(clip: Clip): string | null {
     return `/api/share/${clip.shareToken}`;
 }
 
-export function toClipView(clip: Clip): ClipView {
+export function toClipView(clip: ClipViewRow): ClipView {
     const clipView: ClipView = {
         id: clip.id,
         position: clip.position,
@@ -135,6 +158,10 @@ export async function countReadyClips(videoIds: Array<string>): Promise<Map<stri
     return new Map(rows.map((row) => [row.videoId, row.readyCount]));
 }
 
-export async function listVideoClips(videoId: string): Promise<Array<Clip>> {
-    return db.select().from(clips).where(eq(clips.videoId, videoId)).orderBy(asc(clips.position));
+export async function listVideoClips(videoId: string): Promise<Array<ClipViewRow>> {
+    return db
+        .select(CLIP_VIEW_COLUMNS)
+        .from(clips)
+        .where(eq(clips.videoId, videoId))
+        .orderBy(asc(clips.position));
 }

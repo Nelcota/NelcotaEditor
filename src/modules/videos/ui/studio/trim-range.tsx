@@ -145,7 +145,9 @@ export function TrimRange(props: TrimRangeProps): ReactNode {
                     onKeyDown={(event) => onKeyDown(edge, event)}
                     {...drag.handlers(edge)}
                     className={cn(
-                        "absolute top-1/2 z-20 grid h-10 w-4 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none place-items-center rounded-md bg-primary outline-none focus-visible:ring-4 focus-visible:ring-ring/50 disabled:cursor-not-allowed",
+                        "absolute top-1/2 z-20 grid h-10 w-4 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none place-items-center rounded-md bg-primary outline-none transition-colors not-disabled:hover:bg-primary/85 not-disabled:active:cursor-grabbing focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-not-allowed",
+                        // A 16px handle is hard to grab; an invisible margin widens the target to 40px.
+                        "before:absolute before:-inset-x-3 before:inset-y-0 before:content-['']",
                         "after:h-4 after:w-0.5 after:rounded-full after:bg-primary-foreground",
                     )}
                     style={{ left: `${edgePercent[edge]}%` }}

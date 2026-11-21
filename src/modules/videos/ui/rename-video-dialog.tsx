@@ -5,7 +5,7 @@ import { updateVideoTitle } from "#/modules/videos/server/video-edit-functions";
 import { renameVideoFormSchema } from "#/modules/videos/video-title";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import {
     Dialog,
@@ -41,7 +41,7 @@ function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
                 return;
             }
 
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
             onDone();
         },
     });

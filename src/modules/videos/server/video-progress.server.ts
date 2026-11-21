@@ -102,6 +102,7 @@ export async function resetVideoToQueued(videoId: string): Promise<void> {
             progressPercent: MIN_PERCENT,
             cancelRequested: false,
             finishedAt: null,
+            processingStartedAt: new Date(),
         })
         .where(eq(videos.id, videoId));
 }

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /** Shared with the Better Auth config, so the form and the server never disagree. */
 export const MIN_PASSWORD_LENGTH = 8;
-const MAX_NAME_LENGTH = 80;
+export const MAX_NAME_LENGTH = 80;
 
 const emailSchema = z.email("Digite um email válido.");
 const nameSchema = z

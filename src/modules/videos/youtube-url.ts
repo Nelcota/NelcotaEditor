@@ -22,11 +22,15 @@ function isYoutubeUrl(value: string): boolean {
     return YOUTUBE_HOSTS.includes(url.hostname.toLowerCase());
 }
 
+// Real watch links are under 200 characters; this only stops absurd input before it reaches yt-dlp.
+const MAX_YOUTUBE_URL_LENGTH = 2048;
+
 /** Only YouTube links are accepted, so the worker never downloads from arbitrary hosts. */
 export const youtubeUrlSchema = z
     .string()
     .trim()
     .min(1, "Cole o link do vídeo.")
+    .max(MAX_YOUTUBE_URL_LENGTH, "Esse link está longo demais.")
     .refine(isYoutubeUrl, "Use um link do YouTube (youtube.com ou youtu.be).");
 
 /** Every YouTube video id is 11 characters of letters, digits, "-" and "_". */
@@ -50,6 +54,17 @@ function readIdFromPath(url: URL): string | null {
 }
 
 /** The 11-character id of a YouTube link (watch, youtu.be, shorts, live, embed), or null. */
+/** The plain watch link of a video: drops playlist, timestamp and tracking parameters. */
+export function toCanonicalYoutubeUrl(value: string): string {
+    const videoId = toYoutubeVideoId(value);
+
+    if (videoId === null) {
+        throw new Error(`Not a YouTube video link: ${value.slice(0, 80)}`);
+    }
+
+    return `https://www.youtube.com/watch?v=${videoId}`;
+}
+
 export function toYoutubeVideoId(value: string): string | null {
     const url = URL.parse(value);
 

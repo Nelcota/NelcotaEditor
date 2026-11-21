@@ -2,6 +2,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/*
+ * The app is dark only. Tailwind's default `dark:` follows the OS setting, so on a light-mode OS the
+ * shadcn bases lost their dark states. Bind `dark:` to the document instead.
+ */
+@custom-variant dark (&:where(:root, :root *));
+
 /* Nelcota is a dark tool: videos read better on a dark canvas. See DESIGN.md. */
 :root {
     color-scheme: dark;
@@ -30,6 +36,14 @@
     --chart-current: oklch(0.7 0.15 245);
     --chart-previous: oklch(0.72 0.012 286);
     --radius: 0.75rem;
+    --selection: color-mix(in oklab, var(--primary) 35%, transparent);
+    --scrollbar-thumb: var(--border);
+    --scrollbar-thumb-hover: var(--input);
+    --range-track: oklch(1 0 0 / 0.25);
+    --range-fill: oklch(1 0 0);
+
+    accent-color: var(--primary);
+    scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 /*
@@ -93,7 +107,73 @@
 
 @layer base {
     * {
-        @apply border-border outline-ring/50;
+        @apply border-border outline-ring/70;
+    }
+
+    ::selection {
+        background-color: var(--selection);
+        color: var(--foreground);
+    }
+
+    input,
+    textarea {
+        caret-color: var(--primary);
+    }
+
+    h1,
+    h2,
+    h3 {
+        text-wrap: balance;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+
+    img {
+        -webkit-user-drag: none;
+    }
+
+    /* Chrome paints its own autofill background; delay it forever so the field keeps the theme. */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--foreground);
+        transition:
+            background-color 600000s 0s,
+            color 600000s 0s;
+    }
+
+    input[type="search"]::-webkit-search-cancel-button,
+    input[type="search"]::-webkit-search-decoration {
+        appearance: none;
+    }
+
+    /* Double-clicking a control must not select its label, and fast taps must not zoom on iOS. */
+    :where(button, [role="button"], [role="tab"], [role="radio"], [role="slider"], a[href]) {
+        user-select: none;
+        touch-action: manipulation;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border: 2px solid transparent;
+        border-radius: 9999px;
+        background-color: var(--scrollbar-thumb);
+        background-clip: padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--scrollbar-thumb-hover);
     }
 
     html,
@@ -142,5 +222,116 @@
 
     [aria-busy="true"] {
         cursor: progress;
+    }
+}
+
+/* The navigation bar (NavigationProgress): a slice sliding across, shown after a short delay. */
+@keyframes navigation-progress {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(300%);
+    }
+}
+
+@keyframes navigation-fade-in {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Native range inputs (volume, Studio scrubber) drawn with the player's colors in every browser. */
+@utility range-media {
+    appearance: none;
+    height: 1rem;
+    background: transparent;
+
+    &::-webkit-slider-runnable-track {
+        height: 4px;
+        border-radius: 9999px;
+        background: var(--range-track);
+    }
+
+    &::-webkit-slider-thumb {
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        margin-top: -4px;
+        border-radius: 9999px;
+        background: var(--range-fill);
+        transition: scale 150ms ease-out;
+    }
+
+    &:hover::-webkit-slider-thumb,
+    &:active::-webkit-slider-thumb {
+        scale: 1.25;
+    }
+
+    &::-moz-range-track {
+        height: 4px;
+        border-radius: 9999px;
+        background: var(--range-track);
+    }
+
+    &::-moz-range-progress {
+        height: 4px;
+        border-radius: 9999px;
+        background: var(--range-fill);
+    }
+
+    &::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        border: 0;
+        border-radius: 9999px;
+        background: var(--range-fill);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Windows High Contrast drops box-shadow rings and background-only selected states. */
+@media (forced-colors: active) {
+    :focus-visible {
+        outline: 2px solid CanvasText !important;
+        outline-offset: 2px;
+    }
+
+    [data-state="checked"],
+    [data-state="active"],
+    [aria-pressed="true"],
+    [aria-checked="true"],
+    [aria-current="page"] {
+        outline: 2px solid Highlight;
+    }
+}
+
+@media print {
+    aside,
+    header,
+    nav,
+    button,
+    [data-slot="button"] {
+        display: none !important;
+    }
+
+    body {
+        background: #fff;
+        color: #000;
     }
 }

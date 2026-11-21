@@ -21,7 +21,7 @@ export function CumulativeTooltip({ active, payload }: CumulativeTooltipProps) {
     const point = result.data;
 
     return (
-        <div className="grid gap-0.5 rounded-md border bg-popover px-3 py-2 text-xs shadow-lg">
+        <div className="grid gap-0.5 rounded-md border bg-popover px-3 py-2 text-xs">
             <strong className="text-sm">
                 {formatDayLabel(point.day)} · {formatInteger(point.current)} cortes
             </strong>

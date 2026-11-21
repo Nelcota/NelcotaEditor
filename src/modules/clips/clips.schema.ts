@@ -1,4 +1,6 @@
+import { sql } from "drizzle-orm";
 import {
+    check,
     doublePrecision,
     index,
     integer,
@@ -27,6 +29,7 @@ import {
     DEFAULT_CAPTION_STYLE,
 } from "#/modules/clips/clip-format";
 import { CLIP_STATUSES } from "#/modules/clips/clip-status";
+import { MAX_SCORE, MIN_SCORE } from "#/modules/highlights/highlight-limits";
 import { videos } from "#/modules/videos/videos.schema";
 
 export const clipStatusEnum = pgEnum("clip_status", CLIP_STATUSES);
@@ -69,7 +72,16 @@ export const clips = pgTable(
         shareToken: text("share_token").unique(),
         createdAt: timestamp("created_at").defaultNow().notNull(),
     },
-    (table) => [index("clips_video_id_idx").on(table.videoId)],
+    (table) => [
+        index("clips_video_id_idx").on(table.videoId),
+        check("clips_start_seconds_positive", sql`${table.startSeconds} >= 0`),
+        check("clips_range_ordered", sql`${table.endSeconds} > ${table.startSeconds}`),
+        check(
+            "clips_score_range",
+            sql`${table.score} between ${sql.raw(String(MIN_SCORE))} and ${sql.raw(String(MAX_SCORE))}`,
+        ),
+        check("clips_studio_draft_version_positive", sql`${table.studioDraftVersion} >= 0`),
+    ],
 );
 
 export type Clip = typeof clips.$inferSelect;

@@ -16,13 +16,16 @@ export function YoutubeLinkInput({ value, disabled, onValueChange }: YoutubeLink
             <label htmlFor="new-video-link" className="sr-only">
                 Link do YouTube
             </label>
-            <div className="flex h-12 items-center gap-2.5 rounded-xl border border-input bg-background px-3.5 focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/50 has-[[aria-invalid=true]]:border-destructive">
+            <div className="flex h-12 items-center gap-2.5 rounded-xl border border-input bg-background px-3.5 focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/70 has-[[aria-invalid=true]]:border-destructive">
                 <LinkIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <input
                     id="new-video-link"
                     type="url"
                     inputMode="url"
                     autoComplete="off"
+                    spellCheck={false}
+                    autoCapitalize="none"
+                    enterKeyHint="go"
                     // The person opened this dialog to paste; the field is ready for it.
                     autoFocus
                     placeholder="Cole o link do YouTube"

@@ -2,7 +2,7 @@ import StopCircleIcon from "~icons/solar/stop-circle-linear";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cancelVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/video-views";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 
@@ -12,7 +12,7 @@ export function CancelVideoButton({ video }: { video: VideoSummary }) {
     const cancellation = useMutation({
         mutationFn: () => cancelVideo({ data: { videoId: video.id } }),
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
         },
     });
     const isCancelling = video.isCancelling || cancellation.isPending;

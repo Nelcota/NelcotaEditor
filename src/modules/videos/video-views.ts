@@ -15,6 +15,8 @@ export interface VideoSummary {
     requestedClipCount: number;
     readyClipCount: number;
     createdAt: string;
+    /** When the current run was asked for; null for videos from before it was recorded. */
+    processingStartedAt: string | null;
     /** The original YouTube link; null for uploaded files. */
     sourceUrl: string | null;
     thumbnailUrl: string | null;

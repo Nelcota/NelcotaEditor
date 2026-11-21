@@ -1,8 +1,9 @@
 import { groupWordsIntoCues, toCue, wordsInsideRange } from "#/modules/clips/caption-cues";
 import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/clip-studio.schema";
-import { MAX_CAPTION_WORDS_PER_CUE } from "#/modules/clips/clip-studio.schema";
 
 const WHITESPACE = /\s+/;
+// Shorter than this a caption flashes by unread, and the subtitle file stretches it over the next one.
+export const MIN_CUE_SECONDS = 0.2;
 
 /** Spreads the cue's time evenly over new words when the count changed. */
 function spreadWords(texts: Array<string>, cue: CaptionCue): Array<CaptionWord> {
@@ -18,13 +19,13 @@ function spreadWords(texts: Array<string>, cue: CaptionCue): Array<CaptionWord> 
 /**
  * New text for a cue. Same number of words keeps each word's own timing (fixing a misheard word);
  * otherwise the cue's time is shared out evenly. Empty text removes the cue (null).
+ * Words over the limit are kept, not dropped: the draft check refuses the edit and says why.
  */
 export function editCueText(cue: CaptionCue, text: string): CaptionCue | null {
     const texts = text
         .trim()
         .split(WHITESPACE)
-        .filter((word) => word.length > 0)
-        .slice(0, MAX_CAPTION_WORDS_PER_CUE);
+        .filter((word) => word.length > 0);
 
     if (texts.length === 0) {
         return null;

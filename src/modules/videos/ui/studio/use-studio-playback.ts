@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
+import { createPlaybackClock } from "#/modules/videos/ui/studio/playback-clock";
+import type { PlaybackClock } from "#/modules/videos/ui/studio/playback-clock";
 
 interface PlaybackRange {
     startSeconds: number;
@@ -7,7 +9,8 @@ interface PlaybackRange {
 }
 
 export interface StudioPlayback {
-    currentSeconds: number;
+    /** The time, every frame; read it with usePlaybackValue, or clock.read() inside a handler. */
+    clock: PlaybackClock;
     isPlaying: boolean;
     togglePlay: () => Promise<void>;
     seek: (seconds: number) => void;
@@ -22,7 +25,7 @@ export function useStudioPlayback(
     range: PlaybackRange,
 ): StudioPlayback {
     const rangeRef = useRef(range);
-    const [currentSeconds, setCurrentSeconds] = useState(range.startSeconds);
+    const [clock] = useState(() => createPlaybackClock(range.startSeconds));
     const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
@@ -33,7 +36,7 @@ export function useStudioPlayback(
         const video = videoRef.current;
         const { startSeconds, endSeconds } = rangeRef.current;
         const clamped = Math.min(Math.max(seconds, startSeconds), endSeconds);
-        setCurrentSeconds(clamped);
+        clock.write(clamped);
 
         if (video === null) {
             return;
@@ -77,13 +80,13 @@ export function useStudioPlayback(
                 video.currentTime = startSeconds;
             }
 
-            setCurrentSeconds(video.currentTime);
+            clock.write(video.currentTime);
             frame = window.requestAnimationFrame(follow);
         };
 
         frame = window.requestAnimationFrame(follow);
         return () => window.cancelAnimationFrame(frame);
-    }, [isPlaying, videoRef]);
+    }, [isPlaying, videoRef, clock]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -94,7 +97,7 @@ export function useStudioPlayback(
 
         const onPlay = (): void => setIsPlaying(true);
         const onPause = (): void => setIsPlaying(false);
-        const onSeeked = (): void => setCurrentSeconds(video.currentTime);
+        const onSeeked = (): void => clock.write(video.currentTime);
         video.addEventListener("play", onPlay);
         video.addEventListener("pause", onPause);
         video.addEventListener("seeked", onSeeked);
@@ -104,7 +107,7 @@ export function useStudioPlayback(
             video.removeEventListener("pause", onPause);
             video.removeEventListener("seeked", onSeeked);
         };
-    }, [videoRef]);
+    }, [videoRef, clock]);
 
-    return { currentSeconds, isPlaying, togglePlay, seek };
+    return { clock, isPlaying, togglePlay, seek };
 }

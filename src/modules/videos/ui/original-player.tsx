@@ -193,6 +193,8 @@ function PlayableOriginal({
             }
         >
             <video
+                disablePictureInPicture
+                disableRemotePlayback
                 ref={playerRef}
                 src={fileUrl}
                 poster={video.thumbnailUrl ?? undefined}

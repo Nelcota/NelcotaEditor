@@ -4,7 +4,7 @@ import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
 import { summarizeUsage } from "#/modules/videos/server/usage-summary.server";
-import { toClipView } from "#/modules/videos/server/video-queries.server";
+import { CLIP_VIEW_COLUMNS, toClipView } from "#/modules/videos/server/video-queries.server";
 import type { LibraryClip, UsageSummary } from "#/modules/videos/video-views";
 import { videos } from "#/modules/videos/videos.schema";
 
@@ -14,7 +14,7 @@ export const listLibraryClips = createServerFn({ method: "GET" })
     .handler(async ({ context }): Promise<Array<LibraryClip>> => {
         const userId = context.user.id;
         const rows = await db
-            .select({ clip: clips, videoId: videos.id, videoTitle: videos.title })
+            .select({ clip: CLIP_VIEW_COLUMNS, videoId: videos.id, videoTitle: videos.title })
             .from(clips)
             .innerJoin(videos, eq(videos.id, clips.videoId))
             .where(and(eq(videos.userId, userId), eq(clips.status, "done")))

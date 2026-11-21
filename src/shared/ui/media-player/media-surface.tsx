@@ -5,6 +5,8 @@ import { toBarPercent } from "#/shared/ui/media-player/seek-bar";
 import type { MediaPlayer } from "#/shared/ui/media-player/use-media-player";
 import { Spinner } from "#/shared/ui/spinner";
 
+const BAR_PERCENT = 100;
+
 interface MediaSurfaceProps {
     player: MediaPlayer;
     containerRef: RefObject<HTMLDivElement | null>;
@@ -25,7 +27,7 @@ function BigPlayButton({ player, size }: { player: MediaPlayer; size: "md" | "sm
                 await player.togglePlay();
             }}
             className={cn(
-                "absolute top-1/2 left-1/2 z-10 grid -translate-1/2 place-items-center rounded-full border border-white/20 bg-black/50 text-white outline-none backdrop-blur-md transition-[scale,background-color] hover:scale-105 hover:bg-black/65 focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]",
+                "absolute top-1/2 left-1/2 z-10 grid -translate-1/2 place-items-center rounded-full border border-white/20 bg-black/65 text-white outline-none transition-[scale,background-color] hover:scale-105 hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
                 size === "md" && "size-18 [&>svg]:size-8",
                 size === "sm" && "size-12 [&>svg]:size-5",
             )}
@@ -44,9 +46,12 @@ function IdleProgress({ player }: { player: MediaPlayer }): ReactNode {
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-white/20 opacity-0 transition-opacity group-data-[idle=true]/player:opacity-100"
         >
+            {/* scaleX, not width: it changes on every timeupdate and must not re-run layout. */}
             <div
-                className="h-full bg-white"
-                style={{ width: `${toBarPercent(media.currentSeconds, media.durationSeconds)}%` }}
+                className="h-full origin-left bg-white"
+                style={{
+                    transform: `scaleX(${toBarPercent(media.currentSeconds, media.durationSeconds) / BAR_PERCENT})`,
+                }}
             />
         </div>
     );
@@ -80,7 +85,7 @@ export function MediaSurface({
             }}
             onPointerMove={player.wake}
             className={cn(
-                "group/player @container relative isolate overflow-hidden bg-black outline-none focus-visible:ring-4 focus-visible:ring-ring/50 data-[idle=true]:cursor-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0",
+                "group/player @container relative isolate overflow-hidden bg-black outline-none focus-visible:ring-4 focus-visible:ring-ring/70 data-[idle=true]:cursor-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0",
                 className,
             )}
         >

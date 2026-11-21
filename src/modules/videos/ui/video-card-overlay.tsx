@@ -33,7 +33,7 @@ function describeCrewLine(video: VideoSummary): string {
 /** Queued or processing: the crew member at work, over the frame, with how far it is. */
 export function WorkingOverlay({ video }: { video: VideoSummary }) {
     const progressPercent = video.progressPercent;
-    const secondsLeft = useProcessingTimeLeft(video.createdAt, progressPercent);
+    const secondsLeft = useProcessingTimeLeft(video.processingStartedAt, progressPercent);
 
     return (
         <div aria-live="polite" className={cn(OVERLAY_CLASS, "bg-black/65")}>

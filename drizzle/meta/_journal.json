@@ -57,6 +57,13 @@
       "when": 1795181364354,
       "tag": "0007_clip_caption_font",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795240642666,
+      "tag": "0008_audit_hardening",
+      "breakpoints": true
     }
   ]
 }

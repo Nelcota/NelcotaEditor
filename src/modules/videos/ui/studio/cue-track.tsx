@@ -1,14 +1,18 @@
 import { useRef } from "react";
 import type { ReactNode } from "react";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/clip-studio.schema";
-import { cueLimits, cueText, retimeCue } from "#/modules/videos/ui/studio/cue-editing";
+import {
+    MIN_CUE_SECONDS,
+    cueLimits,
+    cueText,
+    retimeCue,
+} from "#/modules/videos/ui/studio/cue-editing";
 import { clamp, toPercent } from "#/modules/videos/ui/studio/timeline-geometry";
 import type { TimelineWindow } from "#/modules/videos/ui/studio/timeline-geometry";
 import { useEdgeDrag } from "#/modules/videos/ui/studio/use-edge-drag";
 import { cn } from "#/shared/ui/cn";
 
 // Keeps a dragged cue from collapsing to nothing.
-const MIN_CUE_SECONDS = 0.2;
 const EDGE_PATTERN = /^(\d+):(start|end)$/;
 
 interface CueTrackProps {
@@ -141,7 +145,7 @@ export function CueTrack(props: CueTrackProps): ReactNode {
                             aria-label={`Abrir o bloco: ${cueText(cue)}`}
                             disabled={isLocked}
                             onClick={() => onOpen(index)}
-                            className="size-full truncate px-2 text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:cursor-not-allowed"
+                            className="size-full truncate px-2 text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset disabled:cursor-not-allowed"
                         >
                             {cueText(cue)}
                         </button>
@@ -150,12 +154,12 @@ export function CueTrack(props: CueTrackProps): ReactNode {
                                 <span
                                     aria-hidden="true"
                                     {...drag.handlers(`${index}:start`)}
-                                    className="absolute inset-y-0 left-0 w-2 cursor-ew-resize touch-none bg-foreground/80"
+                                    className="absolute inset-y-0 left-0 w-2 cursor-ew-resize touch-none bg-foreground/80 transition-colors hover:bg-foreground before:absolute before:-inset-x-2 before:inset-y-0 before:content-['']"
                                 />
                                 <span
                                     aria-hidden="true"
                                     {...drag.handlers(`${index}:end`)}
-                                    className="absolute inset-y-0 right-0 w-2 cursor-ew-resize touch-none bg-foreground/80"
+                                    className="absolute inset-y-0 right-0 w-2 cursor-ew-resize touch-none bg-foreground/80 transition-colors hover:bg-foreground before:absolute before:-inset-x-2 before:inset-y-0 before:content-['']"
                                 />
                             </>
                         )}
