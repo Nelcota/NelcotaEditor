@@ -1,6 +1,6 @@
-import AddIcon from "~icons/solar/add-linear";
-import MinusIcon from "~icons/solar/minus-linear";
-import ScissorsIcon from "~icons/solar/scissors-linear";
+import PlusIcon from "~icons/lucide/plus";
+import MinusIcon from "~icons/lucide/minus";
+import ScissorsIcon from "~icons/lucide/scissors";
 import type { ReactNode } from "react";
 import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/video-records/video-status";
 import { pluralize } from "#/shared/ui/pluralize";
@@ -90,7 +90,7 @@ export function ClipCountStepper({
                     disabled={disabled}
                     onClick={increase}
                 >
-                    <AddIcon aria-hidden="true" />
+                    <PlusIcon aria-hidden="true" />
                 </Button>
             </div>
         </div>

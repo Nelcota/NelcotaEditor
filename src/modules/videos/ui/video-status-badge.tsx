@@ -1,7 +1,7 @@
-import CheckCircleIcon from "~icons/solar/check-circle-linear";
-import DangerCircleIcon from "~icons/solar/danger-circle-linear";
-import ForbiddenCircleIcon from "~icons/solar/forbidden-circle-linear";
-import ClockCircleIcon from "~icons/solar/clock-circle-linear";
+import CircleCheckIcon from "~icons/lucide/circle-check";
+import CircleAlertIcon from "~icons/lucide/circle-alert";
+import BanIcon from "~icons/lucide/ban";
+import ClockIcon from "~icons/lucide/clock";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import type { VideoStatus } from "#/modules/video-records/video-status";
 import { isVideoWorking } from "#/modules/video-records/video-status";
@@ -20,18 +20,18 @@ const WORKING_STYLE: BadgeStyle = {
 };
 
 const BADGE_STYLES: Partial<Record<VideoStatus, BadgeStyle>> = {
-    queued: { icon: ClockCircleIcon, className: "bg-muted text-muted-foreground" },
+    queued: { icon: ClockIcon, className: "bg-muted text-muted-foreground" },
     // Green and red text on their own 15% tint measured under 4.5:1 at 13px, so the label is ink
     // and the tint and the coloured icon carry the hue.
     done: {
-        icon: CheckCircleIcon,
+        icon: CircleCheckIcon,
         className: "bg-success/15 text-foreground [&>svg]:text-success",
     },
     failed: {
-        icon: DangerCircleIcon,
+        icon: CircleAlertIcon,
         className: "bg-destructive/15 text-foreground [&>svg]:text-destructive",
     },
-    cancelled: { icon: ForbiddenCircleIcon, className: "bg-muted text-muted-foreground" },
+    cancelled: { icon: BanIcon, className: "bg-muted text-muted-foreground" },
 };
 
 function resolveStyle(status: VideoStatus): BadgeStyle {

@@ -9,12 +9,23 @@ import { AdminUserList } from "#/modules/admin/ui/admin-user-list";
 import { AdminVideoList } from "#/modules/admin/ui/admin-video-list";
 import { cn } from "#/shared/ui/cn";
 import { formatBytes } from "#/shared/ui/format";
+import { pluralize } from "#/shared/ui/pluralize";
 
 interface StatProps {
     label: string;
     value: string;
     note: string;
     isAlert?: boolean;
+}
+
+/** "1 admin · 2 bloqueadas": who can manage Nelcota and who is kept out. */
+function describeAccountRoles(overview: AdminOverview): string {
+    const adminCount = overview.adminCount;
+    const bannedCount = overview.bannedUserCount;
+    const admins = `${formatCount(adminCount)} ${pluralize(adminCount, "admin", "admins")}`;
+    const banned = `${formatCount(bannedCount)} ${pluralize(bannedCount, "bloqueada", "bloqueadas")}`;
+
+    return `${admins} · ${banned}`;
 }
 
 function Stat({ label, value, note, isAlert = false }: StatProps): ReactNode {
@@ -42,7 +53,7 @@ function TotalsGrid({ overview }: { overview: AdminOverview }): ReactNode {
             <Stat
                 label="Contas"
                 value={formatCount(overview.userCount)}
-                note={`+${formatCount(overview.newUserCount)} ${recent}`}
+                note={`+${formatCount(overview.newUserCount)} ${recent} · ${describeAccountRoles(overview)}`}
             />
             <Stat
                 label="Vídeos enviados"
@@ -85,7 +96,7 @@ function PipelineGrid({ overview }: { overview: AdminOverview }): ReactNode {
             <Stat
                 label="Vídeo processado"
                 value={formatHours(overview.processedSeconds)}
-                note={`${formatCount(overview.adminCount)} admins · ${formatCount(overview.bannedUserCount)} contas bloqueadas`}
+                note="Duração somada dos vídeos prontos"
             />
         </div>
     );
@@ -110,7 +121,7 @@ function Panel({ title, link, children }: PanelProps): ReactNode {
 }
 
 const PANEL_LINK_CLASS =
-    "rounded-sm text-sm font-medium text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/70";
+    "rounded-sm text-sm font-medium text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring";
 
 function RecentFailures({ overview }: { overview: AdminOverview }): ReactNode {
     const failures = overview.recentFailures;
@@ -120,7 +131,7 @@ function RecentFailures({ overview }: { overview: AdminOverview }): ReactNode {
             title="Falhas recentes"
             link={
                 <Link to="/admin/videos" search={{ filter: "failed" }} className={PANEL_LINK_CLASS}>
-                    Ver todas
+                    Ver todas as falhas
                 </Link>
             }
         >

@@ -1,4 +1,4 @@
-import LinkIcon from "~icons/solar/link-linear";
+import LinkIcon from "~icons/lucide/link";
 import { useState } from "react";
 import { SourceProblem } from "#/modules/videos/ui/source-problem";
 import { describeYoutubeLinkProblem } from "#/modules/videos/youtube-url";
@@ -43,7 +43,7 @@ export function YoutubeLinkInput({
             <label htmlFor={YOUTUBE_LINK_INPUT_ID} className="sr-only">
                 Link do YouTube
             </label>
-            <div className="flex h-12 items-center gap-2.5 rounded-xl border border-input bg-background px-3.5 focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/70 has-[[aria-invalid=true]]:border-destructive">
+            <div className="flex h-12 items-center gap-2.5 rounded-xl border border-input bg-background px-3.5 focus-within:border-ring focus-within:ring-4 focus-within:ring-ring has-[[aria-invalid=true]]:border-destructive">
                 <LinkIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <input
                     id={YOUTUBE_LINK_INPUT_ID}

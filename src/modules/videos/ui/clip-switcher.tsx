@@ -1,5 +1,5 @@
-import SkipNextBoldIcon from "~icons/solar/skip-next-bold";
-import SkipPreviousBoldIcon from "~icons/solar/skip-previous-bold";
+import SkipForwardIcon from "~icons/lucide-solid/skip-forward";
+import SkipBackIcon from "~icons/lucide-solid/skip-back";
 import type { ReactNode } from "react";
 import type { ClipView } from "#/modules/clips/clip-view";
 import { ControlButton } from "#/shared/ui/media-player/control-button";
@@ -29,7 +29,7 @@ export function ClipSwitcher({
         <div className="me-1 hidden h-8 shrink-0 items-center rounded-full bg-white/12 text-xs font-semibold text-white tabular-nums @2xl:flex">
             <ControlButton
                 label="Corte anterior"
-                icon={SkipPreviousBoldIcon}
+                icon={SkipBackIcon}
                 size="sm"
                 isDisabled={previousClip === undefined}
                 onClick={() => {
@@ -44,7 +44,7 @@ export function ClipSwitcher({
             </span>
             <ControlButton
                 label="Próximo corte"
-                icon={SkipNextBoldIcon}
+                icon={SkipForwardIcon}
                 size="sm"
                 isDisabled={nextClip === undefined}
                 onClick={() => {

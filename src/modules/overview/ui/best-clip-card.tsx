@@ -15,12 +15,14 @@ export function BestClipCard({ item }: { item: LibraryClip }) {
                     <ScoreChip score={clip.score} />
                     {formatClock(clip.endSeconds - clip.startSeconds)}
                 </p>
-                <p className="line-clamp-2 text-sm leading-snug font-medium">{clip.title}</p>
+                <p title={clip.title} className="line-clamp-2 text-sm leading-snug font-medium">
+                    {clip.title}
+                </p>
                 <Link
                     to="/videos/$videoId"
                     params={{ videoId: item.videoId }}
                     title={item.videoTitle}
-                    className="truncate rounded text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none motion-safe:active:scale-[0.99]"
+                    className="truncate rounded text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring focus-visible:outline-none motion-safe:active:scale-[0.99]"
                 >
                     {item.videoTitle}
                 </Link>

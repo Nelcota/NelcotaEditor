@@ -1,5 +1,5 @@
-import FilmIcon from "~icons/solar/clapperboard-linear";
-import RestartIcon from "~icons/solar/restart-linear";
+import ClapperboardIcon from "~icons/lucide/clapperboard";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
@@ -21,21 +21,19 @@ import { Skeleton } from "#/shared/ui/skeleton";
 function StudioLoading(): ReactNode {
     return (
         <div
+            role="status"
             aria-busy="true"
-            aria-label="Carregando o Studio"
             className="@container/studio grid grid-cols-[minmax(0,1fr)] gap-4"
         >
-            <div className="flex gap-3">
-                <Skeleton className="h-10 w-96 max-w-full" />
-                <span className="flex-1" />
-                <Skeleton className="hidden h-10 w-48 sm:block" />
+            <span className="sr-only">Carregando o Studio</span>
+            <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-10 w-64 max-w-full" />
+                <Skeleton className="h-10 w-80 max-w-full rounded-full" />
             </div>
-            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 @4xl/studio:grid-cols-[260px_minmax(0,1fr)_360px]">
-                <Skeleton className="hidden h-[560px] rounded-2xl @4xl/studio:block" />
-                <Skeleton className="mx-auto aspect-[9/16] w-full max-w-[300px] rounded-2xl" />
-                <Skeleton className="h-[600px] rounded-2xl" />
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-px overflow-hidden rounded-2xl @4xl/studio:h-[clamp(520px,calc(100dvh-320px),900px)] @4xl/studio:grid-cols-[minmax(0,1fr)_456px] @6xl/studio:grid-cols-[minmax(0,1fr)_520px]">
+                <Skeleton className="h-[min(58dvh,560px)] rounded-none @4xl/studio:h-full" />
+                <Skeleton className="h-80 rounded-none @4xl/studio:h-full" />
             </div>
-            <Skeleton className="hidden h-40 rounded-2xl @4xl/studio:block" />
         </div>
     );
 }
@@ -48,7 +46,7 @@ function NotReady({ details, onShowClips }: Pick<StudioTabProps, "details" | "on
             description="Sem a transcrição e os cortes ainda não dá para editar trecho nem legendas. Acompanhe o andamento em Cortes."
             action={
                 <Button variant="secondary" onClick={onShowClips}>
-                    <FilmIcon aria-hidden="true" />
+                    <ClapperboardIcon aria-hidden="true" />
                     Acompanhar em Cortes
                 </Button>
             }
@@ -115,7 +113,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
                             await Promise.all([studioQuery.refetch(), wordsQuery.refetch()]);
                         }}
                     >
-                        <RestartIcon aria-hidden="true" />
+                        <RotateCwIcon aria-hidden="true" />
                         Tentar de novo
                     </Button>
                 }

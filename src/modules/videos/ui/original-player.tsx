@@ -37,7 +37,7 @@ function PlayableOriginal({
             player={player}
             containerRef={containerRef}
             label={`Vídeo original: ${video.title}`}
-            className="aspect-video w-full rounded-2xl border"
+            className="aspect-video w-full rounded-2xl outline-1 -outline-offset-1 outline-solid outline-black/10 dark:outline-white/10"
             controls={
                 <OriginalControls
                     player={player}

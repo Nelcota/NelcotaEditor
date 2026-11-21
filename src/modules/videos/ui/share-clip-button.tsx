@@ -1,4 +1,4 @@
-import LinkRoundIcon from "~icons/solar/link-round-linear";
+import Link2Icon from "~icons/lucide/link-2";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { setClipSharing } from "#/modules/clips/server/clip-sharing-functions";
 import type { ClipView } from "#/modules/clips/clip-view";
@@ -34,7 +34,7 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
                     aria-busy={mutation.isPending}
                     className="font-medium"
                 >
-                    <LinkRoundIcon aria-hidden="true" />
+                    <Link2Icon aria-hidden="true" />
                     Criar link
                 </Button>
                 {mutation.isError === true && <FormAlert message={mutation.error.message} />}

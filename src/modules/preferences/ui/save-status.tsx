@@ -1,6 +1,6 @@
-import CheckIcon from "~icons/solar/check-linear";
-import DangerCircleIcon from "~icons/solar/danger-circle-linear";
-import RestartIcon from "~icons/solar/restart-linear";
+import CheckIcon from "~icons/lucide/check";
+import CircleAlertIcon from "~icons/lucide/circle-alert";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { ReactNode } from "react";
 import { Button } from "#/shared/ui/button";
 import { Spinner } from "#/shared/ui/spinner";
@@ -30,11 +30,11 @@ export function SaveStatus({ status, onRetry }: SaveStatusProps): ReactNode {
         return (
             <div role="alert" className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1">
                 <p className="flex items-center gap-1.5 text-sm text-destructive">
-                    <DangerCircleIcon className="size-4 shrink-0" aria-hidden="true" />
+                    <CircleAlertIcon className="size-4 shrink-0" aria-hidden="true" />
                     Não foi possível salvar a última mudança.
                 </p>
                 <Button variant="secondary" size="sm" onClick={onRetry}>
-                    <RestartIcon aria-hidden="true" />
+                    <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
             </div>

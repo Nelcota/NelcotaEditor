@@ -1,7 +1,7 @@
-import GallerySendIcon from "~icons/solar/gallery-send-linear";
-import Logout2Icon from "~icons/solar/logout-2-linear";
-import ShieldUserIcon from "~icons/solar/shield-user-linear";
-import UserRoundedIcon from "~icons/solar/user-rounded-linear";
+import ImageUpIcon from "~icons/lucide/image-up";
+import LogOutIcon from "~icons/lucide/log-out";
+import ShieldIcon from "~icons/lucide/shield";
+import UserIcon from "~icons/lucide/user";
 import { Link, getRouteApi } from "@tanstack/react-router";
 import type { ComponentProps, ReactNode } from "react";
 import { UserAvatar } from "#/modules/auth/ui/user-avatar";
@@ -65,7 +65,7 @@ export function AccountMenuContent({
             {hasAccountLink === true && (
                 <DropdownMenuItem asChild>
                     <Link to="/account">
-                        <UserRoundedIcon aria-hidden="true" />
+                        <UserIcon aria-hidden="true" />
                         Conta
                     </Link>
                 </DropdownMenuItem>
@@ -74,13 +74,13 @@ export function AccountMenuContent({
             {user.isAdmin === true && (
                 <DropdownMenuItem asChild className="md:hidden">
                     <Link to="/admin">
-                        <ShieldUserIcon aria-hidden="true" />
+                        <ShieldIcon aria-hidden="true" />
                         Admin
                     </Link>
                 </DropdownMenuItem>
             )}
             <DropdownMenuItem onSelect={onChangePhoto}>
-                <GallerySendIcon aria-hidden="true" />
+                <ImageUpIcon aria-hidden="true" />
                 Trocar foto de perfil
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -92,7 +92,7 @@ export function AccountMenuContent({
                     await signOut();
                 }}
             >
-                <Logout2Icon aria-hidden="true" />
+                <LogOutIcon aria-hidden="true" />
                 Sair
             </DropdownMenuItem>
             <SignOutError message={errorMessage} />

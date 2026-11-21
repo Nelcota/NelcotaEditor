@@ -41,7 +41,7 @@ export function AvatarMascotPicker({
                         aria-disabled={isBusy}
                         onClick={() => handlePick(index)}
                         className={cn(
-                            "grid aspect-square place-items-center rounded-xl border bg-background outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:not-aria-disabled:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-disabled:opacity-50",
+                            "grid aspect-square place-items-center rounded-xl border bg-background outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:not-aria-disabled:bg-secondary focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] aria-disabled:opacity-50",
                             "aria-pressed:border-primary aria-pressed:bg-primary/10",
                         )}
                     >

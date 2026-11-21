@@ -1,4 +1,4 @@
-import ScissorsIcon from "~icons/solar/scissors-linear";
+import ScissorsIcon from "~icons/lucide/scissors";
 import type { ReactNode } from "react";
 import { MAX_CLIP_SECONDS, MIN_CLIP_SECONDS } from "#/modules/clips/clip-limits";
 import { clamp } from "#/modules/studio/ui/timeline-geometry";

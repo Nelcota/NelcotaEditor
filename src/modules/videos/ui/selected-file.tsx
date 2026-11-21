@@ -1,5 +1,5 @@
-import CloseIcon from "~icons/solar/close-linear";
-import VideoFramePlayHorizontalIcon from "~icons/solar/video-frame-play-horizontal-linear";
+import XIcon from "~icons/lucide/x";
+import FilmIcon from "~icons/lucide/film";
 import { Button } from "#/shared/ui/button";
 import { formatBytes } from "#/shared/ui/format";
 
@@ -14,10 +14,7 @@ export function SelectedFile({ file, disabled, onClear }: SelectedFileProps) {
     return (
         <div className="flex items-center gap-3 rounded-2xl border bg-background p-3">
             <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-secondary">
-                <VideoFramePlayHorizontalIcon
-                    className="size-6 text-muted-foreground"
-                    aria-hidden="true"
-                />
+                <FilmIcon className="size-6 text-muted-foreground" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
                 <p
@@ -38,7 +35,7 @@ export function SelectedFile({ file, disabled, onClear }: SelectedFileProps) {
                 disabled={disabled}
                 aria-label="Trocar o arquivo"
             >
-                <CloseIcon aria-hidden="true" />
+                <XIcon aria-hidden="true" />
             </Button>
         </div>
     );

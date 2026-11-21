@@ -1,5 +1,5 @@
-import RestartIcon from "~icons/solar/restart-linear";
-import ScissorsIcon from "~icons/solar/scissors-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
+import ScissorsIcon from "~icons/lucide/scissors";
 import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { formatPreciseClock, parseClockInput } from "#/modules/clips/clip-time";
@@ -88,7 +88,7 @@ function TimeField({
                 }}
                 aria-describedby={describeError(error)}
                 enterKeyHint="done"
-                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-base tabular-nums outline-none transition-colors hover:border-ring/60 sm:text-sm focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/70 aria-invalid:border-destructive"
+                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-base tabular-nums outline-none transition-colors hover:border-ring/60 sm:text-sm focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring aria-invalid:border-destructive"
             />
         </label>
     );
@@ -208,7 +208,7 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
                         onClose();
                     }
                 }}
-                className="h-11 w-full rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/70"
+                className="h-11 w-full rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring"
             />
             <div className="grid grid-cols-[1fr_1fr_auto_auto] items-center gap-2">
                 <TimeField
@@ -246,7 +246,7 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
                             onReplace([original]);
                         }}
                     >
-                        <RestartIcon aria-hidden="true" />
+                        <RotateCwIcon aria-hidden="true" />
                     </Button>
                 </HintTooltip>
             </div>

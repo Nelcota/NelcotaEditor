@@ -1,4 +1,4 @@
-import UploadIcon from "~icons/solar/upload-linear";
+import UploadIcon from "~icons/lucide/upload";
 import type { DragEvent } from "react";
 
 interface FileDropZoneProps {

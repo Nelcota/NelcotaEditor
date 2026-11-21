@@ -1,5 +1,5 @@
-import Rewind10SecondsBackBoldIcon from "~icons/solar/rewind-10-seconds-back-bold";
-import Rewind10SecondsForwardBoldIcon from "~icons/solar/rewind-10-seconds-forward-bold";
+import RotateCcwIcon from "~icons/lucide/rotate-ccw";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { ReactNode } from "react";
 import type { ClipView } from "#/modules/clips/clip-view";
 import { findClipAt, rankOfClip } from "#/modules/videos/ui/clip-ranking";
@@ -88,18 +88,18 @@ export function OriginalControls({
                 <PlayToggleButton player={player} />
                 <ControlButton
                     label="Voltar 10 s (J)"
-                    icon={Rewind10SecondsBackBoldIcon}
+                    icon={RotateCcwIcon}
                     onClick={() => player.seekBy(-SKIP_SECONDS)}
                     className="hidden @lg:grid"
                 />
                 <ControlButton
                     label="Avançar 10 s (L)"
-                    icon={Rewind10SecondsForwardBoldIcon}
+                    icon={RotateCwIcon}
                     onClick={() => player.seekBy(SKIP_SECONDS)}
                     className="hidden @lg:grid"
                 />
                 <MuteButton player={player} />
-                <VolumeSlider player={player} className="mr-1 hidden @2xl:block" />
+                <VolumeSlider player={player} className="me-1 hidden @2xl:block" />
                 <TimeLabel
                     currentSeconds={media.currentSeconds}
                     durationSeconds={durationSeconds}

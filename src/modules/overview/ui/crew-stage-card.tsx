@@ -47,12 +47,14 @@ export function CrewStageCard({ stage, stats }: CrewStageCardProps): ReactNode {
     const videoCount = stats.funnel[stage.funnelKey];
 
     return (
-        <li className="grid content-start gap-4 rounded-2xl border bg-popover p-4 sm:p-5">
+        <li className="grid content-start gap-3 rounded-2xl border bg-popover p-3 @lg:gap-4 @lg:p-5">
             <div className="flex items-center gap-3">
-                <StageCrewMascot status={stage.status} className="size-11" />
+                <StageCrewMascot status={stage.status} className="size-9 @lg:size-11" />
                 <p className="leading-tight">
                     <strong className="block font-semibold">{name}</strong>
-                    <span className="text-sm text-muted-foreground">{stage.role}</span>
+                    <span className="text-sm text-muted-foreground @max-lg:sr-only">
+                        {stage.role}
+                    </span>
                 </p>
             </div>
             <CompactMetric

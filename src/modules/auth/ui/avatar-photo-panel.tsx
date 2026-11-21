@@ -1,5 +1,5 @@
-import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
-import UploadIcon from "~icons/solar/upload-linear";
+import TrashIcon from "~icons/lucide/trash";
+import UploadIcon from "~icons/lucide/upload";
 import { useEffect, useId, useRef } from "react";
 import type { ChangeEvent, ReactNode, RefObject } from "react";
 import { MAX_AVATAR_MEGABYTES } from "#/modules/auth/avatar";
@@ -138,7 +138,7 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
                     <Button
                         asChild
                         variant="secondary"
-                        className="w-full peer-focus-visible:ring-4 peer-focus-visible:ring-ring/70 peer-disabled:opacity-50"
+                        className="w-full peer-focus-visible:ring-4 peer-focus-visible:ring-ring peer-disabled:opacity-50"
                         aria-disabled={props.isBusy}
                         aria-busy={props.isUploading}
                     >
@@ -156,7 +156,7 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
                             disabled={props.isBusy}
                             onClick={requestRemove}
                         >
-                            <TrashBinTrashIcon aria-hidden="true" />
+                            <TrashIcon aria-hidden="true" />
                             Remover foto
                         </Button>
                     )}

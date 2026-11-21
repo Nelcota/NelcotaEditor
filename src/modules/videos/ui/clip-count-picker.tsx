@@ -6,7 +6,7 @@ import { cn } from "#/shared/ui/cn";
 const QUICK_COUNTS: ReadonlyArray<number> = [3, 5, 8, 10];
 
 const OPTION_CLASS =
-    "grid h-9 pointer-coarse:h-11 place-items-center rounded-lg text-sm font-semibold text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:enabled:active:scale-[0.99] aria-pressed:bg-foreground aria-pressed:text-background disabled:cursor-not-allowed disabled:opacity-50";
+    "grid h-9 pointer-coarse:h-11 place-items-center rounded-lg text-sm font-semibold text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:enabled:active:scale-[0.99] aria-pressed:bg-foreground aria-pressed:text-background disabled:cursor-not-allowed disabled:opacity-50";
 
 interface ClipCountPickerProps {
     value: number;

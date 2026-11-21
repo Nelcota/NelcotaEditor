@@ -1,10 +1,10 @@
-import LoginIcon from "~icons/solar/login-2-linear";
-import LogoutIcon from "~icons/solar/logout-2-linear";
-import ShieldCheckIcon from "~icons/solar/shield-check-linear";
-import ShieldCrossIcon from "~icons/solar/shield-cross-linear";
-import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
-import UserBlockIcon from "~icons/solar/user-block-linear";
-import UserCheckIcon from "~icons/solar/user-check-linear";
+import LogInIcon from "~icons/lucide/log-in";
+import LogOutIcon from "~icons/lucide/log-out";
+import ShieldCheckIcon from "~icons/lucide/shield-check";
+import ShieldXIcon from "~icons/lucide/shield-x";
+import TrashIcon from "~icons/lucide/trash";
+import UserXIcon from "~icons/lucide/user-x";
+import UserCheckIcon from "~icons/lucide/user-check";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -66,12 +66,12 @@ function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
                     aria-busy={impersonation.isRunning}
                     onClick={impersonation.run}
                 >
-                    <LoginIcon aria-hidden="true" />
+                    <LogInIcon aria-hidden="true" />
                     Entrar como esta pessoa
                 </Button>
                 {user.isBanned === false && (
                     <Button variant="outline" disabled={isProtected} onClick={() => onPick("ban")}>
-                        <UserBlockIcon aria-hidden="true" />
+                        <UserXIcon aria-hidden="true" />
                         Bloquear
                     </Button>
                 )}
@@ -89,7 +89,7 @@ function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
                 )}
                 {user.isAdmin === true && (
                     <Button variant="outline" onClick={() => onPick("revoke-admin")}>
-                        <ShieldCrossIcon aria-hidden="true" />
+                        <ShieldXIcon aria-hidden="true" />
                         Remover admin
                     </Button>
                 )}
@@ -98,7 +98,7 @@ function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
                     disabled={isProtected || details.sessions.length === 0}
                     onClick={() => onPick("end-sessions")}
                 >
-                    <LogoutIcon aria-hidden="true" />
+                    <LogOutIcon aria-hidden="true" />
                     Encerrar sessões
                 </Button>
                 <Button
@@ -106,7 +106,7 @@ function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
                     disabled={isProtected}
                     onClick={() => onPick("delete")}
                 >
-                    <TrashBinTrashIcon aria-hidden="true" />
+                    <TrashIcon aria-hidden="true" />
                     Excluir conta
                 </Button>
             </div>

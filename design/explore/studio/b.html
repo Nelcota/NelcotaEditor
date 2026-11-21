@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="studio.css" />
+        <script src="shell.js"></script>
+        <style>
+            .bar {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: 56px;
+                padding: 0 20px 0 24px;
+                flex: none;
+            }
+            .body {
+                flex: 1;
+                min-height: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 440px;
+                border-top: 1px solid var(--line);
+            }
+            .doc {
+                overflow: hidden;
+                padding: 24px 40px;
+                display: grid;
+                align-content: start;
+                gap: 20px;
+            }
+            .trim {
+                display: grid;
+                grid-template-columns: auto minmax(0, 1fr) auto;
+                align-items: center;
+                gap: 16px;
+                padding: 12px 14px;
+                border: 1px solid var(--line);
+                border-radius: 14px;
+            }
+            .trim b {
+                font-weight: 600;
+                font-size: 14px;
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+            .trim small {
+                display: block;
+                color: var(--muted);
+                font-size: 13px;
+            }
+            .lane {
+                position: relative;
+                height: 40px;
+                overflow: clip;
+                overflow-clip-margin: 6px;
+            }
+            .lane .strip {
+                border-radius: 7px;
+                overflow: hidden;
+            }
+            .dochead {
+                display: flex;
+                align-items: baseline;
+                gap: 10px;
+                margin-top: 4px;
+            }
+            .dochead h2 {
+                font-size: 20px;
+                font-weight: 650;
+                letter-spacing: -0.01em;
+            }
+            .dochead span {
+                color: var(--muted);
+                font-size: 13.5px;
+            }
+            .para {
+                display: grid;
+                grid-template-columns: 52px minmax(0, 1fr);
+                font-size: 20px;
+                line-height: 1.75;
+                max-width: 760px;
+            }
+            .para time {
+                font-size: 12.5px;
+                color: var(--muted);
+                padding-top: 8px;
+            }
+            .cue {
+                padding: 3px 2px;
+                border-radius: 6px;
+            }
+            .cue.done {
+                color: var(--muted);
+            }
+            .cue.play {
+                background: color-mix(in oklab, var(--primary) 13%, #fff);
+                color: var(--primary-ink);
+                box-shadow: inset 0 -2px 0 var(--primary);
+            }
+            .cue.edit {
+                position: relative;
+                outline: 1.5px solid var(--primary);
+                box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 18%, transparent);
+                background: #fff;
+            }
+            .cue.edit::after {
+                content: "";
+                display: inline-block;
+                width: 1.5px;
+                height: 22px;
+                margin-left: 1px;
+                vertical-align: -4px;
+                background: var(--primary);
+            }
+            .pop {
+                position: absolute;
+                left: -6px;
+                top: 46px;
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                padding: 4px;
+                border-radius: 10px;
+                background: var(--fg);
+                color: #fff;
+                font-size: 13px;
+                line-height: 1;
+                white-space: nowrap;
+                box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+                z-index: 5;
+            }
+            .pop span {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 7px 9px;
+                border-radius: 7px;
+            }
+            .pop span.t {
+                color: rgb(255 255 255 / 0.6);
+                font-variant-numeric: tabular-nums;
+            }
+            .pop i {
+                width: 1px;
+                height: 18px;
+                background: rgb(255 255 255 / 0.2);
+            }
+            .side2 {
+                background: var(--inspector);
+                border-left: 1px solid var(--line);
+                display: grid;
+                grid-template-rows: auto minmax(0, 1fr);
+                padding: 20px 20px 16px;
+                gap: 16px;
+                min-height: 0;
+            }
+            .pv {
+                display: grid;
+                grid-template-columns: 216px minmax(0, 1fr);
+                gap: 16px;
+                align-items: end;
+            }
+            .pv .shot {
+                width: 216px;
+            }
+            .tp {
+                display: grid;
+                gap: 10px;
+                font-size: 13px;
+                color: var(--muted);
+            }
+            .tp .play-btn {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: var(--fg);
+                color: #fff;
+                display: grid;
+                place-items: center;
+            }
+            .card {
+                background: #fff;
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                overflow: hidden;
+            }
+            .card h3 {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 12px 14px 4px;
+            }
+            .pr {
+                display: grid;
+                grid-template-columns: 92px minmax(0, 1fr);
+                align-items: center;
+                gap: 10px;
+                min-height: 42px;
+                padding: 0 14px;
+                border-top: 1px solid var(--line);
+                font-size: 13.5px;
+            }
+            .pr:first-of-type {
+                border-top: 0;
+            }
+            .pr > span:first-child {
+                color: var(--muted);
+            }
+            .dd {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: 32px;
+                padding: 0 8px 0 10px;
+                border-radius: 8px;
+                background: var(--secondary);
+            }
+            .dd .sp {
+                flex: 1;
+            }
+            .pr .seg span {
+                height: 26px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="page">
+            <div class="bar">
+                <div class="select" style="width: 340px">
+                    <span class="n">1 DE 3</span
+                    ><span class="t">Perdidos em São Paulo com o ID4</span><span id="ch"></span>
+                </div>
+                <button class="btn icon" id="u"></button><button class="btn icon" id="r"></button>
+                <span class="sp"></span>
+                <span class="save" id="sv"></span>
+                <span
+                    style="width: 1px; height: 20px; background: var(--line); margin: 0 6px"
+                ></span>
+                <span class="changes">31 alterações não renderizadas</span>
+                <button class="btn primary" style="margin-left: 8px" id="rb"></button>
+            </div>
+            <div class="body">
+                <section class="doc">
+                    <div class="trim">
+                        <div>
+                            <b id="tt"></b>
+                            <small class="num">0:59 a 1:21 · 21,6 s</small>
+                        </div>
+                        <div class="lane" id="lane"></div>
+                        <button class="btn sm outline">Ajustar trecho</button>
+                    </div>
+                    <div class="dochead">
+                        <h2>Roteiro</h2>
+                        <span
+                            >Clique num trecho para corrigir. Enter divide, Backspace no início
+                            junta.</span
+                        >
+                    </div>
+                    <div id="doc" style="display: grid; gap: 14px"></div>
+                </section>
+                <aside class="side2">
+                    <div class="pv">
+                        <div class="shot">
+                            <div class="cap" style="--cap: 22px">SÃO <em>PAULO.</em></div>
+                        </div>
+                        <div class="tp">
+                            <button class="play-btn" id="pl"></button>
+                            <span
+                                class="num"
+                                style="font-size: 15px; color: var(--fg); font-weight: 550"
+                                >0:02,8</span
+                            >
+                            <span class="num">de 0:21,6</span>
+                            <span style="display: flex; gap: 2px"
+                                ><button class="btn icon sm" id="b5"></button
+                                ><button class="btn icon sm" id="f5"></button
+                            ></span>
+                        </div>
+                    </div>
+                    <div class="card" id="style"></div>
+                </aside>
+            </div>
+        </div>
+        <script>
+            const I = icon;
+            ch.innerHTML = I("chevron", 16);
+            u.innerHTML = I("undo");
+            r.innerHTML = I("redo");
+            sv.innerHTML = I("cloud", 17) + "Rascunho salvo";
+            rb.innerHTML = I("render") + "Renderizar corte";
+            tt.innerHTML = I("scissors", 16) + "Trecho";
+            pl.innerHTML = I("play", 18);
+            b5.innerHTML = I("back5");
+            f5.innerHTML = I("fwd5");
+            lane.innerHTML = `${strip(14)}<span class="trimwin" style="left:29.7%;width:33.2%"></span><span class="head-line" style="left:34%"></span>`;
+            const EDIT = 8;
+            const paras = [];
+            let cur = [];
+            CUES.forEach((c, i) => {
+                cur.push([c, i]);
+                if (/[.?]$/.test(c[2]) && cur.length >= 3) {
+                    paras.push(cur);
+                    cur = [];
+                }
+            });
+            if (cur.length) paras.push(cur);
+            doc.innerHTML = paras
+                .slice(0, 7)
+                .map(
+                    (p) =>
+                        `<div class="para"><time class="num">${clock(p[0][0][0])}</time><p>${p
+                            .map(([c, i]) => {
+                                if (i === EDIT)
+                                    return `<span class="cue edit">${c[2]}<span class="pop"><span>${I("split", 15)}Dividir</span><span>${I("merge", 15)}Juntar</span><i></i><span class="t">5,0 a 5,5 s</span><span>${I("trash", 15)}</span></span></span> `;
+                                const cls = i < PLAYING ? "done" : i === PLAYING ? "play" : "";
+                                return `<span class="cue ${cls}">${c[2]}</span> `;
+                            })
+                            .join("")}</p></div>`,
+                )
+                .join("");
+            style.innerHTML = `<h3>${I("palette", 17)}Estilo da legenda</h3>
+                <div class="pr"><span>Legenda</span><div class="seg"><span class="on">Karaokê</span><span>Clássica</span><span>Sem</span></div></div>
+                <div class="pr"><span>Destaque</span><div class="swatches"><i class="sw on" style="background:#ffd60a"></i><i class="sw" style="background:#22c55e"></i><i class="sw" style="background:#ef4444"></i><i class="sw" style="background:#38bdf8"></i><i class="sw" style="background:#c084fc"></i><i class="sw" style="background:#fff"></i></div></div>
+                <div class="pr"><span>Fonte</span><div class="dd"><span style="font:800 13px Montserrat;text-transform:uppercase">Montserrat</span><span class="sp"></span>${I("chevron", 16)}</div></div>
+                <div class="pr"><span>Tamanho</span><div class="seg"><span>P</span><span class="on">M</span><span>G</span></div></div>
+                <div class="pr"><span>Posição</span><div class="seg"><span>Cima</span><span>Meio</span><span class="on">Baixo</span></div></div>
+                <div class="pr"><span>Formato</span><div class="seg"><span class="on">9:16</span><span>1:1</span><span>16:9</span></div></div>`;
+            renderShell();
+        </script>
+    </body>
+</html>

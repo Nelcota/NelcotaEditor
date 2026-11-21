@@ -1,8 +1,8 @@
-import CalendarIcon from "~icons/solar/calendar-linear";
-import ClockCircleIcon from "~icons/solar/clock-circle-linear";
-import SquareArrowRightUpIcon from "~icons/solar/square-arrow-right-up-linear";
-import UploadIcon from "~icons/solar/upload-linear";
-import AltArrowLeftIcon from "~icons/solar/alt-arrow-left-linear";
+import CalendarIcon from "~icons/lucide/calendar";
+import ClockIcon from "~icons/lucide/clock";
+import ArrowUpRightIcon from "~icons/lucide/arrow-up-right";
+import UploadIcon from "~icons/lucide/upload";
+import ChevronLeftIcon from "~icons/lucide/chevron-left";
 import { Link } from "@tanstack/react-router";
 import { isVideoFinished } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
@@ -19,9 +19,9 @@ function BackToList() {
     return (
         <Link
             to="/"
-            className="-ms-1 inline-flex h-10 w-fit items-center gap-1 rounded-xl pe-2 text-meta font-medium text-muted-foreground outline-none transition-[color,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] md:hidden"
+            className="-ms-1 inline-flex h-10 w-fit items-center gap-1 rounded-xl pe-2 text-meta font-medium text-muted-foreground outline-none transition-[color,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] md:hidden"
         >
-            <AltArrowLeftIcon aria-hidden="true" className="size-5" />
+            <ChevronLeftIcon aria-hidden="true" className="size-5" />
             Vídeos
         </Link>
     );
@@ -45,10 +45,10 @@ function SourceLink({ video }: { video: VideoSummary }) {
             href={sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded underline-offset-4 outline-none transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+            className="inline-flex items-center gap-1.5 rounded underline-offset-4 outline-none transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
         >
             Abrir no YouTube
-            <SquareArrowRightUpIcon className="size-4" aria-hidden="true" />
+            <ArrowUpRightIcon className="size-4" aria-hidden="true" />
         </a>
     );
 }
@@ -68,7 +68,7 @@ function VideoMeta({ video }: { video: VideoSummary }) {
             </span>
             {durationSeconds !== null && (
                 <span className="inline-flex items-center gap-1.5 tabular-nums">
-                    <ClockCircleIcon className="size-4" aria-hidden="true" />
+                    <ClockIcon className="size-4" aria-hidden="true" />
                     {formatClock(durationSeconds)}
                 </span>
             )}
@@ -84,29 +84,37 @@ interface VideoHeaderProps {
      * element is ever visually hidden.
      */
     isInspectorShown: boolean;
+    /**
+     * The Studio needs the window's height: the title shrinks to one line and the meta, which the
+     * other tabs show, steps aside.
+     */
+    isCompact: boolean;
 }
 
-export function VideoHeader({ video, isInspectorShown }: VideoHeaderProps) {
+export function VideoHeader({ video, isInspectorShown, isCompact }: VideoHeaderProps) {
     const inspectorOwnedClass = cn(isInspectorShown === true && "lg:hidden");
 
     return (
         <header className="grid gap-2">
             <BackToList />
-            <div className="flex items-center gap-4">
+            <div className="flex items-start gap-4">
                 <div className="grid min-w-0 flex-1 gap-1.5">
                     <h1
                         className={cn(
-                            "line-clamp-2 text-2xl leading-tight font-semibold tracking-[-0.02em] text-balance [overflow-wrap:anywhere]",
+                            "line-clamp-2 text-title font-semibold tracking-[-0.02em] text-balance [overflow-wrap:anywhere]",
+                            isCompact === true && "line-clamp-1 text-xl",
                             isInspectorShown === true && "lg:sr-only",
                         )}
                     >
                         {video.title}
                     </h1>
-                    <div className={inspectorOwnedClass}>
-                        <VideoMeta video={video} />
-                    </div>
+                    {isCompact === false && (
+                        <div className={inspectorOwnedClass}>
+                            <VideoMeta video={video} />
+                        </div>
+                    )}
                 </div>
-                <div className={inspectorOwnedClass}>
+                <div className={cn("-mt-1", inspectorOwnedClass)}>
                     <VideoActionsMenu video={video} />
                 </div>
             </div>

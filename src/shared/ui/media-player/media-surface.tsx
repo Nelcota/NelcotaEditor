@@ -1,4 +1,4 @@
-import PlayBoldIcon from "~icons/solar/play-bold";
+import PlayIcon from "~icons/lucide-solid/play";
 import type { ReactNode, RefObject } from "react";
 import { cn } from "#/shared/ui/cn";
 import { toBarPercent } from "#/shared/ui/media-player/seek-bar";
@@ -27,12 +27,12 @@ function BigPlayButton({ player, size }: { player: MediaPlayer; size: "md" | "sm
                 await player.togglePlay();
             }}
             className={cn(
-                "absolute top-1/2 left-1/2 z-10 grid -translate-1/2 place-items-center rounded-full border border-white/20 bg-black/65 text-white outline-none transition-[scale,background-color] hover:scale-105 hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
+                "absolute top-1/2 left-1/2 z-10 grid -translate-1/2 place-items-center rounded-full border border-white/20 bg-black/65 text-white outline-none transition-[scale,background-color] hover:scale-105 hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
                 size === "md" && "size-18 [&>svg]:size-8",
                 size === "sm" && "size-12 [&>svg]:size-5",
             )}
         >
-            <PlayBoldIcon aria-hidden="true" className="translate-x-0.5" />
+            <PlayIcon aria-hidden="true" className="translate-x-0.5" />
         </button>
     );
 }
@@ -85,7 +85,7 @@ export function MediaSurface({
             }}
             onPointerMove={player.wake}
             className={cn(
-                "group/player @container relative isolate overflow-hidden bg-black outline-none focus-visible:ring-4 focus-visible:ring-ring/70 data-[idle=true]:cursor-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0",
+                "group/player @container relative isolate overflow-hidden bg-black outline-none focus-visible:ring-4 focus-visible:ring-ring data-[idle=true]:cursor-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0",
                 className,
             )}
         >

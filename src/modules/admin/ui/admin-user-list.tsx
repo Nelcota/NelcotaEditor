@@ -1,4 +1,4 @@
-import AltArrowRightIcon from "~icons/solar/alt-arrow-right-linear";
+import ChevronRightIcon from "~icons/lucide/chevron-right";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { AdminUserRow } from "#/modules/admin/admin-views";
@@ -21,7 +21,7 @@ function UserItem({ user }: { user: AdminUserRow }): ReactNode {
             <Link
                 to="/admin/users/$userId"
                 params={{ userId: user.id }}
-                className="-mx-2 my-1 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-2 py-2.5 outline-none transition-[background-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="-mx-2 my-1 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-2 py-2.5 outline-none transition-[background-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
             >
                 <UserAvatar name={user.name} image={user.image} className="size-10" />
                 <span className="grid min-w-0 gap-0.5">
@@ -36,7 +36,7 @@ function UserItem({ user }: { user: AdminUserRow }): ReactNode {
                         {describeUsage(user)}
                     </span>
                 </span>
-                <AltArrowRightIcon
+                <ChevronRightIcon
                     aria-hidden="true"
                     className="size-5 text-muted-foreground rtl:-scale-x-100"
                 />

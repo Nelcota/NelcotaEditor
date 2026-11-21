@@ -1,9 +1,10 @@
-import SidebarMinimalisticIcon from "~icons/solar/sidebar-minimalistic-linear";
+import PanelLeftIcon from "~icons/lucide/panel-left";
 import { Link, Outlet, useMatchRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ImpersonationBanner } from "#/modules/auth/ui/impersonation-banner";
 import { AppSidebar } from "#/modules/shell/ui/app-sidebar";
 import { PhoneTabBar } from "#/modules/shell/ui/phone-tab-bar";
+import { useFocusMainOnNavigate } from "#/modules/shell/ui/use-focus-main-on-navigate";
 import { InspectorToggle } from "#/modules/videos/ui/inspector-toggle";
 import { OpenVideoTabs } from "#/modules/videos/ui/open-video-tabs";
 import { BrandLogo } from "#/shared/ui/brand-logo";
@@ -18,7 +19,7 @@ import { useStoredFlag } from "#/shared/ui/use-stored-flag";
 const SIDEBAR_HIDDEN_KEY = "nelcota:sidebar-hidden";
 
 const BAR_BUTTON_CLASS =
-    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-5";
+    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] [&>svg]:size-5";
 
 /** The video page lays out its own columns (page and inspector) and scrolls them apart. */
 function useIsVideoPage(): boolean {
@@ -56,7 +57,7 @@ function TopBar({ isSidebarHidden, onToggleSidebar, isVideoPage }: TopBarProps):
                 <Link
                     to="/"
                     aria-label="Nelcota, ir para os vídeos"
-                    className="me-auto flex h-10 items-center rounded-xl px-2 outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className="me-auto flex h-10 items-center rounded-xl px-2 outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
                     <BrandLogo className="gap-2 text-base" />
                 </Link>
@@ -67,7 +68,7 @@ function TopBar({ isSidebarHidden, onToggleSidebar, isVideoPage }: TopBarProps):
                         aria-label={sidebarLabel}
                         className={cn(BAR_BUTTON_CLASS, "max-md:hidden")}
                     >
-                        <SidebarMinimalisticIcon aria-hidden="true" />
+                        <PanelLeftIcon aria-hidden="true" />
                     </button>
                 </HintTooltip>
             </div>
@@ -89,13 +90,14 @@ function TopBar({ isSidebarHidden, onToggleSidebar, isVideoPage }: TopBarProps):
 export function AppLayout(): ReactNode {
     const sidebar = useStoredFlag(SIDEBAR_HIDDEN_KEY);
     const isVideoPage = useIsVideoPage();
+    useFocusMainOnNavigate();
 
     return (
         <TooltipProvider>
             <NavigationProgress />
             <a
                 href="#main"
-                className="sr-only rounded-xl bg-primary-solid px-4 py-2 font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-50 focus-visible:ring-4 focus-visible:ring-ring/70"
+                className="sr-only rounded-xl bg-primary-solid px-4 py-2 font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-50 focus-visible:ring-4 focus-visible:ring-ring"
             >
                 Pular para o conteúdo
             </a>
@@ -117,7 +119,8 @@ export function AppLayout(): ReactNode {
                         </aside>
                     )}
                     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:rounded-2xl md:border md:shadow-[0_1px_3px_rgb(0_0_0/0.04)]">
-                        <div className="grid gap-2 px-2 pt-2 empty:hidden">
+                        {/* Hidden while every banner is absent or an empty status region. */}
+                        <div className="grid gap-2 px-2 pt-2 [&:not(:has(>:not([data-empty=true])))]:hidden">
                             <ImpersonationBanner />
                             <OfflineBanner />
                         </div>

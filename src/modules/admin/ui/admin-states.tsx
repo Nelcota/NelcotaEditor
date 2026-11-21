@@ -1,4 +1,4 @@
-import RestartIcon from "~icons/solar/restart-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { ReactNode } from "react";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
@@ -32,7 +32,7 @@ export function AdminLoadError({ title, message, onRetry }: AdminLoadErrorProps)
             description={message}
             action={
                 <Button variant="outline" onClick={onRetry}>
-                    <RestartIcon aria-hidden="true" />
+                    <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
             }

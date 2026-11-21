@@ -79,7 +79,7 @@ export function CueTrack(props: CueTrackProps): ReactNode {
                             aria-label={`Abrir o bloco: ${cueText(cue)}`}
                             disabled={isLocked}
                             onClick={() => onOpen(index)}
-                            className="size-full truncate px-2 text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset disabled:cursor-not-allowed"
+                            className="size-full truncate px-2 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 motion-safe:enabled:active:scale-[0.99] focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-not-allowed"
                         >
                             {cueText(cue)}
                         </button>

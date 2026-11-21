@@ -1,4 +1,4 @@
-import RestartIcon from "~icons/solar/restart-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -30,7 +30,7 @@ export function RouteErrorScreen({ error, reset }: ErrorComponentProps) {
             description="Não foi possível mostrar esta página. Tente de novo; se continuar, volte ao início."
             actions={
                 <Button onClick={retry}>
-                    <RestartIcon aria-hidden="true" />
+                    <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
             }

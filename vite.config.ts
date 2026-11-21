@@ -5,6 +5,39 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import icons from "unplugin-icons/vite";
+import { icons as lucideIcons } from "@iconify-json/lucide";
+
+const LUCIDE_VIEW_BOX_SIZE = 24;
+const LUCIDE_DEFAULT_STROKE = 'stroke-width="2"';
+/** Lucide's default 2 reads heavy at 16 to 20px; 1.75 is lighter and still whole enough to stay crisp. */
+const ICON_STROKE = 'stroke-width="1.75"';
+
+function readLucideBody(name: string): string {
+    const iconBodies = lucideIcons.icons;
+    const alias = lucideIcons.aliases?.[name];
+    const icon = iconBodies[alias?.parent ?? name];
+
+    if (icon === undefined) {
+        throw new Error(`Lucide has no icon named "${name}".`);
+    }
+
+    return icon.body.replaceAll(LUCIDE_DEFAULT_STROKE, ICON_STROKE);
+}
+
+function wrapLucideBody(body: string): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LUCIDE_VIEW_BOX_SIZE} ${LUCIDE_VIEW_BOX_SIZE}">${body}</svg>`;
+}
+
+function loadLucideIcon(name: string): string {
+    return wrapLucideBody(readLucideBody(name));
+}
+
+/** Lucide ships outlines only; transport glyphs (play, pause, skip) read better solid. */
+function loadSolidLucideIcon(name: string): string {
+    const solidBody = readLucideBody(name).replaceAll('fill="none"', 'fill="currentColor"');
+
+    return wrapLucideBody(solidBody);
+}
 
 /**
  * Nitro's dev server treats any request with `Sec-Fetch-Dest: video` (sent by <video>) as a
@@ -38,6 +71,13 @@ export default defineConfig({
         tailwindcss(),
         tanstackStart(),
         viteReact(),
-        icons({ compiler: "jsx", jsx: "react" }),
+        icons({
+            compiler: "jsx",
+            jsx: "react",
+            customCollections: {
+                lucide: loadLucideIcon,
+                "lucide-solid": loadSolidLucideIcon,
+            },
+        }),
     ],
 });

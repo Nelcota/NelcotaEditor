@@ -1,6 +1,6 @@
-import RestartIcon from "~icons/solar/restart-linear";
-import SubtitlesIcon from "~icons/solar/subtitles-linear";
-import TargetIcon from "~icons/solar/target-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
+import CaptionsIcon from "~icons/lucide/captions";
+import TargetIcon from "~icons/lucide/target";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CaptionCue, CaptionWord } from "#/modules/clips/clip-studio.schema";
@@ -117,7 +117,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                     id="studio-captions-title"
                     className="flex items-center gap-2 text-lg leading-tight font-semibold"
                 >
-                    <SubtitlesIcon className="size-5 text-muted-foreground" aria-hidden="true" />
+                    <CaptionsIcon className="size-5 text-muted-foreground" aria-hidden="true" />
                     Legendas
                 </h2>
                 <span className="text-sm text-muted-foreground">
@@ -132,7 +132,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                         disabled={isLocked}
                         onClick={editor.resetAllCaptions}
                     >
-                        <RestartIcon aria-hidden="true" />
+                        <RotateCwIcon aria-hidden="true" />
                     </Button>
                 </HintTooltip>
             </div>
@@ -179,7 +179,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                                 onSeek(cue.startSeconds);
                             }}
                             className={cn(
-                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 border-b px-4 py-2.5 text-left text-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset",
+                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 border-b px-4 py-2.5 text-left text-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-inset",
                                 index === playingIndex &&
                                     "bg-primary/10 shadow-[inset_3px_0_0_var(--primary)]",
                             )}
@@ -203,7 +203,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                 <button
                     type="button"
                     onClick={() => setIsFollowing(true)}
-                    className="absolute bottom-3 left-1/2 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full bg-foreground px-3 text-sm font-semibold whitespace-nowrap text-background outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className="absolute bottom-3 left-1/2 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full bg-foreground px-3 text-sm font-semibold whitespace-nowrap text-background outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
                     <TargetIcon className="size-4" aria-hidden="true" />
                     Voltar ao trecho tocando

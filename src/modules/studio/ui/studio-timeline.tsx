@@ -1,4 +1,4 @@
-import ScissorsIcon from "~icons/solar/scissors-linear";
+import ScissorsIcon from "~icons/lucide/scissors";
 import { useRef } from "react";
 import type { ReactNode } from "react";
 import { MAX_CLIP_SECONDS, MIN_CLIP_SECONDS } from "#/modules/clips/clip-limits";
@@ -62,10 +62,14 @@ function Filmstrip({ sourceUrl, window }: { sourceUrl: string | null; window: Ti
 function Ruler({ window }: { window: TimelineWindow }): ReactNode {
     return (
         <div className="relative h-5 text-xs text-muted-foreground tabular-nums" aria-hidden="true">
-            {tickSeconds(window).map((tick) => (
+            {tickSeconds(window).map((tick, index) => (
                 <span
                     key={tick}
-                    className="absolute -translate-x-1/2"
+                    // In a narrow lane every other label would touch its neighbours.
+                    className={cn(
+                        "absolute -translate-x-1/2",
+                        index % 2 === 1 && "hidden @xl/timeline:inline",
+                    )}
                     style={{ left: `${toPercent(window, tick)}%` }}
                 >
                     {formatClock(tick)}
@@ -116,7 +120,7 @@ export function StudioTimeline(props: StudioTimelineProps): ReactNode {
         <section
             aria-labelledby="studio-timeline-title"
             className={cn(
-                "grid gap-2 rounded-2xl border bg-popover px-4 pt-3 pb-4",
+                "@container/timeline grid gap-2 rounded-2xl border bg-popover px-4 pt-3 pb-4",
                 isLocked === true && "opacity-60",
             )}
         >

@@ -1,9 +1,9 @@
-import CheckCircleIcon from "~icons/solar/check-circle-linear";
-import ClockCircleIcon from "~icons/solar/clock-circle-linear";
-import DangerCircleIcon from "~icons/solar/danger-circle-linear";
-import ForbiddenCircleIcon from "~icons/solar/forbidden-circle-linear";
-import HourglassIcon from "~icons/solar/hourglass-linear";
-import Widget2Icon from "~icons/solar/widget-2-linear";
+import CircleCheckIcon from "~icons/lucide/circle-check";
+import ClockIcon from "~icons/lucide/clock";
+import CircleAlertIcon from "~icons/lucide/circle-alert";
+import BanIcon from "~icons/lucide/ban";
+import HourglassIcon from "~icons/lucide/hourglass";
+import LayoutGridIcon from "~icons/lucide/layout-grid";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback } from "react";
@@ -24,7 +24,7 @@ import { BRAND_MASCOT_INDEX } from "#/shared/ui/mascot";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
 const CHIP_CLASS =
-    "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background aria-[current=page]:hover:bg-foreground/90 [&>svg]:size-5";
+    "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background aria-[current=page]:hover:bg-foreground/90 [&>svg]:size-5";
 
 const FILTER_LABELS: Record<AdminVideoFilter, string> = {
     all: "Todos",
@@ -36,12 +36,12 @@ const FILTER_LABELS: Record<AdminVideoFilter, string> = {
 };
 
 const FILTER_ICONS: Record<AdminVideoFilter, IconComponent> = {
-    all: Widget2Icon,
+    all: LayoutGridIcon,
     working: HourglassIcon,
-    queued: ClockCircleIcon,
-    failed: DangerCircleIcon,
-    cancelled: ForbiddenCircleIcon,
-    done: CheckCircleIcon,
+    queued: ClockIcon,
+    failed: CircleAlertIcon,
+    cancelled: BanIcon,
+    done: CircleCheckIcon,
 };
 
 function toFilterSearch(filter: AdminVideoFilter | undefined): AdminVideoFilter | undefined {

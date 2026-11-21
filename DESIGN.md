@@ -51,7 +51,7 @@ Raised one step on 2026-11-19: small grey text on the dark canvas was hard to re
 | Body, buttons, fields, lists (`text-sm`)            | 15px                  |
 | Inputs (`text-base`)                                | 16px                  |
 | Section titles (`text-lg`)                          | 18px                  |
-| Page title                                          | 30px                  |
+| Page title                                          | 28px (`text-title`)   |
 | Icons in buttons, fields, selects, menus            | 20px                  |
 | Phone tab bar icons                                 | 24px (tabs 64px tall) |
 | Small icons beside text                             | 16px                  |

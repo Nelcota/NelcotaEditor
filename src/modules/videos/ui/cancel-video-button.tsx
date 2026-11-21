@@ -1,4 +1,4 @@
-import StopCircleIcon from "~icons/solar/stop-circle-linear";
+import CircleStopIcon from "~icons/lucide/circle-stop";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cancelVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/video-views";
@@ -26,7 +26,7 @@ export function CancelVideoButton({ video }: { video: VideoSummary }) {
                 disabled={isCancelling}
                 aria-busy={isCancelling}
             >
-                <StopCircleIcon aria-hidden="true" />
+                <CircleStopIcon aria-hidden="true" />
                 {isCancelling === true && "Cancelando…"}
                 {isCancelling === false && "Cancelar"}
             </Button>

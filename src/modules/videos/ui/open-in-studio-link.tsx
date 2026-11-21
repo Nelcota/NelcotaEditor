@@ -1,4 +1,4 @@
-import Pen2Icon from "~icons/solar/pen-2-linear";
+import PencilIcon from "~icons/lucide/pencil";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Button } from "#/shared/ui/button";
@@ -25,7 +25,7 @@ export function OpenInStudioLink(props: OpenInStudioLinkProps): ReactNode {
                 params={{ videoId }}
                 search={{ tab: "studio", clip: clipId }}
             >
-                <Pen2Icon aria-hidden="true" />
+                <PencilIcon aria-hidden="true" />
                 <span className={labelClassName}>
                     Editar<span className={placeClassName}> no Studio</span>
                 </span>

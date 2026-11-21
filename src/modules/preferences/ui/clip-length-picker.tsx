@@ -1,4 +1,4 @@
-import StopwatchIcon from "~icons/solar/stopwatch-linear";
+import TimerIcon from "~icons/lucide/timer";
 import type { ReactNode } from "react";
 import { CLIP_LENGTH_HINTS, CLIP_LENGTH_LABELS } from "#/modules/preferences/preferences";
 import { CLIP_LENGTHS } from "#/modules/video-records/clip-length";
@@ -22,7 +22,7 @@ export function ClipLengthPicker({ value, onValueChange }: ClipLengthPickerProps
     return (
         <div className="grid gap-2">
             <span className="flex items-center gap-2 text-sm font-medium">
-                <StopwatchIcon aria-hidden="true" className="size-5 text-muted-foreground" />
+                <TimerIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 {LABEL}
             </span>
             <SegmentedControl

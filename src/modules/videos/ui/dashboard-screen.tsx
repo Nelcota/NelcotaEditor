@@ -22,11 +22,11 @@ export function DashboardScreen(): ReactNode {
     const navigate = useNavigate();
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
             <PageHeader
                 title="Vídeos"
                 description="Seus vídeos e os cortes que saíram de cada um."
-                action={<NewVideoLink emphasis="primary" />}
+                action={<NewVideoLink emphasis="primary" className="max-sm:w-full" />}
             />
             <VideoList />
             <NewVideoDialog

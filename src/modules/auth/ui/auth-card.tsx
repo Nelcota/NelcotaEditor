@@ -48,9 +48,7 @@ export function AuthCard({ title, description, footer, children }: AuthCardProps
                 <div className="grid w-full max-w-sm gap-6">
                     <BrandLogo />
                     <div>
-                        <h1 className="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em]">
-                            {title}
-                        </h1>
+                        <h1 className="text-title font-semibold tracking-[-0.02em]">{title}</h1>
                         <p className="mt-2 text-muted-foreground">{description}</p>
                     </div>
                     {children}
@@ -58,7 +56,7 @@ export function AuthCard({ title, description, footer, children }: AuthCardProps
                         {footer.text}{" "}
                         <Link
                             to={footer.linkTo}
-                            className="inline-block rounded font-medium text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                            className="inline-block rounded font-medium text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                         >
                             {footer.linkLabel}
                         </Link>

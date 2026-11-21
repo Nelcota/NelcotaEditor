@@ -3,7 +3,8 @@ import type { VideoSummary } from "#/modules/videos/video-views";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { VideoMascot } from "#/modules/videos/ui/video-mascot";
 
-const FRAME_CLASS = "relative aspect-video w-full overflow-hidden rounded-2xl border bg-black";
+const FRAME_CLASS =
+    "relative aspect-video w-full overflow-hidden rounded-2xl bg-black outline-1 -outline-offset-1 outline-solid outline-black/10 dark:outline-white/10";
 
 /** Shown when there is nothing to play yet, or the browser cannot play this file's format. */
 export function OriginalUnavailable({

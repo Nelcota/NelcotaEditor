@@ -1,9 +1,9 @@
-import FullScreenBoldIcon from "~icons/solar/full-screen-bold";
-import PauseBoldIcon from "~icons/solar/pause-bold";
-import PlayBoldIcon from "~icons/solar/play-bold";
-import QuitFullScreenBoldIcon from "~icons/solar/quit-full-screen-bold";
-import VolumeCrossBoldIcon from "~icons/solar/volume-cross-bold";
-import VolumeLoudBoldIcon from "~icons/solar/volume-loud-bold";
+import MaximizeIcon from "~icons/lucide/maximize";
+import PauseIcon from "~icons/lucide-solid/pause";
+import PlayIcon from "~icons/lucide-solid/play";
+import MinimizeIcon from "~icons/lucide/minimize";
+import VolumeXIcon from "~icons/lucide/volume-x";
+import Volume2Icon from "~icons/lucide/volume-2";
 import type { ReactNode } from "react";
 import { ControlButton } from "#/shared/ui/media-player/control-button";
 import type { ControlSize } from "#/shared/ui/media-player/control-button";
@@ -19,7 +19,7 @@ export function PlayToggleButton({ player, size }: PlayerControlProps): ReactNod
         return (
             <ControlButton
                 label="Pausar (K)"
-                icon={PauseBoldIcon}
+                icon={PauseIcon}
                 onClick={player.togglePlay}
                 size={size}
             />
@@ -27,12 +27,7 @@ export function PlayToggleButton({ player, size }: PlayerControlProps): ReactNod
     }
 
     return (
-        <ControlButton
-            label="Tocar (K)"
-            icon={PlayBoldIcon}
-            onClick={player.togglePlay}
-            size={size}
-        />
+        <ControlButton label="Tocar (K)" icon={PlayIcon} onClick={player.togglePlay} size={size} />
     );
 }
 
@@ -43,7 +38,7 @@ export function MuteButton({ player, size }: PlayerControlProps): ReactNode {
         return (
             <ControlButton
                 label="Ligar o som (M)"
-                icon={VolumeCrossBoldIcon}
+                icon={VolumeXIcon}
                 onClick={player.toggleMute}
                 size={size}
             />
@@ -53,7 +48,7 @@ export function MuteButton({ player, size }: PlayerControlProps): ReactNode {
     return (
         <ControlButton
             label="Tirar o som (M)"
-            icon={VolumeLoudBoldIcon}
+            icon={Volume2Icon}
             onClick={player.toggleMute}
             size={size}
         />
@@ -65,7 +60,7 @@ export function FullscreenButton({ player, size }: PlayerControlProps): ReactNod
         return (
             <ControlButton
                 label="Sair da tela cheia (F)"
-                icon={QuitFullScreenBoldIcon}
+                icon={MinimizeIcon}
                 onClick={player.toggleFullscreen}
                 size={size}
             />
@@ -75,7 +70,7 @@ export function FullscreenButton({ player, size }: PlayerControlProps): ReactNod
     return (
         <ControlButton
             label="Tela cheia (F)"
-            icon={FullScreenBoldIcon}
+            icon={MaximizeIcon}
             onClick={player.toggleFullscreen}
             size={size}
         />

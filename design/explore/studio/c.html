@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="studio.css" />
+        <script src="shell.js"></script>
+        <style>
+            .bar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                height: 60px;
+                padding: 0 20px 0 24px;
+                flex: none;
+                border-bottom: 1px solid var(--line);
+            }
+            .steps {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin: 0 auto;
+            }
+            .step {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: 36px;
+                padding: 0 14px 0 8px;
+                border-radius: 99px;
+                font-size: 14px;
+                color: var(--muted);
+                font-weight: 500;
+            }
+            .step i {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                display: grid;
+                place-items: center;
+                font: 600 12px "Geist";
+                font-style: normal;
+                background: var(--secondary);
+                color: var(--muted);
+            }
+            .step.done i {
+                background: var(--success);
+                color: #fff;
+            }
+            .step.done {
+                color: var(--fg);
+            }
+            .step.on {
+                background: var(--fg);
+                color: #fff;
+            }
+            .step.on i {
+                background: #fff;
+                color: var(--fg);
+            }
+            .step.on small {
+                color: rgb(255 255 255 / 0.6);
+            }
+            .step small {
+                font-size: 12.5px;
+                font-weight: 400;
+            }
+            .sepline {
+                width: 28px;
+                height: 1px;
+                background: var(--line-strong);
+            }
+            .body {
+                flex: 1;
+                min-height: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 560px;
+            }
+            .stage {
+                background: var(--stage);
+                display: grid;
+                grid-template-rows: minmax(0, 1fr) auto;
+                justify-items: center;
+                padding: 24px 0 16px;
+                gap: 14px;
+                color: rgb(255 255 255 / 0.7);
+            }
+            .stage .shot {
+                height: 100%;
+                box-shadow: 0 20px 50px rgb(0 0 0 / 0.5);
+            }
+            .tr {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 13px;
+            }
+            .tr .pb {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #fff;
+                color: var(--fg);
+                display: grid;
+                place-items: center;
+            }
+            .tr .scrub {
+                width: 220px;
+                height: 4px;
+                border-radius: 2px;
+                background: rgb(255 255 255 / 0.2);
+                position: relative;
+            }
+            .tr .scrub::before {
+                content: "";
+                position: absolute;
+                inset: 0 auto 0 0;
+                width: 13%;
+                background: #fff;
+                border-radius: 2px;
+            }
+            .tool {
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                padding: 24px 32px 16px;
+                gap: 16px;
+            }
+            .tool h2 {
+                font-size: 22px;
+                font-weight: 650;
+                letter-spacing: -0.015em;
+            }
+            .tool p.lede {
+                color: var(--muted);
+                font-size: 14.5px;
+                margin-top: 2px;
+            }
+            .presets {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+            }
+            .preset {
+                display: grid;
+                gap: 7px;
+                font-size: 13px;
+                font-weight: 550;
+            }
+            .preset .im {
+                position: relative;
+                height: 90px;
+                border-radius: 12px;
+                background: #000 url(img/frame2.jpg) center 62% / cover;
+                display: grid;
+                place-items: center;
+                overflow: hidden;
+            }
+            .preset .im::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: rgb(0 0 0 / 0.25);
+            }
+            .preset .im b {
+                position: relative;
+                color: #fff;
+                text-transform: uppercase;
+                paint-order: stroke;
+                -webkit-text-stroke: 4px #000;
+                font-size: 19px;
+                line-height: 1;
+            }
+            .preset .im b em {
+                font-style: normal;
+            }
+            .preset small {
+                display: block;
+                font-weight: 400;
+                color: var(--muted);
+                font-size: 12.5px;
+            }
+            .preset.on .im {
+                box-shadow:
+                    0 0 0 2px #fff,
+                    0 0 0 4px var(--fg);
+            }
+            .preset.on .ck {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: #fff;
+                color: var(--fg);
+                display: grid;
+                place-items: center;
+            }
+            .fine {
+                border: 1px solid var(--line);
+                border-radius: 14px;
+            }
+            .fine summary {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: 42px;
+                padding: 0 14px;
+                font-size: 14px;
+                font-weight: 600;
+            }
+            .fr {
+                display: grid;
+                grid-template-columns: 110px minmax(0, 1fr);
+                align-items: center;
+                gap: 10px;
+                min-height: 42px;
+                padding: 0 14px;
+                border-top: 1px solid var(--line);
+                font-size: 13.5px;
+            }
+            .fr > span:first-child {
+                color: var(--muted);
+            }
+            .foot {
+                margin-top: auto;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding-top: 16px;
+                border-top: 1px solid var(--line);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="page">
+            <div class="bar">
+                <div class="select" style="width: 300px">
+                    <span class="n">1 DE 3</span
+                    ><span class="t">Perdidos em São Paulo com o ID4</span><span id="ch"></span>
+                </div>
+                <div class="steps">
+                    <span class="step done"
+                        ><i id="d1"></i>Trecho <small class="num">21,6 s</small></span
+                    >
+                    <span class="sepline"></span>
+                    <span class="step done"><i id="d2"></i>Legendas <small>31 blocos</small></span>
+                    <span class="sepline"></span>
+                    <span class="step on"><i>3</i>Estilo</span>
+                </div>
+                <span class="save" id="sv"></span>
+                <button class="btn icon" id="u"></button><button class="btn icon" id="r"></button>
+            </div>
+            <div class="body">
+                <section class="stage">
+                    <div class="shot">
+                        <div class="cap">SÃO <em>PAULO.</em></div>
+                    </div>
+                    <div class="tr">
+                        <button class="pb" id="pl"></button>
+                        <span class="num">0:02,8</span>
+                        <span class="scrub"></span>
+                        <span class="num">0:21,6</span>
+                    </div>
+                </section>
+                <section class="tool">
+                    <div>
+                        <h2>Como a legenda aparece</h2>
+                        <p class="lede">
+                            Escolha um estilo pronto. Dá para ajustar os detalhes depois.
+                        </p>
+                    </div>
+                    <div class="presets" id="presets"></div>
+                    <details class="fine" open>
+                        <summary id="fs"></summary>
+                        <div class="fr">
+                            <span>Cor do destaque</span>
+                            <div class="swatches">
+                                <i class="sw on" style="background: #ffd60a"></i
+                                ><i class="sw" style="background: #22c55e"></i
+                                ><i class="sw" style="background: #ef4444"></i
+                                ><i class="sw" style="background: #38bdf8"></i
+                                ><i class="sw" style="background: #c084fc"></i
+                                ><i class="sw" style="background: #fff"></i>
+                            </div>
+                        </div>
+                        <div class="fr">
+                            <span>Tamanho</span>
+                            <div class="seg">
+                                <span>P</span><span class="on">M</span><span>G</span>
+                            </div>
+                        </div>
+                        <div class="fr">
+                            <span>Posição</span>
+                            <div class="seg">
+                                <span>Cima</span><span>Meio</span><span class="on">Baixo</span>
+                            </div>
+                        </div>
+                        <div class="fr">
+                            <span>Formato</span>
+                            <div class="seg">
+                                <span class="on">9:16</span><span>1:1</span><span>16:9</span>
+                            </div>
+                        </div>
+                    </details>
+                    <div class="foot">
+                        <button class="btn outline" id="bk"></button>
+                        <span class="sp"></span>
+                        <span class="changes">31 alterações</span>
+                        <button class="btn primary" id="rb"></button>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <script>
+            const I = icon;
+            ch.innerHTML = I("chevron", 16);
+            d1.innerHTML = I("check", 13);
+            d2.innerHTML = I("check", 13);
+            u.innerHTML = I("undo");
+            r.innerHTML = I("redo");
+            sv.innerHTML = I("cloud", 17) + "Salvo";
+            pl.innerHTML = I("play", 16);
+            fs.innerHTML = I("sliders", 17) + "Ajuste fino";
+            bk.innerHTML = I("left", 16) + "Legendas";
+            rb.innerHTML = I("render") + "Renderizar corte";
+            const PRESETS = [
+                ["Karaokê", "Montserrat · amarelo", "800 17px Montserrat", "#ffd60a", 1],
+                ["Impacto", "Bebas Neue · verde", "400 26px 'Bebas Neue'", "#4ade80"],
+                ["Bloco", "League Spartan · roxo", "700 19px 'League Spartan'", "#c084fc"],
+                ["Clássica", "Inter · branco", "700 16px Inter", "#fff"],
+                ["Destaque azul", "Montserrat · azul", "800 17px Montserrat", "#38bdf8"],
+                ["Sem legenda", "Só o vídeo", "", ""],
+            ];
+            presets.innerHTML = PRESETS.map(
+                ([n, d, f, c, on]) =>
+                    `<div class="preset ${on ? "on" : ""}"><div class="im">${f ? `<b style="font:${f}">São <em style="color:${c}">Paulo.</em></b>` : ""}${on ? `<span class="ck">${I("check", 14)}</span>` : ""}</div><span>${n}<small>${d}</small></span></div>`,
+            ).join("");
+            renderShell();
+        </script>
+    </body>
+</html>

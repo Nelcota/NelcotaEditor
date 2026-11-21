@@ -1,4 +1,4 @@
-import AltArrowRightIcon from "~icons/solar/alt-arrow-right-linear";
+import ChevronRightIcon from "~icons/lucide/chevron-right";
 import type { ReactNode } from "react";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { cn } from "#/shared/ui/cn";
@@ -8,7 +8,7 @@ const ROW_CLASS =
     "flex min-h-14 w-full items-center gap-3 px-4 py-2 text-start text-base outline-none [&>svg:first-child]:size-5 [&>svg:first-child]:shrink-0";
 
 const ACTION_ROW_CLASS =
-    "transition-colors hover:bg-foreground/[0.03] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/70 disabled:cursor-not-allowed disabled:opacity-50";
+    "transition-colors hover:bg-foreground/[0.03] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
 
 interface RowContentProps {
     icon: IconComponent;
@@ -31,7 +31,7 @@ export function InspectorRowContent({ icon, label, value, hasChevron = false }: 
                 </span>
             )}
             {hasChevron === true && (
-                <AltArrowRightIcon
+                <ChevronRightIcon
                     aria-hidden="true"
                     className="size-5 shrink-0 text-muted-foreground"
                 />

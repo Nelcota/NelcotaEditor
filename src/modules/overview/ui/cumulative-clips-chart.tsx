@@ -1,4 +1,4 @@
-import GraphUpIcon from "~icons/solar/graph-up-linear";
+import TrendingUpIcon from "~icons/lucide/trending-up";
 import {
     Area,
     AreaChart,
@@ -56,7 +56,7 @@ export function CumulativeClipsChart({ stats }: { stats: OverviewStats }) {
     return (
         <section className="grid min-w-0 content-start gap-2 rounded-2xl border bg-popover p-4 sm:p-5">
             <h2 className="flex items-center gap-2 text-lg leading-tight font-semibold">
-                <GraphUpIcon aria-hidden="true" className="size-5 text-muted-foreground" />
+                <TrendingUpIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 Cortes acumulados
             </h2>
             <p className="flex flex-wrap items-baseline gap-x-2.5">

@@ -1,4 +1,4 @@
-import AltArrowLeftIcon from "~icons/solar/alt-arrow-left-linear";
+import ChevronLeftIcon from "~icons/lucide/chevron-left";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -116,9 +116,9 @@ function BackLink(): ReactNode {
     return (
         <Link
             to="/admin/users"
-            className="flex w-fit items-center gap-1.5 rounded-sm text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70"
+            className="flex w-fit items-center gap-1.5 rounded-sm text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
         >
-            <AltArrowLeftIcon aria-hidden="true" className="size-4 rtl:-scale-x-100" />
+            <ChevronLeftIcon aria-hidden="true" className="size-4 rtl:-scale-x-100" />
             Todas as contas
         </Link>
     );

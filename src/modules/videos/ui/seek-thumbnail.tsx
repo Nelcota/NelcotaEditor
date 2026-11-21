@@ -46,7 +46,7 @@ export function SeekThumbnail({ fileUrl, seconds, clipRank }: SeekThumbnailProps
             <span className="rounded-md bg-black/85 px-2 py-1 text-xs font-semibold whitespace-nowrap text-white tabular-nums">
                 {formatClock(seconds)}
                 {clipRank !== null && (
-                    <span className="text-[oklch(0.8_0.11_257)]"> · Corte {clipRank}</span>
+                    <span className="text-media-accent"> · Corte {clipRank}</span>
                 )}
             </span>
         </div>

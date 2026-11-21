@@ -1,15 +1,15 @@
-import CalendarIcon from "~icons/solar/calendar-linear";
-import ClockCircleIcon from "~icons/solar/clock-circle-linear";
-import DocumentTextIcon from "~icons/solar/document-text-linear";
-import DownloadMinimalisticIcon from "~icons/solar/download-minimalistic-linear";
-import PenIcon from "~icons/solar/pen-linear";
-import PlayCircleIcon from "~icons/solar/play-circle-linear";
-import ScissorsIcon from "~icons/solar/scissors-linear";
-import SquareArrowRightUpIcon from "~icons/solar/square-arrow-right-up-linear";
-import StopwatchIcon from "~icons/solar/stopwatch-linear";
-import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
-import UploadIcon from "~icons/solar/upload-linear";
-import VideoFrameIcon from "~icons/solar/video-frame-linear";
+import CalendarIcon from "~icons/lucide/calendar";
+import ClockIcon from "~icons/lucide/clock";
+import FileTextIcon from "~icons/lucide/file-text";
+import DownloadIcon from "~icons/lucide/download";
+import PenIcon from "~icons/lucide/pen";
+import PlayIcon from "~icons/lucide/play";
+import ScissorsIcon from "~icons/lucide/scissors";
+import ArrowUpRightIcon from "~icons/lucide/arrow-up-right";
+import TimerIcon from "~icons/lucide/timer";
+import TrashIcon from "~icons/lucide/trash";
+import UploadIcon from "~icons/lucide/upload";
+import SquarePlayIcon from "~icons/lucide/square-play";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -53,7 +53,7 @@ function NameField({ video, onRename }: { video: VideoSummary; onRename: () => v
                 onClick={onRename}
                 disabled={isVideoFinished(video.status) === false}
                 aria-label={`Renomear: ${video.title}`}
-                className="min-h-12 rounded-xl border bg-background px-4 py-3 text-start text-base leading-snug [overflow-wrap:anywhere] outline-none transition-[border-color,box-shadow] hover:border-ring/50 focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-default disabled:hover:border-border"
+                className="min-h-12 rounded-xl border bg-background px-4 py-3 text-start text-base leading-snug [overflow-wrap:anywhere] outline-none transition-[border-color,box-shadow] hover:border-ring/50 focus-visible:ring-4 focus-visible:ring-ring disabled:cursor-default disabled:hover:border-border"
             >
                 {video.title}
             </button>
@@ -77,8 +77,8 @@ function SourceRow({ video }: { video: VideoSummary }): ReactNode {
                 rel="noopener noreferrer"
                 className={INSPECTOR_LINK_ROW_CLASS}
             >
-                <InspectorRowContent icon={PlayCircleIcon} label="Fonte" value={sourceLabel} />
-                <SquareArrowRightUpIcon
+                <InspectorRowContent icon={PlayIcon} label="Fonte" value={sourceLabel} />
+                <ArrowUpRightIcon
                     aria-hidden="true"
                     className="size-5 shrink-0 text-muted-foreground"
                 />
@@ -96,7 +96,7 @@ function OriginGroup({ video }: { video: VideoSummary }): ReactNode {
             <InspectorRow icon={CalendarIcon} label="Enviado" value={formatDate(video.createdAt)} />
             {durationSeconds !== null && (
                 <InspectorRow
-                    icon={ClockCircleIcon}
+                    icon={ClockIcon}
                     label="Duração"
                     value={formatClock(durationSeconds)}
                 />
@@ -117,7 +117,7 @@ function FilesGroup({ video }: { video: VideoSummary }): ReactNode {
                     search={{ tab: "original" }}
                     className={INSPECTOR_LINK_ROW_CLASS}
                 >
-                    <InspectorRowContent icon={VideoFrameIcon} label="Vídeo original" hasChevron />
+                    <InspectorRowContent icon={SquarePlayIcon} label="Vídeo original" hasChevron />
                 </Link>
             </li>
             <li>
@@ -128,16 +128,13 @@ function FilesGroup({ video }: { video: VideoSummary }): ReactNode {
                     hash="transcricao"
                     className={INSPECTOR_LINK_ROW_CLASS}
                 >
-                    <InspectorRowContent icon={DocumentTextIcon} label="Transcrição" hasChevron />
+                    <InspectorRowContent icon={FileTextIcon} label="Transcrição" hasChevron />
                 </Link>
             </li>
             {originalFileUrl !== null && (
                 <li>
                     <a href={originalFileUrl} download className={INSPECTOR_LINK_ROW_CLASS}>
-                        <InspectorRowContent
-                            icon={DownloadMinimalisticIcon}
-                            label="Baixar o original"
-                        />
+                        <InspectorRowContent icon={DownloadIcon} label="Baixar o original" />
                     </a>
                 </li>
             )}
@@ -169,7 +166,7 @@ export function VideoInspector({ details }: VideoInspectorProps): ReactNode {
                     value={`${video.readyClipCount} de ${countClipTotal(details)}`}
                 />
                 <InspectorRow
-                    icon={StopwatchIcon}
+                    icon={TimerIcon}
                     label="Duração dos cortes"
                     value={CLIP_LENGTH_LABELS[video.clipLength]}
                 />
@@ -185,7 +182,7 @@ export function VideoInspector({ details }: VideoInspectorProps): ReactNode {
                     onClick={() => setOpenDialog("rename")}
                 />
                 <InspectorButtonRow
-                    icon={TrashBinTrashIcon}
+                    icon={TrashIcon}
                     label="Excluir vídeo"
                     isDestructive
                     isDisabled={isWorking}

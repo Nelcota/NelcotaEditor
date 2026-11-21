@@ -1,4 +1,4 @@
-import RestartIcon from "~icons/solar/restart-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { ReactNode } from "react";
 import { toCrewLine } from "#/modules/videos/crew-lines";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
@@ -37,7 +37,7 @@ function RetryButton(props: Omit<VideoRowStatusProps, "video" | "retryError">): 
             aria-disabled={isRetrying}
             aria-busy={isRetrying}
         >
-            <RestartIcon aria-hidden="true" />
+            <RotateCwIcon aria-hidden="true" />
             Tentar de novo
         </Button>
     );

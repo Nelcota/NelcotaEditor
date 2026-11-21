@@ -1,9 +1,9 @@
-import StopCircleIcon from "~icons/solar/stop-circle-linear";
-import MenuDotsIcon from "~icons/solar/menu-dots-linear";
-import SquareArrowRightUpIcon from "~icons/solar/square-arrow-right-up-linear";
-import PenIcon from "~icons/solar/pen-linear";
-import PlayIcon from "~icons/solar/play-linear";
-import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
+import CircleStopIcon from "~icons/lucide/circle-stop";
+import EllipsisIcon from "~icons/lucide/ellipsis";
+import ArrowUpRightIcon from "~icons/lucide/arrow-up-right";
+import PenIcon from "~icons/lucide/pen";
+import PlayIcon from "~icons/lucide/play";
+import TrashIcon from "~icons/lucide/trash";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
@@ -64,7 +64,7 @@ function VideoRowMenuItems({
         <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
                 <Link to="/videos/$videoId" params={{ videoId: video.id }}>
-                    <SquareArrowRightUpIcon aria-hidden="true" className="size-5" />
+                    <ArrowUpRightIcon aria-hidden="true" className="size-5" />
                     Abrir
                 </Link>
             </DropdownMenuItem>
@@ -76,7 +76,7 @@ function VideoRowMenuItems({
             )}
             {isVideoCancellable(status) === true && (
                 <DropdownMenuItem disabled={isPending || video.isCancelling} onSelect={onCancel}>
-                    <StopCircleIcon aria-hidden="true" className="size-5" />
+                    <CircleStopIcon aria-hidden="true" className="size-5" />
                     Cancelar processamento
                 </DropdownMenuItem>
             )}
@@ -90,7 +90,7 @@ function VideoRowMenuItems({
                 disabled={isDeleteDisabled}
                 onSelect={() => onOpenDialog("delete")}
             >
-                <TrashBinTrashIcon aria-hidden="true" className="size-5" />
+                <TrashIcon aria-hidden="true" className="size-5" />
                 <MenuItemLabel label="Excluir" isDisabled={isDeleteDisabled} />
             </DropdownMenuItem>
         </DropdownMenuContent>
@@ -112,7 +112,7 @@ export function VideoRowMenu(props: VideoRowMenuProps) {
                         aria-busy={props.isPending}
                         className="text-muted-foreground"
                     >
-                        <MenuDotsIcon aria-hidden="true" />
+                        <EllipsisIcon aria-hidden="true" />
                     </Button>
                 </DropdownMenuTrigger>
                 <VideoRowMenuItems {...props} onOpenDialog={setOpenDialog} />

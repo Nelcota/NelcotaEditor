@@ -23,7 +23,7 @@ function DropdownMenuContent({
                 data-slot="dropdown-menu-content"
                 sideOffset={sideOffset}
                 className={cn(
-                    "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-44 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overscroll-contain rounded-xl border border-card-border bg-popover p-1 text-popover-foreground shadow-[0_16px_40px_-14px_rgba(15,23,42,0.3)] data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-96",
+                    "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-44 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overscroll-contain rounded-xl border border-card-border bg-popover p-1 text-popover-foreground shadow-[0_16px_40px_-14px_rgb(0_0_0/0.3)] data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-96",
                     className,
                 )}
                 {...props}
@@ -63,7 +63,7 @@ function DropdownMenuItem({
                 onSelect(event);
             }}
             className={cn(
-                "relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-hidden select-none transition-[color,background-color,box-shadow,scale] focus:bg-accent focus:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset motion-safe:active:scale-[0.99] aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:active:scale-100 data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
+                "relative flex items-center gap-2 rounded-sm px-2.5 py-2 text-sm outline-hidden select-none transition-[color,background-color,box-shadow,scale] focus:bg-accent focus:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-inset motion-safe:active:scale-[0.99] aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:active:scale-100 data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
                 className,
             )}
             {...props}

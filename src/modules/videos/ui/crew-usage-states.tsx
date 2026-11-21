@@ -1,4 +1,4 @@
-import RestartIcon from "~icons/solar/restart-linear";
+import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { HOST_NAME } from "#/modules/videos/crew-lines";
 import { STAT_GRID_CLASS } from "#/modules/videos/ui/crew-stat-tile";
 import { NewVideoLink } from "#/modules/videos/ui/new-video-link";
@@ -18,7 +18,7 @@ export function UsageError({ onRetry }: { onRetry: () => void }) {
             description="Guarda não conseguiu buscar os números. Tente de novo; se continuar, recarregue a página."
             action={
                 <Button variant="secondary" onClick={onRetry}>
-                    <RestartIcon aria-hidden="true" />
+                    <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
             }
@@ -28,7 +28,8 @@ export function UsageError({ onRetry }: { onRetry: () => void }) {
 
 export function UsageLoading() {
     return (
-        <div className="grid gap-3" aria-busy="true" aria-label="Carregando uso">
+        <div role="status" aria-busy="true" className="grid gap-3">
+            <span className="sr-only">Carregando uso</span>
             <div className={STAT_GRID_CLASS}>
                 {Array.from({ length: STAT_COUNT }, (_, index) => (
                     <Skeleton key={index} className="h-36 rounded-2xl" />

@@ -83,14 +83,14 @@ export function SeekBar(props: SeekBarProps): ReactNode {
     return (
         <div
             className={cn(
-                "group/seek relative flex items-center rounded-full has-[input:focus-visible]:ring-4 has-[input:focus-visible]:ring-ring/70",
+                "group/seek relative flex items-center rounded-full has-[input:focus-visible]:ring-4 has-[input:focus-visible]:ring-ring",
                 size === "md" && "h-4",
                 size === "sm" && "h-3",
             )}
             onPointerMove={(event) => setHoverSeconds(readPointerSeconds(event, durationSeconds))}
             onPointerLeave={() => setHoverSeconds(null)}
         >
-            <div className="relative h-1 w-full rounded-full bg-white/25 transition-[height] group-hover/seek:h-1.5">
+            <div className="relative h-1.5 w-full origin-center scale-y-[0.67] rounded-full bg-white/25 transition-[scale] group-hover/seek:scale-y-100">
                 {/* Fills grow with scaleX, not width, so playback updates never re-run layout;
                     the clipping wrapper keeps their ends rounded at any scale. */}
                 <span className="absolute inset-0 overflow-hidden rounded-full">

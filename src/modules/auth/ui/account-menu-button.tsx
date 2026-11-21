@@ -1,5 +1,5 @@
-import AltArrowDownIcon from "~icons/solar/alt-arrow-down-linear";
-import AltArrowUpIcon from "~icons/solar/alt-arrow-up-linear";
+import ChevronDownIcon from "~icons/lucide/chevron-down";
+import ChevronUpIcon from "~icons/lucide/chevron-up";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -25,7 +25,7 @@ export function AccountMenuButton(): ReactNode {
             <DropdownMenu>
                 <DropdownMenuTrigger
                     aria-label={`Menu da conta: ${user.name}`}
-                    className="flex h-14 w-full items-center gap-1.5 rounded-xl pe-3 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
+                    className="flex h-14 w-full items-center gap-1.5 rounded-xl pe-3 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
                 >
                     <UserAvatar
                         name={user.name}
@@ -36,8 +36,8 @@ export function AccountMenuButton(): ReactNode {
                         {user.name}
                     </span>
                     <span className="grid text-muted-foreground" aria-hidden="true">
-                        <AltArrowUpIcon className="-mb-1 size-4" />
-                        <AltArrowDownIcon className="size-4" />
+                        <ChevronUpIcon className="-mb-1 size-4" />
+                        <ChevronDownIcon className="size-4" />
                     </span>
                 </DropdownMenuTrigger>
                 <AccountMenuContent

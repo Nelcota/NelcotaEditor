@@ -1,4 +1,4 @@
-import AltArrowDownIcon from "~icons/solar/alt-arrow-down-linear";
+import ChevronDownIcon from "~icons/lucide/chevron-down";
 import type { ReactNode } from "react";
 import { DeleteAccountSection } from "#/modules/auth/ui/delete-account-section";
 
@@ -11,10 +11,10 @@ interface DeleteAccountDisclosureProps {
 export function DeleteAccountDisclosure({ summary, art }: DeleteAccountDisclosureProps): ReactNode {
     return (
         <details className="group grid gap-4 border-t pt-6">
-            <summary className="flex w-fit cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&::-webkit-details-marker]:hidden">
+            <summary className="flex w-fit cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] [&::-webkit-details-marker]:hidden">
                 {art}
                 {summary}
-                <AltArrowDownIcon
+                <ChevronDownIcon
                     aria-hidden="true"
                     className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none"
                 />

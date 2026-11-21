@@ -11,6 +11,10 @@ export interface StudioShortcutActions {
     redo: () => void;
 }
 
+// Controls whose own keys (Space, arrows) must keep working while they have focus.
+const FOCUSED_CONTROL_SELECTOR =
+    "button, a[href], summary, [role=slider], [role=radio], [role=combobox], [role=tab]";
+
 /** Typing in a field must never play the video or move the clip. */
 function isTypingTarget(target: EventTarget | null): boolean {
     if (target instanceof HTMLElement === false) {
@@ -21,6 +25,15 @@ function isTypingTarget(target: EventTarget | null): boolean {
         target.isContentEditable === true ||
         ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
     );
+}
+
+/** A focused button, slider or radio keeps its own Space and letters; Ctrl+Z still undoes. */
+function isFocusedControl(target: EventTarget | null): boolean {
+    if (target instanceof HTMLElement === false) {
+        return false;
+    }
+
+    return target.closest(FOCUSED_CONTROL_SELECTOR) !== null;
 }
 
 function isCommandKey(event: KeyboardEvent): boolean {
@@ -78,6 +91,10 @@ export function useStudioShortcuts(actions: StudioShortcutActions, isEnabled: bo
 
         const onKeyDown = (event: KeyboardEvent): void => {
             if (isTypingTarget(event.target) === true) {
+                return;
+            }
+
+            if (isFocusedControl(event.target) === true && isCommandKey(event) === false) {
                 return;
             }
 

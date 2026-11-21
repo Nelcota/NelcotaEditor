@@ -1,5 +1,5 @@
-import ShieldUserIcon from "~icons/solar/shield-user-linear";
-import UserBlockIcon from "~icons/solar/user-block-linear";
+import ShieldIcon from "~icons/lucide/shield";
+import UserXIcon from "~icons/lucide/user-x";
 import type { ReactNode } from "react";
 import type { AdminUserRow } from "#/modules/admin/admin-views";
 
@@ -11,14 +11,16 @@ export function AdminUserBadges({ user }: { user: AdminUserRow }): ReactNode {
     return (
         <>
             {user.isAdmin === true && (
-                <span className={`${BADGE_CLASS} bg-primary/15 text-primary`}>
-                    <ShieldUserIcon aria-hidden="true" />
+                <span className={`${BADGE_CLASS} bg-secondary text-foreground`}>
+                    <ShieldIcon aria-hidden="true" />
                     Admin
                 </span>
             )}
             {user.isBanned === true && (
-                <span className={`${BADGE_CLASS} bg-destructive/15 text-destructive`}>
-                    <UserBlockIcon aria-hidden="true" />
+                <span
+                    className={`${BADGE_CLASS} bg-destructive/15 text-foreground [&>svg]:text-destructive`}
+                >
+                    <UserXIcon aria-hidden="true" />
                     Bloqueada
                 </span>
             )}

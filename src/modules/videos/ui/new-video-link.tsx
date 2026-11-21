@@ -1,4 +1,4 @@
-import AddIcon from "~icons/solar/add-linear";
+import PlusIcon from "~icons/lucide/plus";
 import { Link } from "@tanstack/react-router";
 import { Button } from "#/shared/ui/button";
 
@@ -19,7 +19,7 @@ export function NewVideoLink({ emphasis, className }: NewVideoLinkProps) {
     return (
         <Button asChild variant={BUTTON_VARIANTS[emphasis]} className={className}>
             <Link to="/" search={{ newVideo: true }} preload="intent">
-                <AddIcon aria-hidden="true" />
+                <PlusIcon aria-hidden="true" />
                 Novo vídeo
             </Link>
         </Button>

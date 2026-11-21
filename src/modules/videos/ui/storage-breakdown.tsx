@@ -1,5 +1,5 @@
-import DangerTriangleIcon from "~icons/solar/danger-triangle-linear";
-import ServerSquareIcon from "~icons/solar/server-square-linear";
+import TriangleAlertIcon from "~icons/lucide/triangle-alert";
+import ServerIcon from "~icons/lucide/server";
 import type { StorageUsage } from "#/modules/videos/video-views";
 import { pluralize } from "#/shared/ui/pluralize";
 import { cn } from "#/shared/ui/cn";
@@ -65,7 +65,7 @@ function StorageWarning({ usedPercent, quotaBytes }: StorageWarningProps) {
             role="status"
             className="flex gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm"
         >
-            <DangerTriangleIcon
+            <TriangleAlertIcon
                 aria-hidden="true"
                 className="mt-0.5 size-5 shrink-0 text-destructive"
             />
@@ -99,7 +99,7 @@ export function StorageBreakdown({ storage, quotaBytes, videoCount }: StorageBre
         >
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <h3 id="storage-title" className="flex items-center gap-2 font-semibold">
-                    <ServerSquareIcon aria-hidden="true" className="size-5 text-muted-foreground" />
+                    <ServerIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                     Espaço em disco
                 </h3>
                 <p className="text-sm text-muted-foreground tabular-nums">
