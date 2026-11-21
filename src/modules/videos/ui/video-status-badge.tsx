@@ -21,8 +21,16 @@ const WORKING_STYLE: BadgeStyle = {
 
 const BADGE_STYLES: Partial<Record<VideoStatus, BadgeStyle>> = {
     queued: { icon: ClockCircleIcon, className: "bg-muted text-muted-foreground" },
-    done: { icon: CheckCircleIcon, className: "bg-success/15 text-success" },
-    failed: { icon: DangerCircleIcon, className: "bg-destructive/15 text-destructive" },
+    // Green and red text on their own 15% tint measured under 4.5:1 at 13px, so the label is ink
+    // and the tint and the coloured icon carry the hue.
+    done: {
+        icon: CheckCircleIcon,
+        className: "bg-success/15 text-foreground [&>svg]:text-success",
+    },
+    failed: {
+        icon: DangerCircleIcon,
+        className: "bg-destructive/15 text-foreground [&>svg]:text-destructive",
+    },
     cancelled: { icon: ForbiddenCircleIcon, className: "bg-muted text-muted-foreground" },
 };
 

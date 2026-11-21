@@ -78,24 +78,37 @@ function VideoMeta({ video }: { video: VideoSummary }) {
 
 interface VideoHeaderProps {
     video: VideoSummary;
-    /** From lg the inspector beside the page already names the video, so the title is read out only. */
+    /**
+     * From lg the inspector beside the page names the video and holds its source and actions. The
+     * title is then read out only, and the controls leave the page (display: none), so no focusable
+     * element is ever visually hidden.
+     */
     isInspectorShown: boolean;
 }
 
 export function VideoHeader({ video, isInspectorShown }: VideoHeaderProps) {
+    const inspectorOwnedClass = cn(isInspectorShown === true && "lg:hidden");
+
     return (
         <header className="grid gap-2">
             <BackToList />
-            <div
-                className={cn("flex items-center gap-4", isInspectorShown === true && "lg:sr-only")}
-            >
+            <div className="flex items-center gap-4">
                 <div className="grid min-w-0 flex-1 gap-1.5">
-                    <h1 className="line-clamp-2 text-2xl leading-tight font-semibold tracking-[-0.02em] text-balance [overflow-wrap:anywhere]">
+                    <h1
+                        className={cn(
+                            "line-clamp-2 text-2xl leading-tight font-semibold tracking-[-0.02em] text-balance [overflow-wrap:anywhere]",
+                            isInspectorShown === true && "lg:sr-only",
+                        )}
+                    >
                         {video.title}
                     </h1>
-                    <VideoMeta video={video} />
+                    <div className={inspectorOwnedClass}>
+                        <VideoMeta video={video} />
+                    </div>
                 </div>
-                <VideoActionsMenu video={video} />
+                <div className={inspectorOwnedClass}>
+                    <VideoActionsMenu video={video} />
+                </div>
             </div>
         </header>
     );

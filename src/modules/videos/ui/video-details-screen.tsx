@@ -21,7 +21,10 @@ import { Skeleton } from "#/shared/ui/skeleton";
 
 const SKELETON_CLIP_COUNT = 4;
 
-const PAGE_COLUMN_CLASS = "grid min-w-0 content-start gap-6 px-4 pt-4 pb-12 md:px-8 md:pt-6";
+// One shrinkable track: without it the grid sizes to its widest child (the tab list) and pushes
+// the menu and the last tab past a 320px screen.
+const PAGE_COLUMN_CLASS =
+    "grid min-w-0 content-start grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-4 pb-12 md:px-8 md:pt-6";
 
 function LoadingState() {
     return (
@@ -98,7 +101,7 @@ function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): Re
     return (
         <div
             className={cn(
-                "grid min-h-0 md:h-full md:overflow-y-auto lg:overflow-hidden",
+                "grid min-h-0 grid-cols-[minmax(0,1fr)] md:h-full md:overflow-y-auto lg:overflow-hidden",
                 isInspectorShown === true && "lg:grid-cols-[minmax(0,1fr)_400px]",
             )}
         >

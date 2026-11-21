@@ -90,7 +90,7 @@ export function SidebarVideos({ query }: { query: string }): ReactNode {
     return (
         <>
             <VideoSection title="Processando" videos={workingVideos} />
-            <VideoSection title="Vídeos" videos={finishedVideos} />
+            <VideoSection title="Prontos" videos={finishedVideos} />
         </>
     );
 }

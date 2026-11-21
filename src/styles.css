@@ -248,14 +248,17 @@
         min-height: 100%;
     }
 
-    /* On phones the document scrolls under the 56px sticky top bar: keep focus and #main clear of it. */
+    /*
+     * On phones the document scrolls above the fixed 64px tab bar: keep focused elements and anchors
+     * clear of it (WCAG 2.4.11). From md there is no tab bar and each pane scrolls on its own.
+     */
     html {
-        scroll-padding-top: 4rem;
+        scroll-padding-bottom: calc(4rem + env(safe-area-inset-bottom));
     }
 
     @media (width >= 48rem) {
         html {
-            scroll-padding-top: 0;
+            scroll-padding-bottom: 0;
         }
     }
 

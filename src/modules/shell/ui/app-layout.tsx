@@ -18,7 +18,7 @@ import { useStoredFlag } from "#/shared/ui/use-stored-flag";
 const SIDEBAR_HIDDEN_KEY = "nelcota:sidebar-hidden";
 
 const BAR_BUTTON_CLASS =
-    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.97] [&>svg]:size-5";
+    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-5";
 
 /** The video page lays out its own columns (page and inspector) and scrolls them apart. */
 function useIsVideoPage(): boolean {
@@ -65,7 +65,6 @@ function TopBar({ isSidebarHidden, onToggleSidebar, isVideoPage }: TopBarProps):
                         type="button"
                         onClick={onToggleSidebar}
                         aria-label={sidebarLabel}
-                        aria-pressed={isSidebarHidden === false}
                         className={cn(BAR_BUTTON_CLASS, "max-md:hidden")}
                     >
                         <SidebarMinimalisticIcon aria-hidden="true" />

@@ -97,7 +97,7 @@ Each drawing has one meaning only:
   and dialogs; the mascots appear where they mean something (a video, a stage at work).
 - Left-align forms and dialogs; one primary button, right-aligned in dialogs.
 - Navigation: the sidebar lists Vídeos (count of videos), Cortes (count of ready clips), Painel and,
-  for admins, Admin; then "Processando" (videos at work, with their percent) and "Vídeos" (the rest,
+  for admins, Admin; then "Processando" (videos at work, with their percent) and "Prontos" (the rest,
   newest first), both narrowed by the search on top. The person's photo, name and a menu (Conta, photo,
   sign out) sit at its foot. The top bar can hide the sidebar. Phones drop the sidebar and the tabs for
   a tab bar with Vídeos, Cortes, Painel and Conta.

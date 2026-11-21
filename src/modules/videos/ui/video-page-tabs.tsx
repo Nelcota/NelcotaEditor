@@ -67,7 +67,8 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
         >
             <TabsList
                 variant="line"
-                className="h-auto w-full justify-start gap-6 border-b px-0 pb-0"
+                // Under sm the three labels only fit a 320px screen without their icons.
+                className="h-auto w-full justify-start gap-6 border-b px-0 pb-0 max-sm:gap-5 max-sm:[&_[role=tab]>svg]:hidden"
             >
                 <TabsTrigger value="clips" className="h-11 flex-none px-0 text-base font-semibold">
                     <ClapperboardIcon aria-hidden="true" />
