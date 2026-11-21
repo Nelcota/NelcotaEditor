@@ -34,7 +34,7 @@ export function AppLayout(): ReactNode {
                 >
                     <aside
                         className={cn(
-                            "hidden min-h-0 border-r px-3 py-3.5 md:block",
+                            "hidden min-h-0 border-r px-3 py-3.5 md:block md:overflow-y-auto",
                             sidebar.isCollapsed === true && "px-2",
                         )}
                     >

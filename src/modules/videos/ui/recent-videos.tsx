@@ -56,8 +56,8 @@ function RecentVideo({ video, isCurrent, isCollapsed }: RecentVideoProps) {
                 params={{ videoId: video.id }}
                 aria-current={toAriaCurrent(isCurrent)}
                 className={cn(
-                    "flex min-w-0 items-center gap-3 rounded-xl px-2.5 py-2 outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
-                    isCurrent === true && "bg-accent",
+                    "flex min-w-0 items-center gap-3 rounded-xl px-2.5 py-2 outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
+                    isCurrent === true && "bg-accent hover:bg-accent",
                     isCollapsed === true && "justify-center px-0",
                 )}
             >
@@ -67,7 +67,7 @@ function RecentVideo({ video, isCurrent, isCollapsed }: RecentVideoProps) {
                         <span className="truncate text-sm font-semibold" title={video.title}>
                             {video.title}
                         </span>
-                        <span className={cn("truncate text-[13px]", lineToneClass(video))}>
+                        <span className={cn("truncate text-xs", lineToneClass(video))}>
                             {crewLine}
                         </span>
                         {isVideoWorking(video.status) === true && (
@@ -87,11 +87,8 @@ function RecentVideo({ video, isCurrent, isCollapsed }: RecentVideoProps) {
 
 function RecentVideosLoading() {
     return (
-        <div
-            className="grid gap-2 px-2.5 pt-2"
-            aria-busy="true"
-            aria-label="Carregando vídeos recentes"
-        >
+        <div className="grid gap-2 px-2.5 pt-2" role="status">
+            <span className="sr-only">Carregando vídeos recentes…</span>
             {Array.from({ length: SKELETON_COUNT }, (_, index) => (
                 <Skeleton key={index} className="h-10 rounded-xl" />
             ))}
@@ -124,7 +121,7 @@ function RecentVideosHeading({
                 aria-expanded={isHidden === false}
                 aria-controls={listId}
                 onClick={onToggle}
-                className="flex h-8 w-full items-center justify-between rounded-lg px-3 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-colors outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="flex h-8 w-full items-center justify-between rounded-lg px-3 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <span className="flex items-center gap-2">
                     <HistoryIcon aria-hidden="true" className="size-4" />
@@ -151,7 +148,7 @@ function SeeAllLink(): ReactNode {
     return (
         <Link
             to="/"
-            className="flex h-9 items-center justify-center rounded-lg text-sm font-semibold text-muted-foreground transition-colors outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+            className="flex h-9 items-center justify-center rounded-lg text-sm font-semibold text-muted-foreground transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
         >
             Ver todos
         </Link>

@@ -24,7 +24,7 @@ function CollapseButton({ isCollapsed, onToggle }: CollapseButtonProps): ReactNo
     let label = "Recolher barra lateral";
 
     if (isCollapsed === true) {
-        label = "Abrir barra lateral";
+        label = "Expandir barra lateral";
     }
 
     return (
@@ -34,7 +34,7 @@ function CollapseButton({ isCollapsed, onToggle }: CollapseButtonProps): ReactNo
                 onClick={onToggle}
                 aria-label={label}
                 aria-expanded={isCollapsed === false}
-                className="grid size-10 place-items-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="grid size-10 place-items-center rounded-lg text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <SidebarMinimalisticIcon className="size-5" aria-hidden="true" />
             </button>
@@ -55,7 +55,11 @@ export function AppSidebar({ isCollapsed, onToggleCollapsed }: AppSidebarProps):
                 <Link
                     to="/"
                     aria-label="Nelcota, ir para o início"
-                    className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg outline-none transition-opacity hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className={cn(
+                        "flex min-w-0 items-center gap-2.5 rounded-lg outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
+                        // An auto margin instead of flex-1 keeps the link clear of the sheet's close button.
+                        isCollapsed === false && "mr-auto",
+                    )}
                 >
                     <BrandMark className="size-10" />
                     {isCollapsed === false && (
@@ -70,7 +74,7 @@ export function AppSidebar({ isCollapsed, onToggleCollapsed }: AppSidebarProps):
                 <NewVideoLink emphasis="primary" isCompact={isCollapsed} />
             </div>
             <SidebarSections isCollapsed={isCollapsed} />
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">
                 <RecentVideos isCollapsed={isCollapsed} />
             </div>
             <SidebarAccount isCollapsed={isCollapsed} />

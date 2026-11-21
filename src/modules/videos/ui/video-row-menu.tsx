@@ -31,6 +31,20 @@ interface VideoRowMenuProps {
     isPending: boolean;
 }
 
+/** Why an item is off; the menu only opens on demand, so the reason fits right under the label. */
+function MenuItemLabel({ label, isDisabled }: { label: string; isDisabled: boolean }) {
+    return (
+        <span className="grid">
+            {label}
+            {isDisabled === true && (
+                <span className="text-xs text-muted-foreground">
+                    Disponível quando o processamento terminar
+                </span>
+            )}
+        </span>
+    );
+}
+
 interface VideoRowMenuItemsProps extends VideoRowMenuProps {
     onOpenDialog: (dialog: VideoDialog) => void;
 }
@@ -43,42 +57,41 @@ function VideoRowMenuItems({
     onOpenDialog,
 }: VideoRowMenuItemsProps) {
     const status = video.status;
+    const isRenameDisabled = isVideoFinished(status) === false;
+    const isDeleteDisabled = isVideoWorking(status);
 
     return (
         <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
                 <Link to="/videos/$videoId" params={{ videoId: video.id }}>
-                    <SquareArrowRightUpIcon aria-hidden="true" />
+                    <SquareArrowRightUpIcon aria-hidden="true" className="size-5" />
                     Abrir
                 </Link>
             </DropdownMenuItem>
             {isVideoResumable(status) === true && (
                 <DropdownMenuItem disabled={isPending} onSelect={onResume}>
-                    <PlayIcon aria-hidden="true" />
+                    <PlayIcon aria-hidden="true" className="size-5" />
                     Retomar
                 </DropdownMenuItem>
             )}
             {isVideoCancellable(status) === true && (
                 <DropdownMenuItem disabled={isPending || video.isCancelling} onSelect={onCancel}>
-                    <StopCircleIcon aria-hidden="true" />
+                    <StopCircleIcon aria-hidden="true" className="size-5" />
                     Cancelar processamento
                 </DropdownMenuItem>
             )}
-            <DropdownMenuItem
-                disabled={isVideoFinished(status) === false}
-                onSelect={() => onOpenDialog("rename")}
-            >
-                <PenIcon aria-hidden="true" />
-                Renomear
+            <DropdownMenuItem disabled={isRenameDisabled} onSelect={() => onOpenDialog("rename")}>
+                <PenIcon aria-hidden="true" className="size-5" />
+                <MenuItemLabel label="Renomear" isDisabled={isRenameDisabled} />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
                 variant="destructive"
-                disabled={isVideoWorking(status)}
+                disabled={isDeleteDisabled}
                 onSelect={() => onOpenDialog("delete")}
             >
-                <TrashBinTrashIcon aria-hidden="true" />
-                Excluir
+                <TrashBinTrashIcon aria-hidden="true" className="size-5" />
+                <MenuItemLabel label="Excluir" isDisabled={isDeleteDisabled} />
             </DropdownMenuItem>
         </DropdownMenuContent>
     );

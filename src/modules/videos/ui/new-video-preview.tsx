@@ -12,7 +12,8 @@ import { toLinkVideoId } from "#/modules/videos/ui/video-source";
 import type { VideoSource } from "#/modules/videos/ui/video-source";
 import { youtubePreviewQueryOptions } from "#/modules/videos/ui/youtube-preview-queries";
 
-const FRAME_CLASS = "aspect-video w-full rounded-xl bg-black object-cover";
+const FRAME_CLASS =
+    "aspect-video w-full rounded-lg bg-black object-cover outline outline-1 -outline-offset-1 outline-white/10";
 
 interface NewVideoPreviewProps {
     source: VideoSource;
@@ -43,7 +44,7 @@ function FileFrame({ file }: { file: File }): ReactNode {
 
 function EmptyFrame(): ReactNode {
     return (
-        <div className="grid aspect-video w-full place-content-center justify-items-center gap-2 rounded-xl border border-dashed text-[14px] text-muted-foreground">
+        <div className="grid aspect-video w-full place-content-center justify-items-center gap-2 rounded-lg border border-dashed text-meta text-muted-foreground">
             <VideoFramePlayHorizontalIcon className="size-7" aria-hidden="true" />O vídeo aparece
             aqui
         </div>
@@ -74,7 +75,7 @@ function PreviewFrame({ source }: { source: VideoSource }): ReactNode {
 function Fact({ label, value }: { label: string; value: string }): ReactNode {
     return (
         <div className="grid gap-0.5">
-            <dt className="text-[14px] text-muted-foreground">{label}</dt>
+            <dt className="text-meta text-muted-foreground">{label}</dt>
             <dd className="text-sm font-bold">{value}</dd>
         </div>
     );
@@ -101,11 +102,9 @@ export function NewVideoPreview({
         >
             <div className="grid gap-1">
                 <h3 className="font-bold">Prévia</h3>
-                <p className="text-[14px] text-muted-foreground">
-                    Como o vídeo entra na sua lista.
-                </p>
+                <p className="text-meta text-muted-foreground">Como o vídeo entra na sua lista.</p>
             </div>
-            <div className="grid gap-3 rounded-2xl border bg-background/40 p-3">
+            <div className="grid gap-3 rounded-3xl border bg-background/40 p-3">
                 <div className="relative">
                     <PreviewFrame source={source} />
                     <span className="absolute top-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-black/70 py-0.5 pr-2.5 pl-1 text-xs font-bold text-white">
@@ -117,7 +116,7 @@ export function NewVideoPreview({
                     <p className="line-clamp-2 leading-snug font-extrabold break-words">
                         {text.title}
                     </p>
-                    <p title={text.detail} className="truncate text-[14px] text-muted-foreground">
+                    <p title={text.detail} className="truncate text-meta text-muted-foreground">
                         {text.detail}
                     </p>
                 </div>

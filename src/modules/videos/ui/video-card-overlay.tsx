@@ -9,7 +9,8 @@ import { formatTimeLeft } from "#/shared/ui/format";
 import { cn } from "#/shared/ui/cn";
 import { Progress } from "#/shared/ui/progress";
 
-const FALLBACK_FAILURE_MESSAGE = "Guarda encontrou um problema";
+const FALLBACK_FAILURE_MESSAGE =
+    "Guarda encontrou um problema. Tente de novo; se repetir, envie o vídeo outra vez.";
 
 const OVERLAY_CLASS =
     "pointer-events-none absolute inset-0 grid content-center justify-items-center gap-2 p-4 text-center text-sm text-white";
@@ -36,12 +37,12 @@ export function WorkingOverlay({ video }: { video: VideoSummary }) {
     const secondsLeft = useProcessingTimeLeft(video.processingStartedAt, progressPercent);
 
     return (
-        <div aria-live="polite" className={cn(OVERLAY_CLASS, "bg-black/65")}>
-            <StageCrewMascot status={video.status} isWorking className="size-11" />
+        <div className={cn(OVERLAY_CLASS, "bg-black/65")}>
+            <StageCrewMascot status={video.status} isWorking className="size-11 @max-xs:hidden" />
             <p className="line-clamp-2 font-semibold">{describeCrewLine(video)}</p>
             <Progress
                 value={progressPercent}
-                className="h-1 w-3/4 bg-white/20"
+                className="h-1 w-3/4 bg-black/40"
                 aria-label={`Progresso: ${progressPercent}%`}
             />
             <p className="text-xs text-white/75 tabular-nums">
@@ -58,7 +59,7 @@ export function CancelledOverlay(): ReactNode {
             <span className="absolute top-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-bold text-white">
                 Cancelado
             </span>
-            <StageCrewMascot status="cancelled" className="size-9" />
+            <StageCrewMascot status="cancelled" className="size-9 @max-xs:hidden" />
             <p className="font-semibold">Parado por você. Retome pelo menu do vídeo.</p>
         </div>
     );
@@ -75,16 +76,21 @@ interface FailedOverlayProps {
  * Failed: Guarda says what went wrong, and the retry sits right there on the video. The frame is
  * only dimmed: one small red badge marks the failure, so a list with errors does not turn red.
  */
+/** The full failure text: the overlay clamps it, so the card meta repeats it in full. */
+export function describeFailure(video: VideoSummary, retryError: string | null): string {
+    return retryError ?? video.errorMessage ?? FALLBACK_FAILURE_MESSAGE;
+}
+
 export function FailedOverlay({ video, onRetry, isRetrying, retryError }: FailedOverlayProps) {
-    const message = retryError ?? video.errorMessage ?? FALLBACK_FAILURE_MESSAGE;
+    const message = describeFailure(video, retryError);
 
     return (
         <div className={cn(OVERLAY_CLASS, "bg-black/70")}>
-            <span className="absolute top-2 right-2 rounded-md bg-destructive px-1.5 py-0.5 text-xs font-bold text-white">
+            <span className="absolute top-2 right-2 rounded-md bg-destructive px-1.5 py-0.5 text-xs font-bold text-destructive-foreground">
                 Com erro
             </span>
-            <StageCrewMascot status="failed" className="size-9" />
-            <p role="alert" className="line-clamp-2 font-semibold">
+            <StageCrewMascot status="failed" className="size-9 @max-xs:hidden" />
+            <p aria-hidden="true" className="line-clamp-2 font-semibold">
                 {message}
             </p>
             <Button

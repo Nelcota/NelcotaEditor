@@ -1,8 +1,9 @@
 import type { ClipView } from "#/modules/videos/video-views";
 import { cn } from "#/shared/ui/cn";
 
+// Grows to two lines instead of cutting the title: picking a clip means reading its name.
 const CHIP_CLASS =
-    "inline-flex h-10 max-w-72 items-center gap-2 rounded-full border bg-popover py-0 pr-3 pl-1.5 text-sm font-bold outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
+    "inline-flex min-h-10 max-w-80 items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pr-3 pl-1.5 text-sm font-bold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
 
 interface ClipChipsProps {
     clips: Array<ClipView>;
@@ -67,7 +68,7 @@ export function ClipChips({
                     <span className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary text-xs tabular-nums">
                         {index + 1}
                     </span>
-                    <span className="truncate">{clip.title}</span>
+                    <span className="line-clamp-2 text-start leading-snug">{clip.title}</span>
                     <ScoreOrState clip={clip} />
                 </button>
             ))}

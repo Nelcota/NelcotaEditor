@@ -23,7 +23,7 @@ function DropdownMenuContent({
                 data-slot="dropdown-menu-content"
                 sideOffset={sideOffset}
                 className={cn(
-                    "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-44 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overscroll-contain rounded-xl border bg-secondary p-1 text-popover-foreground data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+                    "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-44 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overscroll-contain rounded-xl border bg-popover p-1 text-popover-foreground data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-96",
                     className,
                 )}
                 {...props}
@@ -44,7 +44,7 @@ function DropdownMenuItem({
             data-slot="dropdown-menu-item"
             data-variant={variant}
             className={cn(
-                "relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-hidden select-none transition-colors focus:bg-accent focus:text-accent-foreground motion-safe:active:scale-[0.99] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/15 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+                "relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-hidden select-none transition-[color,background-color,box-shadow,scale] focus:bg-accent focus:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset motion-safe:active:scale-[0.99] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[disabled]:active:scale-100 data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
                 className,
             )}
             {...props}

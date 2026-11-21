@@ -7,7 +7,7 @@ export type ClipOrder = (typeof CLIP_ORDERS)[number];
 export const DEFAULT_CLIP_ORDER: ClipOrder = "newest";
 
 export const CLIP_ORDER_LABELS: Record<ClipOrder, string> = {
-    newest: "Mais recentes",
+    newest: "Recentes",
     best: "Maior nota",
 };
 

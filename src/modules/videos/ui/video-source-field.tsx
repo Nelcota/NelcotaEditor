@@ -12,6 +12,7 @@ import { YoutubeLinkPreview } from "#/modules/videos/ui/youtube-link-preview";
 interface VideoSourceFieldProps {
     source: VideoSource;
     disabled: boolean;
+    isSubmitAttempted: boolean;
     onSourceChange: (source: VideoSource) => void;
 }
 
@@ -45,7 +46,12 @@ function useFileIntake(onSourceChange: (source: VideoSource) => void): FileIntak
  * One place for both ways in: paste a YouTube link or drop a file. A good link turns into a
  * preview of the video; a file turns into its name and size.
  */
-export function VideoSourceField({ source, disabled, onSourceChange }: VideoSourceFieldProps) {
+export function VideoSourceField({
+    source,
+    disabled,
+    isSubmitAttempted,
+    onSourceChange,
+}: VideoSourceFieldProps) {
     const [isDragging, setIsDragging] = useState(false);
     const { fileProblem, acceptFile, clearFileProblem } = useFileIntake(onSourceChange);
     const clearSource = (): void => onSourceChange(EMPTY_SOURCE);
@@ -81,17 +87,18 @@ export function VideoSourceField({ source, disabled, onSourceChange }: VideoSour
                 event.preventDefault();
                 setIsDragging(true);
             }}
-            className="grid min-h-52 content-center gap-4 rounded-2xl border-[1.5px] border-dashed border-input p-4 sm:p-6"
+            className="grid min-h-52 content-center gap-4 rounded-2xl border border-dashed border-input p-4 sm:p-6"
         >
             <YoutubeLinkInput
                 value={source.text}
                 disabled={disabled}
+                isSubmitAttempted={isSubmitAttempted}
                 onValueChange={(text) => {
                     clearFileProblem();
                     onSourceChange({ kind: "link", text });
                 }}
             />
-            <div className="flex items-center gap-3 text-[14px] text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
+            <div className="flex items-center gap-3 text-meta text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
                 ou
             </div>
             <VideoFilePicker disabled={disabled} problem={fileProblem} onFileChosen={acceptFile} />

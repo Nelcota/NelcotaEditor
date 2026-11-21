@@ -15,13 +15,14 @@ const SKELETON_CARD_COUNT = 6;
 
 export function VideoListLoading() {
     return (
-        <div className="@container" aria-busy="true" aria-label="Carregando vídeos">
+        <div role="status" className="@container">
+            <span className="sr-only">Carregando vídeos</span>
             <div className="grid grid-cols-1 gap-x-5 gap-y-7 @xl:grid-cols-2 @4xl:grid-cols-3">
                 {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
                     <div key={index} className="grid gap-2.5">
                         <Skeleton className="aspect-video rounded-2xl" />
-                        <Skeleton className="h-4 w-4/5" />
-                        <Skeleton className="h-3 w-2/5" />
+                        <Skeleton className="h-12 w-4/5" />
+                        <Skeleton className="h-5 w-2/5" />
                     </div>
                 ))}
             </div>
@@ -76,26 +77,43 @@ export function VideoListLoadError({ onRetry }: { onRetry: () => void }) {
     );
 }
 
+interface NoMatchCopy {
+    title: string;
+    description: string;
+    actionLabel: string;
+}
+
 /** Names the search when there is one; otherwise it was the status filter that emptied the list. */
-function describeNoMatch(query: string): string {
+function describeNoMatch(query: string): NoMatchCopy {
     const trimmedQuery = query.trim();
 
     if (trimmedQuery.length === 0) {
-        return "Nenhum vídeo neste filtro";
+        return {
+            title: "Nenhum vídeo neste filtro",
+            description: "Nenhum vídeo nesta situação agora.",
+            actionLabel: "Ver todos",
+        };
     }
 
-    return `Nenhum vídeo com “${trimmedQuery}”`;
+    return {
+        title: `Nenhum vídeo com “${trimmedQuery}”`,
+        description:
+            "A busca olha só o título. Confira a grafia ou limpe a busca e o filtro para ver todos.",
+        actionLabel: "Limpar busca e filtro",
+    };
 }
 
 export function NoMatchState({ query, onClear }: { query: string; onClear: () => void }) {
+    const copy = describeNoMatch(query);
+
     return (
         <EmptyState
             art={<MagnifierCloseIcon className="size-8 text-muted-foreground" aria-hidden="true" />}
-            title={describeNoMatch(query)}
-            description="A busca olha só o título. Confira a grafia ou limpe a busca e o filtro para ver todos."
+            title={copy.title}
+            description={copy.description}
             action={
                 <Button variant="secondary" className="rounded-full" onClick={onClear}>
-                    Limpar busca e filtro
+                    {copy.actionLabel}
                 </Button>
             }
         />

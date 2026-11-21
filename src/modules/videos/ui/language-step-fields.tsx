@@ -27,7 +27,7 @@ export function LanguageStepFields({ language, onLanguageChange }: LanguageStepP
                 {TRANSCRIPTION_LANGUAGES.map((option) => (
                     <label
                         key={option}
-                        className="grid cursor-pointer gap-1 rounded-xl border p-4 transition-colors hover:bg-secondary/60 has-checked:border-primary has-checked:bg-primary/10 has-focus-visible:ring-4 has-focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                        className="grid cursor-pointer gap-1 rounded-xl border p-4 transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary/60 has-checked:border-primary has-checked:bg-primary/10 has-checked:ring-2 has-checked:ring-primary has-focus-visible:ring-4 has-focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                     >
                         <input
                             type="radio"
@@ -38,7 +38,7 @@ export function LanguageStepFields({ language, onLanguageChange }: LanguageStepP
                             className="sr-only"
                         />
                         <span className="font-bold">{TRANSCRIPTION_LANGUAGE_LABELS[option]}</span>
-                        <span className="text-[14px] text-muted-foreground">
+                        <span className="text-meta text-muted-foreground">
                             {LANGUAGE_HINTS[option]}
                         </span>
                     </label>

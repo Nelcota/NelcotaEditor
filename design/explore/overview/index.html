@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Painel · 3 direções</title>
+        <link rel="stylesheet" href="../navigation/tokens.css" />
+        <link rel="stylesheet" href="../navigation/board.css" />
+        <style>
+            body {
+                padding: 40px 32px 80px;
+            }
+            .wrap {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                gap: 40px;
+            }
+            .legend {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+            }
+            .legend article {
+                padding: 18px;
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                background: var(--popover);
+                display: grid;
+                gap: 8px;
+                align-content: start;
+            }
+            .legend article.is-pick {
+                border-color: var(--primary);
+            }
+            .tag {
+                display: inline-block;
+                font-size: 12px;
+                font-weight: 800;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: var(--primary);
+                color: var(--primary-foreground);
+            }
+            .legend h3 {
+                font-size: 18px;
+                font-weight: 800;
+            }
+            .legend p {
+                font-size: 14px;
+            }
+            .legend b {
+                color: var(--foreground);
+            }
+            section {
+                display: grid;
+                gap: 14px;
+            }
+            section h2 {
+                font-size: 20px;
+                font-weight: 800;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 260px;
+                gap: 16px;
+                align-items: start;
+            }
+            .shots img,
+            .full {
+                width: 100%;
+                border-radius: 14px;
+                border: 1px solid var(--border);
+                display: block;
+            }
+            .phone-shot {
+                width: 260px;
+                overflow: hidden;
+                border-radius: 22px;
+                border: 1px solid var(--border);
+            }
+            .phone-shot img {
+                width: 333px;
+                max-width: none;
+                border: 0;
+                border-radius: 0;
+            }
+            .caption {
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .shared {
+                padding: 16px 18px;
+                border: 1px dashed var(--border);
+                border-radius: 16px;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header style="display: grid; gap: 6px">
+                <h1 class="page-title">Painel · atual + 3 direções</h1>
+                <p class="muted">
+                    Mesmos números da sua conta local (30 dias: 3 vídeos, 8 cortes, nota média 87).
+                    1280 × 800 com a barra lateral aberta, que é onde o Painel aperta hoje, e
+                    celular 390. Nada disso está no app ainda.
+                </p>
+            </header>
+
+            <p class="shared muted">
+                <b style="color: var(--foreground)">Igual nas três:</b> as colunas passam a depender
+                da largura do conteúdo (container query), não da janela, então a barra lateral
+                aberta não espreme mais nada; os rótulos ficam numa linha; o funil vira quatro
+                números com etapa em vez de barras iguais; os títulos dos cortes mostram duas
+                linhas; no celular os períodos ficam "7 dias · 30 dias · 90 dias" e os cortes rolam
+                de lado com o próximo aparecendo na borda.
+            </p>
+
+            <div class="legend">
+                <article class="is-pick">
+                    <span><span class="tag">Recomendo</span></span>
+                    <h3>A · Números em faixa</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> as seis métricas numa faixa de 3 × 2 no topo; embaixo o
+                        gráfico acumulado com o funil ao lado; por último os melhores cortes numa
+                        fileira de cinco.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> é o Painel de hoje reorganizado, sem perder nada; cada cartão
+                        tem espaço para o rótulo e o mini gráfico.
+                    </p>
+                    <p class="muted"><b>Custa:</b> os cortes ficam no fim da página.</p>
+                    <p class="muted">
+                        <b>Por que recomendo:</b> resolve o aperto sem mudar o que a pessoa já
+                        aprendeu a ler, e funciona igual de 1000 a 1600 px.
+                    </p>
+                </article>
+                <article>
+                    <h3>B · Cortes em destaque</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> os melhores cortes primeiro, grandes; embaixo as métricas
+                        viram uma lista "Em números" ao lado do gráfico e do funil.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> mostra primeiro o resultado (os cortes) e dá para assistir de
+                        cara.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> as métricas perdem os mini gráficos e o destaque; repete a
+                        página Cortes.
+                    </p>
+                </article>
+                <article>
+                    <h3>C · Resumo em uma frase</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> um cartão que conta o período numa frase ("Em 30 dias, 3
+                        vídeos viraram 8 cortes, com nota média 87"), três números grandes e o resto
+                        em etiquetas; gráfico largo; funil e três cortes embaixo.
+                    </p>
+                    <p class="muted"><b>Bom em:</b> entende-se em um segundo; ótimo no celular.</p>
+                    <p class="muted">
+                        <b>Custa:</b> tempo médio, minutos e falhas viram detalhes pequenos; sem
+                        mini gráficos.
+                    </p>
+                </article>
+            </div>
+
+            <section>
+                <h2>Atual</h2>
+                <img class="full" src="renders/current.png" alt="Painel atual" />
+                <p class="caption">
+                    Seis cartões em duas colunas espremidos ao lado do carrossel: rótulos e "Ver
+                    todos" quebram, títulos dos cortes cortados, funil de barras iguais com rótulos
+                    em três linhas. As colunas seguem a largura da janela, não do conteúdo.
+                </p>
+            </section>
+            <section>
+                <h2>
+                    A · Números em faixa
+                    <span class="tag" style="vertical-align: middle">Recomendo</span>
+                </h2>
+                <div class="shots">
+                    <img src="renders/a.png" alt="Direção A" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-a.png" alt="Direção A no celular" />
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h2>B · Cortes em destaque</h2>
+                <div class="shots">
+                    <img src="renders/b.png" alt="Direção B" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-b.png" alt="Direção B no celular" />
+                    </div>
+                </div>
+            </section>
+            <section>
+                <h2>C · Resumo em uma frase</h2>
+                <div class="shots">
+                    <img src="renders/c.png" alt="Direção C" />
+                    <div class="phone-shot">
+                        <img src="renders/phone-c.png" alt="Direção C no celular" />
+                    </div>
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

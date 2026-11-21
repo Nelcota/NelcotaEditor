@@ -2,7 +2,8 @@ import CloseIcon from "~icons/solar/close-linear";
 import DangerCircleIcon from "~icons/solar/danger-circle-linear";
 import LinkIcon from "~icons/solar/link-linear";
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
+import type { ReactNode, RefObject } from "react";
 import type { YoutubePreview } from "#/modules/videos/youtube-preview";
 import { toYoutubeThumbnailUrl } from "#/modules/videos/youtube-preview";
 import { youtubePreviewQueryOptions } from "#/modules/videos/ui/youtube-preview-queries";
@@ -14,31 +15,36 @@ const UNAVAILABLE_MESSAGES: Record<"private" | "not-found", string> = {
     "not-found": "Não achamos esse vídeo. Confira se o link está completo.",
 };
 
-function PreviewCard(props: {
+interface PreviewCardProps {
     thumbnailUrl: string;
     title: ReactNode;
     detail: ReactNode;
     onClear: () => void;
-}) {
+    clearButtonRef: RefObject<HTMLButtonElement | null>;
+}
+
+function PreviewCard({ thumbnailUrl, title, detail, onClear, clearButtonRef }: PreviewCardProps) {
     return (
-        <div className="grid grid-cols-[96px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-background p-2.5 sm:grid-cols-[136px_minmax(0,1fr)_auto] sm:gap-4">
+        <div className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-background p-2.5 min-[400px]:grid-cols-[96px_minmax(0,1fr)_auto] sm:grid-cols-[136px_minmax(0,1fr)_auto] sm:gap-4">
             <img
-                src={props.thumbnailUrl}
+                src={thumbnailUrl}
                 alt=""
                 referrerPolicy="no-referrer"
-                className="aspect-video w-full rounded-lg bg-muted object-cover"
+                className="aspect-video w-full rounded-[5px] bg-muted object-cover outline outline-1 -outline-offset-1 outline-white/10"
             />
             <div className="grid min-w-0 gap-1">
-                {props.title}
-                <p className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
-                    {props.detail}
-                </p>
+                {title}
+                {/* A div: the loading detail is a Skeleton (a div), which a <p> cannot hold. */}
+                <div className="flex items-center gap-1.5 text-meta text-muted-foreground">
+                    {detail}
+                </div>
             </div>
             <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={props.onClear}
+                ref={clearButtonRef}
+                onClick={onClear}
                 aria-label="Trocar o vídeo"
             >
                 <CloseIcon aria-hidden="true" />
@@ -67,14 +73,27 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
     const previewQuery = useQuery(youtubePreviewQueryOptions(videoId));
     const preview = previewQuery.data;
     const thumbnailUrl = toYoutubeThumbnailUrl(videoId);
+    const clearButtonRef = useRef<HTMLButtonElement>(null);
+
+    // This card replaces the link field the person was typing in; without this, focus would
+    // fall to the page.
+    useEffect(() => {
+        clearButtonRef.current?.focus();
+    }, []);
 
     if (preview === undefined && previewQuery.isError === false) {
         return (
             <PreviewCard
                 thumbnailUrl={thumbnailUrl}
-                title={<Skeleton className="h-4 w-4/5" aria-label="Buscando o vídeo" />}
+                title={
+                    <span role="status">
+                        <Skeleton className="h-4 w-4/5" />
+                        <span className="sr-only">Buscando o vídeo</span>
+                    </span>
+                }
                 detail={<Skeleton className="h-3 w-24" />}
                 onClear={onClear}
+                clearButtonRef={clearButtonRef}
             />
         );
     }
@@ -87,6 +106,7 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
                 title={<p className="font-bold">Vídeo do YouTube</p>}
                 detail="Não deu para conferir agora; dá para gerar mesmo assim."
                 onClear={onClear}
+                clearButtonRef={clearButtonRef}
             />
         );
     }
@@ -103,6 +123,7 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
                 }
                 detail="Cole outro link ou envie o arquivo."
                 onClear={onClear}
+                clearButtonRef={clearButtonRef}
             />
         );
     }
@@ -110,7 +131,9 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
     return (
         <PreviewCard
             thumbnailUrl={preview.thumbnailUrl}
-            title={<p className="line-clamp-2 leading-snug font-bold">{preview.title}</p>}
+            title={
+                <p className="leading-snug font-bold [overflow-wrap:anywhere]">{preview.title}</p>
+            }
             detail={
                 <>
                     <LinkIcon className="size-4 shrink-0" aria-hidden="true" />
@@ -120,6 +143,7 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
                 </>
             }
             onClear={onClear}
+            clearButtonRef={clearButtonRef}
         />
     );
 }

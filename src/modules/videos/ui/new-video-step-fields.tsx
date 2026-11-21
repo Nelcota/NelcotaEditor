@@ -8,6 +8,7 @@ import { TextField } from "#/shared/ui/text-field";
 interface VideoStepProps {
     source: VideoSource;
     title: string;
+    isSubmitAttempted: boolean;
     onSourceChange: (source: VideoSource) => void;
     onTitleChange: (title: string) => void;
 }
@@ -16,12 +17,18 @@ interface VideoStepProps {
 export function VideoStepFields({
     source,
     title,
+    isSubmitAttempted,
     onSourceChange,
     onTitleChange,
 }: VideoStepProps): ReactNode {
     return (
         <div className="grid gap-5">
-            <VideoSourceField source={source} disabled={false} onSourceChange={onSourceChange} />
+            <VideoSourceField
+                source={source}
+                disabled={false}
+                isSubmitAttempted={isSubmitAttempted}
+                onSourceChange={onSourceChange}
+            />
             {source.kind === "file" && (
                 <TextField
                     id="new-video-title"

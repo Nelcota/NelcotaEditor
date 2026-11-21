@@ -102,7 +102,7 @@ async function runYtDlp(
     } catch (error) {
         if (error instanceof CommandFailedError) {
             throw new UserFacingError(
-                "Não foi possível baixar o vídeo do YouTube. Confira se o link é público e tente de novo.",
+                "Não foi possível baixar o vídeo do YouTube. Confira se o vídeo é público ou não listado e tente de novo.",
                 { cause: error },
             );
         }

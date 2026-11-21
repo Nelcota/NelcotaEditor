@@ -78,9 +78,14 @@ export function SelectedClipPanel({
                 <ClipPreview key={clip.id} clip={clip} />
             </div>
             <div className="grid min-w-0 content-start gap-2">
-                <p className="text-[14px] font-bold text-muted-foreground tabular-nums">
-                    CORTE {rank} DE {total} · {formatClock(clip.startSeconds)} a{" "}
-                    {formatClock(clip.endSeconds)} · {durationSeconds}s
+                <p className="flex flex-wrap gap-x-3 gap-y-1 text-meta font-bold text-muted-foreground tabular-nums">
+                    <span className="whitespace-nowrap">
+                        CORTE {rank} DE {total}
+                    </span>
+                    <span className="whitespace-nowrap">
+                        {formatClock(clip.startSeconds)} a {formatClock(clip.endSeconds)}
+                    </span>
+                    <span className="whitespace-nowrap">{durationSeconds}s</span>
                 </p>
                 <h2
                     id="selected-clip-title"

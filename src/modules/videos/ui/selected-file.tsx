@@ -12,7 +12,7 @@ interface SelectedFileProps {
 /** The chosen file by name and size, with a way to pick another. */
 export function SelectedFile({ file, disabled, onClear }: SelectedFileProps) {
     return (
-        <div className="flex items-center gap-3 rounded-xl border bg-background p-3">
+        <div className="flex items-center gap-3 rounded-2xl border bg-background p-3">
             <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-secondary">
                 <VideoFramePlayHorizontalIcon
                     className="size-6 text-muted-foreground"
@@ -20,10 +20,10 @@ export function SelectedFile({ file, disabled, onClear }: SelectedFileProps) {
                 />
             </span>
             <div className="min-w-0 flex-1">
-                <p title={file.name} className="truncate font-bold">
+                <p title={file.name} className="line-clamp-2 font-bold [overflow-wrap:anywhere]">
                     {file.name}
                 </p>
-                <p className="text-[14px] text-muted-foreground">
+                <p className="text-meta text-muted-foreground">
                     Arquivo do computador · {formatBytes(file.size)}
                 </p>
             </div>

@@ -8,7 +8,8 @@ import { Button } from "#/shared/ui/button";
 
 // At 1 or 10 the button only looks disabled (aria-disabled): a native `disabled` would drop the
 // keyboard focus to <body> right after the press that reached the limit.
-const BOUND_BUTTON_CLASS = "aria-disabled:opacity-50 aria-disabled:hover:bg-transparent";
+const BOUND_BUTTON_CLASS =
+    "aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-disabled:active:scale-100";
 
 function describeCount(count: number): string {
     return `${count} ${pluralize(count, "corte", "cortes")}`;
@@ -56,13 +57,13 @@ export function ClipCountStepper({
     return (
         <div className="grid gap-2">
             <span id={labelId} className="flex items-center gap-2 text-sm font-semibold">
-                <ScissorsIcon aria-hidden="true" className="size-[18px] text-muted-foreground" />
+                <ScissorsIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 {label}
             </span>
             <div
                 role="group"
                 aria-labelledby={labelId}
-                className="flex min-h-11 items-center justify-between gap-2 rounded-lg border bg-background p-1"
+                className="flex min-h-11 items-center justify-between gap-2 rounded-xl border border-input bg-background p-1"
             >
                 <Button
                     type="button"

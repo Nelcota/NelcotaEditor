@@ -7,8 +7,6 @@ import { METRIC_DEFINITIONS } from "#/modules/overview/ui/metric-definitions";
 import { PipelineFunnel } from "#/modules/overview/ui/pipeline-funnel";
 import { cn } from "#/shared/ui/cn";
 
-const ROW_CLASS = "grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]";
-
 interface OverviewBoardProps {
     stats: OverviewStats;
     /** True while the numbers of the previous period are shown and the new ones load. */
@@ -16,12 +14,20 @@ interface OverviewBoardProps {
     onWiden: (() => void) | null;
 }
 
+/**
+ * Direction A "Números em faixa" (DESIGN.md): the six numbers in a band, then the trend beside the
+ * funnel, then the best clips across the full width. Columns follow the board's own width
+ * (container queries), so the open sidebar no longer squeezes them.
+ */
 export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps) {
     const metrics = stats.metrics;
 
     return (
         <div
-            className={cn("grid gap-4 transition-opacity", isStale === true && "opacity-55")}
+            className={cn(
+                "@container grid gap-4 transition-opacity",
+                isStale === true && "opacity-55",
+            )}
             aria-busy={isStale}
         >
             <InProgressNotice count={stats.inProgressCount} />
@@ -31,22 +37,20 @@ export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps) {
                     próximo período.
                 </p>
             )}
-            <div className={ROW_CLASS}>
-                <div className="grid content-start gap-4 sm:grid-cols-2">
-                    {METRIC_DEFINITIONS.map((definition) => (
-                        <MetricCard
-                            key={definition.key}
-                            definition={definition}
-                            metric={metrics[definition.key]}
-                        />
-                    ))}
-                </div>
-                <BestClipsCarousel clips={stats.bestClips} onWiden={onWiden} />
+            <div className="grid gap-3 @lg:grid-cols-2 @3xl:grid-cols-3">
+                {METRIC_DEFINITIONS.map((definition) => (
+                    <MetricCard
+                        key={definition.key}
+                        definition={definition}
+                        metric={metrics[definition.key]}
+                    />
+                ))}
             </div>
-            <div className={ROW_CLASS}>
+            <div className="grid gap-4 @4xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
                 <CumulativeClipsChart stats={stats} />
-                <PipelineFunnel funnel={stats.funnel} clipCount={metrics.clipsReady.current ?? 0} />
+                <PipelineFunnel funnel={stats.funnel} />
             </div>
+            <BestClipsCarousel clips={stats.bestClips} onWiden={onWiden} />
         </div>
     );
 }

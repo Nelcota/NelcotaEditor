@@ -6,10 +6,10 @@ const uploadFailureSchema = z.object({ error: z.string() });
 
 const HTTP_CREATED = 201;
 const PERCENT = 100;
-const NETWORK_ERROR_MESSAGE = "A conexão caiu durante o envio. Tente novamente.";
-const UNKNOWN_ERROR_MESSAGE = "Não foi possível enviar o vídeo. Tente novamente.";
-const ABORTED_MESSAGE = "O envio foi interrompido. Tente novamente.";
-const EMPTY_FILE_MESSAGE = "O arquivo escolhido está vazio.";
+const NETWORK_ERROR_MESSAGE = "A conexão caiu durante o envio. Tente de novo.";
+const UNKNOWN_ERROR_MESSAGE = "Não foi possível enviar o vídeo. Tente de novo.";
+const ABORTED_MESSAGE = "O envio foi interrompido. Tente de novo.";
+const EMPTY_FILE_MESSAGE = "O arquivo escolhido está vazio. Escolha outro arquivo.";
 const UPLOAD_ENDPOINT = "/api/videos/upload";
 
 export interface UploadVideoInput {

@@ -60,7 +60,9 @@ function LanguageSelect(props: {
                 value={toOptionValue(props.value)}
                 options={LANGUAGE_OPTIONS}
                 onValueChange={(value) => props.onValueChange(fromOptionValue(value))}
-                className="grid-flow-row grid-cols-2"
+                // "Detectar automaticamente" gets the whole first row; the three languages share
+                // the second, so no pill breaks its label in two.
+                className="grid-flow-row grid-cols-3 [&>button:first-child]:col-span-3"
             />
         </div>
     );

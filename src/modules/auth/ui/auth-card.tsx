@@ -29,7 +29,7 @@ function MascotShowcase(): ReactNode {
                 ))}
             </div>
             <div className="mx-auto max-w-md text-center">
-                <p className="text-[30px] leading-tight font-extrabold tracking-tight">
+                <p className="text-3xl font-extrabold tracking-tight">
                     Vídeos longos viram <span className="text-primary">cortes virais</span>
                 </p>
                 <p className="mt-2.5 text-muted-foreground">
@@ -48,7 +48,7 @@ export function AuthCard({ title, description, footer, children }: AuthCardProps
                 <div className="grid w-full max-w-sm gap-6">
                     <BrandLogo />
                     <div>
-                        <h1 className="text-[30px] font-extrabold tracking-tight">{title}</h1>
+                        <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
                         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
                     </div>
                     {children}
@@ -56,7 +56,7 @@ export function AuthCard({ title, description, footer, children }: AuthCardProps
                         {footer.text}{" "}
                         <Link
                             to={footer.linkTo}
-                            className="rounded font-bold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                            className="inline-block rounded font-bold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                         >
                             {footer.linkLabel}
                         </Link>

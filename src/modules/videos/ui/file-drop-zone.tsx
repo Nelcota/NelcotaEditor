@@ -13,7 +13,7 @@ export function FileDropZone({ onDragLeave, onDrop }: FileDropZoneProps) {
             onDragOver={(event) => event.preventDefault()}
             onDragLeave={onDragLeave}
             onDrop={onDrop}
-            className="grid min-h-52 place-items-center content-center gap-2 rounded-2xl border-[1.5px] border-dashed border-primary bg-primary/8 p-6 text-center"
+            className="grid min-h-52 place-items-center content-center gap-2 rounded-2xl border border-dashed border-primary bg-primary/8 p-6 text-center"
         >
             <UploadIcon className="size-7" aria-hidden="true" />
             <p className="font-bold">Solte para enviar</p>

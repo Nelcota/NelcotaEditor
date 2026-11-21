@@ -12,6 +12,31 @@ import { FormAlert } from "#/shared/ui/form-alert";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 
+/** In page order; each field's input id matches its name. */
+const FIELD_NAMES = ["email", "password"] as const;
+
+type SignInFieldName = (typeof FIELD_NAMES)[number];
+
+/**
+ * Reads the form state instead of `[aria-invalid=true]`: the inputs only get that attribute on the
+ * next render, after this runs.
+ */
+function focusFirstInvalidField(hasErrors: (name: SignInFieldName) => boolean): void {
+    const firstInvalidName = FIELD_NAMES.find((name) => hasErrors(name));
+
+    if (firstInvalidName === undefined) {
+        return;
+    }
+
+    const input = document.getElementById(firstInvalidName);
+
+    if (input === null) {
+        return;
+    }
+
+    input.focus();
+}
+
 export function SignInScreen(): ReactNode {
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -19,6 +44,17 @@ export function SignInScreen(): ReactNode {
     const form = useForm({
         defaultValues: { email: "", password: "" },
         validators: { onSubmit: signInSchema },
+        onSubmitInvalid: ({ formApi }) => {
+            focusFirstInvalidField((name) => {
+                const meta = formApi.getFieldMeta(name);
+
+                if (meta === undefined) {
+                    return false;
+                }
+
+                return meta.errors.length > 0;
+            });
+        },
         onSubmit: async ({ value }) => {
             setErrorMessage(null);
             const failure = await runAuthRequest(() => authClient.signIn.email(value));

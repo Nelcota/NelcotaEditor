@@ -1,25 +1,52 @@
 import LinkIcon from "~icons/solar/link-linear";
+import { useState } from "react";
 import { SourceProblem } from "#/modules/videos/ui/source-problem";
 import { describeYoutubeLinkProblem } from "#/modules/videos/youtube-url";
+
+export const YOUTUBE_LINK_INPUT_ID = "new-video-link";
+const LINK_PROBLEM_ID = "new-video-link-problem";
+const MISSING_SOURCE_MESSAGE = "Cole o link do vídeo ou escolha um arquivo.";
 
 interface YoutubeLinkInputProps {
     value: string;
     disabled: boolean;
+    isSubmitAttempted: boolean;
     onValueChange: (text: string) => void;
 }
 
-export function YoutubeLinkInput({ value, disabled, onValueChange }: YoutubeLinkInputProps) {
-    const linkProblem = describeYoutubeLinkProblem(value);
+function describeProblem(value: string, isSubmitAttempted: boolean): string | null {
+    if (value.trim().length === 0 && isSubmitAttempted === true) {
+        return MISSING_SOURCE_MESSAGE;
+    }
+
+    return describeYoutubeLinkProblem(value);
+}
+
+export function YoutubeLinkInput({
+    value,
+    disabled,
+    isSubmitAttempted,
+    onValueChange,
+}: YoutubeLinkInputProps) {
+    // Judged only once the person is done with the text (left the field, pasted it or tried to
+    // send), so the field does not turn red and speak up on every keystroke.
+    const [isTouched, setIsTouched] = useState(false);
+    const problem = describeProblem(value, isSubmitAttempted);
+    let visibleProblem: string | null = null;
+
+    if (isTouched === true || isSubmitAttempted === true) {
+        visibleProblem = problem;
+    }
 
     return (
         <div className="grid gap-2">
-            <label htmlFor="new-video-link" className="sr-only">
+            <label htmlFor={YOUTUBE_LINK_INPUT_ID} className="sr-only">
                 Link do YouTube
             </label>
             <div className="flex h-12 items-center gap-2.5 rounded-xl border border-input bg-background px-3.5 focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/70 has-[[aria-invalid=true]]:border-destructive">
                 <LinkIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <input
-                    id="new-video-link"
+                    id={YOUTUBE_LINK_INPUT_ID}
                     type="url"
                     inputMode="url"
                     autoComplete="off"
@@ -31,12 +58,15 @@ export function YoutubeLinkInput({ value, disabled, onValueChange }: YoutubeLink
                     placeholder="Cole o link do YouTube"
                     value={value}
                     disabled={disabled}
-                    aria-invalid={linkProblem !== null}
+                    aria-invalid={visibleProblem !== null}
+                    aria-describedby={LINK_PROBLEM_ID}
+                    onBlur={() => setIsTouched(true)}
+                    onPaste={() => setIsTouched(true)}
                     onChange={(event) => onValueChange(event.target.value)}
-                    className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+                    className="w-full min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
                 />
             </div>
-            <SourceProblem message={linkProblem} />
+            <SourceProblem id={LINK_PROBLEM_ID} message={visibleProblem} />
         </div>
     );
 }

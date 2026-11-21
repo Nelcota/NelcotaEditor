@@ -3,7 +3,7 @@ import { MIN_PASSWORD_LENGTH } from "#/modules/auth/auth-forms.schema";
 export const VIDEOS_STILL_PROCESSING_CODE = "VIDEOS_STILL_PROCESSING";
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
-    INVALID_EMAIL_OR_PASSWORD: "Email ou senha incorretos.",
+    INVALID_EMAIL_OR_PASSWORD: "Email ou senha incorretos. Confira os dois e tente de novo.",
     USER_ALREADY_EXISTS: "Já existe uma conta com este email. Tente entrar.",
     USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Já existe uma conta com este email. Tente entrar.",
     PASSWORD_TOO_SHORT: `A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`,
@@ -14,7 +14,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     [VIDEOS_STILL_PROCESSING_CODE]: "Cancele os vídeos em processamento antes de excluir a conta.",
 };
 
-const FALLBACK_MESSAGE = "Não foi possível continuar. Tente novamente.";
+const FALLBACK_MESSAGE = "Não foi possível concluir. Confira sua conexão e tente de novo.";
 
 export function toAuthErrorMessage(code: string | undefined): string {
     if (code === undefined) {

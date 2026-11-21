@@ -1,6 +1,25 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cancelVideo, retryVideo } from "#/modules/videos/server/video-functions";
+import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
+
+const RESUME_FALLBACK_MESSAGE =
+    "Não foi possível retomar o vídeo. Confira sua conexão e tente de novo.";
+const CANCEL_FALLBACK_MESSAGE =
+    "Não foi possível cancelar o vídeo. Confira sua conexão e tente de novo.";
+
+/** Only one of the two can have failed: starting either action resets the other. */
+function describeFailure(resumeError: Error | null, cancelError: Error | null): string | null {
+    if (resumeError !== null) {
+        return toErrorMessage(resumeError, RESUME_FALLBACK_MESSAGE);
+    }
+
+    if (cancelError !== null) {
+        return toErrorMessage(cancelError, CANCEL_FALLBACK_MESSAGE);
+    }
+
+    return null;
+}
 
 interface VideoRowActions {
     resume: () => void;
@@ -23,7 +42,6 @@ export function useVideoRowActions(videoId: string): VideoRowActions {
         mutationFn: () => cancelVideo({ data: { videoId } }),
         onSuccess: refreshVideos,
     });
-    const failure = resumption.error ?? cancellation.error;
 
     return {
         resume: () => {
@@ -35,6 +53,6 @@ export function useVideoRowActions(videoId: string): VideoRowActions {
             cancellation.mutate();
         },
         isPending: resumption.isPending || cancellation.isPending,
-        errorMessage: failure?.message ?? null,
+        errorMessage: describeFailure(resumption.error, cancellation.error),
     };
 }

@@ -88,12 +88,13 @@ export function ClipRow({
         >
             <ClipPreview clip={clip} />
             <div className="grid min-w-0 content-start gap-2">
-                <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[14px] font-bold text-muted-foreground tabular-nums">
+                {/* Groups separated by space, not "·": a wrapped line never starts with a dot. */}
+                <p className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 text-meta font-bold text-muted-foreground tabular-nums">
                     {lead}
-                    <span>
-                        · {formatClock(clip.startSeconds)} a {formatClock(clip.endSeconds)} ·{" "}
-                        {durationSeconds}s
+                    <span className="whitespace-nowrap">
+                        {formatClock(clip.startSeconds)} a {formatClock(clip.endSeconds)}
                     </span>
+                    <span className="whitespace-nowrap">{durationSeconds}s</span>
                 </p>
                 <h3 className="text-lg leading-snug font-extrabold text-balance">{clip.title}</h3>
                 {clip.reason.length > 0 && (

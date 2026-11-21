@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { useRef } from "react";
 import { deleteVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/video-views";
+import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import {
     AlertDialog,
@@ -15,6 +17,21 @@ import {
 } from "#/shared/ui/alert-dialog";
 import { FormAlert } from "#/shared/ui/form-alert";
 
+const FALLBACK_ERROR_MESSAGE =
+    "Não foi possível excluir o vídeo. Confira sua conexão e tente de novo.";
+
+/** The card and its menu button are gone after a delete, so focus goes to the page content. */
+function focusMainContent(event: Event): void {
+    const main = document.getElementById("main");
+
+    if (main === null) {
+        return;
+    }
+
+    event.preventDefault();
+    main.focus();
+}
+
 interface DeleteVideoDialogProps {
     video: VideoSummary;
     isOpen: boolean;
@@ -25,9 +42,12 @@ interface DeleteVideoDialogProps {
 export function DeleteVideoDialog({ video, isOpen, onOpenChange }: DeleteVideoDialogProps) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    // A ref, not mutation state: the dialog closes inside onSuccess, before isSuccess turns true.
+    const hasDeletedRef = useRef(false);
     const deletion = useMutation({
         mutationFn: () => deleteVideo({ data: { videoId: video.id } }),
         onSuccess: async () => {
+            hasDeletedRef.current = true;
             onOpenChange(false);
             await invalidateVideoQueries(queryClient);
             await navigate({ to: "/" });
@@ -36,7 +56,13 @@ export function DeleteVideoDialog({ video, isOpen, onOpenChange }: DeleteVideoDi
 
     return (
         <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-            <AlertDialogContent>
+            <AlertDialogContent
+                onCloseAutoFocus={(event) => {
+                    if (hasDeletedRef.current === true) {
+                        focusMainContent(event);
+                    }
+                }}
+            >
                 <AlertDialogHeader>
                     <AlertDialogTitle>Excluir este vídeo?</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -44,7 +70,9 @@ export function DeleteVideoDialog({ video, isOpen, onOpenChange }: DeleteVideoDi
                         desfeito.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                {deletion.isError === true && <FormAlert message={deletion.error.message} />}
+                {deletion.isError === true && (
+                    <FormAlert message={toErrorMessage(deletion.error, FALLBACK_ERROR_MESSAGE)} />
+                )}
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction

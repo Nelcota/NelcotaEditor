@@ -7,6 +7,7 @@ import { applyAvatarChange } from "#/modules/auth/client/apply-avatar-change";
 import { AvatarMascotPicker } from "#/modules/auth/ui/avatar-mascot-picker";
 import { forgetCurrentUser } from "#/modules/auth/ui/current-user-query";
 import { AvatarPhotoPanel } from "#/modules/auth/ui/avatar-photo-panel";
+import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
 import {
     Dialog,
     DialogContent,
@@ -16,6 +17,8 @@ import {
 } from "#/shared/ui/dialog";
 
 const appRoute = getRouteApi("/_app");
+const CHANGE_FAILED_MESSAGE =
+    "Não foi possível trocar a foto. Confira sua conexão e tente de novo.";
 
 function toSelectedMascot(avatar: Avatar): number | null {
     if (avatar.kind !== "mascot") {
@@ -46,6 +49,11 @@ export function AvatarDialog({ isOpen, onOpenChange }: AvatarDialogProps): React
         },
     });
     const isUploading = change.isPending && change.variables.kind === "upload";
+    let errorMessage: string | null = null;
+
+    if (change.error !== null) {
+        errorMessage = toErrorMessage(change.error, CHANGE_FAILED_MESSAGE);
+    }
 
     const handleOpenChange = (isNowOpen: boolean): void => {
         // A failure from the last time should not greet the person when they come back.
@@ -55,7 +63,7 @@ export function AvatarDialog({ isOpen, onOpenChange }: AvatarDialogProps): React
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogContent className="gap-6 [--dialog-padding:--spacing(8)] sm:max-w-2xl">
+            <DialogContent className="gap-6 [--dialog-padding:--spacing(6)] sm:[--dialog-padding:--spacing(8)] sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Foto de perfil</DialogTitle>
                     <DialogDescription>Envie uma foto ou use um mascote.</DialogDescription>
@@ -66,7 +74,7 @@ export function AvatarDialog({ isOpen, onOpenChange }: AvatarDialogProps): React
                         hasAvatar={avatar.kind !== "initials"}
                         isBusy={change.isPending}
                         isUploading={isUploading}
-                        errorMessage={change.error?.message ?? null}
+                        errorMessage={errorMessage}
                         onUpload={(file) => change.mutate({ kind: "upload", file })}
                         onRemove={() => change.mutate({ kind: "remove" })}
                     />

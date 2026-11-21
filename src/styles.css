@@ -26,11 +26,14 @@
     --muted-foreground: oklch(0.72 0.012 286);
     --accent: oklch(0.29 0.008 286);
     --accent-foreground: oklch(0.97 0.002 286);
-    --destructive: oklch(0.64 0.21 25);
-    --destructive-foreground: oklch(0.97 0.002 286);
-    --success: oklch(0.76 0.16 155);
+    /* Lighter than the usual red so it reads as text on raised surfaces; labels on it are dark. */
+    --destructive: oklch(0.7 0.19 25);
+    --destructive-foreground: oklch(0.2 0.05 25);
+    /* Turned away from the primary green so "finished" does not read as "main action". */
+    --success: oklch(0.76 0.14 175);
     --border: oklch(0.3 0.006 286);
-    --input: oklch(0.32 0.006 286);
+    /* Field borders: 3:1 against popover and background (WCAG 1.4.11). */
+    --input: oklch(0.52 0.006 286);
     --ring: oklch(0.71 0.19 148);
     /* Charts: the period being looked at, and the one before it (drawn dashed). */
     --chart-current: oklch(0.7 0.15 245);
@@ -55,6 +58,9 @@
     --text-xs--line-height: 1.125rem;
     --text-sm: 0.9375rem;
     --text-sm--line-height: 1.375rem;
+    /* Secondary lines (meta under titles, counts): 14px, in rem so it follows the browser size. */
+    --text-meta: 0.875rem;
+    --text-meta--line-height: 1.25rem;
 }
 
 @theme inline {
@@ -179,6 +185,22 @@
     html,
     body {
         min-height: 100%;
+    }
+
+    /* On phones the document scrolls under the 56px sticky top bar: keep focus and #main clear of it. */
+    html {
+        scroll-padding-top: 4rem;
+    }
+
+    @media (width >= 48rem) {
+        html {
+            scroll-padding-top: 0;
+        }
+    }
+
+    /* Every control has its own press state; the grey Android tap flash would double it. */
+    :where(button, a, label, [role="button"]) {
+        -webkit-tap-highlight-color: transparent;
     }
 
     body {

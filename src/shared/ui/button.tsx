@@ -4,15 +4,15 @@ import { cn } from "#/shared/ui/cn";
 import { Slot } from "radix-ui";
 
 const buttonVariants = cva(
-    "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,scale,opacity] outline-none motion-safe:not-disabled:active:scale-[0.99] aria-busy:cursor-progress focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+    "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,scale,opacity] outline-none motion-safe:not-disabled:not-aria-disabled:active:scale-[0.99] aria-busy:cursor-progress focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
     {
         variants: {
             variant: {
                 default: "bg-primary text-primary-foreground not-disabled:hover:bg-primary/90",
                 destructive:
-                    "bg-destructive font-semibold text-white not-disabled:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+                    "bg-destructive font-semibold text-destructive-foreground not-disabled:hover:bg-destructive/90",
                 outline:
-                    "border bg-background not-disabled:hover:bg-accent not-disabled:hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:not-disabled:hover:bg-input/50",
+                    "border bg-background not-disabled:hover:bg-accent not-disabled:hover:text-accent-foreground dark:border-border dark:bg-card dark:not-disabled:hover:bg-accent",
                 secondary:
                     "bg-secondary text-secondary-foreground not-disabled:hover:bg-secondary/80",
                 ghost: "not-disabled:hover:bg-accent not-disabled:hover:text-accent-foreground dark:not-disabled:hover:bg-accent/50",

@@ -20,7 +20,7 @@ export function MobileTopBar(): ReactNode {
             <Link
                 to="/"
                 aria-label="Nelcota, ir para o início"
-                className="rounded-lg outline-none transition-opacity hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="rounded-lg outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <BrandLogo />
             </Link>

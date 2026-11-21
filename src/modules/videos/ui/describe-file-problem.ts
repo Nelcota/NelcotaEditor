@@ -12,7 +12,7 @@ export function describeFileProblem(file: File): string | null {
     }
 
     if (file.size > MAX_UPLOAD_BYTES) {
-        return "O arquivo passa do limite de 5 GB.";
+        return "O arquivo passa de 5 GB. Escolha um arquivo menor ou cole um link do YouTube.";
     }
 
     return null;

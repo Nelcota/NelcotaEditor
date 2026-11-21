@@ -17,8 +17,17 @@ export function AvatarMascotPicker({
     isBusy,
     onPick,
 }: AvatarMascotPickerProps): ReactNode {
+    // aria-disabled instead of disabled: a disabled button drops keyboard focus mid-change.
+    const handlePick = (index: number): void => {
+        if (isBusy === true) {
+            return;
+        }
+
+        onPick(index);
+    };
+
     return (
-        <fieldset disabled={isBusy} aria-busy={isBusy}>
+        <fieldset aria-busy={isBusy}>
             <legend className="float-left mb-4 w-full text-sm font-semibold">
                 Ou escolha um mascote
             </legend>
@@ -29,9 +38,10 @@ export function AvatarMascotPicker({
                         type="button"
                         aria-label={`Mascote ${index + 1}`}
                         aria-pressed={selectedIndex === index}
-                        onClick={() => onPick(index)}
+                        aria-disabled={isBusy}
+                        onClick={() => handlePick(index)}
                         className={cn(
-                            "grid aspect-square place-items-center rounded-xl border bg-background outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50",
+                            "grid aspect-square place-items-center rounded-xl border bg-background outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:not-aria-disabled:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] aria-disabled:opacity-50",
                             "aria-pressed:border-primary aria-pressed:bg-primary/10",
                         )}
                     >

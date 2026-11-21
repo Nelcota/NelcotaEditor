@@ -1,7 +1,7 @@
 import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
 import UploadIcon from "~icons/solar/upload-linear";
-import { useId } from "react";
-import type { ChangeEvent, ReactNode } from "react";
+import { useEffect, useId, useRef } from "react";
+import type { ChangeEvent, ReactNode, RefObject } from "react";
 import { MAX_AVATAR_MEGABYTES } from "#/modules/auth/avatar";
 import type { SessionUser } from "#/modules/auth/session-user";
 import { UserAvatar } from "#/modules/auth/ui/user-avatar";
@@ -43,6 +43,48 @@ function UploadButtonContent({ isUploading, hasAvatar }: UploadButtonContentProp
     );
 }
 
+interface RemovalFocusOptions {
+    hasAvatar: boolean;
+    isBusy: boolean;
+    onRemove: () => void;
+}
+
+interface RemovalFocus {
+    fileInputRef: RefObject<HTMLInputElement | null>;
+    requestRemove: () => void;
+}
+
+/**
+ * The remove button unmounts once the photo is gone, so keyboard focus moves to the upload control
+ * instead of falling back to the page.
+ */
+function useRemovalFocus({ hasAvatar, isBusy, onRemove }: RemovalFocusOptions): RemovalFocus {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const isRemovingRef = useRef(false);
+
+    useEffect(() => {
+        if (isBusy === true || isRemovingRef.current === false) {
+            return;
+        }
+
+        isRemovingRef.current = false;
+        const fileInput = fileInputRef.current;
+
+        if (hasAvatar === true || fileInput === null) {
+            return;
+        }
+
+        fileInput.focus();
+    }, [hasAvatar, isBusy]);
+
+    const requestRemove = (): void => {
+        isRemovingRef.current = true;
+        onRemove();
+    };
+
+    return { fileInputRef, requestRemove };
+}
+
 interface AvatarPhotoPanelProps {
     user: SessionUser;
     hasAvatar: boolean;
@@ -57,6 +99,11 @@ interface AvatarPhotoPanelProps {
 export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
     const fileInputId = useId();
     const user = props.user;
+    const { fileInputRef, requestRemove } = useRemovalFocus({
+        hasAvatar: props.hasAvatar,
+        isBusy: props.isBusy,
+        onRemove: props.onRemove,
+    });
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
         const input = event.target;
@@ -80,6 +127,7 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
                     {/* The input comes first so the label (a <label>, where `disabled` does
                         nothing) can show its focus ring and busy state through `peer`. */}
                     <input
+                        ref={fileInputRef}
                         id={fileInputId}
                         type="file"
                         accept={ACCEPTED_TYPES}
@@ -90,7 +138,7 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
                     <Button
                         asChild
                         variant="secondary"
-                        className="w-full peer-focus-visible:ring-4 peer-focus-visible:ring-ring/70 peer-disabled:pointer-events-none peer-disabled:opacity-50"
+                        className="w-full peer-focus-visible:ring-4 peer-focus-visible:ring-ring/70 peer-disabled:opacity-50"
                         aria-disabled={props.isBusy}
                         aria-busy={props.isUploading}
                     >
@@ -106,10 +154,10 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
                             variant="destructive"
                             className="w-full"
                             disabled={props.isBusy}
-                            onClick={props.onRemove}
+                            onClick={requestRemove}
                         >
                             <TrashBinTrashIcon aria-hidden="true" />
-                            Remover
+                            Remover foto
                         </Button>
                     )}
                 </div>

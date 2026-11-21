@@ -8,7 +8,7 @@ export function UploadProgress({ percent }: { percent: number | null }): ReactNo
     }
 
     return (
-        <div className="grid gap-2" aria-live="polite">
+        <div className="grid gap-2">
             <div className="flex justify-between gap-3 text-sm">
                 <span className="font-medium">Enviando… mantenha esta janela aberta</span>
                 <span className="text-muted-foreground tabular-nums">{percent}%</span>

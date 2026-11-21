@@ -26,7 +26,7 @@ export function ClipsToolbar(props: ClipsToolbarProps) {
                 onValueChange={onQueryChange}
             />
             {/* Two fixed orders: both visible instead of a list that opens over the page. */}
-            <div className="flex w-full items-center gap-2 sm:w-auto">
+            <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
                 <SortVerticalIcon
                     aria-hidden="true"
                     className="size-5 shrink-0 text-muted-foreground"
@@ -44,9 +44,15 @@ export function ClipsToolbar(props: ClipsToolbarProps) {
                     className="flex-1 rounded-full [&>button]:rounded-full sm:flex-none"
                 />
             </div>
-            <span className="ml-auto hidden text-sm text-muted-foreground tabular-nums lg:inline">
+            <span
+                aria-hidden="true"
+                className="w-full text-meta text-muted-foreground tabular-nums"
+            >
                 {countLabel}
             </span>
+            <p role="status" className="sr-only">
+                {countLabel}
+            </p>
         </div>
     );
 }

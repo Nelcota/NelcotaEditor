@@ -3,6 +3,8 @@ const SECONDS_PER_HOUR = 3600;
 const MINUTES_PER_HOUR = 60;
 const BYTES_PER_UNIT = 1024;
 const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"];
+// Keeps a number on the same line as its unit ("5 GB" never splits).
+const NO_BREAK_SPACE = " ";
 
 /** 75 → "1:15", 3725 → "1:02:05". */
 export function formatClock(totalSeconds: number): string {
@@ -25,7 +27,7 @@ export function formatClock(totalSeconds: number): string {
 /** 40 → "menos de 1 min", 200 → "cerca de 4 min", 4000 → "cerca de 1 h 7 min". */
 export function formatTimeLeft(totalSeconds: number): string {
     if (Number.isFinite(totalSeconds) === false || totalSeconds < SECONDS_PER_MINUTE) {
-        return "menos de 1 min";
+        return `menos de 1${NO_BREAK_SPACE}min`;
     }
 
     const totalMinutes = Math.ceil(totalSeconds / SECONDS_PER_MINUTE);
@@ -33,10 +35,10 @@ export function formatTimeLeft(totalSeconds: number): string {
     const minutes = totalMinutes % MINUTES_PER_HOUR;
 
     if (hours > 0) {
-        return `cerca de ${hours} h ${minutes} min`;
+        return `cerca de ${hours}${NO_BREAK_SPACE}h ${minutes}${NO_BREAK_SPACE}min`;
     }
 
-    return `cerca de ${totalMinutes} min`;
+    return `cerca de ${totalMinutes}${NO_BREAK_SPACE}min`;
 }
 
 export function formatBytes(bytes: number): string {
@@ -53,7 +55,12 @@ export function formatBytes(bytes: number): string {
     // Whole bytes have no decimals; larger units show one.
     const decimals = Math.min(1, unitIndex);
 
-    return `${value.toFixed(decimals)} ${BYTE_UNITS[unitIndex] ?? "B"}`;
+    const formattedValue = new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    }).format(value);
+
+    return `${formattedValue}${NO_BREAK_SPACE}${BYTE_UNITS[unitIndex] ?? "B"}`;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {

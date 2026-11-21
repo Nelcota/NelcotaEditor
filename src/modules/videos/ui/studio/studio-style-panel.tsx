@@ -43,7 +43,15 @@ const FONT_OPTIONS = CAPTION_FONTS.map((value) => {
         value,
         ariaLabel: face.label,
         label: (
-            <span className="uppercase" style={{ fontFamily: `"${face.family}", sans-serif` }}>
+            // Same scale and weight as the preview: condensed Bebas Neue read tiny at 1em.
+            <span
+                className="uppercase"
+                style={{
+                    fontFamily: `"${face.family}", sans-serif`,
+                    fontSize: `${face.sizeScale}em`,
+                    fontWeight: face.previewWeight,
+                }}
+            >
                 {face.label}
             </span>
         ),
@@ -88,7 +96,8 @@ function FontPicker({ editor, isLocked }: StudioStylePanelProps): ReactNode {
             options={FONT_OPTIONS}
             disabled={isLocked || draft.captionStyle === "none"}
             onValueChange={(captionFont) => editor.updateSettings({ captionFont })}
-            className="grid-flow-row grid-cols-2"
+            // One per row: in the narrow style panel two columns broke "League Spartan" in half.
+            className="grid-flow-row grid-cols-1"
         />
     );
 }

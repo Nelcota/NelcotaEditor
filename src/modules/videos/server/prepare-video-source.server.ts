@@ -50,7 +50,9 @@ export async function prepareVideoSource(video: Video, signal: AbortSignal): Pro
     const mediaInfo = await probeMedia(resolveStoragePath(sourcePath));
 
     if (mediaInfo.hasVideo === false) {
-        throw new UserFacingError("O arquivo enviado não tem imagem de vídeo.");
+        throw new UserFacingError(
+            "O arquivo enviado não tem imagem de vídeo. Escolha um arquivo de vídeo.",
+        );
     }
 
     if (mediaInfo.hasAudio === false) {
@@ -61,11 +63,15 @@ export async function prepareVideoSource(video: Video, signal: AbortSignal): Pro
 
     // ffprobe reports "N/A" for streams it cannot time, which becomes NaN.
     if (Number.isFinite(durationSeconds) === false || durationSeconds <= 0) {
-        throw new UserFacingError("Não foi possível ler a duração do vídeo.");
+        throw new UserFacingError(
+            "Não foi possível ler este arquivo. Exporte o vídeo de novo em MP4 e envie outra vez.",
+        );
     }
 
     if (durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
-        throw new UserFacingError("O vídeo é longo demais. O máximo é 3 horas.");
+        throw new UserFacingError(
+            "O vídeo passa de 3 horas. Corte o vídeo ou envie um trecho menor.",
+        );
     }
 
     // yt-dlp limits each format to 4 GB, but video and audio are merged after that check:
@@ -79,7 +85,7 @@ export async function prepareVideoSource(video: Video, signal: AbortSignal): Pro
             await rm(absoluteSourcePath, { force: true });
         }
 
-        throw new UserFacingError("O vídeo é grande demais. O máximo é 5 GB.");
+        throw new UserFacingError("O vídeo passa de 5 GB. Envie um arquivo menor.");
     }
 
     const source = { sourcePath, durationSeconds };

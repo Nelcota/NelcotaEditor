@@ -13,7 +13,7 @@ export const AVATAR_MASCOT_COUNT = 15;
 const BYTES_PER_MEGABYTE = 1024 * 1024;
 export const MAX_AVATAR_MEGABYTES = 2;
 export const MAX_AVATAR_BYTES = MAX_AVATAR_MEGABYTES * BYTES_PER_MEGABYTE;
-export const AVATAR_TOO_LARGE_MESSAGE = `A foto passa do limite de ${MAX_AVATAR_MEGABYTES} MB.`;
+export const AVATAR_TOO_LARGE_MESSAGE = `A foto passa de ${MAX_AVATAR_MEGABYTES} MB. Escolha uma foto menor.`;
 export const AVATAR_PHOTO_EXTENSIONS = ["png", "jpg", "webp"] as const;
 
 export type AvatarPhotoExtension = (typeof AVATAR_PHOTO_EXTENSIONS)[number];

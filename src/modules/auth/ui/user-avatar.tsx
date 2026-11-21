@@ -36,7 +36,11 @@ export function UserAvatar({ name, image, className }: UserAvatarProps): ReactNo
     if (avatar.kind === "photo") {
         return (
             <span className={frameClass} aria-hidden="true">
-                <img src={avatar.url} alt="" className="size-full object-cover" />
+                <img
+                    src={avatar.url}
+                    alt=""
+                    className="size-full object-cover outline outline-1 -outline-offset-1 outline-white/10"
+                />
             </span>
         );
     }

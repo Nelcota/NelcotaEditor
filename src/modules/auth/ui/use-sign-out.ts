@@ -4,7 +4,7 @@ import { useState } from "react";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 
-const SIGN_OUT_FAILED_MESSAGE = "Não foi possível sair. Tente novamente.";
+const SIGN_OUT_FAILED_MESSAGE = "Não foi possível sair. Tente de novo.";
 
 interface SignOut {
     signOut: () => Promise<void>;

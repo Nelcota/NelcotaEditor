@@ -9,20 +9,28 @@ import { BestClipCard } from "#/modules/overview/ui/best-clip-card";
 import { useScrollEdges } from "#/modules/overview/ui/use-scroll-edges";
 import { Button } from "#/shared/ui/button";
 
-/** With this many clips or fewer they all fit, so there is nothing to scroll. */
-const CLIPS_THAT_FIT = 3;
+// At an end the arrow only looks disabled (aria-disabled): a native `disabled` would drop the
+// keyboard focus to <body> right after the press that reached it.
+const EDGE_BUTTON_CLASS = "aria-disabled:opacity-50";
 
 function CarouselControls({ scroller }: { scroller: RefObject<HTMLUListElement | null> }) {
     const edges = useScrollEdges(scroller);
-    const scrollBy = (direction: number) => {
+    const canScrollBack = edges.canScrollBack;
+    const canScrollForward = edges.canScrollForward;
+    const scrollBy = (direction: number, canMove: boolean) => {
         const element = scroller.current;
 
-        if (element === null) {
+        if (element === null || canMove === false) {
             return;
         }
 
         element.scrollBy({ left: direction * element.clientWidth, behavior: "smooth" });
     };
+
+    // Every clip already fits: arrows that can never move are noise.
+    if (canScrollBack === false && canScrollForward === false) {
+        return null;
+    }
 
     return (
         <div className="flex justify-end gap-2">
@@ -30,8 +38,9 @@ function CarouselControls({ scroller }: { scroller: RefObject<HTMLUListElement |
                 variant="outline"
                 size="icon"
                 aria-label="Cortes anteriores"
-                disabled={edges.canScrollBack === false}
-                onClick={() => scrollBy(-1)}
+                aria-disabled={canScrollBack === false}
+                className={EDGE_BUTTON_CLASS}
+                onClick={() => scrollBy(-1, canScrollBack)}
             >
                 <AltArrowLeftIcon aria-hidden="true" />
             </Button>
@@ -39,8 +48,9 @@ function CarouselControls({ scroller }: { scroller: RefObject<HTMLUListElement |
                 variant="outline"
                 size="icon"
                 aria-label="Próximos cortes"
-                disabled={edges.canScrollForward === false}
-                onClick={() => scrollBy(1)}
+                aria-disabled={canScrollForward === false}
+                className={EDGE_BUTTON_CLASS}
+                onClick={() => scrollBy(1, canScrollForward)}
             >
                 <AltArrowRightIcon aria-hidden="true" />
             </Button>
@@ -73,7 +83,7 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
     const scrollerRef = useRef<HTMLUListElement>(null);
 
     return (
-        <section className="flex min-w-0 flex-col gap-4 rounded-2xl border bg-card p-4 sm:p-5">
+        <section className="@container/clips flex min-w-0 flex-col gap-4 rounded-2xl border bg-card p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 text-lg font-bold">
                     <StarIcon aria-hidden="true" className="size-5 text-muted-foreground" />
@@ -81,7 +91,7 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
                 </h2>
                 <Link
                     to="/clips"
-                    className="rounded text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
+                    className="shrink-0 rounded text-sm font-semibold whitespace-nowrap text-muted-foreground hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
                 >
                     Ver todos
                 </Link>
@@ -91,14 +101,14 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
                 <ul
                     ref={scrollerRef}
                     aria-label="Melhores cortes, da maior nota para a menor"
-                    className="grid snap-x snap-mandatory auto-cols-[calc((100%-24px)/3)] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain [scrollbar-width:none]"
+                    className="-mx-1 grid snap-x snap-mandatory auto-cols-[10rem] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain px-1 pb-1 [scrollbar-width:none] @2xl/clips:auto-cols-[calc((100%-2.25rem)/4)] @4xl/clips:auto-cols-[calc((100%-3rem)/5)]"
                 >
                     {clips.map((item) => (
                         <BestClipCard key={item.clip.id} item={item} />
                     ))}
                 </ul>
             )}
-            {clips.length > CLIPS_THAT_FIT && <CarouselControls scroller={scrollerRef} />}
+            {clips.length > 0 && <CarouselControls scroller={scrollerRef} />}
         </section>
     );
 }

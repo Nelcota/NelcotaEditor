@@ -38,7 +38,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
                         <Link
                             to={ACCOUNT_PATH}
                             aria-current={toAriaCurrent(isAccountPage)}
-                            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-2 text-left outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-2 text-left outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                         >
                             <UserAvatar name={user.name} image={user.image} className="size-10" />
                             <span className="grid min-w-0 flex-1">
@@ -47,7 +47,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
                                 </span>
                                 <span
                                     title={user.email}
-                                    className="truncate text-[14px] text-muted-foreground"
+                                    className="truncate text-meta text-muted-foreground"
                                 >
                                     {user.email}
                                 </span>
@@ -57,7 +57,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
                     <DropdownMenuTrigger
                         aria-label={`Menu da conta: ${user.name}`}
                         className={cn(
-                            "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] data-[state=open]:bg-secondary",
+                            "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] data-[state=open]:bg-secondary",
                             isCollapsed === true && "size-auto",
                         )}
                     >
@@ -65,7 +65,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
                             <UserAvatar name={user.name} image={user.image} className="size-10" />
                         )}
                         {isCollapsed === false && (
-                            <MenuDotsIcon className="size-4" aria-hidden="true" />
+                            <MenuDotsIcon className="size-5" aria-hidden="true" />
                         )}
                     </DropdownMenuTrigger>
                 </div>

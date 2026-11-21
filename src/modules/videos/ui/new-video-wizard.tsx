@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import type { FormEvent, ReactNode } from "react";
 import { TRANSCRIPTION_LANGUAGE_LABELS } from "#/modules/preferences/preferences";
 import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
@@ -9,13 +10,14 @@ import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
 import { UploadProgress } from "#/modules/videos/ui/upload-progress";
 import { useIsLinkBlocked } from "#/modules/videos/ui/use-is-link-blocked";
 import { useVideoSubmission } from "#/modules/videos/ui/use-video-submission";
+import { YOUTUBE_LINK_INPUT_ID } from "#/modules/videos/ui/youtube-link-input";
 import { EMPTY_SOURCE, hasUsableSource } from "#/modules/videos/ui/video-source";
 import type { VideoSource } from "#/modules/videos/ui/video-source";
 import { Button } from "#/shared/ui/button";
 import { DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/dialog";
 import { FormAlert } from "#/shared/ui/form-alert";
 
-const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente novamente.";
+const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente de novo.";
 
 interface NewVideoWizardProps {
     defaultClipCount: number;
@@ -38,12 +40,25 @@ export function NewVideoWizard({
     const languageLabel = TRANSCRIPTION_LANGUAGE_LABELS[language];
     const isLinkBlocked = useIsLinkBlocked(source);
     const { submission, uploadPercent } = useVideoSubmission();
+    const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
     const isBusy = submission.isPending;
+
+    const changeSource = (nextSource: VideoSource): void => {
+        setIsSubmitAttempted(false);
+        setSource(nextSource);
+    };
 
     const submit = (event: FormEvent<HTMLFormElement>): void => {
         event.preventDefault();
 
-        if (hasUsableSource(source) === false || isLinkBlocked === true || isBusy === true) {
+        if (isLinkBlocked === true || isBusy === true) {
+            return;
+        }
+
+        if (hasUsableSource(source) === false) {
+            // Rendered first, so the problem the field points at exists when focus lands there.
+            flushSync(() => setIsSubmitAttempted(true));
+            document.getElementById(YOUTUBE_LINK_INPUT_ID)?.focus();
             return;
         }
 
@@ -56,19 +71,20 @@ export function NewVideoWizard({
             onSubmit={submit}
             className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto]"
         >
-            <DialogHeader className="border-b px-5 py-4 sm:px-7 sm:py-5">
+            <DialogHeader className="border-b py-4 pr-16 pl-5 sm:py-5 sm:pr-16 sm:pl-7">
                 <DialogTitle>Novo vídeo</DialogTitle>
                 <DialogDescription>
                     Cole o link ou envie o arquivo. O resto já vem preenchido; mude só se quiser.
                 </DialogDescription>
             </DialogHeader>
             <div className="grid min-h-0 lg:grid-cols-[minmax(0,1fr)_320px]">
-                <section className="grid min-h-0 content-start gap-8 overflow-y-auto p-5 sm:p-7">
+                <section className="grid min-h-0 grid-cols-[minmax(0,1fr)] content-start gap-8 overflow-y-auto p-5 sm:p-7 [@media(max-height:560px)]:overflow-visible">
                     <VideoStepFields
                         source={source}
                         title={title}
+                        isSubmitAttempted={isSubmitAttempted}
                         onTitleChange={setTitle}
-                        onSourceChange={setSource}
+                        onSourceChange={changeSource}
                     />
                     <ClipsStepFields clipCount={clipCount} onClipCountChange={setClipCount} />
                     <LanguageStepFields language={language} onLanguageChange={setLanguage} />
@@ -91,7 +107,7 @@ export function NewVideoWizard({
                     type="submit"
                     size="lg"
                     className="font-semibold max-sm:flex-1 sm:min-w-40"
-                    disabled={hasUsableSource(source) === false || isLinkBlocked === true || isBusy}
+                    disabled={isBusy === true || isLinkBlocked === true}
                     aria-busy={isBusy}
                 >
                     Gerar cortes

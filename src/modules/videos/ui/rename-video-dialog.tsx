@@ -18,7 +18,21 @@ import { FormAlert } from "#/shared/ui/form-alert";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 
-const FALLBACK_ERROR_MESSAGE = "Não foi possível renomear o vídeo. Tente novamente.";
+const FALLBACK_ERROR_MESSAGE =
+    "Não foi possível renomear o vídeo. Confira sua conexão e tente de novo.";
+
+const TITLE_FIELD_ID = "video-title";
+
+/** The field id is known up front; aria-invalid only reaches the DOM a render later. */
+function focusTitleField(): void {
+    const titleField = document.getElementById(TITLE_FIELD_ID);
+
+    if (titleField === null) {
+        return;
+    }
+
+    titleField.focus();
+}
 
 interface RenameVideoFormProps {
     video: VideoSummary;
@@ -44,6 +58,9 @@ function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
             await invalidateVideoQueries(queryClient);
             onDone();
         },
+        onSubmitInvalid: () => {
+            focusTitleField();
+        },
     });
 
     return (
@@ -58,7 +75,7 @@ function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
             <form.Field name="title">
                 {(field) => (
                     <TextField
-                        id="video-title"
+                        id={TITLE_FIELD_ID}
                         label="Título"
                         autoComplete="off"
                         value={field.state.value}

@@ -4,6 +4,10 @@ import { clampPageIndex } from "#/modules/videos/ui/clamp-page-index";
 import { VIDEOS_PER_PAGE } from "#/modules/videos/ui/video-list-filter";
 import { Button } from "#/shared/ui/button";
 
+// At the first or last page the button only looks disabled (aria-disabled): a native `disabled`
+// would drop the keyboard focus to <body> right after the press that reached the end.
+const BOUND_BUTTON_CLASS = "aria-disabled:opacity-50 aria-disabled:hover:bg-transparent";
+
 export interface VideoPagerProps {
     pageIndex: number;
     pageCount: number;
@@ -26,17 +30,36 @@ export function VideoPager({ pageIndex, pageCount, itemCount, onPageChange }: Vi
 
     const currentPageIndex = clampPageIndex(pageIndex, pageCount);
     const lastPageIndex = pageCount - 1;
+    const isFirstPage = currentPageIndex <= 0;
+    const isLastPage = currentPageIndex >= lastPageIndex;
+
+    function goToPreviousPage(): void {
+        if (isFirstPage === true) {
+            return;
+        }
+
+        onPageChange(currentPageIndex - 1);
+    }
+
+    function goToNextPage(): void {
+        if (isLastPage === true) {
+            return;
+        }
+
+        onPageChange(currentPageIndex + 1);
+    }
 
     return (
-        <div className="flex items-center justify-between border-t pt-3 text-[14px] text-muted-foreground tabular-nums">
+        <div className="flex items-center justify-between border-t pt-3 text-meta text-muted-foreground tabular-nums">
             <span>{describeRange(currentPageIndex, itemCount)}</span>
             <div className="flex gap-1">
                 <Button
                     variant="ghost"
                     size="icon"
                     aria-label="Página anterior"
-                    disabled={currentPageIndex === 0}
-                    onClick={() => onPageChange(currentPageIndex - 1)}
+                    aria-disabled={isFirstPage}
+                    className={BOUND_BUTTON_CLASS}
+                    onClick={goToPreviousPage}
                 >
                     <AltArrowLeftIcon aria-hidden="true" />
                 </Button>
@@ -44,8 +67,9 @@ export function VideoPager({ pageIndex, pageCount, itemCount, onPageChange }: Vi
                     variant="ghost"
                     size="icon"
                     aria-label="Próxima página"
-                    disabled={currentPageIndex >= lastPageIndex}
-                    onClick={() => onPageChange(currentPageIndex + 1)}
+                    aria-disabled={isLastPage}
+                    className={BOUND_BUTTON_CLASS}
+                    onClick={goToNextPage}
                 >
                     <AltArrowRightIcon aria-hidden="true" />
                 </Button>

@@ -9,9 +9,11 @@ interface PageHeaderProps {
 /** The title block every console page starts with. */
 export function PageHeader({ title, description, action }: PageHeaderProps) {
     return (
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <h1 className="text-[30px] font-extrabold tracking-tight">{title}</h1>
+        // Wraps by the space it has, not the window: with the sidebar open the action moves below
+        // instead of squeezing the description into a narrow column.
+        <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+            <div className="min-w-0 flex-[1_1_20rem]">
+                <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
                 <p className="mt-1 max-w-prose text-muted-foreground">{description}</p>
             </div>
             {action}

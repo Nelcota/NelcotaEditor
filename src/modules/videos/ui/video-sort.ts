@@ -7,8 +7,8 @@ export type VideoSort = (typeof VIDEO_SORTS)[number];
 export const DEFAULT_VIDEO_SORT: VideoSort = "newest";
 
 export const VIDEO_SORT_LABELS: Record<VideoSort, string> = {
-    newest: "Mais recentes",
-    oldest: "Mais antigos",
+    newest: "Recentes",
+    oldest: "Antigos",
     title: "De A a Z",
 };
 

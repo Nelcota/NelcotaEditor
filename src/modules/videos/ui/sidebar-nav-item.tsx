@@ -9,10 +9,10 @@ import { cn } from "#/shared/ui/cn";
 export type NavItemState = "current" | "parent" | "none";
 
 const ITEM_CLASS =
-    "relative flex items-center gap-3 min-h-11 rounded-xl px-3 py-2.5 text-base font-semibold outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-[22px] [&>svg]:shrink-0 [&>svg]:text-muted-foreground";
+    "relative flex items-center gap-3 min-h-11 rounded-xl px-3 py-2.5 text-base font-semibold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-[22px] [&>svg]:shrink-0 [&>svg]:text-muted-foreground";
 
 const STATE_CLASSES: Record<NavItemState, string> = {
-    current: "bg-accent font-bold [&>svg]:text-primary",
+    current: "bg-accent hover:bg-accent font-bold [&>svg]:text-primary",
     parent: "font-bold [&>svg]:text-primary",
     none: "",
 };
@@ -60,7 +60,7 @@ export function SidebarNavContent({
             <Icon aria-hidden="true" />
             {label}
             {count !== undefined && (
-                <span className="ml-auto text-[14px] font-bold text-muted-foreground tabular-nums">
+                <span className="ml-auto text-meta font-bold text-muted-foreground tabular-nums">
                     {count}
                 </span>
             )}

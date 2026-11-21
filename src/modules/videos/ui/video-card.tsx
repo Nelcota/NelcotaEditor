@@ -12,6 +12,7 @@ import {
     CancelledOverlay,
     FailedOverlay,
     WorkingOverlay,
+    describeFailure,
 } from "#/modules/videos/ui/video-card-overlay";
 import { VideoMascot } from "#/modules/videos/ui/video-mascot";
 import { VideoRowMenu } from "#/modules/videos/ui/video-row-menu";
@@ -39,7 +40,7 @@ function CardImage({ video }: { video: VideoSummary }) {
             alt=""
             loading="lazy"
             referrerPolicy="no-referrer"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="size-full object-cover"
         />
     );
 }
@@ -56,7 +57,7 @@ function CardMeta({ video }: { video: VideoSummary }) {
     const SourceIcon = SOURCE_ICONS[video.source];
 
     return (
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[14px] text-muted-foreground tabular-nums">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-meta text-muted-foreground tabular-nums">
             <span className={META_ITEM_CLASS}>
                 <SourceIcon aria-hidden="true" className="size-4" />
                 {VIDEO_SOURCE_LABELS[video.source]}
@@ -101,7 +102,7 @@ export function VideoCard({ video }: { video: VideoSummary }) {
     const actions = useVideoRowActions(video.id);
 
     return (
-        <li className="group relative grid content-start gap-2.5">
+        <li className="group @container relative grid content-start gap-2.5 transition-[scale] motion-safe:has-[a:active]:scale-[0.99]">
             <div className="relative aspect-video overflow-hidden rounded-2xl border bg-muted">
                 <CardImage video={video} />
                 <ImageBadges video={video} />
@@ -122,11 +123,16 @@ export function VideoCard({ video }: { video: VideoSummary }) {
                         to="/videos/$videoId"
                         params={{ videoId: video.id }}
                         title={video.title}
-                        className="line-clamp-2 min-h-[2lh] rounded font-bold break-words underline-offset-4 outline-none group-hover:underline after:absolute after:inset-x-0 after:top-0 after:aspect-video after:rounded-2xl focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                        className="line-clamp-2 min-h-[2lh] rounded font-bold break-words underline-offset-4 outline-none group-hover:underline after:absolute after:inset-x-0 after:top-0 after:aspect-video after:rounded-2xl focus-visible:ring-4 focus-visible:ring-ring/70"
                     >
                         {video.title}
                     </Link>
                     <CardMeta video={video} />
+                    {video.status === "failed" && (
+                        <p className="text-meta text-destructive [overflow-wrap:anywhere]">
+                            {describeFailure(video, actions.errorMessage)}
+                        </p>
+                    )}
                 </div>
                 <VideoRowMenu
                     video={video}

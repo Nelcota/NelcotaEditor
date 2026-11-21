@@ -49,10 +49,13 @@ export function AccountMenuContent({
             <div className="flex items-center gap-2.5 px-2.5 py-2">
                 <UserAvatar name={user.name} image={user.image} />
                 <div className="min-w-0">
-                    <p title={user.name} className="truncate text-sm font-bold">
+                    <p title={user.name} className="text-sm font-bold [overflow-wrap:anywhere]">
                         {user.name}
                     </p>
-                    <p title={user.email} className="truncate text-xs text-muted-foreground">
+                    <p
+                        title={user.email}
+                        className="text-xs text-muted-foreground [overflow-wrap:anywhere]"
+                    >
                         {user.email}
                     </p>
                 </div>

@@ -21,7 +21,7 @@ export function NewVideoDialog({ isOpen, onOpenChange }: NewVideoDialogProps): R
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             {/* A fixed height, so the dialog never jumps while the preview loads. */}
-            <DialogContent className="h-[min(680px,calc(100dvh-2rem))] grid-rows-1 gap-0 overflow-hidden p-0 [--dialog-padding:--spacing(5)] sm:max-w-[min(1080px,calc(100%-4rem))] sm:[--dialog-padding:--spacing(7)]">
+            <DialogContent className="h-[min(680px,calc(100dvh-2rem))] grid-rows-1 gap-0 overflow-hidden p-0 [@media(max-height:560px)]:h-auto [@media(max-height:560px)]:overflow-y-auto [--dialog-padding:--spacing(5)] sm:max-w-[min(1080px,calc(100%-4rem))] sm:[--dialog-padding:--spacing(7)]">
                 <NewVideoWizard
                     key={`${defaultClipCount}-${defaultLanguage}`}
                     defaultClipCount={defaultClipCount}
