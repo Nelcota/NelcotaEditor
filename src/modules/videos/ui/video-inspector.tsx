@@ -1,0 +1,202 @@
+import CalendarIcon from "~icons/solar/calendar-linear";
+import ClockCircleIcon from "~icons/solar/clock-circle-linear";
+import DocumentTextIcon from "~icons/solar/document-text-linear";
+import DownloadMinimalisticIcon from "~icons/solar/download-minimalistic-linear";
+import PenIcon from "~icons/solar/pen-linear";
+import PlayCircleIcon from "~icons/solar/play-circle-linear";
+import ScissorsIcon from "~icons/solar/scissors-linear";
+import SquareArrowRightUpIcon from "~icons/solar/square-arrow-right-up-linear";
+import StopwatchIcon from "~icons/solar/stopwatch-linear";
+import TrashBinTrashIcon from "~icons/solar/trash-bin-trash-linear";
+import UploadIcon from "~icons/solar/upload-linear";
+import VideoFrameIcon from "~icons/solar/video-frame-linear";
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import { CLIP_LENGTH_LABELS } from "#/modules/preferences/preferences";
+import { isVideoFinished, isVideoWorking } from "#/modules/video-records/video-status";
+import type { VideoDetails, VideoSummary } from "#/modules/videos/video-views";
+import { countClipTotal } from "#/modules/videos/ui/clip-ranking";
+import {
+    INSPECTOR_LINK_ROW_CLASS,
+    InspectorButtonRow,
+    InspectorGroup,
+    InspectorRow,
+    InspectorRowContent,
+} from "#/modules/videos/ui/inspector-rows";
+import { VideoDialogs } from "#/modules/videos/ui/video-dialogs";
+import type { VideoDialog } from "#/modules/videos/ui/video-dialogs";
+import { VideoMascot } from "#/modules/videos/ui/video-mascot";
+import { VIDEO_SOURCE_LABELS } from "#/modules/videos/ui/video-status-labels";
+import { VideoStatusBadge } from "#/modules/videos/ui/video-status-badge";
+import { formatClock, formatDate } from "#/shared/ui/format";
+
+const SECURE_URL_PREFIX = "https://";
+
+/** The video's mascot large and centred, its state under it, like a profile. */
+function InspectorIdentity({ video }: { video: VideoSummary }): ReactNode {
+    return (
+        <div className="grid justify-items-center gap-2">
+            <VideoMascot videoId={video.id} className="size-16" />
+            <VideoStatusBadge status={video.status} />
+        </div>
+    );
+}
+
+/** The name in a field-shaped box; renaming opens from it once the video is finished. */
+function NameField({ video, onRename }: { video: VideoSummary; onRename: () => void }) {
+    return (
+        <div className="grid gap-2">
+            <h3 className="px-1 text-sm text-muted-foreground">Nome</h3>
+            <button
+                type="button"
+                onClick={onRename}
+                disabled={isVideoFinished(video.status) === false}
+                aria-label={`Renomear: ${video.title}`}
+                className="min-h-12 rounded-xl border bg-background px-4 py-3 text-start text-base leading-snug [overflow-wrap:anywhere] outline-none transition-[border-color,box-shadow] hover:border-ring/50 focus-visible:ring-4 focus-visible:ring-ring/70 disabled:cursor-default disabled:hover:border-border"
+            >
+                {video.title}
+            </button>
+        </div>
+    );
+}
+
+function SourceRow({ video }: { video: VideoSummary }): ReactNode {
+    const sourceUrl = video.sourceUrl;
+    const sourceLabel = VIDEO_SOURCE_LABELS[video.source];
+
+    if (sourceUrl === null || sourceUrl.startsWith(SECURE_URL_PREFIX) === false) {
+        return <InspectorRow icon={UploadIcon} label="Fonte" value={sourceLabel} />;
+    }
+
+    return (
+        <li>
+            <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={INSPECTOR_LINK_ROW_CLASS}
+            >
+                <InspectorRowContent icon={PlayCircleIcon} label="Fonte" value={sourceLabel} />
+                <SquareArrowRightUpIcon
+                    aria-hidden="true"
+                    className="size-5 shrink-0 text-muted-foreground"
+                />
+            </a>
+        </li>
+    );
+}
+
+function OriginGroup({ video }: { video: VideoSummary }): ReactNode {
+    const durationSeconds = video.durationSeconds;
+
+    return (
+        <InspectorGroup title="Origem">
+            <SourceRow video={video} />
+            <InspectorRow icon={CalendarIcon} label="Enviado" value={formatDate(video.createdAt)} />
+            {durationSeconds !== null && (
+                <InspectorRow
+                    icon={ClockCircleIcon}
+                    label="Duração"
+                    value={formatClock(durationSeconds)}
+                />
+            )}
+        </InspectorGroup>
+    );
+}
+
+function FilesGroup({ video }: { video: VideoSummary }): ReactNode {
+    const originalFileUrl = video.originalFileUrl;
+
+    return (
+        <InspectorGroup title="Arquivos">
+            <li>
+                <Link
+                    to="/videos/$videoId"
+                    params={{ videoId: video.id }}
+                    search={{ tab: "original" }}
+                    className={INSPECTOR_LINK_ROW_CLASS}
+                >
+                    <InspectorRowContent icon={VideoFrameIcon} label="Vídeo original" hasChevron />
+                </Link>
+            </li>
+            <li>
+                <Link
+                    to="/videos/$videoId"
+                    params={{ videoId: video.id }}
+                    search={{ tab: "original" }}
+                    hash="transcricao"
+                    className={INSPECTOR_LINK_ROW_CLASS}
+                >
+                    <InspectorRowContent icon={DocumentTextIcon} label="Transcrição" hasChevron />
+                </Link>
+            </li>
+            {originalFileUrl !== null && (
+                <li>
+                    <a href={originalFileUrl} download className={INSPECTOR_LINK_ROW_CLASS}>
+                        <InspectorRowContent
+                            icon={DownloadMinimalisticIcon}
+                            label="Baixar o original"
+                        />
+                    </a>
+                </li>
+            )}
+        </InspectorGroup>
+    );
+}
+
+interface VideoInspectorProps {
+    details: VideoDetails;
+}
+
+/**
+ * The right panel of a video, read like a profile: who it is, what came out, where it came from,
+ * its files and the rare actions. Lines: cards 24px in, row text 16px in from the card, titles 4px in.
+ */
+export function VideoInspector({ details }: VideoInspectorProps): ReactNode {
+    const video = details.video;
+    const [openDialog, setOpenDialog] = useState<VideoDialog | null>(null);
+    const isWorking = isVideoWorking(video.status);
+
+    return (
+        <div className="grid gap-6">
+            <InspectorIdentity video={video} />
+            <NameField video={video} onRename={() => setOpenDialog("rename")} />
+            <InspectorGroup title="Cortes">
+                <InspectorRow
+                    icon={ScissorsIcon}
+                    label="Cortes prontos"
+                    value={`${video.readyClipCount} de ${countClipTotal(details)}`}
+                />
+                <InspectorRow
+                    icon={StopwatchIcon}
+                    label="Duração dos cortes"
+                    value={CLIP_LENGTH_LABELS[video.clipLength]}
+                />
+            </InspectorGroup>
+            <OriginGroup video={video} />
+            <FilesGroup video={video} />
+            <InspectorGroup title="Ações">
+                <InspectorButtonRow
+                    icon={PenIcon}
+                    label="Renomear"
+                    hasChevron
+                    isDisabled={isVideoFinished(video.status) === false}
+                    onClick={() => setOpenDialog("rename")}
+                />
+                <InspectorButtonRow
+                    icon={TrashBinTrashIcon}
+                    label="Excluir vídeo"
+                    isDestructive
+                    isDisabled={isWorking}
+                    onClick={() => setOpenDialog("delete")}
+                />
+            </InspectorGroup>
+            <VideoDialogs
+                video={video}
+                openDialog={openDialog}
+                onClose={() => setOpenDialog(null)}
+            />
+        </div>
+    );
+}

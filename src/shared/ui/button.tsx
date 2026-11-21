@@ -8,9 +8,10 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                // One flat blue; the offset gap keeps the same-blue ring from reading as a bigger button.
+                // Ink fill; hover mixes toward the page so it shows in both themes. The offset gap keeps
+                // the ring from reading as a bigger button.
                 default:
-                    "bg-primary-solid text-primary-foreground not-disabled:hover:bg-[color-mix(in_oklab,var(--primary-solid)_88%,black)] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    "bg-primary-solid text-primary-foreground not-disabled:hover:bg-[color-mix(in_oklab,var(--primary-solid)_84%,var(--background))] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 destructive:
                     "bg-destructive font-medium text-destructive-foreground not-disabled:hover:bg-destructive/90",
                 outline:

@@ -1,5 +1,6 @@
 import ClapperboardIcon from "~icons/solar/clapperboard-linear";
 import Pen2Icon from "~icons/solar/pen-2-linear";
+import VideoFrameIcon from "~icons/solar/video-frame-linear";
 import { useNavigate } from "@tanstack/react-router";
 import type { ComponentType, ReactNode } from "react";
 import { isVideoFinished, isVideoResumable } from "#/modules/video-records/video-status";
@@ -7,6 +8,7 @@ import type { VideoDetails } from "#/modules/videos/video-views";
 import { ProcessingPanel } from "#/modules/videos/ui/processing-panel";
 import { ResumePanel } from "#/modules/videos/ui/resume-panel";
 import { VideoClipsSection } from "#/modules/videos/ui/video-clips-section";
+import { VideoOriginalSection } from "#/modules/videos/ui/video-original-section";
 import type { VideoPageSearch, VideoPageTab } from "#/modules/videos/ui/video-page-search";
 import { VIDEO_PAGE_TABS } from "#/modules/videos/ui/video-page-search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/tabs";
@@ -30,7 +32,11 @@ interface VideoPageTabsProps {
     StudioTab: ComponentType<StudioTabProps>;
 }
 
-/** Cortes to watch and pick, Studio to edit one: the tab lives in the address, so it survives reloads. */
+/**
+ * Cortes to watch and pick, Original to read and scrub the full video, Studio to edit a clip. The
+ * tab lives in the address, so it survives reloads. Tab labels have no side padding: the first
+ * icon sits on the surface's text line.
+ */
 export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps): ReactNode {
     const navigate = useNavigate();
     const video = details.video;
@@ -70,6 +76,13 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
                         {details.clips.length}
                     </span>
                 </TabsTrigger>
+                <TabsTrigger
+                    value="original"
+                    className="h-11 flex-none px-0 text-base font-semibold"
+                >
+                    <VideoFrameIcon aria-hidden="true" />
+                    Original
+                </TabsTrigger>
                 <TabsTrigger value="studio" className="h-11 flex-none px-0 text-base font-semibold">
                     <Pen2Icon aria-hidden="true" />
                     Studio
@@ -79,6 +92,9 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
                 {isVideoFinished(video.status) === false && <ProcessingPanel video={video} />}
                 {isVideoResumable(video.status) === true && <ResumePanel video={video} />}
                 <VideoClipsSection details={details} />
+            </TabsContent>
+            <TabsContent value="original" className="min-w-0">
+                <VideoOriginalSection details={details} />
             </TabsContent>
             <TabsContent value="studio" className="min-w-0">
                 <StudioTab

@@ -1,14 +1,16 @@
 # Nelcota — design brief
 
-Nelcota turns long videos into vertical short clips with captions. Since 2026-11-21 (direction B of
-`design/explore/rebuild/`, picked by the owner) the app has its own neutral system, no longer the
-landing page's: white page, grey sunken controls, one flat blue, no sidebar. Light by default; dark only
-when the person picks it with the toggle in the top bar (saved in `localStorage`, applied before the
-first paint).
+Nelcota turns long videos into vertical short clips with captions. Since 2026-11-21 the app follows the
+owner's reference design: a desktop-style window. A light grey frame holds the top bar (brand, sidebar
+toggle, the open videos as tabs, theme, inspector toggle) and the sidebar (search, sections with counts,
+the videos at work and the rest, the person at the foot). One white rounded panel holds the page; on a
+video it splits into the page and a soft grey inspector of white grouped cards. Ink-black primary
+buttons; blue kept for focus and progress. Light by default; dark only when the person picks it with the
+toggle in the top bar (saved in `localStorage`, applied before the first paint).
 
 ## Principles
 
-- **One obvious next step.** Each screen has one primary action in the blue gradient. Everything else is
+- **One obvious next step.** Each screen has one primary action in ink (`primary-solid`). Everything else is
   secondary or ghost.
 - **Always say what is happening.** Processing takes minutes, so every video shows its stage in
   plain words and a progress bar. Errors say what went wrong and what to do.
@@ -16,17 +18,19 @@ first paint).
 
 ## Tokens (`src/styles.css`)
 
-| Token                                  | Use                                                      |
-| -------------------------------------- | -------------------------------------------------------- |
-| `background` (white, dark: near-black) | Page and top bar                                         |
-| `card` (white, dark: raised grey)      | Panels, `card-border` = ink at 10%                       |
-| `secondary` / `muted` (light grey)     | Sunken tracks: segmented controls, filters, placeholders |
-| `primary` (blue, oklch 0.58 0.21 263)  | Focus ring, progress, selected clip number               |
-| `primary-solid`                        | The one primary button, flat (white label keeps 4.5:1)   |
-| `primary-ink`                          | Blue text and links                                      |
-| `muted-foreground`                     | Secondary text                                           |
-| `success` (teal)                       | Finished videos and clip scores                          |
-| `destructive` (red)                    | Failures and delete                                      |
+| Token                                   | Use                                                      |
+| --------------------------------------- | -------------------------------------------------------- |
+| `background` (white, dark: near-black)  | The rounded panel and the inspector's cards              |
+| `frame` (light grey)                    | Window frame: top bar and sidebar                        |
+| `inspector` (between frame and panel)   | The video inspector behind its white cards               |
+| `card` (white, dark: raised grey)       | Panels, `card-border` = ink at 10%                       |
+| `secondary` / `muted` (light grey)      | Sunken tracks: segmented controls, filters, placeholders |
+| `primary` (blue, oklch 0.58 0.21 263)   | Focus ring, progress, activity dots                      |
+| `primary-solid` (ink, dark: near-white) | The one primary button and the open clip's number        |
+| `primary-ink`                           | Blue text and links                                      |
+| `muted-foreground`                      | Secondary text                                           |
+| `success` (teal)                        | Finished videos and clip scores                          |
+| `destructive` (red)                     | Failures and delete                                      |
 
 - Font: Geist (400 to 600). Page titles 28px semibold, tracking -0.02em, one muted line under them.
   No eyebrows, no grid backdrop, no gradients.
@@ -62,7 +66,7 @@ Raised one step on 2026-11-19: small grey text on the dark canvas was hard to re
 Two 4x4 sprites in `public/mascots/` (sources in `assets/`), drawn by `Mascot` (index 0–31).
 Each drawing has one meaning only:
 
-- **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, rail, top bar, sign-in, favicon).
+- **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
   (`src/modules/videos/video-mascot.ts`). Gallery cards and the video header.
@@ -92,9 +96,20 @@ Each drawing has one meaning only:
 - Decoration must carry information. No glows, gradients, icon tiles or looping animation in forms
   and dialogs; the mascots appear where they mean something (a video, a stage at work).
 - Left-align forms and dialogs; one primary button, right-aligned in dialogs.
-- Navigation: the top bar holds Vídeos, Cortes, Painel (and Admin for admins), "Novo vídeo" and the
-  account menu (Conta, photo, sign out). Phones get a tab bar with Vídeos, Cortes, a central "Novo
-  vídeo" and Painel; Admin moves into the account menu.
+- Navigation: the sidebar lists Vídeos (count of videos), Cortes (count of ready clips), Painel and,
+  for admins, Admin; then "Processando" (videos at work, with their percent) and "Vídeos" (the rest,
+  newest first), both narrowed by the search on top. The person's photo, name and a menu (Conta, photo,
+  sign out) sit at its foot. The top bar can hide the sidebar. Phones drop the sidebar and the tabs for
+  a tab bar with Vídeos, Cortes, Painel and Conta.
+- Tabs: every video opened becomes a tab in the top bar (mascot, title, close), remembered per browser,
+  up to 8. Closing the tab in view moves to its neighbour or back to Vídeos. The plus after the tabs
+  starts a new video.
+- Video page: the page column holds the tabs Cortes · Original · Studio. Cortes: the picked clip plays
+  at 9:16 beside the ranked list (the column's own width decides, through a container query); the open
+  row shows Brilho's reason and the actions. Original: the full video with the clips marked on its bar
+  and the transcript under it. From lg the inspector (400px) sits beside it: the video's mascot and
+  state, the name in a field (opens rename), then Cortes, Origem, Arquivos and Ações as grouped cards.
+  The Studio takes the full width; the top bar's last button hides the inspector anywhere.
 
 ## Interaction rules (from CLAUDE.md)
 
@@ -113,10 +128,9 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Page rhythm:** sections of a page are 32px apart (`gap-8`); a section's title and its content 16px
   (`gap-4`); items in a list or grid 12–20px; parts of one card 8–12px. Card padding 16px on phones, 20–24px
   from `sm` up.
-- **Page frame:** one frame line shared by the top bar, the page and the phone tab bar
-  (`PAGE_FRAME_CLASS`): 16px on phones, 32px from `md`, 40px from `xl`, content up to 1440px. Pages sit
-  on a 12-column grid with a 24px gutter: the video gallery is 3 of 12 per card, clips 2 of 12, the video
-  page 8 (original, transcript) + 4 (clips panel).
+- **Shell:** top bar 56px; sidebar 280px on the frame; the panel fills the rest with 8px of frame on
+  its trailing and bottom sides, 14px corners. Plain pages pad 32px inside the panel (16px on phones);
+  the video page pads its column 32px and its inspector 24px.
 - **Reading width:** paragraphs (page descriptions, clip reasons, empty states) stop at about 65
   characters (`max-w-prose`).
 - **Control heights:** 40px for buttons, inputs, selects, chips and search in toolbars and cards; 44px for
@@ -128,11 +142,17 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
   content they act on.
 - **Edge lines** (gridline pass, 2026-11-21, set by Claude at the person's request): measured on
   ink, not boxes, within 1px.
-    - Frame: the logo's ghost starts and the avatar ends on the frame line (40 and 1400 at 1440px,
-      16 and 374 at 390px). Page titles, filter tracks, search fields and gallery covers start or end on
-      the same lines.
-    - Top bar: every item centres on y = 32 (28 on phones, 56px bar). Section links are 40px boxes.
-    - Video page clips panel: heading, row numbers and the clip preview share one text line 20px in.
+    - Top bar: every item centres on y = 28. The brand's ghost centres on the sidebar's icon column
+      (34) and its name starts on the label line (56). The inspector toggle centres on the inspector
+      cards' trailing line.
+    - Sidebar: boxes 12px in (search, rows, account), icon column centred at 34, labels at 56,
+      trailing 12px in. Section titles start on the icon column's leading edge (24). The search field
+      pads 11px to take back its 1px border. The photo's ring starts on the box line and the name on 56.
+      The current row gets a 4px bar on the window's edge.
+    - Inspector: cards 24px in; rows 16px in on both sides with a 20px icon and the label 12px after
+      it (56px rows); field labels and group titles 4px in from the cards, as in the reference.
+    - Clip list: rows 16px in on both sides; the number badge is the icon column, the open row's
+      details start on the title line after it (56px).
     - Tabs (video page, admin) have no side padding: the first label's icon sits on the text line.
     - Dialogs: the close glyph ends on `--dialog-padding` and centres on the title.
 
@@ -204,3 +224,5 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 
 Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/studio/index.html`.
 | 2026-11-21 | Layout rebuilt from scratch, direction B "Topo" (board `design/explore/rebuild/index.html`): no sidebar; one top bar with the sections, "Novo vídeo" and the account; phone tab bar with a central "Novo vídeo"; 12-column page; videos as a 16:9 cover gallery with the state on the cover; Cortes as a 9:16 grid; video page 8 + 4 with the clips panel beside the original; neutral tokens replace the landing system (no lavender, eyebrows, grid backdrop or gradient button); "Início" is now "Vídeos" | The person asked to stop copying the landing and redo the whole layout; picked B from three directions |
+| 2026-11-21 | Layout rebuilt again, direction A "Mesa" (same board): icon rail, video list pane fixed beside the open video, Cortes · Original · Studio tabs, ink primary button over a warm grey frame; replaces direction B's top bar and gallery | The person picked A from the three directions after seeing B shipped |
+| 2026-11-21 | The window design from the owner's reference replaces direction A's rail and list pane: grey frame with a top bar of open-video tabs and a sidebar (search, sections with counts, videos, person), one white rounded panel, and an inspector with grouped cards on the video page | The person sent the reference and asked to redo everything to match it |

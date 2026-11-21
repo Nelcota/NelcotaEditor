@@ -4,7 +4,7 @@ import type { NavSection } from "#/modules/shell/ui/nav-sections";
 
 const appRoute = getRouteApi("/_app");
 
-/** The bar's sections; admins also get Admin. */
+/** The rail's sections; admins also get Admin. */
 export function useNavSections(): ReadonlyArray<NavSection> {
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;

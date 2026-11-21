@@ -2,39 +2,28 @@ import CalendarIcon from "~icons/solar/calendar-linear";
 import ClockCircleIcon from "~icons/solar/clock-circle-linear";
 import SquareArrowRightUpIcon from "~icons/solar/square-arrow-right-up-linear";
 import UploadIcon from "~icons/solar/upload-linear";
-import AltArrowRightIcon from "~icons/solar/alt-arrow-right-linear";
+import AltArrowLeftIcon from "~icons/solar/alt-arrow-left-linear";
 import { Link } from "@tanstack/react-router";
 import { isVideoFinished } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoActionsMenu } from "#/modules/videos/ui/video-actions-menu";
-import { VideoMascot } from "#/modules/videos/ui/video-mascot";
 import { VIDEO_SOURCE_LABELS } from "#/modules/videos/ui/video-status-labels";
 import { VideoStatusBadge } from "#/modules/videos/ui/video-status-badge";
+import { cn } from "#/shared/ui/cn";
 import { formatClock, formatDate } from "#/shared/ui/format";
 
 const SECURE_URL_PREFIX = "https://";
 
-/** Where the page sits: back to the gallery, then this video. */
-function Breadcrumb({ title }: { title: string }) {
+/** Phones only: there is no sidebar, so this is the way back to the list. */
+function BackToList() {
     return (
-        <nav aria-label="Você está em" className="text-meta text-muted-foreground">
-            <ol className="flex min-w-0 items-center gap-1.5">
-                <li>
-                    <Link
-                        to="/"
-                        className="rounded underline-offset-4 outline-none transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/70"
-                    >
-                        Vídeos
-                    </Link>
-                </li>
-                <li aria-hidden="true">
-                    <AltArrowRightIcon className="size-4" />
-                </li>
-                <li aria-current="page" className="min-w-0 truncate text-foreground">
-                    {title}
-                </li>
-            </ol>
-        </nav>
+        <Link
+            to="/"
+            className="-ms-1 inline-flex h-10 w-fit items-center gap-1 rounded-xl pe-2 text-meta font-medium text-muted-foreground outline-none transition-[color,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] md:hidden"
+        >
+            <AltArrowLeftIcon aria-hidden="true" className="size-5" />
+            Vídeos
+        </Link>
     );
 }
 
@@ -87,12 +76,19 @@ function VideoMeta({ video }: { video: VideoSummary }) {
     );
 }
 
-export function VideoHeader({ video }: { video: VideoSummary }) {
+interface VideoHeaderProps {
+    video: VideoSummary;
+    /** From lg the inspector beside the page already names the video, so the title is read out only. */
+    isInspectorShown: boolean;
+}
+
+export function VideoHeader({ video, isInspectorShown }: VideoHeaderProps) {
     return (
-        <header className="grid gap-3">
-            <Breadcrumb title={video.title} />
-            <div className="flex items-center gap-4">
-                <VideoMascot videoId={video.id} className="size-10 shrink-0 max-sm:hidden" />
+        <header className="grid gap-2">
+            <BackToList />
+            <div
+                className={cn("flex items-center gap-4", isInspectorShown === true && "lg:sr-only")}
+            >
                 <div className="grid min-w-0 flex-1 gap-1.5">
                     <h1 className="line-clamp-2 text-2xl leading-tight font-semibold tracking-[-0.02em] text-balance [overflow-wrap:anywhere]">
                         {video.title}
