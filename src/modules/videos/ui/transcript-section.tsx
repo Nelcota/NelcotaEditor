@@ -12,10 +12,15 @@ import { Skeleton } from "#/shared/ui/skeleton";
 const TRANSCRIPT_PANEL_ID = "transcript-panel";
 const TRANSCRIPT_HINT_ID = "transcript-hint";
 
-interface TranscriptSectionProps {
+interface TranscriptContentProps {
     videoId: string;
     currentSeconds: number;
     onSeek: (seconds: number) => void;
+}
+
+interface TranscriptSectionProps extends TranscriptContentProps {
+    /** Where the transcript is the point of the page, it starts open and is fetched right away. */
+    isInitiallyOpen?: boolean;
 }
 
 function TranscriptLoadError({ message, onRetry }: { message: string; onRetry: () => void }) {
@@ -30,7 +35,7 @@ function TranscriptLoadError({ message, onRetry }: { message: string; onRetry: (
     );
 }
 
-function TranscriptContent({ videoId, currentSeconds, onSeek }: TranscriptSectionProps) {
+function TranscriptContent({ videoId, currentSeconds, onSeek }: TranscriptContentProps) {
     const transcriptQuery = useQuery(transcriptQueryOptions(videoId));
     const transcript = transcriptQuery.data;
 
@@ -99,13 +104,14 @@ function TranscriptToggle({ isOpen, onToggle }: { isOpen: boolean; onToggle: () 
 }
 
 /** What was said, line by line; opening it is the only moment it is fetched. */
-export function TranscriptSection(props: TranscriptSectionProps) {
-    const [isOpen, setIsOpen] = useState(false);
+export function TranscriptSection({ isInitiallyOpen = false, ...props }: TranscriptSectionProps) {
+    const [isOpen, setIsOpen] = useState(isInitiallyOpen);
 
     return (
         <section
+            id="transcricao"
             aria-labelledby="transcript-title"
-            className="grid gap-3 rounded-2xl border bg-popover p-4 sm:p-5"
+            className="grid scroll-mt-6 gap-3 rounded-2xl border bg-popover p-4 sm:p-5"
         >
             <TranscriptToggle
                 isOpen={isOpen}

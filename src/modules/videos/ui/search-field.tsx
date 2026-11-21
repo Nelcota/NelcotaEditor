@@ -1,4 +1,5 @@
 import MagniferIcon from "~icons/solar/magnifer-linear";
+import { cn } from "#/shared/ui/cn";
 
 interface SearchFieldProps {
     /** Read by screen readers; the placeholder can say something shorter or more specific. */
@@ -6,12 +7,24 @@ interface SearchFieldProps {
     placeholder: string;
     value: string;
     onValueChange: (value: string) => void;
+    className?: string;
 }
 
 /** The search box used above every searchable list. */
-export function SearchField({ label, placeholder, value, onValueChange }: SearchFieldProps) {
+export function SearchField({
+    label,
+    placeholder,
+    value,
+    onValueChange,
+    className,
+}: SearchFieldProps) {
     return (
-        <label className="flex h-10 w-full items-center gap-2 rounded-xl border border-input bg-background px-3 text-muted-foreground transition-colors hover:border-ring/60 focus-within:ring-4 focus-within:ring-ring/70 sm:w-72">
+        <label
+            className={cn(
+                "flex h-10 w-full items-center gap-2 rounded-xl border border-input bg-background px-3 text-muted-foreground transition-colors hover:border-ring/60 focus-within:ring-4 focus-within:ring-ring/70 sm:w-72",
+                className,
+            )}
+        >
             <MagniferIcon className="size-5 shrink-0" aria-hidden="true" />
             <span className="sr-only">{label}</span>
             <input

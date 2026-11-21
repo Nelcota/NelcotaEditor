@@ -8,12 +8,20 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Neutral system (direction B, 2026-11-21): white page, grey sunken controls, one flat blue. */
+/*
+ * Window system (2026-11-21, from the owner's reference): a light grey window frame holds the top bar
+ * and the sidebar; one white rounded panel holds the page and, on the video page, a soft grey
+ * inspector with white grouped cards. Ink-black primary buttons; blue kept for focus and progress.
+ */
 :root {
     color-scheme: light;
 
     --background: oklch(1 0 0);
     --foreground: oklch(0.2 0.004 106);
+    /* The window frame: top bar and sidebar, around the white panel. */
+    --frame: oklch(0.962 0.002 106);
+    /* The inspector beside the page: between the frame and the panel, so its white cards stand out. */
+    --inspector: oklch(0.982 0.001 106);
     --card: oklch(1 0 0);
     --card-foreground: var(--foreground);
     --popover: oklch(1 0 0);
@@ -21,8 +29,8 @@
     --primary: oklch(0.58 0.21 263);
     /* Blue text and links: a step darker than the fill so small text keeps 4.5:1 on white. */
     --primary-ink: oklch(0.5 0.2 263);
-    /* Button fill: dark enough for a white label at 4.5:1, in both themes. */
-    --primary-solid: oklch(0.53 0.21 263);
+    /* Primary button fill: ink, so the one main action reads as the strongest thing on screen. */
+    --primary-solid: oklch(0.2 0.004 106);
     --primary-foreground: oklch(1 0 0);
     /* Sunken surfaces: segmented tracks, chips, placeholders. */
     --secondary: oklch(0.955 0.002 106);
@@ -58,6 +66,10 @@
 
     --background: oklch(0.17 0.003 106);
     --foreground: oklch(0.97 0.002 106);
+    --frame: oklch(0.13 0.003 106);
+    --inspector: oklch(0.155 0.003 106);
+    --primary-solid: oklch(0.97 0.002 106);
+    --primary-foreground: oklch(0.2 0.004 106);
     --card: oklch(0.2 0.003 106);
     --popover: oklch(0.22 0.003 106);
     --secondary: oklch(0.25 0.003 106);
@@ -103,6 +115,8 @@
     --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     --color-background: var(--background);
     --color-foreground: var(--foreground);
+    --color-frame: var(--frame);
+    --color-inspector: var(--inspector);
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
     --color-card-border: var(--card-border);
@@ -131,7 +145,7 @@
     --radius-md: 0.75rem;
     --radius-lg: 0.5rem;
     --radius-xl: 0.625rem;
-    --radius-2xl: 0.75rem;
+    --radius-2xl: 0.875rem;
 
     /* The crew member of the running stage bobs while it works. Use with motion-safe:. */
     --animate-crew-work: crew-work 1.4s ease-in-out infinite;

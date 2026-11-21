@@ -1,3 +1,5 @@
+import AltArrowDownIcon from "~icons/solar/alt-arrow-down-linear";
+import AltArrowUpIcon from "~icons/solar/alt-arrow-up-linear";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -8,7 +10,11 @@ import { DropdownMenu, DropdownMenuTrigger } from "#/shared/ui/dropdown-menu";
 
 const appRoute = getRouteApi("/_app");
 
-/** The profile photo at the end of the top bar: it opens Conta, the photo and the way out. */
+/**
+ * Who is signed in, at the foot of the sidebar: photo, name and the up/down chevrons of a menu that
+ * opens Conta, the photo and the way out. The photo's ring starts on the box line, the name on the
+ * text line.
+ */
 export function AccountMenuButton(): ReactNode {
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
@@ -19,13 +25,24 @@ export function AccountMenuButton(): ReactNode {
             <DropdownMenu>
                 <DropdownMenuTrigger
                     aria-label={`Menu da conta: ${user.name}`}
-                    className="grid size-10 shrink-0 place-items-center rounded-full outline-none transition-[box-shadow,scale,opacity] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] data-[state=open]:ring-4 data-[state=open]:ring-secondary"
+                    className="flex h-14 w-full items-center gap-1.5 rounded-xl pe-3 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
                 >
-                    <UserAvatar name={user.name} image={user.image} className="size-10" />
+                    <UserAvatar
+                        name={user.name}
+                        image={user.image}
+                        className="ms-0.5 size-9 ring-2 ring-foreground"
+                    />
+                    <span className="min-w-0 flex-1 truncate text-base font-medium">
+                        {user.name}
+                    </span>
+                    <span className="grid text-muted-foreground" aria-hidden="true">
+                        <AltArrowUpIcon className="-mb-1 size-4" />
+                        <AltArrowDownIcon className="size-4" />
+                    </span>
                 </DropdownMenuTrigger>
                 <AccountMenuContent
-                    side="bottom"
-                    align="end"
+                    side="top"
+                    align="start"
                     className="w-64"
                     hasAccountLink
                     onChangePhoto={() => setIsPhotoDialogOpen(true)}

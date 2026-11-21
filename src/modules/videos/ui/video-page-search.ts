@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const VIDEO_PAGE_TABS = ["clips", "studio"] as const;
+export const VIDEO_PAGE_TABS = ["clips", "original", "studio"] as const;
 
 export type VideoPageTab = (typeof VIDEO_PAGE_TABS)[number];
 

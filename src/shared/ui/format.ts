@@ -103,6 +103,23 @@ export function formatDate(isoDate: string): string {
     return dayFormatter.format(date);
 }
 
+const shortDayFormatter = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: DISPLAY_TIME_ZONE,
+});
+
+/** "2026-11-19T20:41:00Z" → "19/11", for rows where the year is noise. */
+export function formatShortDate(isoDate: string): string {
+    const date = new Date(isoDate);
+
+    if (Number.isNaN(date.getTime()) === true) {
+        return "";
+    }
+
+    return shortDayFormatter.format(date);
+}
+
 export function formatDateTime(isoDate: string): string {
     const date = new Date(isoDate);
 

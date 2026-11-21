@@ -14,25 +14,19 @@ import { Skeleton } from "#/shared/ui/skeleton";
 
 const SKELETON_ROW_COUNT = 5;
 
-/** The toolbar's two rows over the same bordered list as `VideoGallery`, so nothing jumps. */
+/** The toolbar and the list card at their real sizes, so nothing jumps when they load. */
 export function VideoListLoading(): ReactNode {
     return (
-        <div role="status" className="grid gap-6">
+        <div role="status" className="grid gap-4">
             <span className="sr-only">Carregando vídeos</span>
-            <div className="grid gap-3">
-                <Skeleton className="h-10 w-full rounded-full sm:w-72" />
-                <Skeleton className="h-10 w-48 rounded-full" />
-            </div>
-            <div className="rounded-2xl border bg-popover px-4 sm:px-5">
+            <Skeleton className="h-10 w-full rounded-xl sm:w-72" />
+            <div className="divide-y rounded-2xl border">
                 {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
-                    <div
-                        key={index}
-                        className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-x-4 border-b py-3 last:border-b-0 sm:grid-cols-[128px_minmax(0,1fr)]"
-                    >
-                        <Skeleton className="aspect-video rounded-lg" />
-                        <div className="grid gap-2">
-                            <Skeleton className="h-5 w-3/5" />
-                            <Skeleton className="h-4 w-2/5" />
+                    <div key={index} className="flex items-center gap-4 px-4 py-3">
+                        <Skeleton className="h-[63px] w-28 rounded-lg" />
+                        <div className="grid flex-1 gap-2">
+                            <Skeleton className="h-4 w-3/5" />
+                            <Skeleton className="h-3.5 w-1/4" />
                         </div>
                     </div>
                 ))}
