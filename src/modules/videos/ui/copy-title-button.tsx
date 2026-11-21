@@ -1,6 +1,20 @@
 import { CopyTextButton } from "#/shared/ui/copy-text-button";
+import { cn } from "#/shared/ui/cn";
+
+interface CopyTitleButtonProps {
+    title: string;
+    className?: string;
+    labelClassName?: string;
+}
 
 /** Copies the clip title to post it. */
-export function CopyTitleButton({ title }: { title: string }) {
-    return <CopyTextButton text={title} label="Copiar título" className="min-w-36" />;
+export function CopyTitleButton({ title, className, labelClassName }: CopyTitleButtonProps) {
+    return (
+        <CopyTextButton
+            text={title}
+            label="Copiar título"
+            className={cn("min-w-36", className)}
+            labelClassName={labelClassName}
+        />
+    );
 }

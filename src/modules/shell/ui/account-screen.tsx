@@ -1,75 +1,55 @@
-import DangerTriangleIcon from "~icons/solar/danger-triangle-linear";
-import SettingsIcon from "~icons/solar/settings-linear";
-import UsersGroupRoundedIcon from "~icons/solar/users-group-rounded-linear";
 import type { ReactNode } from "react";
-import { DeleteAccountSection } from "#/modules/auth/ui/delete-account-section";
 import { ProfileCard } from "#/modules/auth/ui/profile-card";
+import { useFirstName } from "#/modules/auth/ui/use-first-name";
 import { PreferencesSection } from "#/modules/preferences/ui/preferences-section";
+import { AccountSectionHeading } from "#/modules/shell/ui/account-section-heading";
+import { DeleteAccountDisclosure } from "#/modules/shell/ui/delete-account-disclosure";
+import { CREW_NAMES } from "#/modules/videos/crew-lines";
+import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { CrewUsagePanel } from "#/modules/videos/ui/crew-usage-panel";
-import type { IconComponent } from "#/shared/ui/icon-component";
-import { PageHeader } from "#/shared/ui/page-header";
 
-interface AccountSectionProps {
-    id: string;
-    icon: IconComponent;
-    title: string;
-    description: string;
-    children: ReactNode;
-}
+const SECTION_MASCOT_CLASS = "size-11 shrink-0";
 
-function AccountSection(props: AccountSectionProps): ReactNode {
-    const Icon = props.icon;
-
-    return (
-        <section aria-labelledby={props.id} className="grid gap-4">
-            <div>
-                <h2
-                    id={props.id}
-                    className="flex items-center gap-2 text-lg leading-tight font-extrabold"
-                >
-                    <Icon aria-hidden="true" className="size-5 text-muted-foreground" />
-                    {props.title}
-                </h2>
-                <p className="text-sm text-muted-foreground">{props.description}</p>
-            </div>
-            {props.children}
-        </section>
-    );
-}
-
-/** Profile on top, then what the person can change, then what the crew has done, then danger. */
+/**
+ * A greeting, then each section hosted by the crew member behind that part of the work, with one
+ * short line beside the facts: Brilho picks the moments, Sorte reports, Guarda keeps the way out.
+ */
 export function AccountScreen(): ReactNode {
+    const firstName = useFirstName();
+
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
-            <PageHeader
-                title="Conta"
-                description="Seu perfil, suas preferências e quanto você já usou."
-            />
+        <div className="grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-10">
+            <header>
+                {/* The heading names the page like every other tab; the greeting is what shows. */}
+                <h1 className="sr-only">Conta</h1>
+                <p className="text-3xl font-extrabold tracking-tight">Oi, {firstName}!</p>
+                <p className="mt-1 max-w-prose text-muted-foreground">
+                    A turma trabalha do jeito que você deixar aqui.
+                </p>
+            </header>
             <ProfileCard />
-            <AccountSection
-                id="preferences-title"
-                icon={SettingsIcon}
-                title="Preferências"
-                description="O que já vem escolhido quando você adiciona um vídeo."
-            >
+            <section aria-labelledby="preferences-title" className="grid gap-3">
+                <AccountSectionHeading
+                    id="preferences-title"
+                    title="Seus cortes"
+                    description={`${CREW_NAMES.selecting} escolhe os momentos seguindo isto em cada vídeo novo.`}
+                    art={<StageCrewMascot status="selecting" className={SECTION_MASCOT_CLASS} />}
+                />
                 <PreferencesSection />
-            </AccountSection>
-            <AccountSection
-                id="usage-title"
-                icon={UsersGroupRoundedIcon}
-                title="Uso"
-                description="O que a equipe já fez por você desde que a conta foi criada."
-            >
+            </section>
+            <section aria-labelledby="usage-title" className="grid gap-3">
+                <AccountSectionHeading
+                    id="usage-title"
+                    title="O que a turma já fez"
+                    description="Cada número é de quem fez aquela parte."
+                    art={<StageCrewMascot status="done" className={SECTION_MASCOT_CLASS} />}
+                />
                 <CrewUsagePanel />
-            </AccountSection>
-            <AccountSection
-                id="danger-title"
-                icon={DangerTriangleIcon}
-                title="Zona de perigo"
-                description="Ações que não têm volta."
-            >
-                <DeleteAccountSection />
-            </AccountSection>
+            </section>
+            <DeleteAccountDisclosure
+                summary="Excluir conta"
+                art={<StageCrewMascot status="failed" className="size-6" />}
+            />
         </div>
     );
 }

@@ -31,7 +31,7 @@ export function FilterableVideoList({ videos, filter }: FilterableVideoListProps
     const matchingCount = page.matchingCount;
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
             <VideoListToolbar
                 sort={controls.sort}
                 onSortChange={controls.changeSort}
