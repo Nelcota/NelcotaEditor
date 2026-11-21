@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { formatPreciseClock, parseClockInput } from "#/modules/clips/clip-time";
 import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/clip-studio.schema";
 import {
-    MIN_CUE_SECONDS,
+    isShorterThanMinimumCue,
     cueLimits,
     cueText,
     editCueText,
@@ -20,6 +20,8 @@ import { HintTooltip } from "#/shared/ui/hint-tooltip";
 const UNREADABLE_TIME_MESSAGE = "Use segundos (8,5) ou minutos e segundos (1:08,5).";
 const OUT_OF_RANGE_MESSAGE = "Fora do espaço livre entre os blocos vizinhos.";
 const CUE_TIME_ERROR_ID = "cue-time-error";
+const TOO_SHORT_MESSAGE = "Uma legenda precisa durar pelo menos 0,2 s.";
+const WHITESPACE = /\s+/;
 
 function describeError(error: string | null): string | undefined {
     if (error === null) {
@@ -28,8 +30,6 @@ function describeError(error: string | null): string | undefined {
 
     return CUE_TIME_ERROR_ID;
 }
-const TOO_SHORT_MESSAGE = "Uma legenda precisa durar pelo menos 0,2 s.";
-const WHITESPACE = /\s+/;
 
 interface CueEditorProps {
     draft: StudioDraft;
@@ -136,7 +136,7 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
             return;
         }
 
-        if (endSeconds - startSeconds < MIN_CUE_SECONDS) {
+        if (isShorterThanMinimumCue(startSeconds, endSeconds) === true) {
             setTimeError(TOO_SHORT_MESSAGE);
             return;
         }

@@ -6,6 +6,10 @@ import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/videos/video-status";
 import { pluralize } from "#/modules/videos/ui/pluralize";
 import { Button } from "#/shared/ui/button";
 
+// At 1 or 10 the button only looks disabled (aria-disabled): a native `disabled` would drop the
+// keyboard focus to <body> right after the press that reached the limit.
+const BOUND_BUTTON_CLASS = "aria-disabled:opacity-50 aria-disabled:hover:bg-transparent";
+
 function describeCount(count: number): string {
     return `${count} ${pluralize(count, "corte", "cortes")}`;
 }
@@ -30,6 +34,24 @@ export function ClipCountStepper({
     disabled = false,
 }: ClipCountStepperProps): ReactNode {
     const labelId = `${id}-label`;
+    const isAtMinimum = value <= MIN_CLIP_COUNT;
+    const isAtMaximum = value >= MAX_CLIP_COUNT;
+
+    function decrease(): void {
+        if (isAtMinimum === true) {
+            return;
+        }
+
+        onValueChange(value - 1);
+    }
+
+    function increase(): void {
+        if (isAtMaximum === true) {
+            return;
+        }
+
+        onValueChange(value + 1);
+    }
 
     return (
         <div className="grid gap-2">
@@ -40,15 +62,17 @@ export function ClipCountStepper({
             <div
                 role="group"
                 aria-labelledby={labelId}
-                className="flex h-11 items-center justify-between gap-2 rounded-lg border bg-background p-1"
+                className="flex min-h-11 items-center justify-between gap-2 rounded-lg border bg-background p-1"
             >
                 <Button
                     type="button"
                     variant="ghost"
                     size="icon-sm"
                     aria-label="Menos um corte"
-                    disabled={disabled || value <= MIN_CLIP_COUNT}
-                    onClick={() => onValueChange(Math.max(MIN_CLIP_COUNT, value - 1))}
+                    aria-disabled={isAtMinimum}
+                    className={BOUND_BUTTON_CLASS}
+                    disabled={disabled}
+                    onClick={decrease}
                 >
                     <MinusIcon aria-hidden="true" />
                 </Button>
@@ -60,8 +84,10 @@ export function ClipCountStepper({
                     variant="ghost"
                     size="icon-sm"
                     aria-label="Mais um corte"
-                    disabled={disabled || value >= MAX_CLIP_COUNT}
-                    onClick={() => onValueChange(Math.min(MAX_CLIP_COUNT, value + 1))}
+                    aria-disabled={isAtMaximum}
+                    className={BOUND_BUTTON_CLASS}
+                    disabled={disabled}
+                    onClick={increase}
                 >
                     <AddIcon aria-hidden="true" />
                 </Button>
