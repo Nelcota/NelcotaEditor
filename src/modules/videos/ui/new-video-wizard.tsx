@@ -119,7 +119,7 @@ export function NewVideoWizard({
                 <Button
                     type="submit"
                     size="lg"
-                    className="font-semibold max-sm:flex-1 sm:min-w-40"
+                    className="font-medium max-sm:flex-1 sm:min-w-40"
                     disabled={isBusy === true || isLinkBlocked === true}
                     aria-busy={isBusy}
                 >

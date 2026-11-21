@@ -66,7 +66,7 @@ export function CueTrack(props: CueTrackProps): ReactNode {
                     <div
                         key={`${draft.cues[index]?.startSeconds}-${index}`}
                         className={cn(
-                            "absolute inset-y-0.5 overflow-hidden rounded-md border bg-secondary text-xs font-bold text-muted-foreground",
+                            "absolute inset-y-0.5 overflow-hidden rounded-md border bg-secondary text-xs font-semibold text-muted-foreground",
                             index === playingIndex &&
                                 "border-primary bg-primary/20 text-foreground",
                             index === openIndex && "border-2 border-foreground text-foreground",

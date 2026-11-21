@@ -56,7 +56,7 @@ export function ClipCountStepper({
 
     return (
         <div className="grid gap-2">
-            <span id={labelId} className="flex items-center gap-2 text-sm font-semibold">
+            <span id={labelId} className="flex items-center gap-2 text-sm font-medium">
                 <ScissorsIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 {label}
             </span>
@@ -77,7 +77,7 @@ export function ClipCountStepper({
                 >
                     <MinusIcon aria-hidden="true" />
                 </Button>
-                <output id={id} aria-live="polite" className="text-sm font-bold tabular-nums">
+                <output id={id} aria-live="polite" className="text-sm font-semibold tabular-nums">
                     {describeCount(value)}
                 </output>
                 <Button

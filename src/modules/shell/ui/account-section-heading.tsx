@@ -18,7 +18,7 @@ export function AccountSectionHeading({
         <div className="flex items-center gap-3">
             {art}
             <div className="min-w-0">
-                <h2 id={id} className="text-lg leading-tight font-extrabold text-balance">
+                <h2 id={id} className="text-lg leading-tight font-semibold text-balance">
                     {title}
                 </h2>
                 {description !== undefined && (

@@ -9,11 +9,12 @@ import { cn } from "#/shared/ui/cn";
 export type NavItemState = "current" | "parent" | "none";
 
 const ITEM_CLASS =
-    "relative flex items-center gap-3 min-h-11 rounded-xl px-3 py-2.5 text-base font-semibold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-[22px] [&>svg]:shrink-0 [&>svg]:text-muted-foreground";
+    "relative flex items-center gap-3 min-h-11 rounded-xl px-3 py-2.5 text-base font-medium text-foreground/70 outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-[22px] [&>svg]:shrink-0 [&>svg]:text-muted-foreground";
 
 const STATE_CLASSES: Record<NavItemState, string> = {
-    current: "bg-accent hover:bg-accent font-bold [&>svg]:text-primary",
-    parent: "font-bold [&>svg]:text-primary",
+    current:
+        "bg-primary/10 text-primary-ink hover:bg-primary/10 hover:text-primary-ink [&>svg]:text-primary-ink",
+    parent: "text-foreground [&>svg]:text-primary-ink",
     none: "",
 };
 
@@ -60,7 +61,7 @@ export function SidebarNavContent({
             <Icon aria-hidden="true" />
             {label}
             {count !== undefined && (
-                <span className="ms-auto text-meta font-bold text-muted-foreground tabular-nums">
+                <span className="ms-auto text-meta font-semibold text-muted-foreground tabular-nums">
                     {count}
                 </span>
             )}

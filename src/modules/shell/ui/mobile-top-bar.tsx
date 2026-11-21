@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { AppSidebar } from "#/modules/shell/ui/app-sidebar";
 import { BrandLogo } from "#/shared/ui/brand-logo";
 import { Button } from "#/shared/ui/button";
+import { ThemeToggle } from "#/shared/ui/theme-toggle";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "#/shared/ui/sheet";
 
 /** Phones have no room for the sidebar, so the same sidebar lives in a sheet behind a menu button. */
@@ -16,7 +17,7 @@ export function MobileTopBar(): ReactNode {
     useEffect(() => router.subscribe("onResolved", () => setIsMenuOpen(false)), [router]);
 
     return (
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background px-4 md:hidden">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-1 border-b bg-background/80 px-4 backdrop-blur-xl md:hidden">
             <Link
                 to="/"
                 aria-label="Nelcota, ir para o início"
@@ -25,6 +26,7 @@ export function MobileTopBar(): ReactNode {
                 <BrandLogo />
             </Link>
             <span className="flex-1" />
+            <ThemeToggle />
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon" aria-label="Abrir menu">

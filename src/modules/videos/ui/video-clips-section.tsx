@@ -30,7 +30,7 @@ function WaitingClips({ details }: { details: VideoDetails }) {
 
     return (
         <section aria-label="Cortes a caminho" className="grid gap-3">
-            <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+            <p className="font-mono text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">
                 Cortes a caminho
             </p>
             <ClipChips
@@ -50,7 +50,7 @@ function WaitingClips({ details }: { details: VideoDetails }) {
 function SidePreview({ clip }: { clip: ClipView }) {
     return (
         <div className="hidden gap-2 @5xl:grid">
-            <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+            <p className="font-mono text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">
                 Vira este corte
             </p>
             <ClipPreview key={clip.id} clip={clip} />
@@ -96,7 +96,7 @@ export function VideoClipsSection({ details }: { details: VideoDetails }) {
                 <SidePreview clip={selectedClip} />
             </div>
             <div className="grid gap-2">
-                <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                <p className="font-mono text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">
                     Escolha um corte · melhores primeiro
                 </p>
                 <ClipChips

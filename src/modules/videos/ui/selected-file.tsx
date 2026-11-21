@@ -20,7 +20,10 @@ export function SelectedFile({ file, disabled, onClear }: SelectedFileProps) {
                 />
             </span>
             <div className="min-w-0 flex-1">
-                <p title={file.name} className="line-clamp-2 font-bold [overflow-wrap:anywhere]">
+                <p
+                    title={file.name}
+                    className="line-clamp-2 font-semibold [overflow-wrap:anywhere]"
+                >
                     {file.name}
                 </p>
                 <p className="text-meta text-muted-foreground">

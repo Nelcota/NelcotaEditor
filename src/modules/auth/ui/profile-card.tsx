@@ -73,7 +73,7 @@ export function ProfileCard(): ReactNode {
         <div className="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border bg-popover p-5 sm:p-6">
             <AvatarButton onClick={() => setOpenDialog("photo")} />
             <div className="grid min-w-0 flex-[1_1_10rem] gap-0.5">
-                <p title={user.name} className="truncate text-xl font-extrabold tracking-tight">
+                <p title={user.name} className="truncate text-xl font-semibold tracking-tight">
                     {user.name}
                 </p>
                 <p title={user.email} className="truncate text-muted-foreground">

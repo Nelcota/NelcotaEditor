@@ -21,7 +21,7 @@ interface ClipLengthPickerProps {
 export function ClipLengthPicker({ value, onValueChange }: ClipLengthPickerProps): ReactNode {
     return (
         <div className="grid gap-2">
-            <span className="flex items-center gap-2 text-sm font-semibold">
+            <span className="flex items-center gap-2 text-sm font-medium">
                 <StopwatchIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 {LABEL}
             </span>

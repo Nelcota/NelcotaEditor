@@ -43,7 +43,7 @@ function ProfileHeader({ details }: { details: AdminUserDetails }): ReactNode {
             <UserAvatar name={user.name} image={user.image} className="size-16 text-xl" />
             <div className="grid min-w-0 flex-[1_1_16rem] gap-1">
                 <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-2xl font-extrabold tracking-tight [overflow-wrap:anywhere]">
+                    <h2 className="text-2xl font-semibold tracking-tight [overflow-wrap:anywhere]">
                         {user.name}
                     </h2>
                     <AdminUserBadges user={user} />
@@ -73,8 +73,8 @@ function UsageFacts({ details }: { details: AdminUserDetails }): ReactNode {
         <dl className="grid grid-cols-2 gap-3 @2xl:grid-cols-4">
             {facts.map((fact) => (
                 <div key={fact.label} className="grid gap-1 rounded-2xl border bg-popover p-4">
-                    <dt className="text-sm font-semibold text-muted-foreground">{fact.label}</dt>
-                    <dd className="text-lg font-extrabold tabular-nums">{fact.value}</dd>
+                    <dt className="text-sm font-medium text-muted-foreground">{fact.label}</dt>
+                    <dd className="text-lg font-semibold tabular-nums">{fact.value}</dd>
                 </div>
             ))}
         </dl>
@@ -84,7 +84,7 @@ function UsageFacts({ details }: { details: AdminUserDetails }): ReactNode {
 function Section({ title, children }: { title: string; children: ReactNode }): ReactNode {
     return (
         <section className="grid gap-4">
-            <h2 className="text-lg font-bold">{title}</h2>
+            <h2 className="text-lg font-semibold">{title}</h2>
             {children}
         </section>
     );
@@ -113,7 +113,7 @@ function BackLink(): ReactNode {
     return (
         <Link
             to="/admin/users"
-            className="flex w-fit items-center gap-1.5 rounded-sm text-sm font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70"
+            className="flex w-fit items-center gap-1.5 rounded-sm text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70"
         >
             <AltArrowLeftIcon aria-hidden="true" className="size-4 rtl:-scale-x-100" />
             Todas as contas

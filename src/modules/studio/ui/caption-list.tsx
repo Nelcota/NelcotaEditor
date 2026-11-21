@@ -30,7 +30,7 @@ function NoSpeech(): ReactNode {
     return (
         <div className="grid justify-items-center gap-2 px-5 py-10 text-center">
             <StageCrewMascot status="transcribing" className="size-10" />
-            <p className="font-bold">Nenhuma fala neste trecho</p>
+            <p className="font-semibold">Nenhuma fala neste trecho</p>
             <p className="max-w-xs text-sm text-muted-foreground">
                 Tinta não ouviu ninguém falando aqui. Mude o trecho para incluir fala, ou deixe o
                 corte sem legenda.
@@ -115,7 +115,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
             <div className="flex items-center gap-2 border-b px-4 py-2.5">
                 <h2
                     id="studio-captions-title"
-                    className="flex items-center gap-2 text-lg leading-tight font-extrabold"
+                    className="flex items-center gap-2 text-lg leading-tight font-semibold"
                 >
                     <SubtitlesIcon className="size-5 text-muted-foreground" aria-hidden="true" />
                     Legendas
@@ -203,7 +203,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                 <button
                     type="button"
                     onClick={() => setIsFollowing(true)}
-                    className="absolute bottom-3 left-1/2 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full bg-foreground px-3 text-sm font-bold whitespace-nowrap text-background outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className="absolute bottom-3 left-1/2 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full bg-foreground px-3 text-sm font-semibold whitespace-nowrap text-background outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                 >
                     <TargetIcon className="size-4" aria-hidden="true" />
                     Voltar ao trecho tocando

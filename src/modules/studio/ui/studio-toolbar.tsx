@@ -55,7 +55,7 @@ function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
                     onClick={async () => {
                         await editor.autosave.flush();
                     }}
-                    className="rounded font-semibold underline underline-offset-2 outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className="rounded font-medium underline underline-offset-2 outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                 >
                     Tentar de novo
                 </button>
@@ -78,7 +78,7 @@ function RenderButton(props: Pick<StudioToolbarProps, "editor" | "isRendering" |
 
     return (
         <Button
-            className="min-w-48 font-bold max-sm:w-full"
+            className="min-w-48 font-semibold max-sm:w-full"
             disabled={
                 editor.changeCount === 0 ||
                 isRendering === true ||
@@ -112,7 +112,7 @@ export function StudioToolbar(props: StudioToolbarProps): ReactNode {
                 <SelectContent>
                     {rankedClips.map((clip, index) => (
                         <SelectItem key={clip.id} value={clip.id}>
-                            <span className="text-xs font-extrabold text-muted-foreground">
+                            <span className="text-xs font-semibold text-muted-foreground">
                                 {index + 1} DE {total}
                             </span>
                             <span className="truncate">{clip.title}</span>
@@ -147,7 +147,7 @@ export function StudioToolbar(props: StudioToolbarProps): ReactNode {
             <span className="flex-1" />
             {isRendering === false && <SaveState editor={editor} />}
             {changeCount > 0 && isRendering === false && (
-                <span className="inline-flex items-center gap-2 text-sm font-semibold whitespace-nowrap before:size-2 before:rounded-full before:bg-primary">
+                <span className="inline-flex items-center gap-2 text-sm font-medium whitespace-nowrap before:size-2 before:rounded-full before:bg-primary">
                     {changeCount}{" "}
                     {pluralize(
                         changeCount,

@@ -26,7 +26,7 @@ interface EdgeRowProps {
 function EdgeRow({ label, seconds, isLocked, onMove }: EdgeRowProps): ReactNode {
     return (
         <div className="grid gap-1.5">
-            <span className="text-sm font-bold">{label}</span>
+            <span className="text-sm font-semibold">{label}</span>
             <div className="grid grid-cols-[56px_1fr_56px] gap-2">
                 <Button
                     variant="outline"
@@ -81,7 +81,7 @@ export function MobileTrim(props: MobileTrimProps): ReactNode {
             aria-label="Trecho do corte"
             className="grid gap-3 rounded-2xl border bg-popover p-4"
         >
-            <p className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
                 <ScissorsIcon className="size-4" aria-hidden="true" />
                 Trecho · {Math.round(lengthSeconds)} s (de {MIN_CLIP_SECONDS} a {MAX_CLIP_SECONDS}{" "}
                 s)

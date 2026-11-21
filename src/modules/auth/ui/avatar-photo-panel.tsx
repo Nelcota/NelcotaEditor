@@ -120,7 +120,7 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
 
     return (
         <div className="grid content-start gap-4 sm:border-r sm:pr-8">
-            <p className="text-sm font-semibold">Sua foto</p>
+            <p className="text-sm font-medium">Sua foto</p>
             <UserAvatar name={user.name} image={user.image} className="size-32 text-2xl" />
             <div className="grid gap-2">
                 <div className="grid gap-2">

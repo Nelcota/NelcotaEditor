@@ -1,11 +1,13 @@
 # Nelcota — design brief
 
-Nelcota turns long videos into vertical short clips with captions. The interface is a
-quiet, dark workspace; the videos and the clips are the color on the page.
+Nelcota turns long videos into vertical short clips with captions. Since 2026-11-21 the app uses
+the landing page's visual system (`E:/NelcotaEditorLanding`, see its DESIGN.md): soft lavender-grey
+page, white cards, thin frame lines, one blue accent. Light by default; dark only when the person
+picks it with the toggle in the sidebar (saved in `localStorage`, applied before the first paint).
 
 ## Principles
 
-- **One obvious next step.** Each screen has one primary action in the ghost's green. Everything else is
+- **One obvious next step.** Each screen has one primary action in the blue gradient. Everything else is
   secondary or ghost.
 - **Always say what is happening.** Processing takes minutes, so every video shows its stage in
   plain words and a progress bar. Errors say what went wrong and what to do.
@@ -13,17 +15,22 @@ quiet, dark workspace; the videos and the clips are the color on the page.
 
 ## Tokens (`src/styles.css`)
 
-| Token                                                                           | Use                                          |
-| ------------------------------------------------------------------------------- | -------------------------------------------- |
-| `background` (near-black)                                                       | Page                                         |
-| `card`                                                                          | Panels and list rows                         |
-| `primary` (vibrant ghost green, oklch 0.71 0.19 148 ≈ #2CC056, dark text on it) | The single main action, focus ring, progress |
-| `muted-foreground`                                                              | Secondary text                               |
-| `success` (green)                                                               | Finished videos and clips                    |
-| `destructive` (red)                                                             | Failures and delete                          |
+| Token                                          | Use                                               |
+| ---------------------------------------------- | ------------------------------------------------- |
+| `background` (lavender grey, dark: near-black) | Page and sidebar                                  |
+| `card` (white, dark: raised grey)              | Panels and list rows, `card-border` = ink at 10%  |
+| `primary` (blue, oklch 0.5683 0.1821 257.313)  | Focus ring, progress, icons of the current item   |
+| `primary-solid`                                | Primary button gradient (white label keeps 4.5:1) |
+| `primary-ink`                                  | Blue text and links                               |
+| `muted-foreground` (ink at 65%)                | Secondary text                                    |
+| `success` (teal)                               | Finished videos and clips                         |
+| `destructive` (red)                            | Failures and delete                               |
 
-- Font: Manrope (400–800). Headings 700–800 with tight tracking.
-- Radius: 12px (`--radius`).
+- Font: Geist (400 to 600), Geist Mono for eyebrows and small uppercase labels. Page titles weight
+  400, tracking -0.04em, with a mono eyebrow in blue brackets above (`[ BIBLIOTECA ]`, `eyebrow` utility).
+- Radius: cards 6.5px (`rounded-md`), buttons and inputs 12px (`rounded-xl`).
+- The page sits between two vertical rules (`border-x` on `main`) over a faint grid (`grid-backdrop`).
+- Scrollbar: a 4px strip, as on the landing page.
 - The caption highlight in rendered clips stays yellow (#FFE500): it is part of the clip, not the UI,
   and yellow reads best over any video frame.
 

@@ -53,7 +53,7 @@ const TranscriptLine = memo(function TranscriptLine({
                     "aria-[current=time]:bg-accent",
                 )}
             >
-                <span className="pt-px text-xs font-bold text-muted-foreground tabular-nums">
+                <span className="pt-px text-xs font-semibold text-muted-foreground tabular-nums">
                     {formatClock(line.startSeconds)}
                 </span>
                 <span className="max-w-prose">{line.text}</span>

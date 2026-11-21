@@ -28,7 +28,7 @@ export function AvatarMascotPicker({
 
     return (
         <fieldset aria-busy={isBusy}>
-            <legend className="float-left mb-4 w-full text-sm font-semibold">
+            <legend className="float-left mb-4 w-full text-sm font-medium">
                 Ou escolha um mascote
             </legend>
             <div className="clear-both grid grid-cols-5 gap-3">

@@ -65,7 +65,7 @@ export function ResumePanel({ video }: { video: VideoSummary }) {
         >
             <StageCrewMascot status={video.status} className="size-12" />
             <div className="flex-1">
-                <p className="font-semibold">{copy.title}</p>
+                <p className="font-medium">{copy.title}</p>
                 <p className="text-sm text-muted-foreground">
                     {video.errorMessage ?? copy.fallbackDescription}
                 </p>

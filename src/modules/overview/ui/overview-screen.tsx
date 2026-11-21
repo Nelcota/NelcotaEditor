@@ -84,6 +84,7 @@ export function OverviewScreen() {
     return (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
             <PageHeader
+                eyebrow="Resultados"
                 title="Painel"
                 description="Quanto você enviou, quantos cortes saíram e como foi cada etapa."
                 action={<PeriodPicker value={periodDays} onChange={changePeriod} />}

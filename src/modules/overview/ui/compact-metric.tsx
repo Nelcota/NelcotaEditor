@@ -18,7 +18,7 @@ function CompactValue({ definition, metric }: CompactMetricProps): ReactNode {
     if (value === null) {
         return (
             <p className="grid gap-0.5">
-                <strong className="text-lg font-extrabold">{EMPTY_VALUE}</strong>
+                <strong className="text-lg font-semibold">{EMPTY_VALUE}</strong>
                 <span className="text-xs text-muted-foreground">{definition.emptyNote}</span>
             </p>
         );
@@ -26,11 +26,13 @@ function CompactValue({ definition, metric }: CompactMetricProps): ReactNode {
 
     return (
         <p className="flex items-baseline gap-1">
-            <strong className="text-2xl font-extrabold tracking-tight whitespace-nowrap tabular-nums">
+            <strong className="text-2xl font-semibold tracking-tight whitespace-nowrap tabular-nums">
                 {definition.format(value)}
             </strong>
             {definition.unit !== null && (
-                <span className="text-sm font-bold text-muted-foreground">{definition.unit}</span>
+                <span className="text-sm font-semibold text-muted-foreground">
+                    {definition.unit}
+                </span>
             )}
         </p>
     );
@@ -45,7 +47,7 @@ export function CompactMetric({ definition, metric }: CompactMetricProps): React
 
     return (
         <div className="grid content-start gap-1">
-            <p className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
+            <p className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                 {definition.label}
                 <MetricHelp label={definition.label} help={definition.help} />
             </p>

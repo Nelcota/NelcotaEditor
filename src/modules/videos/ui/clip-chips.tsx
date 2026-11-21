@@ -4,7 +4,7 @@ import { cn } from "#/shared/ui/cn";
 // Grows to two lines instead of cutting the title: picking a clip means reading its name. It never
 // grows past its row, so a title with no spaces breaks anywhere instead of overflowing.
 const CHIP_CLASS =
-    "group inline-flex min-h-10 max-w-[min(20rem,100%)] items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pe-3 ps-1.5 text-sm font-bold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
+    "group inline-flex min-h-10 max-w-[min(20rem,100%)] items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pe-3 ps-1.5 text-sm font-semibold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
 
 interface ClipChipsProps {
     clips: Array<ClipView>;

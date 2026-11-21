@@ -25,7 +25,7 @@ export function InProgressNotice({ count }: { count: number }) {
             <Link
                 to="/"
                 search={{ status: "processing" }}
-                className="rounded font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
+                className="rounded font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
             >
                 ver no Início
             </Link>

@@ -52,7 +52,7 @@ function LanguageSelect(props: {
     // Four fixed choices: all visible at once instead of a list that opens over the page.
     return (
         <div className="grid gap-2">
-            <span className="flex items-center gap-2 text-sm font-semibold">
+            <span className="flex items-center gap-2 text-sm font-medium">
                 <TranslationIcon aria-hidden="true" className="size-[18px] text-muted-foreground" />
                 Idioma da transcrição
             </span>

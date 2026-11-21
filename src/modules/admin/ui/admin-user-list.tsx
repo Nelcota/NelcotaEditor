@@ -26,7 +26,7 @@ function UserItem({ user }: { user: AdminUserRow }): ReactNode {
                 <UserAvatar name={user.name} image={user.image} className="size-10" />
                 <span className="grid min-w-0 gap-0.5">
                     <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="font-semibold [overflow-wrap:anywhere]">{user.name}</span>
+                        <span className="font-medium [overflow-wrap:anywhere]">{user.name}</span>
                         <AdminUserBadges user={user} />
                     </span>
                     <span className="text-meta text-muted-foreground [overflow-wrap:anywhere]">

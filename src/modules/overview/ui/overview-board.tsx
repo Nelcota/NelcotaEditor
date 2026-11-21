@@ -22,7 +22,7 @@ function FailedVideosLink(): ReactNode {
         <Link
             to="/"
             search={{ status: "failed" }}
-            className="w-fit rounded text-xs font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none motion-safe:active:scale-[0.99]"
+            className="w-fit rounded text-xs font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none motion-safe:active:scale-[0.99]"
         >
             Ver vídeos com falha
         </Link>
@@ -80,7 +80,7 @@ export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps): 
                 </p>
             )}
             <section aria-labelledby="crew-title" className="grid gap-3">
-                <h2 id="crew-title" className="text-lg font-extrabold">
+                <h2 id="crew-title" className="text-lg font-semibold">
                     O que a turma fez no período
                 </h2>
                 <ol className="grid gap-3 @lg:grid-cols-2 @4xl:grid-cols-4">

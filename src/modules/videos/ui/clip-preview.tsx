@@ -107,7 +107,7 @@ export function ClipPreview({ clip }: { clip: ClipView }): ReactNode {
         <div
             className={cn(
                 FRAME_CLASS,
-                "flex flex-col items-center justify-center gap-2 p-3 text-center text-xs font-semibold",
+                "flex flex-col items-center justify-center gap-2 p-3 text-center text-xs font-medium",
                 clip.status === "failed" && "bg-destructive/10 text-destructive",
                 clip.status !== "failed" && "bg-muted/60 text-muted-foreground",
             )}

@@ -156,7 +156,7 @@ export function TrimRange(props: TrimRangeProps): ReactNode {
             {active !== null && (
                 <span
                     className={cn(
-                        "pointer-events-none absolute -top-9 z-30 -translate-x-1/2 rounded-md px-2 py-1 text-xs font-bold whitespace-nowrap tabular-nums",
+                        "pointer-events-none absolute -top-9 z-30 -translate-x-1/2 rounded-md px-2 py-1 text-xs font-semibold whitespace-nowrap tabular-nums",
                         limitMessage === null && "bg-foreground text-background",
                         limitMessage !== null && "bg-destructive text-white",
                     )}

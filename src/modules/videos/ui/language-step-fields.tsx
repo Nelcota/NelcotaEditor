@@ -22,7 +22,7 @@ interface LanguageStepProps {
 export function LanguageStepFields({ language, onLanguageChange }: LanguageStepProps): ReactNode {
     return (
         <fieldset className="grid gap-4">
-            <legend className="mb-3 text-sm font-semibold">Em que idioma as pessoas falam?</legend>
+            <legend className="mb-3 text-sm font-medium">Em que idioma as pessoas falam?</legend>
             <div className="grid gap-3 sm:grid-cols-2">
                 {TRANSCRIPTION_LANGUAGES.map((option) => (
                     <label
@@ -37,7 +37,9 @@ export function LanguageStepFields({ language, onLanguageChange }: LanguageStepP
                             onChange={() => onLanguageChange(option)}
                             className="sr-only"
                         />
-                        <span className="font-bold">{TRANSCRIPTION_LANGUAGE_LABELS[option]}</span>
+                        <span className="font-semibold">
+                            {TRANSCRIPTION_LANGUAGE_LABELS[option]}
+                        </span>
                         <span className="text-meta text-muted-foreground">
                             {LANGUAGE_HINTS[option]}
                         </span>

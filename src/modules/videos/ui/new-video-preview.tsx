@@ -85,7 +85,7 @@ function Fact({ label, value, isWide = false }: FactProps): ReactNode {
     return (
         <div className={cn("grid gap-0.5", isWide === true && "col-span-2")}>
             <dt className="text-meta text-muted-foreground">{label}</dt>
-            <dd className="text-sm font-bold">{value}</dd>
+            <dd className="text-sm font-semibold">{value}</dd>
         </div>
     );
 }
@@ -111,19 +111,19 @@ export function NewVideoPreview({
             className="hidden min-h-0 content-start gap-4 overflow-y-auto border-l p-5 lg:grid"
         >
             <div className="grid gap-1">
-                <h3 className="font-bold">Prévia</h3>
+                <h3 className="font-semibold">Prévia</h3>
                 <p className="text-meta text-muted-foreground">Como o vídeo entra na sua lista.</p>
             </div>
             <div className="grid gap-3 rounded-3xl border bg-background/40 p-3">
                 <div className="relative">
                     <PreviewFrame source={source} />
-                    <span className="absolute top-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-black/70 py-0.5 pr-2.5 pl-1 text-xs font-bold text-white">
+                    <span className="absolute top-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-black/70 py-0.5 pr-2.5 pl-1 text-xs font-semibold text-white">
                         <StageCrewMascot status="queued" className="size-5" />
                         Entra na fila
                     </span>
                 </div>
                 <div className="grid gap-1 px-1">
-                    <p className="line-clamp-2 leading-snug font-extrabold break-words">
+                    <p className="line-clamp-2 leading-snug font-semibold break-words">
                         {text.title}
                     </p>
                     <p title={text.detail} className="truncate text-meta text-muted-foreground">

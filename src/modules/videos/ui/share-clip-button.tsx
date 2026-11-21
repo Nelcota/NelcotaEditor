@@ -32,7 +32,7 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
                     onClick={() => mutation.mutate(true)}
                     disabled={mutation.isPending}
                     aria-busy={mutation.isPending}
-                    className="font-semibold"
+                    className="font-medium"
                 >
                     <LinkRoundIcon aria-hidden="true" />
                     Criar link

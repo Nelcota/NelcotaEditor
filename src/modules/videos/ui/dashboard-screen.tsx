@@ -32,7 +32,7 @@ function MobileNewVideoButton() {
     }
 
     return (
-        <Button asChild size="lg" className="rounded-full font-bold md:hidden">
+        <Button asChild size="lg" className="rounded-full font-semibold md:hidden">
             <Link to="/" search={(previous) => ({ ...previous, newVideo: true })}>
                 <AddIcon aria-hidden="true" />
                 Novo vídeo
@@ -48,6 +48,7 @@ export function DashboardScreen() {
     return (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
             <PageHeader
+                eyebrow="Biblioteca"
                 title="Início"
                 description="Seus vídeos e os cortes que saíram de cada um."
                 action={<MobileNewVideoButton />}
