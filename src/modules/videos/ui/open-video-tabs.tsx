@@ -56,7 +56,7 @@ function VideoTab({ video, isCurrent, onClose }: VideoTabProps): ReactNode {
                 onClick={onClose}
                 aria-label={`Fechar a aba de ${video.title}`}
                 className={cn(
-                    "relative z-10 grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 outline-none transition-[opacity,background-color,color] group-hover:opacity-100 hover:bg-foreground/8 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.97]",
+                    "relative z-10 grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 outline-none transition-[opacity,background-color,color] group-hover:opacity-100 pointer-coarse:opacity-100 hover:bg-foreground/8 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
                     isCurrent === true && "opacity-100",
                 )}
             >
@@ -113,7 +113,7 @@ export function OpenVideoTabs(): ReactNode {
                     search={{ newVideo: true }}
                     preload="intent"
                     aria-label="Novo vídeo"
-                    className="grid size-9 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.97]"
+                    className="grid size-9 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                 >
                     <AddIcon aria-hidden="true" className="size-5" />
                 </Link>

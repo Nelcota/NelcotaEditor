@@ -12,7 +12,7 @@ import { cn } from "#/shared/ui/cn";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
 const TAB_CLASS =
-    "relative grid h-16 content-center justify-items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-[color,scale] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/70 motion-safe:active:scale-[0.97] [&>svg]:size-6";
+    "relative grid h-16 content-center justify-items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-[color,scale] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-6";
 
 const STATE_CLASSES: Record<NavSectionState, string> = {
     current: "text-foreground",

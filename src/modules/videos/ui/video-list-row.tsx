@@ -31,7 +31,7 @@ function RowThumbnail({ video }: { video: VideoSummary }): ReactNode {
             alt=""
             loading="lazy"
             referrerPolicy="no-referrer"
-            className="h-[45px] w-20 shrink-0 sm:h-[63px] sm:w-28 rounded-lg bg-secondary object-cover"
+            className="h-[45px] w-20 shrink-0 sm:h-[63px] sm:w-28 rounded-lg bg-secondary object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
     );
 }

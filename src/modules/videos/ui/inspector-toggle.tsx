@@ -27,9 +27,8 @@ export function InspectorToggle({ className }: { className?: string }): ReactNod
                 type="button"
                 onClick={inspector.toggle}
                 aria-label={label}
-                aria-pressed={inspector.isOn === false}
                 className={cn(
-                    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.97]",
+                    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
                     className,
                 )}
             >
