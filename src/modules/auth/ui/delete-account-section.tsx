@@ -10,13 +10,11 @@ export function DeleteAccountSection(): ReactNode {
 
     return (
         <div className="flex flex-col gap-4 rounded-2xl border border-destructive/40 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            <div className="grid gap-1">
-                <p className="font-bold">Excluir conta</p>
-                <p className="max-w-prose text-sm text-muted-foreground">
-                    Apaga a conta e tudo o que a equipe fez para você. Vídeos em processamento
-                    precisam ser cancelados antes.
-                </p>
-            </div>
+            {/* The disclosure above already says "Excluir conta"; the button says it once more. */}
+            <p className="max-w-prose text-sm text-muted-foreground">
+                Apaga a conta e tudo o que a equipe fez para você. Vídeos em processamento precisam
+                ser cancelados antes.
+            </p>
             <Button
                 variant="outline"
                 className="font-semibold text-destructive not-disabled:hover:text-destructive"

@@ -17,7 +17,8 @@ import { CumulativeTooltip } from "#/modules/overview/ui/cumulative-tooltip";
 const CHART_HEIGHT = 260;
 const AXIS_TICK = {
     fill: "var(--muted-foreground)",
-    fontSize: 12,
+    // The project floor: no text below 13px (DESIGN.md › Type and icons).
+    fontSize: 13,
     style: { fontVariantNumeric: "tabular-nums" },
 };
 const GRADIENT_ID = "cumulative-clips-fill";

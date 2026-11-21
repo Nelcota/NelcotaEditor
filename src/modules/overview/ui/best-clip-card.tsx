@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ClipPreview } from "#/modules/videos/ui/clip-preview";
+import { ScoreChip } from "#/modules/videos/ui/score-chip";
 import type { LibraryClip } from "#/modules/videos/video-views";
 import { formatClock } from "#/shared/ui/format";
 
@@ -11,9 +12,7 @@ export function BestClipCard({ item }: { item: LibraryClip }) {
             <ClipPreview clip={clip} />
             <div className="grid gap-1">
                 <p className="flex items-center gap-2 text-xs font-bold text-muted-foreground tabular-nums">
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-foreground">
-                        Nota {clip.score}
-                    </span>
+                    <ScoreChip score={clip.score} />
                     {formatClock(clip.endSeconds - clip.startSeconds)}
                 </p>
                 <p className="line-clamp-2 text-sm leading-snug font-semibold">{clip.title}</p>

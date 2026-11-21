@@ -32,9 +32,15 @@ function DropdownMenuContent({
     );
 }
 
+/**
+ * A disabled item stays focusable (aria-disabled), unlike Radix's own `disabled`, which skips it:
+ * arrow keys still reach it, so screen readers hear it exists and why it is off.
+ */
 function DropdownMenuItem({
     className,
     variant = "default",
+    disabled = false,
+    onSelect,
     ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
     variant?: "default" | "destructive";
@@ -43,8 +49,21 @@ function DropdownMenuItem({
         <DropdownMenuPrimitive.Item
             data-slot="dropdown-menu-item"
             data-variant={variant}
+            aria-disabled={disabled}
+            onSelect={(event) => {
+                if (disabled === true) {
+                    event.preventDefault();
+                    return;
+                }
+
+                if (onSelect === undefined) {
+                    return;
+                }
+
+                onSelect(event);
+            }}
             className={cn(
-                "relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-hidden select-none transition-[color,background-color,box-shadow,scale] focus:bg-accent focus:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset motion-safe:active:scale-[0.99] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[disabled]:active:scale-100 data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
+                "relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-hidden select-none transition-[color,background-color,box-shadow,scale] focus:bg-accent focus:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:ring-inset motion-safe:active:scale-[0.99] aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:active:scale-100 data-[variant=destructive]:text-destructive [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
                 className,
             )}
             {...props}

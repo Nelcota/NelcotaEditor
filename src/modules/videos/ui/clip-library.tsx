@@ -3,11 +3,10 @@ import { useState } from "react";
 import type { LibraryClip } from "#/modules/videos/video-views";
 import { DEFAULT_CLIP_ORDER, sortLibraryClips } from "#/modules/videos/ui/clip-order";
 import type { ClipOrder } from "#/modules/videos/ui/clip-order";
-import { ClipRow } from "#/modules/videos/ui/clip-row";
 import { ClipsToolbar } from "#/modules/videos/ui/clips-toolbar";
+import { CompactClipRow } from "#/modules/videos/ui/compact-clip-row";
 import { searchLibraryClips } from "#/modules/videos/ui/library-clip-search";
 import { pluralize } from "#/shared/ui/pluralize";
-import { SourceVideoLink } from "#/modules/videos/ui/source-video-link";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 
@@ -36,16 +35,11 @@ function NoClipMatch({ query, onClear }: { query: string; onClear: () => void })
 
 function ClipRows({ items }: { items: Array<LibraryClip> }) {
     return (
-        <div className="grid gap-3">
+        <ul className="rounded-2xl border bg-popover px-4 sm:px-5">
             {items.map((item) => (
-                <ClipRow
-                    key={item.clip.id}
-                    clip={item.clip}
-                    videoId={item.videoId}
-                    lead={<SourceVideoLink item={item} />}
-                />
+                <CompactClipRow key={item.clip.id} item={item} />
             ))}
-        </div>
+        </ul>
     );
 }
 

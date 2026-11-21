@@ -5,14 +5,28 @@ import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
 
-const SKELETON_ROW_COUNT = 4;
+const SKELETON_ROW_COUNT = 5;
 
+/** The toolbar over the same bordered list as the library, so nothing jumps on arrival. */
 export function ClipsLoading() {
     return (
-        <div className="grid gap-3" aria-busy="true" aria-label="Carregando cortes">
-            {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
-                <Skeleton key={index} className="h-56 rounded-2xl" />
-            ))}
+        <div role="status" className="grid gap-4">
+            <span className="sr-only">Carregando cortes</span>
+            <Skeleton className="h-10 w-full rounded-full sm:w-72" />
+            <div className="rounded-2xl border bg-popover px-4 sm:px-5">
+                {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
+                    <div
+                        key={index}
+                        className="grid grid-cols-[56px_minmax(0,1fr)] items-center gap-x-4 border-b py-3 last:border-b-0"
+                    >
+                        <Skeleton className="aspect-[9/16] rounded-xl" />
+                        <div className="grid gap-2">
+                            <Skeleton className="h-5 w-3/5" />
+                            <Skeleton className="h-4 w-2/5" />
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

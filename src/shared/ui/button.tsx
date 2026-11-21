@@ -8,7 +8,10 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                default: "bg-primary text-primary-foreground not-disabled:hover:bg-primary/90",
+                // The ring is the same green as the fill; the offset gap keeps it from reading as
+                // a slightly bigger button.
+                default:
+                    "bg-primary text-primary-foreground not-disabled:hover:bg-primary/90 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 destructive:
                     "bg-destructive font-semibold text-destructive-foreground not-disabled:hover:bg-destructive/90",
                 outline:

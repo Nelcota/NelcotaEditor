@@ -17,7 +17,7 @@ interface StoragePart {
 function toStorageParts(storage: StorageUsage): Array<StoragePart> {
     return [
         { label: "Originais", bytes: storage.sourceBytes, swatchClass: "bg-foreground/45" },
-        { label: "Cortes", bytes: storage.clipBytes, swatchClass: "bg-primary" },
+        { label: "Cortes", bytes: storage.clipBytes, swatchClass: "bg-chart-current" },
     ];
 }
 

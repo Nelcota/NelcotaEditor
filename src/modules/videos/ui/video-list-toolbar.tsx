@@ -90,7 +90,7 @@ const SORT_OPTIONS = VIDEO_SORTS.map((value) => ({ value, label: VIDEO_SORT_LABE
 /** Three fixed orders: all visible at once instead of a list that opens over the page. */
 function SortSelect({ sort, onSortChange }: SortSelectProps) {
     return (
-        <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
             <SortVerticalIcon
                 aria-hidden="true"
                 className="size-5 shrink-0 text-muted-foreground"
@@ -113,7 +113,7 @@ export function VideoListToolbar(props: VideoListToolbarProps) {
     // trailing, so the count no longer sits between the chips and the sort.
     return (
         <div className="grid gap-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
                 <SearchField
                     label="Buscar por título"
                     placeholder="Buscar por título"
@@ -122,11 +122,11 @@ export function VideoListToolbar(props: VideoListToolbarProps) {
                 />
                 <SortSelect sort={sort} onSortChange={onSortChange} />
             </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                 <FilterChips filter={filter} counts={counts} />
                 <span
                     aria-hidden="true"
-                    className="ml-auto text-meta whitespace-nowrap text-muted-foreground tabular-nums"
+                    className="text-meta whitespace-nowrap text-muted-foreground tabular-nums"
                 >
                     {totalLabel}
                 </span>
