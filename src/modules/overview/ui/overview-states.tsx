@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import RestartIcon from "~icons/solar/restart-linear";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
@@ -7,7 +8,7 @@ import { Skeleton } from "#/shared/ui/skeleton";
 const CREW_CARD_COUNT = 4;
 
 /** The board's own shape (crew cards, time and failures, best clips, chart), so nothing jumps. */
-export function OverviewLoading() {
+export function OverviewLoading(): ReactNode {
     return (
         <div role="status" className="@container">
             <span className="sr-only">Carregando o painel</span>

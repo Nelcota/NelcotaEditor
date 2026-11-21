@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { VideoStatus } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { VideoListRow } from "#/modules/videos/ui/video-list-row";
@@ -51,7 +52,7 @@ interface VideoGalleryProps extends VideoPagerProps {
 }
 
 /** One line per video in a single bordered list, so many videos fit on one screen. */
-export function VideoGallery({ videos, ...pager }: VideoGalleryProps) {
+export function VideoGallery({ videos, ...pager }: VideoGalleryProps): ReactNode {
     const announcement = useStageAnnouncement(videos);
 
     return (

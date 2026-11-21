@@ -38,7 +38,12 @@ const STATE_ICONS: Record<CopyState, ReactNode> = {
 };
 
 /** Copies text to the clipboard; says so for a moment, and says it when the browser refuses. */
-export function CopyTextButton({ text, label, className, labelClassName }: CopyTextButtonProps) {
+export function CopyTextButton({
+    text,
+    label,
+    className,
+    labelClassName,
+}: CopyTextButtonProps): ReactNode {
     const [state, setState] = useState<CopyState>("idle");
 
     useEffect(() => {

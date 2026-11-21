@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import RestartIcon from "~icons/solar/restart-linear";
 import { NewVideoLink } from "#/modules/videos/ui/new-video-link";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
@@ -8,7 +9,7 @@ import { Skeleton } from "#/shared/ui/skeleton";
 const SKELETON_ROW_COUNT = 5;
 
 /** The toolbar over the same bordered list as the library, so nothing jumps on arrival. */
-export function ClipsLoading() {
+export function ClipsLoading(): ReactNode {
     return (
         <div role="status" className="grid gap-4">
             <span className="sr-only">Carregando cortes</span>
