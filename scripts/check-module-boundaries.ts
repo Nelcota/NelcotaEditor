@@ -26,6 +26,7 @@ const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>
     studio: ["auth", "video-records", "transcription", "clips", "processing", "videos"],
     overview: ["auth", "video-records", "transcription", "clips", "videos"],
     shell: ["auth", "preferences", "videos"],
+    admin: ["auth", "video-records", "clips", "videos"],
 };
 
 interface AllowedException {

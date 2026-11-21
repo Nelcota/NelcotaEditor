@@ -19,6 +19,7 @@
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
         "db:studio": "drizzle-kit studio",
+        "admin:grant": "tsx scripts/grant-admin.ts",
         "typecheck": "tsc --noEmit",
         "format": "oxfmt",
         "lint": "oxlint",

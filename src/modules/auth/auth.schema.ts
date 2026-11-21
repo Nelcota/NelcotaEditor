@@ -1,6 +1,10 @@
 import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// Better Auth core tables (https://www.better-auth.com/docs/concepts/database#core-schema).
+// Better Auth core tables (https://www.better-auth.com/docs/concepts/database#core-schema), plus
+// the admin plugin's fields (https://www.better-auth.com/docs/plugins/admin#schema).
+
+export const USER_ROLE = "user";
+export const ADMIN_ROLE = "admin";
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -8,6 +12,10 @@ export const user = pgTable("user", {
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
+    role: text("role").default(USER_ROLE).notNull(),
+    banned: boolean("banned").default(false).notNull(),
+    banReason: text("ban_reason"),
+    banExpires: timestamp("ban_expires", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
         .defaultNow()
@@ -28,6 +36,8 @@ export const session = pgTable(
             .notNull(),
         ipAddress: text("ip_address"),
         userAgent: text("user_agent"),
+        // Set while an admin is signed in as this user, to support them.
+        impersonatedBy: text("impersonated_by").references(() => user.id, { onDelete: "cascade" }),
         userId: text("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),

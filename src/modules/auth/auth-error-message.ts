@@ -2,6 +2,9 @@ import { MIN_PASSWORD_LENGTH } from "#/modules/auth/auth-forms.schema";
 
 export const VIDEOS_STILL_PROCESSING_CODE = "VIDEOS_STILL_PROCESSING";
 
+export const BANNED_USER_MESSAGE =
+    "Esta conta foi bloqueada. Fale com o suporte se achar que é um engano.";
+
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
     INVALID_EMAIL_OR_PASSWORD: "Email ou senha incorretos. Confira os dois e tente de novo.",
     USER_ALREADY_EXISTS: "Já existe uma conta com este email. Tente entrar.",
@@ -13,6 +16,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     CREDENTIAL_ACCOUNT_NOT_FOUND: "Esta conta não tem senha para trocar.",
     [VIDEOS_STILL_PROCESSING_CODE]: "Cancele os vídeos em processamento antes de excluir a conta.",
     MISSING_RESPONSE: "Aguarde a verificação de segurança terminar e tente de novo.",
+    BANNED_USER: BANNED_USER_MESSAGE,
     VERIFICATION_FAILED: "A verificação de segurança falhou. Tente de novo.",
 };
 

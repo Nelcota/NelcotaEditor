@@ -14,15 +14,20 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppClipsRouteImport } from './routes/_app/clips'
 import { Route as AppOverviewRouteImport } from './routes/_app/overview'
 import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
 import { Route as AppUsageRouteImport } from './routes/_app/usage'
+import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppAdminVideosRouteImport } from './routes/_app/admin/videos'
 import { Route as AppVideosVideoIdRouteImport } from './routes/_app/videos.$videoId'
 import { Route as ApiAccountAvatarRouteImport } from './routes/api/account/avatar'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiShareTokenRouteImport } from './routes/api/share/$token'
 import { Route as ApiVideosUploadRouteImport } from './routes/api/videos/upload'
+import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
+import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ApiClipsClipIdFileRouteImport } from './routes/api/clips/$clipId/file'
 import { Route as ApiVideosVideoIdSourceRouteImport } from './routes/api/videos/$videoId/source'
 import { Route as ApiVideosVideoIdThumbnailRouteImport } from './routes/api/videos/$videoId/thumbnail'
@@ -51,6 +56,11 @@ const AppAccountRoute = AppAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppClipsRoute = AppClipsRouteImport.update({
   id: '/clips',
   path: '/clips',
@@ -70,6 +80,16 @@ const AppUsageRoute = AppUsageRouteImport.update({
   id: '/usage',
   path: '/usage',
   getParentRoute: () => AppRoute,
+} as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminVideosRoute = AppAdminVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => AppAdminRoute,
 } as any)
 const AppVideosVideoIdRoute = AppVideosVideoIdRouteImport.update({
   id: '/videos/$videoId',
@@ -96,6 +116,16 @@ const ApiVideosUploadRoute = ApiVideosUploadRouteImport.update({
   path: '/api/videos/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const ApiClipsClipIdFileRoute = ApiClipsClipIdFileRouteImport.update({
   id: '/api/clips/$clipId/file',
   path: '/api/clips/$clipId/file',
@@ -118,18 +148,23 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/account': typeof AppAccountRoute
+  '/admin': typeof AppAdminRouteWithChildren
   '/clips': typeof AppClipsRoute
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
+  '/admin/videos': typeof AppAdminVideosRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/videos/upload': typeof ApiVideosUploadRoute
+  '/admin/': typeof AppAdminIndexRoute
+  '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
+  '/admin/users/': typeof AppAdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
@@ -140,14 +175,18 @@ export interface FileRoutesByTo {
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
   '/': typeof AppIndexRoute
+  '/admin/videos': typeof AppAdminVideosRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/videos/upload': typeof ApiVideosUploadRoute
+  '/admin': typeof AppAdminIndexRoute
+  '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
+  '/admin/users': typeof AppAdminUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -155,19 +194,24 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/_app/account': typeof AppAccountRoute
+  '/_app/admin': typeof AppAdminRouteWithChildren
   '/_app/clips': typeof AppClipsRoute
   '/_app/overview': typeof AppOverviewRoute
   '/_app/preferences': typeof AppPreferencesRoute
   '/_app/usage': typeof AppUsageRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/admin/videos': typeof AppAdminVideosRoute
   '/_app/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/videos/upload': typeof ApiVideosUploadRoute
+  '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
+  '/_app/admin/users/': typeof AppAdminUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -176,18 +220,23 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/account'
+    | '/admin'
     | '/clips'
     | '/overview'
     | '/preferences'
     | '/usage'
+    | '/admin/videos'
     | '/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
     | '/api/videos/upload'
+    | '/admin/'
+    | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
+    | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -198,33 +247,42 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/usage'
     | '/'
+    | '/admin/videos'
     | '/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
     | '/api/videos/upload'
+    | '/admin'
+    | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
+    | '/admin/users'
   id:
     | '__root__'
     | '/_app'
     | '/sign-in'
     | '/sign-up'
     | '/_app/account'
+    | '/_app/admin'
     | '/_app/clips'
     | '/_app/overview'
     | '/_app/preferences'
     | '/_app/usage'
     | '/_app/'
+    | '/_app/admin/videos'
     | '/_app/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
     | '/api/videos/upload'
+    | '/_app/admin/'
+    | '/_app/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
+    | '/_app/admin/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -277,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/clips': {
       id: '/_app/clips'
       path: '/clips'
@@ -304,6 +369,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/usage'
       preLoaderRoute: typeof AppUsageRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/admin/': {
+      id: '/_app/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/videos': {
+      id: '/_app/admin/videos'
+      path: '/videos'
+      fullPath: '/admin/videos'
+      preLoaderRoute: typeof AppAdminVideosRouteImport
+      parentRoute: typeof AppAdminRoute
     }
     '/_app/videos/$videoId': {
       id: '/_app/videos/$videoId'
@@ -340,6 +419,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVideosUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/admin/users/': {
+      id: '/_app/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AppAdminUsersIndexRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/users/$userId': {
+      id: '/_app/admin/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AppAdminUsersUserIdRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/api/clips/$clipId/file': {
       id: '/api/clips/$clipId/file'
       path: '/api/clips/$clipId/file'
@@ -364,8 +457,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppAdminRouteChildren {
+  AppAdminVideosRoute: typeof AppAdminVideosRoute
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
+  AppAdminUsersUserIdRoute: typeof AppAdminUsersUserIdRoute
+  AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
+}
+
+const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminVideosRoute: AppAdminVideosRoute,
+  AppAdminIndexRoute: AppAdminIndexRoute,
+  AppAdminUsersUserIdRoute: AppAdminUsersUserIdRoute,
+  AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
+}
+
+const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
+  AppAdminRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
+  AppAdminRoute: typeof AppAdminRouteWithChildren
   AppClipsRoute: typeof AppClipsRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppPreferencesRoute: typeof AppPreferencesRoute
@@ -376,6 +488,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
+  AppAdminRoute: AppAdminRouteWithChildren,
   AppClipsRoute: AppClipsRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppPreferencesRoute: AppPreferencesRoute,
