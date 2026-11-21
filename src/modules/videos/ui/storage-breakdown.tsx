@@ -72,7 +72,7 @@ function StorageWarning({ usedPercent, quotaBytes }: StorageWarningProps) {
             <p>
                 <span className="font-bold">{title}</span>
                 <span className="text-muted-foreground">
-                    {` — ${usedPercent}% dos ${formatBytes(quotaBytes)} em uso. Exclua vídeos antigos ou baixe os cortes e apague os originais para liberar espaço.`}
+                    {`. ${usedPercent}% dos ${formatBytes(quotaBytes)} em uso. Exclua vídeos antigos ou baixe os cortes e apague os originais para liberar espaço.`}
                 </span>
             </p>
         </div>

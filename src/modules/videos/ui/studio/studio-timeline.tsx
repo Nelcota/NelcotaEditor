@@ -133,7 +133,7 @@ export function StudioTimeline(props: StudioTimelineProps): ReactNode {
                     Trecho do original
                 </h2>
                 <span className="text-sm text-muted-foreground tabular-nums">
-                    {formatClock(draft.startSeconds)} – {formatClock(draft.endSeconds)} ·{" "}
+                    {formatClock(draft.startSeconds)} a {formatClock(draft.endSeconds)} ·{" "}
                     {lengthSeconds.toFixed(1).replace(".", ",")} s (de {MIN_CLIP_SECONDS} a{" "}
                     {MAX_CLIP_SECONDS} s)
                 </span>

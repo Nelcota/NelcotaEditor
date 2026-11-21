@@ -20,7 +20,7 @@ function BrilhoReason({ clip }: { clip: ClipView }) {
                     Brilho deu {clip.score}/{SCORE_SCALE}
                 </span>
                 {clip.reason.length > 0 && (
-                    <span className="text-muted-foreground"> — {clip.reason}</span>
+                    <span className="text-muted-foreground">: {clip.reason}</span>
                 )}
             </p>
         </div>
@@ -79,7 +79,7 @@ export function SelectedClipPanel({
             </div>
             <div className="grid min-w-0 content-start gap-2">
                 <p className="text-[14px] font-bold text-muted-foreground tabular-nums">
-                    CORTE {rank} DE {total} · {formatClock(clip.startSeconds)}–
+                    CORTE {rank} DE {total} · {formatClock(clip.startSeconds)} a{" "}
                     {formatClock(clip.endSeconds)} · {durationSeconds}s
                 </p>
                 <h2

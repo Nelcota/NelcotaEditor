@@ -43,7 +43,7 @@ export interface RenderClipInput {
 
 export class InvalidClipRangeError extends Error {
     constructor(clip: Clip) {
-        super(`Clip ${clip.id} has an invalid range: ${clip.startSeconds}–${clip.endSeconds}`);
+        super(`Clip ${clip.id} has an invalid range: ${clip.startSeconds} to ${clip.endSeconds}`);
         this.name = "InvalidClipRangeError";
     }
 }

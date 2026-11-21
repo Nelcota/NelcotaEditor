@@ -32,6 +32,7 @@ export function buildHighlightSystemPrompt(clipCount: number): string {
         "- Does not overlap any other clip.",
         "Prefer surprising facts, useful advice, strong opinions, emotion, stories and humor.",
         "Write `title` and `reason` in the same language as the transcript.",
+        "Never use em dashes or en dashes in `title` or `reason`; use a comma, a colon or a period instead.",
         "Answer only with JSON in this exact format:",
         '{"clips":[{"start":12.3,"end":48.9,"title":"Short catchy title (max 60 characters)","reason":"One sentence on why it works","score":87}]}',
         "`start` and `end` are seconds taken from the transcript; `score` is an integer from 1 to 100.",

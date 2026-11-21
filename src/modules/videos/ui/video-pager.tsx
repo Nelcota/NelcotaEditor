@@ -11,12 +11,12 @@ export interface VideoPagerProps {
     onPageChange: (pageIndex: number) => void;
 }
 
-/** "21–40 de 57", counted from one for people; the page index itself starts at zero. */
+/** "21 a 40 de 57", counted from one for people; the page index itself starts at zero. */
 function describeRange(pageIndex: number, itemCount: number): string {
     const firstItem = Math.min(pageIndex * VIDEOS_PER_PAGE + 1, itemCount);
     const lastItem = Math.min(firstItem + VIDEOS_PER_PAGE - 1, itemCount);
 
-    return `${firstItem}–${lastItem} de ${itemCount}`;
+    return `${firstItem} a ${lastItem} de ${itemCount}`;
 }
 
 export function VideoPager({ pageIndex, pageCount, itemCount, onPageChange }: VideoPagerProps) {

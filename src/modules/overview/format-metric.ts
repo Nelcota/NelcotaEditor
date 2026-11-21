@@ -3,7 +3,7 @@ const SECONDS_PER_HOUR = 3600;
 
 const integerFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 
-export const EMPTY_VALUE = "—";
+export const EMPTY_VALUE = "Sem dados";
 
 export function formatInteger(value: number): string {
     if (Number.isFinite(value) === false) {

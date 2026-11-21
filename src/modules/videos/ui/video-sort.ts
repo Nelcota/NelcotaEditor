@@ -9,7 +9,7 @@ export const DEFAULT_VIDEO_SORT: VideoSort = "newest";
 export const VIDEO_SORT_LABELS: Record<VideoSort, string> = {
     newest: "Mais recentes",
     oldest: "Mais antigos",
-    title: "Título (A–Z)",
+    title: "De A a Z",
 };
 
 const titleCollator = new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true });

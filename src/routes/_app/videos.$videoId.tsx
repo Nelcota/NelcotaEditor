@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_app/videos/$videoId")({
     loader: async ({ context, params }) => ({
         title: await loadVideoPageTitle(context.queryClient, params.videoId),
     }),
-    head: ({ loaderData }) => ({ meta: [{ title: `${loaderData?.title ?? "Vídeo"} — Nelcota` }] }),
+    head: ({ loaderData }) => ({ meta: [{ title: `${loaderData?.title ?? "Vídeo"} · Nelcota` }] }),
     component: VideoDetailsRoute,
 });
 

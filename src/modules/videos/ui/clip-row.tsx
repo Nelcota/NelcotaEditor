@@ -91,7 +91,7 @@ export function ClipRow({
                 <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[14px] font-bold text-muted-foreground tabular-nums">
                     {lead}
                     <span>
-                        · {formatClock(clip.startSeconds)}–{formatClock(clip.endSeconds)} ·{" "}
+                        · {formatClock(clip.startSeconds)} a {formatClock(clip.endSeconds)} ·{" "}
                         {durationSeconds}s
                     </span>
                 </p>

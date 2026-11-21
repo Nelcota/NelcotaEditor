@@ -63,7 +63,7 @@ function MetricValue({
     value: number | null;
 }) {
     if (value === null) {
-        return <strong className="text-3xl font-extrabold tracking-tight">{EMPTY_VALUE}</strong>;
+        return <strong className="text-xl font-extrabold tracking-tight">{EMPTY_VALUE}</strong>;
     }
 
     return (

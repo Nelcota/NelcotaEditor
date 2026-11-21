@@ -86,13 +86,20 @@ function overlapsAny(range: TimeRange, accepted: Array<TimeRange>): boolean {
     );
 }
 
+// The app's copy never uses em or en dashes; the prompt asks for none, and this enforces it.
+const DASH_SEPARATOR = /\s*[\u2013\u2014]\s*/g;
+
+function replaceDashes(text: string): string {
+    return text.replace(DASH_SEPARATOR, ", ").trim();
+}
+
 function cleanCandidate(candidate: HighlightCandidate, range: TimeRange): HighlightCandidate {
     const roundedScore = Math.round(candidate.score);
 
     return {
         ...range,
-        title: truncateText(candidate.title.trim(), MAX_TITLE_LENGTH),
-        reason: truncateText(candidate.reason.trim(), MAX_REASON_LENGTH),
+        title: truncateText(replaceDashes(candidate.title), MAX_TITLE_LENGTH),
+        reason: truncateText(replaceDashes(candidate.reason), MAX_REASON_LENGTH),
         score: Math.min(MAX_SCORE, Math.max(MIN_SCORE, roundedScore)),
     };
 }
