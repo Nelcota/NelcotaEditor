@@ -164,10 +164,15 @@ function buildGroupEvents(
 
     return group.map((word, index) => {
         const start = word.startSeconds;
-        const end = Math.max(
+        const nextWord = group[index + 1];
+        const nextStart = nextWord?.startSeconds ?? nextGroupStart;
+        const stretchedEnd = Math.max(
             start + MIN_EVENT_SECONDS,
-            wordEndSeconds(word, group[index + 1], nextGroupStart),
+            wordEndSeconds(word, nextWord, nextGroupStart),
         );
+        // The minimum length must not push a word over the next one: two caption lines would
+        // show at once. When there is no room at all, the word keeps its tiny slot.
+        const end = Math.min(stretchedEnd, Math.max(nextStart, start + Number.EPSILON));
         const highlightedIndex = resolveHighlightedIndex(options.style, index);
         const text = buildGroupText(group, highlightedIndex, highlightColour);
 

@@ -83,7 +83,7 @@ export function SeekBar(props: SeekBarProps): ReactNode {
     return (
         <div
             className={cn(
-                "group/seek relative flex items-center rounded-full has-[input:focus-visible]:ring-4 has-[input:focus-visible]:ring-ring/50",
+                "group/seek relative flex items-center rounded-full has-[input:focus-visible]:ring-4 has-[input:focus-visible]:ring-ring/70",
                 size === "md" && "h-4",
                 size === "sm" && "h-3",
             )}
@@ -91,14 +91,20 @@ export function SeekBar(props: SeekBarProps): ReactNode {
             onPointerLeave={() => setHoverSeconds(null)}
         >
             <div className="relative h-1 w-full rounded-full bg-white/25 transition-[height] group-hover/seek:h-1.5">
-                <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-white/30"
-                    style={{ width: `${toBarPercent(bufferedSeconds, durationSeconds)}%` }}
-                />
-                <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-white"
-                    style={{ width: `${playedPercent}%` }}
-                />
+                {/* Fills grow with scaleX, not width, so playback updates never re-run layout;
+                    the clipping wrapper keeps their ends rounded at any scale. */}
+                <span className="absolute inset-0 overflow-hidden rounded-full">
+                    <span
+                        className="absolute inset-0 origin-left bg-white/30"
+                        style={{
+                            transform: `scaleX(${toBarPercent(bufferedSeconds, durationSeconds) / PERCENT})`,
+                        }}
+                    />
+                    <span
+                        className="absolute inset-0 origin-left bg-white"
+                        style={{ transform: `scaleX(${playedPercent / PERCENT})` }}
+                    />
+                </span>
                 {props.marks}
                 <span
                     aria-hidden="true"

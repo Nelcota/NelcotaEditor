@@ -20,7 +20,8 @@ export function BestClipCard({ item }: { item: LibraryClip }) {
                 <Link
                     to="/videos/$videoId"
                     params={{ videoId: item.videoId }}
-                    className="truncate rounded text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    title={item.videoTitle}
+                    className="truncate rounded text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none motion-safe:active:scale-[0.99]"
                 >
                     {item.videoTitle}
                 </Link>

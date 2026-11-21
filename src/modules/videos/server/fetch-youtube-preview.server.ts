@@ -21,7 +21,8 @@ const UNEXPECTED_ANSWER_MESSAGE = "O YouTube respondeu de um jeito inesperado.";
 /** Only the fields we show; YouTube's answer is external data, so it is checked before use. */
 const oembedSchema = z.object({
     title: z.string().trim().min(1).max(300),
-    author_name: z.string().trim().max(200).optional(),
+    // An empty or oversized channel name is shown as no channel instead of "YouTube · ".
+    author_name: z.string().trim().min(1).max(200).optional().catch(undefined),
 });
 
 type Oembed = z.infer<typeof oembedSchema>;

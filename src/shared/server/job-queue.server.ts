@@ -1,11 +1,32 @@
 import { PgBoss } from "pg-boss";
 import { getEnvironment } from "#/shared/server/env.server";
 
+/**
+ * "web" only sends jobs; "worker" also runs pg-boss's maintenance (expiring jobs, the scheduler).
+ * One process doing maintenance is enough, and the web server should not carry its timers.
+ */
+export type JobQueueRole = "web" | "worker";
+
 let jobQueuePromise: Promise<PgBoss> | null = null;
+let jobQueueRole: JobQueueRole = "web";
+
+/** Call before the first getJobQueue(); the worker sets "worker". */
+export function setJobQueueRole(role: JobQueueRole): void {
+    if (jobQueuePromise !== null) {
+        throw new Error(`The job queue already started as "${jobQueueRole}"`);
+    }
+
+    jobQueueRole = role;
+}
 
 async function startJobQueue(): Promise<PgBoss> {
     const environment = getEnvironment();
-    const jobQueue = new PgBoss({ connectionString: environment.DATABASE_URL });
+    const isWorker = jobQueueRole === "worker";
+    const jobQueue = new PgBoss({
+        connectionString: environment.DATABASE_URL,
+        supervise: isWorker,
+        schedule: isWorker,
+    });
 
     jobQueue.on("error", (error: unknown) => {
         console.error("Job queue error", error);

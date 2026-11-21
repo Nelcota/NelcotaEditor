@@ -77,11 +77,21 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
             <UserAvatar name={user.name} image={user.image} className="size-32 text-2xl" />
             <div className="grid gap-2">
                 <div className="grid gap-2">
+                    {/* The input comes first so the label (a <label>, where `disabled` does
+                        nothing) can show its focus ring and busy state through `peer`. */}
+                    <input
+                        id={fileInputId}
+                        type="file"
+                        accept={ACCEPTED_TYPES}
+                        className="peer sr-only"
+                        disabled={props.isBusy}
+                        onChange={handleFileChange}
+                    />
                     <Button
                         asChild
                         variant="secondary"
-                        className="w-full"
-                        disabled={props.isBusy}
+                        className="w-full peer-focus-visible:ring-4 peer-focus-visible:ring-ring/70 peer-disabled:pointer-events-none peer-disabled:opacity-50"
+                        aria-disabled={props.isBusy}
                         aria-busy={props.isUploading}
                     >
                         <label htmlFor={fileInputId}>
@@ -91,14 +101,6 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
                             />
                         </label>
                     </Button>
-                    <input
-                        id={fileInputId}
-                        type="file"
-                        accept={ACCEPTED_TYPES}
-                        className="sr-only"
-                        disabled={props.isBusy}
-                        onChange={handleFileChange}
-                    />
                     {props.hasAvatar === true && (
                         <Button
                             variant="destructive"

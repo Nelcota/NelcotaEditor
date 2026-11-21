@@ -31,7 +31,13 @@ export const captionWordSchema = z.object({
 export const captionCueSchema = z.object({
     startSeconds: secondsSchema,
     endSeconds: secondsSchema,
-    words: z.array(captionWordSchema).min(1).max(MAX_CAPTION_WORDS_PER_CUE),
+    words: z
+        .array(captionWordSchema)
+        .min(1, "Uma legenda precisa ter pelo menos uma palavra.")
+        .max(
+            MAX_CAPTION_WORDS_PER_CUE,
+            `Uma legenda pode ter até ${MAX_CAPTION_WORDS_PER_CUE} palavras. Divida em duas.`,
+        ),
 });
 
 export type CaptionWord = z.infer<typeof captionWordSchema>;
@@ -47,15 +53,27 @@ const draftFieldsSchema = z.object({
     captionPosition: z.enum(CAPTION_POSITIONS),
     // Drafts saved before fonts existed have none; they get the font every clip had then.
     captionFont: z.enum(CAPTION_FONTS).default(DEFAULT_CAPTION_FONT),
-    cues: z.array(captionCueSchema).max(MAX_CAPTION_CUES),
+    cues: z
+        .array(captionCueSchema)
+        .max(MAX_CAPTION_CUES, `O corte pode ter até ${MAX_CAPTION_CUES} legendas.`),
 });
 
 type DraftFields = z.infer<typeof draftFieldsSchema>;
 
-function hasAllowedDuration(draft: DraftFields): boolean {
-    const durationSeconds = draft.endSeconds - draft.startSeconds;
+const CENTISECONDS_PER_SECOND = 100;
 
-    return durationSeconds >= MIN_CLIP_SECONDS && durationSeconds <= MAX_CLIP_SECONDS;
+/**
+ * Compared in whole hundredths: edges are rounded to hundredths, and float subtraction turns a
+ * trim exactly at the limit into 14.999999999999998 or 90.00000000000001.
+ */
+function hasAllowedDuration(draft: DraftFields): boolean {
+    const durationCentiseconds = Math.round(
+        (draft.endSeconds - draft.startSeconds) * CENTISECONDS_PER_SECOND,
+    );
+    const minCentiseconds = MIN_CLIP_SECONDS * CENTISECONDS_PER_SECOND;
+    const maxCentiseconds = MAX_CLIP_SECONDS * CENTISECONDS_PER_SECOND;
+
+    return durationCentiseconds >= minCentiseconds && durationCentiseconds <= maxCentiseconds;
 }
 
 interface TimeRange {

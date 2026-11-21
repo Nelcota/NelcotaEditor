@@ -49,8 +49,12 @@ export function AccountMenuContent({
             <div className="flex items-center gap-2.5 px-2.5 py-2">
                 <UserAvatar name={user.name} image={user.image} />
                 <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{user.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                    <p title={user.name} className="truncate text-sm font-bold">
+                        {user.name}
+                    </p>
+                    <p title={user.email} className="truncate text-xs text-muted-foreground">
+                        {user.email}
+                    </p>
                 </div>
             </div>
             <DropdownMenuSeparator />

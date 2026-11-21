@@ -114,7 +114,9 @@ export function YoutubeLinkPreview({ videoId, onClear }: YoutubeLinkPreviewProps
             detail={
                 <>
                     <LinkIcon className="size-4 shrink-0" aria-hidden="true" />
-                    <span className="truncate">{describeFound(preview)}</span>
+                    <span title={describeFound(preview)} className="truncate">
+                        {describeFound(preview)}
+                    </span>
                 </>
             }
             onClear={onClear}

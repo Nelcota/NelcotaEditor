@@ -44,14 +44,24 @@ function estimateSecondsLeft(elapsedSeconds: number, progressPercent: number): n
 }
 
 /**
- * Seconds left for the whole video, from how fast it has gone since it was created. It counts any
- * time spent waiting in the queue, so it errs on the long side ("cerca de").
+ * Seconds left for the whole video, from how fast this run has gone since it was asked for (not
+ * since the video was created: a re-render days later would look like it took days). It counts
+ * any time spent waiting in the queue, so it errs on the long side ("cerca de").
  */
-export function useProcessingTimeLeft(createdAt: string, progressPercent: number): number | null {
+export function useProcessingTimeLeft(
+    processingStartedAt: string | null,
+    progressPercent: number,
+): number | null {
     const now = useNow();
-    const startedAt = new Date(createdAt).getTime();
 
-    if (now === null || Number.isNaN(startedAt) === true) {
+    // Videos from before the run start was recorded: no honest pace to show.
+    if (now === null || processingStartedAt === null) {
+        return null;
+    }
+
+    const startedAt = new Date(processingStartedAt).getTime();
+
+    if (Number.isNaN(startedAt) === true) {
         return null;
     }
 

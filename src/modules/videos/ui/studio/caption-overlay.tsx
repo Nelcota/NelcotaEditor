@@ -2,6 +2,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { resolveCaptionPlacement } from "#/modules/clips/caption-layout";
 import { CAPTION_COLOR_HEX, CAPTION_FONT_FACES } from "#/modules/clips/caption-style";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/clip-studio.schema";
+import { usePlaybackValue } from "#/modules/videos/ui/studio/playback-clock";
+import type { PlaybackClock } from "#/modules/videos/ui/studio/playback-clock";
 
 const PERCENT = 100;
 // Matches the subtitles file: outline 7 and shadow 3 at a 96px font.
@@ -63,18 +65,30 @@ function wordStyle(draft: StudioDraft, isSpoken: boolean): CSSProperties | undef
 
 interface CaptionOverlayProps {
     draft: StudioDraft;
-    currentSeconds: number;
+    clock: PlaybackClock;
 }
 
-/** The caption drawn over the live preview, placed and sized like the rendered file. */
-export function CaptionOverlay({ draft, currentSeconds }: CaptionOverlayProps): ReactNode {
-    const cue = draft.cues[findCueAt(draft.cues, currentSeconds)];
+function findSpokenWordIndexIn(cue: CaptionCue | undefined, seconds: number): number {
+    if (cue === undefined) {
+        return -1;
+    }
+
+    return findSpokenWordIndex(cue, seconds);
+}
+
+/**
+ * The caption drawn over the live preview, placed and sized like the rendered file. It follows the
+ * clock through the cue and word indexes, so it re-renders when the highlight moves, not per frame.
+ */
+export function CaptionOverlay({ draft, clock }: CaptionOverlayProps): ReactNode {
+    const cues = draft.cues;
+    const cueIndex = usePlaybackValue(clock, (seconds) => findCueAt(cues, seconds));
+    const cue = cues[cueIndex];
+    const spokenIndex = usePlaybackValue(clock, (seconds) => findSpokenWordIndexIn(cue, seconds));
 
     if (draft.captionStyle === "none" || cue === undefined) {
         return null;
     }
-
-    const spokenIndex = findSpokenWordIndex(cue, currentSeconds);
 
     return (
         <p

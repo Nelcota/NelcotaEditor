@@ -9,7 +9,7 @@ import { cn } from "#/shared/ui/cn";
 export type NavItemState = "current" | "parent" | "none";
 
 const ITEM_CLASS =
-    "relative flex items-center gap-3 min-h-11 rounded-xl px-3 py-2.5 text-base font-semibold outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99] [&>svg]:size-[22px] [&>svg]:shrink-0 [&>svg]:text-muted-foreground";
+    "relative flex items-center gap-3 min-h-11 rounded-xl px-3 py-2.5 text-base font-semibold outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] [&>svg]:size-[22px] [&>svg]:shrink-0 [&>svg]:text-muted-foreground";
 
 const STATE_CLASSES: Record<NavItemState, string> = {
     current: "bg-accent font-bold [&>svg]:text-primary",

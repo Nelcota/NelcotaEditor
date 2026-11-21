@@ -55,6 +55,9 @@ export function SignInScreen(): ReactNode {
                             label="Email"
                             type="email"
                             autoComplete="email"
+                            spellCheck={false}
+                            autoCapitalize="none"
+                            enterKeyHint="next"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -69,6 +72,7 @@ export function SignInScreen(): ReactNode {
                             label="Senha"
                             type="password"
                             autoComplete="current-password"
+                            enterKeyHint="go"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}

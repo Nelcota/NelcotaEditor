@@ -16,11 +16,11 @@ export function MobileTopBar(): ReactNode {
     useEffect(() => router.subscribe("onResolved", () => setIsMenuOpen(false)), [router]);
 
     return (
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur md:hidden">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background px-4 md:hidden">
             <Link
                 to="/"
                 aria-label="Nelcota, ir para o início"
-                className="rounded-lg outline-none transition-opacity hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+                className="rounded-lg outline-none transition-opacity hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <BrandLogo />
             </Link>

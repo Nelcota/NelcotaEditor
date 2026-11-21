@@ -59,7 +59,9 @@ function toDownloadName(title: string): string {
 function buildHeaders(clipFile: OwnedClipFile, isDownload: boolean): Headers {
     const headers = new Headers({
         "Content-Type": "video/mp4",
-        "Cache-Control": "private, max-age=3600",
+        // A Studio render rewrites this same file: revalidate (a cheap 304 via Last-Modified)
+        // instead of replaying the old cut from the cache for up to an hour.
+        "Cache-Control": "private, no-cache",
         "X-Content-Type-Options": "nosniff",
     });
 

@@ -53,7 +53,7 @@ function SourceLink({ video }: { video: VideoSummary }) {
             href={sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded underline-offset-4 outline-none transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+            className="inline-flex items-center gap-1.5 rounded underline-offset-4 outline-none transition-colors hover:text-foreground hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
         >
             Abrir no YouTube
             <SquareArrowRightUpIcon className="size-4" aria-hidden="true" />

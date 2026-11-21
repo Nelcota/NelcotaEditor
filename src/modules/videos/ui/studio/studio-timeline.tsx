@@ -9,6 +9,8 @@ import {
     toPercent,
 } from "#/modules/videos/ui/studio/timeline-geometry";
 import type { TimelineWindow } from "#/modules/videos/ui/studio/timeline-geometry";
+import { usePlaybackValue } from "#/modules/videos/ui/studio/playback-clock";
+import type { PlaybackClock } from "#/modules/videos/ui/studio/playback-clock";
 import { TrimRange } from "#/modules/videos/ui/studio/trim-range";
 import type { StudioEditor } from "#/modules/videos/ui/studio/use-studio-editor";
 import { Button } from "#/shared/ui/button";
@@ -23,7 +25,7 @@ interface StudioTimelineProps {
     window: TimelineWindow;
     sourceUrl: string | null;
     videoDurationSeconds: number;
-    currentSeconds: number;
+    clock: PlaybackClock;
     playingIndex: number;
     openIndex: number | null;
     isLocked: boolean;
@@ -77,9 +79,39 @@ function Ruler({ window }: { window: TimelineWindow }): ReactNode {
     );
 }
 
+// A tenth of a percent of the lane is under a pixel; finer steps would re-render for nothing.
+const PLAYHEAD_STEPS_PER_PERCENT = 10;
+
+/**
+ * The line at the preview's time. It alone follows the clock every frame, and moves with a
+ * transform (a full-width layer slid along the lane) instead of `left`, which re-ran layout.
+ */
+function Playhead({ clock, window }: { clock: PlaybackClock; window: TimelineWindow }) {
+    const percent = usePlaybackValue(
+        clock,
+        (seconds) =>
+            Math.round(toPercent(window, seconds) * PLAYHEAD_STEPS_PER_PERCENT) /
+            PLAYHEAD_STEPS_PER_PERCENT,
+    );
+
+    return (
+        <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 -top-1 -bottom-1 z-20 overflow-x-clip"
+        >
+            <span
+                className="absolute inset-y-0 left-0 w-full will-change-transform"
+                style={{ transform: `translateX(${percent}%)` }}
+            >
+                <span className="absolute inset-y-0 left-0 w-0.5 -translate-x-1/2 bg-foreground" />
+            </span>
+        </span>
+    );
+}
+
 /** The clip's place in the original: drag its edges, see its captions, click to jump there. */
 export function StudioTimeline(props: StudioTimelineProps): ReactNode {
-    const { editor, window, currentSeconds, isLocked } = props;
+    const { editor, window, clock, isLocked } = props;
     const draft = editor.draft;
     const laneRef = useRef<HTMLDivElement>(null);
     const lengthSeconds = draft.endSeconds - draft.startSeconds;
@@ -138,11 +170,7 @@ export function StudioTimeline(props: StudioTimelineProps): ReactNode {
                     isLocked={isLocked}
                     onTrim={editor.trim}
                 />
-                <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -top-1 -bottom-1 z-20 w-0.5 bg-foreground"
-                    style={{ left: `${toPercent(window, currentSeconds)}%` }}
-                />
+                <Playhead clock={clock} window={window} />
             </div>
             <CueTrack
                 draft={draft}

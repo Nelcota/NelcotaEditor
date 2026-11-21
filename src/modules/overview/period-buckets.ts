@@ -1,6 +1,14 @@
-const MILLISECONDS_PER_DAY = 86_400_000;
+import { startOfBusinessDay, toBusinessDayKey } from "#/shared/server/business-time-zone";
 
-/** The current period and the one before it, as 2 × periodDays whole UTC days ending today. */
+const MILLISECONDS_PER_DAY = 86_400_000;
+// Midday of a slot: its key is read there, safely inside the day even if a clock change moved
+// its edges by an hour.
+const HALF_DAY_MILLISECONDS = MILLISECONDS_PER_DAY / 2;
+
+/**
+ * The current period and the one before it, as 2 × periodDays whole days ending today, counted
+ * in the business time zone (São Paulo), not UTC.
+ */
 export interface PeriodWindow {
     periodDays: number;
     previousStart: Date;
@@ -18,7 +26,7 @@ export function createPeriodWindow(periodDays: number, now: Date): PeriodWindow 
         throw new InvalidPeriodError(periodDays);
     }
 
-    const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const today = startOfBusinessDay(now).getTime();
     const previousStart = new Date(today - (periodDays * 2 - 1) * MILLISECONDS_PER_DAY);
 
     return { periodDays, previousStart };
@@ -41,7 +49,9 @@ export function listCurrentDays(window: PeriodWindow): Array<string> {
     const currentStart = window.previousStart.getTime() + window.periodDays * MILLISECONDS_PER_DAY;
 
     return Array.from({ length: window.periodDays }, (_, offset) =>
-        new Date(currentStart + offset * MILLISECONDS_PER_DAY).toISOString().slice(0, 10),
+        toBusinessDayKey(
+            new Date(currentStart + offset * MILLISECONDS_PER_DAY + HALF_DAY_MILLISECONDS),
+        ),
     );
 }
 

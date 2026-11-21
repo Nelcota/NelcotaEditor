@@ -74,7 +74,7 @@ function TranscriptToggle({ isOpen, onToggle }: { isOpen: boolean; onToggle: () 
             aria-expanded={isOpen}
             aria-controls={TRANSCRIPT_PANEL_ID}
             onClick={onToggle}
-            className="group flex items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+            className="group flex items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
         >
             <span>
                 <span id="transcript-title" className="block text-lg font-extrabold">

@@ -37,7 +37,7 @@ export function ControlButton({
                 await onClick();
             }}
             className={cn(
-                "grid shrink-0 place-items-center rounded-lg text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring/50 disabled:opacity-40 disabled:hover:bg-transparent motion-safe:active:scale-[0.99]",
+                "grid shrink-0 place-items-center rounded-lg text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring/70 disabled:opacity-40 disabled:hover:bg-transparent motion-safe:active:scale-[0.99]",
                 SIZE_CLASSES[size],
                 className,
             )}

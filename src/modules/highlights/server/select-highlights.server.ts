@@ -20,19 +20,47 @@ import { UserFacingError } from "#/shared/server/user-facing-error";
 // Used when the model leaves the score out: the middle of the 1–100 scale ranks it neutrally.
 const DEFAULT_SCORE = 50;
 
-const highlightResponseSchema = z.object({
-    clips: z.array(
-        z.object({
-            start: z.coerce.number(),
-            end: z.coerce.number(),
-            title: z.string().default(""),
-            reason: z.string().default(""),
-            score: z.coerce.number().default(DEFAULT_SCORE),
-        }),
-    ),
+// About 100k tokens of Portuguese, inside deepseek-chat's 128k context with room for the prompt
+// and the answer. A 3-hour video (the longest accepted) is about 200k characters.
+const MAX_TRANSCRIPT_CHARACTERS = 300_000;
+const TRANSCRIPT_TOO_LONG_MESSAGE =
+    "A fala deste vídeo é longa demais para a IA escolher os cortes de uma vez. Tente um vídeo mais curto.";
+
+// The prompt asks for at most 10; anything far beyond that is a broken answer, not more clips.
+const MAX_RETURNED_CLIPS = 50;
+
+// A number, or a numeric string such as "12.5". null, "", booleans and arrays are rejected instead
+// of being coerced to 0, which would silently become a clip at the very start of the video.
+const numericFieldSchema = z.union([z.number(), z.string().trim().min(1)]).pipe(z.coerce.number());
+
+const highlightClipSchema = z.object({
+    start: numericFieldSchema,
+    end: numericFieldSchema,
+    title: z.string().catch(""),
+    reason: z.string().catch(""),
+    score: numericFieldSchema.optional().catch(undefined),
 });
 
-type HighlightResponse = z.infer<typeof highlightResponseSchema>;
+type HighlightClip = z.infer<typeof highlightClipSchema>;
+
+const highlightResponseSchema = z.object({
+    clips: z.array(z.unknown()).max(MAX_RETURNED_CLIPS),
+});
+
+/** One malformed item is dropped; the valid ones still become clips. */
+function parseHighlightClips(items: Array<unknown>): Array<HighlightClip> {
+    const parsedClips: Array<HighlightClip> = [];
+
+    for (const item of items) {
+        const result = highlightClipSchema.safeParse(item);
+
+        if (result.success === true) {
+            parsedClips.push(result.data);
+        }
+    }
+
+    return parsedClips;
+}
 
 async function findClips(videoId: string): Promise<Array<Clip>> {
     return db.select().from(clips).where(eq(clips.videoId, videoId)).orderBy(asc(clips.position));
@@ -45,8 +73,8 @@ export interface HighlightSelectionInput {
     signal: AbortSignal;
 }
 
-function toCandidates(response: HighlightResponse): Array<HighlightCandidate> {
-    return response.clips
+function toCandidates(highlightClips: Array<HighlightClip>): Array<HighlightCandidate> {
+    return highlightClips
         .filter(
             (clip) => Number.isFinite(clip.start) === true && Number.isFinite(clip.end) === true,
         )
@@ -55,7 +83,7 @@ function toCandidates(response: HighlightResponse): Array<HighlightCandidate> {
             endSeconds: clip.end,
             title: clip.title,
             reason: clip.reason,
-            score: clip.score,
+            score: clip.score ?? DEFAULT_SCORE,
         }));
 }
 
@@ -81,6 +109,11 @@ async function requestCandidates(
 ): Promise<Array<HighlightCandidate>> {
     const video = input.video;
     const transcript = formatTranscriptLines(buildTranscriptLines(input.words));
+
+    // Over the model's context the API answers with an error that retrying never fixes; say why.
+    if (transcript.length > MAX_TRANSCRIPT_CHARACTERS) {
+        throw new UserFacingError(TRANSCRIPT_TOO_LONG_MESSAGE);
+    }
     const answer = await requestJsonCompletion(
         {
             system: buildHighlightSystemPrompt(video.requestedClipCount),
@@ -94,7 +127,7 @@ async function requestCandidates(
         throw new UserFacingError("A DeepSeek devolveu uma resposta inválida. Tente novamente.");
     }
 
-    return toCandidates(result.data);
+    return toCandidates(parseHighlightClips(result.data.clips));
 }
 
 function titleOrFallback(title: string, position: number): string {

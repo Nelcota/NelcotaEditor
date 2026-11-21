@@ -10,6 +10,7 @@ import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import {
     clipStudioQueryKey,
     clipStudioQueryOptions,
+    studioWordsQueryOptions,
 } from "#/modules/videos/ui/studio/studio-queries";
 import { StudioWorkspace } from "#/modules/videos/ui/studio/studio-workspace";
 import { Button } from "#/shared/ui/button";
@@ -73,6 +74,11 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
         ...clipStudioQueryOptions(video.id, selectedClipId ?? ""),
         enabled: selectedClipId !== null,
     });
+    // Runs alongside the clip's state, not after it, and is reused when another clip opens.
+    const wordsQuery = useQuery({
+        ...studioWordsQueryOptions(video.id),
+        enabled: selectedClipId !== null,
+    });
     const isFinished = isVideoFinished(video.status);
 
     // When Brasa finishes, the clip's applied version and file are new.
@@ -91,18 +97,20 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
     }
 
     const studio = studioQuery.data;
+    const words = wordsQuery.data;
+    const loadError = studioQuery.error ?? wordsQuery.error;
 
-    if (studioQuery.isError === true && studio === undefined) {
+    if (loadError !== null && (studio === undefined || words === undefined)) {
         return (
             <EmptyState
                 art={<StageCrewMascot status="failed" className="size-14" />}
                 title="Não foi possível abrir o Studio"
-                description={studioQuery.error.message}
+                description={loadError.message}
                 action={
                     <Button
                         variant="secondary"
                         onClick={async () => {
-                            await studioQuery.refetch();
+                            await Promise.all([studioQuery.refetch(), wordsQuery.refetch()]);
                         }}
                     >
                         <RestartIcon aria-hidden="true" />
@@ -113,7 +121,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
         );
     }
 
-    if (studio === undefined) {
+    if (studio === undefined || words === undefined) {
         return <StudioLoading />;
     }
 
@@ -121,7 +129,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
         <StudioWorkspace
             key={selectedClip.id}
             video={video}
-            studio={{ ...studio, clip: selectedClip }}
+            studio={{ ...studio, words, clip: selectedClip }}
             rankedClips={rankedClips}
             onSelectClip={onSelectClip}
         />

@@ -122,7 +122,7 @@ export function VideoCard({ video }: { video: VideoSummary }) {
                         to="/videos/$videoId"
                         params={{ videoId: video.id }}
                         title={video.title}
-                        className="line-clamp-2 min-h-[2lh] rounded font-bold break-words underline-offset-4 outline-none group-hover:underline after:absolute after:inset-x-0 after:top-0 after:aspect-video after:rounded-2xl focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99]"
+                        className="line-clamp-2 min-h-[2lh] rounded font-bold break-words underline-offset-4 outline-none group-hover:underline after:absolute after:inset-x-0 after:top-0 after:aspect-video after:rounded-2xl focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                     >
                         {video.title}
                     </Link>

@@ -18,7 +18,7 @@ export function RenderingOverlay({ progressPercent }: { progressPercent: number 
     return (
         <div
             role="status"
-            className="absolute inset-0 z-30 grid content-center justify-items-center gap-2.5 bg-background/80 p-6 text-center backdrop-blur-sm"
+            className="absolute inset-0 z-30 grid content-center justify-items-center gap-2.5 bg-background/95 p-6 text-center"
         >
             <StageCrewMascot status="rendering" isWorking className="size-12" />
             <p className="font-bold">Brasa está refazendo o corte</p>

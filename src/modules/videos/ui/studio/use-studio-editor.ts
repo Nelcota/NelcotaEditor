@@ -1,7 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useReducer, useState } from "react";
+import { useMemo, useReducer, useState } from "react";
+import { studioDraftSchema } from "#/modules/clips/clip-studio.schema";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/clip-studio.schema";
-import type { ClipStudioView } from "#/modules/videos/clip-studio-view";
+import type { ClipStudioState, ClipStudioView } from "#/modules/videos/clip-studio-view";
 import { getClipStudio, renderClipDraft } from "#/modules/videos/server/clip-studio-functions";
 import { replaceCueAt, resetAllCues } from "#/modules/videos/ui/studio/cue-editing";
 import { readDraftBackup } from "#/modules/videos/ui/studio/draft-backup";
@@ -11,7 +12,7 @@ import { createHistory, studioHistoryReducer } from "#/modules/videos/ui/studio/
 import { useDraftAutosave } from "#/modules/videos/ui/studio/use-draft-autosave";
 import type { DraftAutosave } from "#/modules/videos/ui/studio/use-draft-autosave";
 import { toErrorMessage } from "#/modules/videos/ui/to-error-message";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 
 const HUNDREDTHS = 100;
 
@@ -20,6 +21,7 @@ function roundTime(seconds: number): number {
     return Math.round(seconds * HUNDREDTHS) / HUNDREDTHS;
 }
 
+const INVALID_EDIT_MESSAGE = "Essa mudança não cabe nas regras do corte.";
 const RENDER_FAILED_MESSAGE = "Não foi possível enviar o corte para a Brasa. Tente novamente.";
 
 type DraftSettings = Omit<StudioDraft, "startSeconds" | "endSeconds" | "cues">;
@@ -33,6 +35,8 @@ export interface StudioEditor {
     autosave: DraftAutosave;
     isSendingRender: boolean;
     renderError: string | null;
+    /** Why the last edit was refused; null after an edit that went through. */
+    editError: string | null;
     undo: () => void;
     redo: () => void;
     updateSettings: (settings: Partial<DraftSettings>) => void;
@@ -65,7 +69,13 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
     );
     const [isSendingRender, setIsSendingRender] = useState(false);
     const [renderError, setRenderError] = useState<string | null>(null);
+    const [editError, setEditError] = useState<string | null>(null);
     const draft = history.present;
+    // The Studio re-renders every frame while playing; this compares every cue, so only redo it on edits.
+    const changeCount = useMemo(
+        () => countDraftChanges(draft, studio.applied),
+        [draft, studio.applied],
+    );
     const autosave = useDraftAutosave({
         videoId,
         clipId,
@@ -75,15 +85,26 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
     });
 
     // A step that changes nothing (a click on the option already picked) must not fill the undo list.
+    // A step the server would reject (a word too long, too many cues) is refused here with the
+    // reason, instead of failing every autosave later with a generic message.
     const apply = (next: StudioDraft): void => {
         if (JSON.stringify(next) === JSON.stringify(draft)) {
             return;
         }
 
+        const validation = studioDraftSchema.safeParse(next);
+
+        if (validation.success === false) {
+            const firstIssue = validation.error.issues[0];
+            setEditError(firstIssue?.message ?? INVALID_EDIT_MESSAGE);
+            return;
+        }
+
+        setEditError(null);
         dispatch({ type: "apply", draft: next });
     };
 
-    const fetchLatest = async (): Promise<ClipStudioView> =>
+    const fetchLatest = async (): Promise<ClipStudioState> =>
         getClipStudio({ data: { videoId, clipId } });
 
     const render = async (): Promise<"queued" | "conflict" | "failed"> => {
@@ -107,7 +128,7 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
 
             // Rendering moved the version on and made this draft the applied one.
             autosave.resync(autosave.readVersion() + 1, draft);
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
             return "queued";
         } catch (error) {
             setRenderError(toErrorMessage(error, RENDER_FAILED_MESSAGE));
@@ -133,12 +154,13 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
     return {
         draft,
         applied: studio.applied,
-        changeCount: countDraftChanges(draft, studio.applied),
+        changeCount,
         canUndo: history.past.length > 0,
         canRedo: history.future.length > 0,
         autosave,
         isSendingRender,
         renderError,
+        editError,
         undo: () => dispatch({ type: "undo" }),
         redo: () => dispatch({ type: "redo" }),
         updateSettings: (settings) => apply({ ...draft, ...settings }),

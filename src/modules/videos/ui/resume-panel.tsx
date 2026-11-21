@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { retryVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -49,7 +49,7 @@ export function ResumePanel({ video }: { video: VideoSummary }) {
     const resume = useMutation({
         mutationFn: () => retryVideo({ data: { videoId: video.id } }),
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
         },
     });
     const copy = resolveCopy(video);

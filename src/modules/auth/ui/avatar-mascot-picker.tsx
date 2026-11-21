@@ -31,7 +31,7 @@ export function AvatarMascotPicker({
                         aria-pressed={selectedIndex === index}
                         onClick={() => onPick(index)}
                         className={cn(
-                            "grid aspect-square place-items-center rounded-xl border bg-background outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50",
+                            "grid aspect-square place-items-center rounded-xl border bg-background outline-none transition-colors hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50",
                             "aria-pressed:border-primary aria-pressed:bg-primary/10",
                         )}
                     >

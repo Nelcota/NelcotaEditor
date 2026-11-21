@@ -1,10 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { getCurrentUser } from "#/modules/auth/server/get-current-user";
 import { AppLayout } from "#/modules/auth/ui/app-layout";
+import { currentUserQueryOptions } from "#/modules/auth/ui/current-user-query";
 
 export const Route = createFileRoute("/_app")({
-    beforeLoad: async () => {
-        const user = await getCurrentUser();
+    beforeLoad: async ({ context }) => {
+        const user = await context.queryClient.fetchQuery(currentUserQueryOptions());
 
         if (user === null) {
             throw redirect({ to: "/sign-in" });

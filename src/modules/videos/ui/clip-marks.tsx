@@ -44,7 +44,7 @@ export function ClipMarks({ clips, selectedClipId, durationSeconds }: ClipMarksP
                 "pointer-events-none absolute -inset-y-0.5 rounded-[3px]",
                 clip.status === "failed" && "bg-destructive/70",
                 clip.status !== "failed" && "bg-primary/60",
-                clip.id === selectedClipId && "z-[1] bg-primary shadow-[0_0_0_2px_white]",
+                clip.id === selectedClipId && "z-[1] bg-primary ring-2 ring-white",
             )}
             style={toMarkBox(clip, durationSeconds)}
         />

@@ -3,7 +3,7 @@ import path from "node:path";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
-import { TRANSCRIPTION_LANGUAGES, toWhisperLanguage } from "#/modules/preferences/preferences";
+import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/preferences";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import {
     EmptyUploadError,
@@ -18,6 +18,7 @@ import {
 } from "#/modules/videos/upload-limits";
 import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/videos/video-status";
 import { videos } from "#/modules/videos/videos.schema";
+import { truncateText } from "#/modules/videos/video-title";
 
 const MAX_FILE_NAME_LENGTH = 255;
 const HTTP_CREATED = 201;
@@ -50,7 +51,7 @@ function resolveTitle(query: UploadQuery): string {
         return query.title;
     }
 
-    const baseName = path.parse(query.fileName).name.trim().slice(0, MAX_TITLE_LENGTH);
+    const baseName = truncateText(path.parse(query.fileName).name.trim(), MAX_TITLE_LENGTH);
 
     if (baseName.length === 0) {
         return UPLOAD_PLACEHOLDER_TITLE;
@@ -133,7 +134,9 @@ async function insertUploadedVideo(video: NewUploadedVideo): Promise<void> {
             source: "upload",
             sourcePath,
             requestedClipCount: query.clipCount,
-            transcriptionLanguage: toWhisperLanguage(query.language),
+            // "" is stored as is: it means "detect automatically", unlike null (videos from before 0002).
+            transcriptionLanguage: query.language,
+            processingStartedAt: new Date(),
         });
     } catch (error) {
         await removeVideoDirectory(videoId);

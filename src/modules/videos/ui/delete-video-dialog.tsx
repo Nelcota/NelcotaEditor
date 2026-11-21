@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { deleteVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/video-views";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -29,7 +29,7 @@ export function DeleteVideoDialog({ video, isOpen, onOpenChange }: DeleteVideoDi
         mutationFn: () => deleteVideo({ data: { videoId: video.id } }),
         onSuccess: async () => {
             onOpenChange(false);
-            await queryClient.invalidateQueries({ queryKey: VIDEOS_QUERY_KEY });
+            await invalidateVideoQueries(queryClient);
             await navigate({ to: "/" });
         },
     });

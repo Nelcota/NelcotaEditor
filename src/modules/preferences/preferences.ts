@@ -24,12 +24,3 @@ export const DEFAULT_PREFERENCES: Preferences = {
     defaultClipCount: DEFAULT_CLIP_COUNT,
     transcriptionLanguage: "",
 };
-
-/** What the transcriber receives: null lets Whisper detect the language. */
-export function toWhisperLanguage(language: TranscriptionLanguage): string | null {
-    if (language.length === 0) {
-        return null;
-    }
-
-    return language;
-}

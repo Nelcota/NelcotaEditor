@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { TranscriptLineView } from "#/modules/transcription/transcript-view";
 import { SearchField } from "#/modules/videos/ui/search-field";
 import { TranscriptLines } from "#/modules/videos/ui/transcript-lines";
@@ -46,7 +46,9 @@ interface TranscriptBodyProps {
 /** The whole transcript, searchable; a line that matches nothing says so instead of going blank. */
 export function TranscriptBody({ lines, currentSeconds, onSeek }: TranscriptBodyProps) {
     const [query, setQuery] = useState("");
-    const visibleLines = filterLines(lines, query);
+    // The player re-renders this about four times a second; only redo the work when the text changes.
+    const visibleLines = useMemo(() => filterLines(lines, query), [lines, query]);
+    const fullText = useMemo(() => lines.map((line) => line.text).join("\n"), [lines]);
 
     if (lines.length === 0) {
         return (
@@ -56,11 +58,7 @@ export function TranscriptBody({ lines, currentSeconds, onSeek }: TranscriptBody
 
     return (
         <div className="grid gap-3">
-            <TranscriptToolbar
-                query={query}
-                onQueryChange={setQuery}
-                fullText={lines.map((line) => line.text).join("\n")}
-            />
+            <TranscriptToolbar query={query} onQueryChange={setQuery} fullText={fullText} />
             {visibleLines.length === 0 && (
                 <p className="text-sm text-muted-foreground">Nenhuma fala com “{query.trim()}”.</p>
             )}

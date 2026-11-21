@@ -6,7 +6,7 @@ export function MetricHelp({ label, help }: { label: string; help: string }) {
         <Tooltip>
             <TooltipTrigger
                 aria-label={`Sobre ${label}`}
-                className="grid size-6 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-none motion-safe:active:scale-[0.99]"
+                className="grid size-6 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none motion-safe:active:scale-[0.99]"
             >
                 <InfoCircleIcon aria-hidden="true" className="size-4" />
             </TooltipTrigger>

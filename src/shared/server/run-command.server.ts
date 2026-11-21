@@ -1,6 +1,9 @@
 import { ExecaError, execa } from "execa";
 
 const STDERR_IN_MESSAGE_LENGTH = 500;
+// Same as the processing job expiry: a stalled yt-dlp or ffmpeg must not outlive its job and keep
+// the only worker busy until someone cancels by hand.
+const MAX_COMMAND_MILLISECONDS = 6 * 60 * 60 * 1000;
 
 export class CommandFailedError extends Error {
     readonly stderr: string;
@@ -60,7 +63,11 @@ export async function runCommand(
     const subprocess = execa(command, args, {
         cwd: options.workingDirectory,
         cancelSignal: options.signal,
+        timeout: MAX_COMMAND_MILLISECONDS,
         all: true,
+        // The interleaved output is read line by line above, never as a whole: keeping it too
+        // would hold yt-dlp and ffmpeg progress for a 3-hour video in memory a third time.
+        buffer: { stdout: true, stderr: true, all: false },
     });
     const onOutputLine = options.onOutputLine;
 

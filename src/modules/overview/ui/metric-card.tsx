@@ -18,7 +18,7 @@ function FailedVideosLink() {
         <Link
             to="/"
             search={{ status: "failed" }}
-            className="rounded font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="rounded font-semibold text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none motion-safe:active:scale-[0.99]"
         >
             ver vídeos
         </Link>

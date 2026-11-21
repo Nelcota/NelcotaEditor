@@ -21,18 +21,23 @@ export function SeekThumbnail({ fileUrl, seconds, clipRank }: SeekThumbnailProps
     useEffect(() => {
         const video = videoRef.current;
 
-        if (video === null) {
+        // In a narrow player the frame is hidden by a container query; a hidden video still
+        // downloads, so the source is only attached when the frame actually shows.
+        if (video === null || video.getClientRects().length === 0) {
             return;
         }
 
+        if (video.getAttribute("src") === null) {
+            video.src = fileUrl;
+        }
+
         video.currentTime = frameSeconds;
-    }, [frameSeconds]);
+    }, [fileUrl, frameSeconds]);
 
     return (
         <div className="grid justify-items-center gap-1.5">
             <video
                 ref={videoRef}
-                src={fileUrl}
                 muted
                 playsInline
                 preload="metadata"

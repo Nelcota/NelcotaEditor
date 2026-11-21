@@ -21,12 +21,17 @@ import { StudioTimeline } from "#/modules/videos/ui/studio/studio-timeline";
 import { StudioToolbar } from "#/modules/videos/ui/studio/studio-toolbar";
 import { computeTimelineWindow, clamp } from "#/modules/videos/ui/studio/timeline-geometry";
 import { useStudioEditor } from "#/modules/videos/ui/studio/use-studio-editor";
+import { usePlaybackValue } from "#/modules/videos/ui/studio/playback-clock";
 import { useStudioPlayback } from "#/modules/videos/ui/studio/use-studio-playback";
 import { useStudioShortcuts } from "#/modules/videos/ui/studio/use-studio-shortcuts";
 import { cn } from "#/shared/ui/cn";
 import { SegmentedControl } from "#/shared/ui/segmented-control";
+import { useMediaQuery } from "#/shared/ui/use-media-query";
 
 type PhonePanel = "captions" | "style" | "trim";
+
+// Tailwind's lg breakpoint, where the timeline shows.
+const DESKTOP_MEDIA_QUERY = "(min-width: 64rem)";
 
 const PHONE_PANELS = [
     { value: "captions", label: "Legendas" },
@@ -81,7 +86,11 @@ export function StudioWorkspace({
         editor.applied,
         studio.videoDurationSeconds,
     );
-    const playingIndex = findCueAt(draft.cues, playback.currentSeconds);
+    // Only the spoken cue's index re-renders the Studio, not every frame of the clock.
+    const playingIndex = usePlaybackValue(playback.clock, (seconds) =>
+        findCueAt(draft.cues, seconds),
+    );
+    const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
 
     const sendRender = async (): Promise<void> => {
         const outcome = await editor.render();
@@ -102,20 +111,20 @@ export function StudioWorkspace({
 
     const markStart = (): void => {
         const earliest = Math.max(0, draft.endSeconds - MAX_CLIP_SECONDS);
-        const start = clamp(playback.currentSeconds, earliest, draft.endSeconds - MIN_CLIP_SECONDS);
+        const start = clamp(playback.clock.read(), earliest, draft.endSeconds - MIN_CLIP_SECONDS);
         editor.trim(start, draft.endSeconds);
     };
 
     const markEnd = (): void => {
         const latest = Math.min(durationSeconds, draft.startSeconds + MAX_CLIP_SECONDS);
-        const end = clamp(playback.currentSeconds, draft.startSeconds + MIN_CLIP_SECONDS, latest);
+        const end = clamp(playback.clock.read(), draft.startSeconds + MIN_CLIP_SECONDS, latest);
         editor.trim(draft.startSeconds, end);
     };
 
     useStudioShortcuts(
         {
             togglePlay: playback.togglePlay,
-            skip: (delta) => playback.seek(playback.currentSeconds + delta),
+            skip: (delta) => playback.seek(playback.clock.read() + delta),
             markStart,
             markEnd,
             undo: editor.undo,
@@ -140,6 +149,11 @@ export function StudioWorkspace({
             {editor.renderError !== null && (
                 <p role="alert" className="text-sm text-destructive">
                     {editor.renderError}
+                </p>
+            )}
+            {editor.editError !== null && (
+                <p role="alert" className="text-sm text-destructive">
+                    {editor.editError}
                 </p>
             )}
             <StudioToolbar
@@ -183,13 +197,13 @@ export function StudioWorkspace({
                 <CaptionList
                     editor={editor}
                     words={studio.words}
-                    currentSeconds={playback.currentSeconds}
+                    playingIndex={playingIndex}
                     openIndex={openIndex}
                     onOpen={openCue}
                     onSeek={playback.seek}
                     isLocked={isRendering}
                     className={cn(
-                        "order-3 max-h-[70vh] lg:flex lg:h-[600px]",
+                        "order-3 max-h-[70dvh] lg:flex lg:h-[600px]",
                         phonePanel !== "captions" && "hidden",
                     )}
                 />
@@ -197,18 +211,19 @@ export function StudioWorkspace({
                     <MobileTrim
                         editor={editor}
                         videoDurationSeconds={durationSeconds}
-                        currentSeconds={playback.currentSeconds}
+                        readCurrentSeconds={playback.clock.read}
                         isLocked={isRendering}
                     />
                 </div>
             </div>
-            <div className="hidden lg:block">
+            {/* Not just hidden on phones: its filmstrip loads ten videos that nobody would see. */}
+            {isDesktop === true && (
                 <StudioTimeline
                     editor={editor}
                     window={timelineWindow}
                     sourceUrl={video.originalFileUrl}
                     videoDurationSeconds={durationSeconds}
-                    currentSeconds={playback.currentSeconds}
+                    clock={playback.clock}
                     playingIndex={playingIndex}
                     openIndex={openIndex}
                     isLocked={isRendering}
@@ -224,7 +239,7 @@ export function StudioWorkspace({
                     onMarkStart={markStart}
                     onMarkEnd={markEnd}
                 />
-            </div>
+            )}
             <ConflictDialog
                 isOpen={hasConflict === true || editor.autosave.status === "conflict"}
                 onTakeTheirs={async () => {

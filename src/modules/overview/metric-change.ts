@@ -57,6 +57,11 @@ export function describeChange(metric: MetricView, options: ChangeOptions): Metr
         return null;
     }
 
+    // Nothing now and nothing before is an empty period, not "unchanged": the card says so instead.
+    if (current === 0 && (previous ?? 0) === 0) {
+        return null;
+    }
+
     const difference = current - (previous ?? 0);
     const direction = toDirection(difference);
     const tone = toTone(direction, options.betterWhen);

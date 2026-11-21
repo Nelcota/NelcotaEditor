@@ -9,6 +9,7 @@ import { pluralize } from "#/modules/videos/ui/pluralize";
 import type { SaveStatus } from "#/modules/videos/ui/studio/use-draft-autosave";
 import type { StudioEditor } from "#/modules/videos/ui/studio/use-studio-editor";
 import { Button } from "#/shared/ui/button";
+import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { cn } from "#/shared/ui/cn";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
 
@@ -54,7 +55,7 @@ function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
                     onClick={async () => {
                         await editor.autosave.flush();
                     }}
-                    className="rounded font-semibold underline underline-offset-2 outline-none focus-visible:ring-4 focus-visible:ring-ring/50"
+                    className="rounded font-semibold underline underline-offset-2 outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                 >
                     Tentar de novo
                 </button>
@@ -119,26 +120,30 @@ export function StudioToolbar(props: StudioToolbarProps): ReactNode {
                     ))}
                 </SelectContent>
             </Select>
-            <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Desfazer"
-                title="Desfazer (Ctrl+Z)"
-                disabled={editor.canUndo === false || isRendering === true}
-                onClick={editor.undo}
-            >
-                <UndoLeftIcon aria-hidden="true" />
-            </Button>
-            <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Refazer"
-                title="Refazer (Ctrl+Shift+Z)"
-                disabled={editor.canRedo === false || isRendering === true}
-                onClick={editor.redo}
-            >
-                <UndoRightIcon aria-hidden="true" />
-            </Button>
+            <HintTooltip label="Desfazer" shortcut="Ctrl+Z">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Desfazer"
+                    aria-keyshortcuts="Control+Z"
+                    disabled={editor.canUndo === false || isRendering === true}
+                    onClick={editor.undo}
+                >
+                    <UndoLeftIcon aria-hidden="true" />
+                </Button>
+            </HintTooltip>
+            <HintTooltip label="Refazer" shortcut="Ctrl+Shift+Z">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Refazer"
+                    aria-keyshortcuts="Control+Shift+Z"
+                    disabled={editor.canRedo === false || isRendering === true}
+                    onClick={editor.redo}
+                >
+                    <UndoRightIcon aria-hidden="true" />
+                </Button>
+            </HintTooltip>
             <span className="flex-1" />
             {isRendering === false && <SaveState editor={editor} />}
             {changeCount > 0 && isRendering === false && (

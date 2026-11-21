@@ -1,10 +1,11 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { toAvatar } from "#/modules/auth/avatar";
 import type { Avatar } from "#/modules/auth/avatar";
 import { applyAvatarChange } from "#/modules/auth/client/apply-avatar-change";
 import { AvatarMascotPicker } from "#/modules/auth/ui/avatar-mascot-picker";
+import { forgetCurrentUser } from "#/modules/auth/ui/current-user-query";
 import { AvatarPhotoPanel } from "#/modules/auth/ui/avatar-photo-panel";
 import {
     Dialog,
@@ -31,13 +32,16 @@ interface AvatarDialogProps {
 
 export function AvatarDialog({ isOpen, onOpenChange }: AvatarDialogProps): ReactNode {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
     const avatar = toAvatar(user.image);
     const change = useMutation({
         mutationFn: applyAvatarChange,
-        // The signed-in user lives in the route context, so reload it to show the new avatar.
+        // The signed-in user lives in the route context (and its cache), so reload it to show the
+        // new avatar.
         onSuccess: async () => {
+            await forgetCurrentUser(queryClient);
             await router.invalidate();
         },
     });

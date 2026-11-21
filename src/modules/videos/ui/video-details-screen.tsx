@@ -18,7 +18,7 @@ function BackLink() {
     return (
         <Link
             to="/"
-            className="inline-flex w-fit items-center gap-1.5 rounded-md text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/50 motion-safe:active:scale-[0.99] md:hidden"
+            className="inline-flex w-fit items-center gap-1.5 rounded-md text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99] md:hidden"
         >
             <ArrowLeftIcon className="size-4" aria-hidden="true" />
             Seus vídeos

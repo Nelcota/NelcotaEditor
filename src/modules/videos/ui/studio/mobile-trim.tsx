@@ -11,7 +11,8 @@ const STEP_SECONDS = 0.5;
 interface MobileTrimProps {
     editor: StudioEditor;
     videoDurationSeconds: number;
-    currentSeconds: number;
+    /** Read on tap: the preview's time changes every frame, so it is not a prop. */
+    readCurrentSeconds: () => number;
     isLocked: boolean;
 }
 
@@ -55,7 +56,7 @@ function EdgeRow({ label, seconds, isLocked, onMove }: EdgeRowProps): ReactNode 
 
 /** Phones have no room to drag a timeline: the edges move in half-second steps instead. */
 export function MobileTrim(props: MobileTrimProps): ReactNode {
-    const { editor, videoDurationSeconds, currentSeconds, isLocked } = props;
+    const { editor, videoDurationSeconds, readCurrentSeconds, isLocked } = props;
     const draft = editor.draft;
     const lengthSeconds = draft.endSeconds - draft.startSeconds;
 
@@ -98,7 +99,7 @@ export function MobileTrim(props: MobileTrimProps): ReactNode {
                 variant="outline"
                 className="h-11"
                 disabled={isLocked}
-                onClick={() => moveStart(currentSeconds)}
+                onClick={() => moveStart(readCurrentSeconds())}
             >
                 Usar o ponto da prévia como início
             </Button>

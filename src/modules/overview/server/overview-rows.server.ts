@@ -3,6 +3,8 @@ import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { transcripts } from "#/modules/transcription/transcription.schema";
+import { CLIP_VIEW_COLUMNS } from "#/modules/videos/server/video-queries.server";
+import type { ClipViewRow } from "#/modules/videos/server/video-queries.server";
 import { FINISHED_VIDEO_STATUSES } from "#/modules/videos/video-status";
 import type { VideoStatus } from "#/modules/videos/video-status";
 import { videos } from "#/modules/videos/videos.schema";
@@ -12,12 +14,13 @@ export interface OverviewVideoRow {
     status: VideoStatus;
     createdAt: Date;
     finishedAt: Date | null;
+    processingStartedAt: Date | null;
     durationSeconds: number | null;
     hasTranscript: boolean;
 }
 
 export interface OverviewClipRow {
-    clip: Clip;
+    clip: ClipViewRow;
     videoId: string;
     videoTitle: string;
 }
@@ -33,6 +36,7 @@ export async function listFinishedVideos(
             status: videos.status,
             createdAt: videos.createdAt,
             finishedAt: videos.finishedAt,
+            processingStartedAt: videos.processingStartedAt,
             durationSeconds: videos.durationSeconds,
             transcriptVideoId: transcripts.videoId,
         })
@@ -68,7 +72,7 @@ export async function listClipStatuses(
 
 export async function listReadyClips(userId: string, since: Date): Promise<Array<OverviewClipRow>> {
     return db
-        .select({ clip: clips, videoId: videos.id, videoTitle: videos.title })
+        .select({ clip: CLIP_VIEW_COLUMNS, videoId: videos.id, videoTitle: videos.title })
         .from(clips)
         .innerJoin(videos, eq(videos.id, clips.videoId))
         .where(

@@ -14,6 +14,7 @@ import { TimeLabel } from "#/shared/ui/media-player/media-readouts";
 import { MediaSurface } from "#/shared/ui/media-player/media-surface";
 import { SeekBar } from "#/shared/ui/media-player/seek-bar";
 import { useMediaPlayer } from "#/shared/ui/media-player/use-media-player";
+import { useHasBeenNearViewport } from "#/shared/ui/use-has-been-near-viewport";
 
 /** A clip that is not ready shows the crew member on its stage. */
 const CLIP_STAGE: Record<ClipStatus, VideoStatus> = {
@@ -41,6 +42,14 @@ function PlayablePreview({ clip, fileUrl }: { clip: ClipView; fileUrl: string })
     const containerRef = useRef<HTMLDivElement>(null);
     const player = useMediaPlayer(videoRef, containerRef);
     const media = player.media;
+    // The clip list can hold hundreds of clips; each source is a request, so only near ones load.
+    const isNearViewport = useHasBeenNearViewport(containerRef);
+    let source: string | undefined = undefined;
+
+    if (isNearViewport === true) {
+        // The media fragment makes the browser show an early frame as the cover.
+        source = `${fileUrl}#t=0.1`;
+    }
 
     return (
         <MediaSurface
@@ -74,9 +83,10 @@ function PlayablePreview({ clip, fileUrl }: { clip: ClipView; fileUrl: string })
             }
         >
             <video
+                disablePictureInPicture
+                disableRemotePlayback
                 ref={videoRef}
-                // The media fragment makes the browser show an early frame as the cover.
-                src={`${fileUrl}#t=0.1`}
+                src={source}
                 playsInline
                 preload="metadata"
                 className={cn("object-cover", player.isFullscreen === true && "object-contain")}

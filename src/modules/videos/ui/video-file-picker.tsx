@@ -21,8 +21,9 @@ export function VideoFilePicker({ disabled, problem, onFileChosen }: VideoFilePi
             <label
                 htmlFor={fileInputId}
                 className={cn(
-                    "inline-flex cursor-pointer items-center gap-2 rounded-md text-sm font-semibold outline-none transition-colors hover:text-primary has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/50 motion-safe:active:scale-[0.99]",
+                    "inline-flex cursor-pointer items-center gap-2 rounded-md text-sm font-semibold outline-none transition-colors has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/70",
                     disabled === true && "cursor-not-allowed opacity-50",
+                    disabled === false && "hover:text-primary motion-safe:active:scale-[0.99]",
                 )}
             >
                 <UploadIcon className="size-[18px]" aria-hidden="true" />

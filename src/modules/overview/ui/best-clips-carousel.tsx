@@ -81,7 +81,7 @@ export function BestClipsCarousel({ clips, onWiden }: BestClipsCarouselProps) {
                 </h2>
                 <Link
                     to="/clips"
-                    className="rounded text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    className="rounded text-sm font-semibold text-muted-foreground hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 focus-visible:outline-none"
                 >
                     Ver todos
                 </Link>

@@ -1,11 +1,15 @@
-import { MAX_CLIP_SECONDS, MIN_CLIP_SECONDS } from "#/modules/highlights/highlight-limits";
+import { truncateText } from "#/modules/videos/video-title";
+import {
+    MAX_CLIP_SECONDS,
+    MAX_SCORE,
+    MIN_CLIP_SECONDS,
+    MIN_SCORE,
+} from "#/modules/highlights/highlight-limits";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 
 const START_PADDING_SECONDS = 0.15;
 const END_PADDING_SECONDS = 0.35;
 const OVERLAP_TOLERANCE_SECONDS = 1;
-const MIN_SCORE = 1;
-const MAX_SCORE = 100;
 const MAX_TITLE_LENGTH = 100;
 const MAX_REASON_LENGTH = 300;
 
@@ -87,8 +91,8 @@ function cleanCandidate(candidate: HighlightCandidate, range: TimeRange): Highli
 
     return {
         ...range,
-        title: candidate.title.trim().slice(0, MAX_TITLE_LENGTH),
-        reason: candidate.reason.trim().slice(0, MAX_REASON_LENGTH),
+        title: truncateText(candidate.title.trim(), MAX_TITLE_LENGTH),
+        reason: truncateText(candidate.reason.trim(), MAX_REASON_LENGTH),
         score: Math.min(MAX_SCORE, Math.max(MIN_SCORE, roundedScore)),
     };
 }

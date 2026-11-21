@@ -4,6 +4,7 @@ import { AppSidebar } from "#/modules/auth/ui/app-sidebar";
 import { MobileTopBar } from "#/modules/auth/ui/mobile-top-bar";
 import { useSidebarCollapsed } from "#/modules/auth/ui/use-sidebar-collapsed";
 import { cn } from "#/shared/ui/cn";
+import { NavigationProgress } from "#/shared/ui/navigation-progress";
 import { OfflineBanner } from "#/shared/ui/offline-banner";
 import { TooltipProvider } from "#/shared/ui/tooltip";
 
@@ -16,6 +17,13 @@ export function AppLayout(): ReactNode {
 
     return (
         <TooltipProvider>
+            <NavigationProgress />
+            <a
+                href="#main"
+                className="sr-only rounded-md bg-primary px-4 py-2 font-semibold text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus-visible:ring-4 focus-visible:ring-ring/70"
+            >
+                Pular para o conteúdo
+            </a>
             <div className="min-h-dvh md:h-dvh md:p-2">
                 <div
                     className={cn(
@@ -35,9 +43,13 @@ export function AppLayout(): ReactNode {
                             onToggleCollapsed={sidebar.toggle}
                         />
                     </aside>
-                    <div className="min-w-0 md:overflow-y-auto">
+                    <div className="min-w-0 md:overflow-y-auto md:[scrollbar-gutter:stable]">
                         <MobileTopBar />
-                        <main className="mx-auto grid max-w-[1200px] grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-6 pb-12 md:px-8 md:pt-9">
+                        <main
+                            id="main"
+                            tabIndex={-1}
+                            className="mx-auto grid outline-none max-w-[1200px] grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-6 pb-12 md:px-8 md:pt-9"
+                        >
                             <OfflineBanner />
                             <Outlet />
                         </main>

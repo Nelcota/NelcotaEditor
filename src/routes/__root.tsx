@@ -12,6 +12,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         meta: [
             { charSet: "utf-8" },
             { name: "viewport", content: "width=device-width, initial-scale=1" },
+            { name: "color-scheme", content: "dark" },
+            // Matches --background so the mobile browser bar blends with the app.
+            { name: "theme-color", content: "#0d0d0f" },
             { title: "Nelcota — cortes com legenda" },
         ],
         links: [

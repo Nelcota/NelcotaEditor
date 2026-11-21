@@ -67,13 +67,18 @@ function summarizeVideoMetrics(window: PeriodWindow, rows: Array<OverviewVideoRo
         ),
         averageProcessingSeconds: summarizeMetric(
             bucketByDay(window, rows, (row) => {
-                if (row.status !== "done" || row.finishedAt === null) {
+                const finishedAt = row.finishedAt;
+                const processingStartedAt = row.processingStartedAt;
+
+                // Measured from the run's start, not createdAt: a re-render weeks later would
+                // count weeks. Videos from before the start was recorded stay out of the average.
+                if (row.status !== "done" || finishedAt === null || processingStartedAt === null) {
                     return null;
                 }
 
-                const elapsed = row.finishedAt.getTime() - row.createdAt.getTime();
+                const elapsed = finishedAt.getTime() - processingStartedAt.getTime();
 
-                return { date: row.finishedAt, value: elapsed / MILLISECONDS_PER_SECOND };
+                return { date: finishedAt, value: elapsed / MILLISECONDS_PER_SECOND };
             }),
             "average",
         ),

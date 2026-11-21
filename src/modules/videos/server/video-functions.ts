@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
-import { TRANSCRIPTION_LANGUAGES, toWhisperLanguage } from "#/modules/preferences/preferences";
+import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/preferences";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import {
     countReadyClips,
@@ -25,16 +25,25 @@ import {
     isVideoResumable,
 } from "#/modules/videos/video-status";
 import type { VideoDetails, VideoSummary } from "#/modules/videos/video-views";
+import { toStoredVideoTitle } from "#/modules/videos/video-title";
 import { videos } from "#/modules/videos/videos.schema";
 import { fetchYoutubePreview } from "#/modules/videos/server/fetch-youtube-preview.server";
-import { toYoutubeVideoId, youtubeUrlSchema } from "#/modules/videos/youtube-url";
+import {
+    toCanonicalYoutubeUrl,
+    toYoutubeVideoId,
+    youtubeUrlSchema,
+} from "#/modules/videos/youtube-url";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const videoIdInputSchema = z.object({ videoId: z.uuid() });
 
+// The client checks the id too, but a direct call with a channel or playlist link would make
+// yt-dlp walk every entry, so the server requires a single video and keeps only its canonical link.
 const youtubeVideoInputSchema = z.object({
-    url: youtubeUrlSchema,
+    url: youtubeUrlSchema
+        .refine((url) => toYoutubeVideoId(url) !== null, "Cole o link de um vídeo do YouTube.")
+        .transform((url) => toCanonicalYoutubeUrl(url)),
     clipCount: z.number().int().min(MIN_CLIP_COUNT).max(MAX_CLIP_COUNT),
     language: z.enum(TRANSCRIPTION_LANGUAGES),
 });
@@ -53,7 +62,7 @@ async function resolveYoutubeTitle(url: string): Promise<string> {
         const preview = await fetchYoutubePreview(youtubeId);
 
         if (preview.kind === "found") {
-            return preview.title;
+            return toStoredVideoTitle(preview.title) ?? YOUTUBE_PLACEHOLDER_TITLE;
         }
 
         return YOUTUBE_PLACEHOLDER_TITLE;
@@ -101,7 +110,9 @@ export const createYoutubeVideo = createServerFn({ method: "POST" })
             source: "youtube",
             sourceUrl: data.url,
             requestedClipCount: data.clipCount,
-            transcriptionLanguage: toWhisperLanguage(data.language),
+            // "" is stored as is: it means "detect automatically", unlike null (videos from before 0002).
+            transcriptionLanguage: data.language,
+            processingStartedAt: new Date(),
         });
         await enqueueVideoProcessing(videoId);
         return { videoId };
