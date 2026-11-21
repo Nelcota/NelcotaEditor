@@ -72,9 +72,9 @@ export function SelectedClipPanel({
         <section
             aria-labelledby="selected-clip-title"
             aria-live="polite"
-            className="grid grid-cols-[96px_minmax(0,1fr)] gap-4 rounded-2xl border bg-popover p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto]"
+            className="grid grid-cols-[96px_minmax(0,1fr)] gap-4 rounded-2xl border bg-popover p-4 sm:p-5 @5xl:grid-cols-[minmax(0,1fr)_auto]"
         >
-            <div className="lg:hidden">
+            <div className="@5xl:hidden">
                 <ClipPreview key={clip.id} clip={clip} />
             </div>
             <div className="grid min-w-0 content-start gap-2">
@@ -100,7 +100,7 @@ export function SelectedClipPanel({
             <div className="col-span-2 grid gap-3 sm:hidden">
                 <BrilhoReason clip={clip} />
             </div>
-            <div className="col-span-2 flex flex-wrap gap-2 [&>*]:flex-1 sm:[&>*]:flex-none lg:col-span-1 lg:flex-col lg:[&>*]:w-full">
+            <div className="col-span-2 flex flex-wrap gap-2 [&>*]:flex-1 sm:[&>*]:flex-none @5xl:col-span-1 @5xl:flex-col @5xl:[&>*]:w-full">
                 <ClipActions videoId={videoId} clip={clip} canRetry={canRetry} />
             </div>
         </section>

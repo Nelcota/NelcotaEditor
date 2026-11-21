@@ -79,7 +79,7 @@ function TranscriptToggle({ isOpen, onToggle }: { isOpen: boolean; onToggle: () 
                     aria-controls={TRANSCRIPT_PANEL_ID}
                     aria-describedby={TRANSCRIPT_HINT_ID}
                     onClick={onToggle}
-                    className="group flex w-full items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                    className="group flex w-full items-center justify-between gap-3 rounded-lg text-start outline-none focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                 >
                     Transcrição
                     <AltArrowDownIcon

@@ -3,11 +3,12 @@ import * as React from "react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import { cn } from "#/shared/ui/cn";
 
-type SheetSide = "left" | "right";
+/** Logical sides, so the sheet comes in from the leading edge in either text direction. */
+type SheetSide = "start" | "end";
 
 const SIDE_CLASSES: Record<SheetSide, string> = {
-    left: "inset-y-0 left-0 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
-    right: "inset-y-0 right-0 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+    start: "inset-y-0 start-0 border-e data-[state=closed]:slide-out-to-start data-[state=open]:slide-in-from-start",
+    end: "inset-y-0 end-0 border-s data-[state=closed]:slide-out-to-end data-[state=open]:slide-in-from-end",
 };
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
@@ -25,7 +26,7 @@ function SheetClose({ ...props }: React.ComponentProps<typeof SheetPrimitive.Clo
 function SheetContent({
     className,
     children,
-    side = "right",
+    side = "end",
     ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & { side?: SheetSide }) {
     return (
@@ -44,7 +45,7 @@ function SheetContent({
                 {...props}
             >
                 {children}
-                <SheetPrimitive.Close className="absolute top-3 right-3 grid size-8 pointer-coarse:size-11 place-items-center rounded-md text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]">
+                <SheetPrimitive.Close className="absolute top-3 end-3 grid size-8 pointer-coarse:size-11 place-items-center rounded-md text-muted-foreground outline-none transition-[color,background-color,box-shadow,scale] hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]">
                     <CloseIcon className="size-5" aria-hidden="true" />
                     <span className="sr-only">Fechar</span>
                 </SheetPrimitive.Close>

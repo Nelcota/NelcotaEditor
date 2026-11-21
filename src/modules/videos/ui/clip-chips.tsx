@@ -1,9 +1,10 @@
 import type { ClipView } from "#/modules/clips/clip-view";
 import { cn } from "#/shared/ui/cn";
 
-// Grows to two lines instead of cutting the title: picking a clip means reading its name.
+// Grows to two lines instead of cutting the title: picking a clip means reading its name. It never
+// grows past its row, so a title with no spaces breaks anywhere instead of overflowing.
 const CHIP_CLASS =
-    "group inline-flex min-h-10 max-w-80 items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pr-3 pl-1.5 text-sm font-bold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
+    "group inline-flex min-h-10 max-w-[min(20rem,100%)] items-center gap-2 rounded-[1.25rem] border bg-popover py-1.5 pe-3 ps-1.5 text-sm font-bold outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]";
 
 interface ClipChipsProps {
     clips: Array<ClipView>;
@@ -33,7 +34,7 @@ function ScoreOrState({ clip }: { clip: ClipView }) {
 }
 
 const PLACEHOLDER_CLASS =
-    "inline-flex h-10 items-center gap-2 rounded-full border border-dashed py-0 pr-3 pl-1.5 text-sm text-muted-foreground";
+    "inline-flex h-10 items-center gap-2 rounded-full border border-dashed py-0 pe-3 ps-1.5 text-sm text-muted-foreground";
 
 /** A slot for a clip Brilho has not picked yet; the number continues after the real ones. */
 function PlaceholderChip({ number }: { number: number }) {
@@ -72,7 +73,9 @@ export function ClipChips({
                     <span className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary text-xs text-secondary-foreground tabular-nums">
                         {index + 1}
                     </span>
-                    <span className="line-clamp-2 text-start leading-snug">{clip.title}</span>
+                    <span className="line-clamp-2 min-w-0 text-start leading-snug [overflow-wrap:anywhere]">
+                        {clip.title}
+                    </span>
                     <ScoreOrState clip={clip} />
                 </button>
             ))}

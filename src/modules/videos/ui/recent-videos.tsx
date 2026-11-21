@@ -120,7 +120,7 @@ function RecentVideosHeading({
                 aria-expanded={isHidden === false}
                 aria-controls={listId}
                 onClick={onToggle}
-                className="flex h-8 w-full items-center justify-between rounded-lg px-3 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                className="flex min-h-8 w-full items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-start text-xs font-bold tracking-wider text-muted-foreground uppercase transition-[color,background-color,border-color,box-shadow,scale] outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
             >
                 <span className="flex items-center gap-2">
                     <HistoryIcon aria-hidden="true" className="size-4" />
@@ -128,7 +128,10 @@ function RecentVideosHeading({
                 </span>
                 <AltArrowDownIcon
                     aria-hidden="true"
-                    className={cn("size-4 transition-transform", isHidden === true && "-rotate-90")}
+                    className={cn(
+                        "size-4 transition-transform",
+                        isHidden === true && "-rotate-90 rtl:rotate-90",
+                    )}
                 />
             </button>
         </h2>

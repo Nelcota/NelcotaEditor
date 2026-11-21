@@ -31,7 +31,7 @@ export function MobileTopBar(): ReactNode {
                         <HamburgerMenuIcon aria-hidden="true" />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" aria-describedby={undefined} className="pt-3.5">
+                <SheetContent side="start" aria-describedby={undefined} className="pt-3.5">
                     <SheetTitle className="sr-only">Menu</SheetTitle>
                     <AppSidebar isCollapsed={false} />
                 </SheetContent>

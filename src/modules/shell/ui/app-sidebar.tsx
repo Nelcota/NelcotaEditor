@@ -73,7 +73,7 @@ export function AppSidebar({ isCollapsed, onToggleCollapsed }: AppSidebarProps):
                     className={cn(
                         "flex min-w-0 items-center gap-2.5 rounded-lg outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]",
                         // An auto margin instead of flex-1 keeps the link clear of the sheet's close button.
-                        isCollapsed === false && "mr-auto",
+                        isCollapsed === false && "me-auto",
                     )}
                 >
                     <BrandMark className="size-10" />

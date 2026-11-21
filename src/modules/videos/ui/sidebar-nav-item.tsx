@@ -32,7 +32,7 @@ function ActivityDot(): ReactNode {
     return (
         <span
             aria-hidden="true"
-            className="absolute top-2 left-[calc(50%+4px)] size-2 rounded-full bg-primary ring-2 ring-card"
+            className="absolute top-2 start-[calc(50%+4px)] size-2 rounded-full bg-primary ring-2 ring-card"
         />
     );
 }
@@ -60,7 +60,7 @@ export function SidebarNavContent({
             <Icon aria-hidden="true" />
             {label}
             {count !== undefined && (
-                <span className="ml-auto text-meta font-bold text-muted-foreground tabular-nums">
+                <span className="ms-auto text-meta font-bold text-muted-foreground tabular-nums">
                     {count}
                 </span>
             )}
