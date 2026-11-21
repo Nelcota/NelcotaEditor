@@ -1,4 +1,4 @@
-import { stat } from "node:fs/promises";
+import { rm, stat } from "node:fs/promises";
 import { toOverallPercent } from "#/modules/processing/processing-stages";
 import { MAX_UPLOAD_BYTES } from "#/modules/videos/upload-limits";
 import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/videos/video-status";
@@ -70,9 +70,15 @@ export async function prepareVideoSource(video: Video, signal: AbortSignal): Pro
 
     // yt-dlp limits each format to 4 GB, but video and audio are merged after that check:
     // the same 5 GB ceiling as uploads is enforced on the final file, whatever its origin.
-    const fileStats = await stat(resolveStoragePath(sourcePath));
+    const absoluteSourcePath = resolveStoragePath(sourcePath);
+    const fileStats = await stat(absoluteSourcePath);
 
     if (fileStats.size > MAX_UPLOAD_BYTES) {
+        // A download that is never saved would otherwise sit on disk and count against the quota.
+        if (video.sourcePath === null) {
+            await rm(absoluteSourcePath, { force: true });
+        }
+
         throw new UserFacingError("O vídeo é grande demais. O máximo é 5 GB.");
     }
 

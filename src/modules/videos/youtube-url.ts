@@ -53,7 +53,6 @@ function readIdFromPath(url: URL): string | null {
     return null;
 }
 
-/** The 11-character id of a YouTube link (watch, youtu.be, shorts, live, embed), or null. */
 /** The plain watch link of a video: drops playlist, timestamp and tracking parameters. */
 export function toCanonicalYoutubeUrl(value: string): string {
     const videoId = toYoutubeVideoId(value);
@@ -65,6 +64,7 @@ export function toCanonicalYoutubeUrl(value: string): string {
     return `https://www.youtube.com/watch?v=${videoId}`;
 }
 
+/** The 11-character id of a YouTube link (watch, youtu.be, shorts, live, embed), or null. */
 export function toYoutubeVideoId(value: string): string | null {
     const url = URL.parse(value);
 

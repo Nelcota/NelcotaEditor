@@ -9,7 +9,11 @@ export const videoTitleSchema = z
     .string()
     .trim()
     .min(1, "Digite um título.")
-    .max(MAX_VIDEO_TITLE_LENGTH, `O título pode ter até ${MAX_VIDEO_TITLE_LENGTH} caracteres.`);
+    // Counted in code points, like truncateText and the database's char_length CHECK: a stored
+    // title with emojis must still pass when the form saves it back.
+    .refine((title) => Array.from(title).length <= MAX_VIDEO_TITLE_LENGTH, {
+        message: `O título pode ter até ${MAX_VIDEO_TITLE_LENGTH} caracteres.`,
+    });
 
 export const renameVideoFormSchema = z.object({ title: videoTitleSchema });
 

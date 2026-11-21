@@ -150,7 +150,7 @@
     }
 
     /* Double-clicking a control must not select its label, and fast taps must not zoom on iOS. */
-    :where(button, [role="button"], [role="tab"], [role="radio"], [role="slider"], a[href]) {
+    :where(button, [role="button"], [role="tab"], [role="radio"], [role="slider"]) {
         user-select: none;
         touch-action: manipulation;
     }
@@ -313,7 +313,7 @@
     }
 
     [data-state="checked"],
-    [data-state="active"],
+    [role="tab"][data-state="active"],
     [aria-pressed="true"],
     [aria-checked="true"],
     [aria-current="page"] {

@@ -1,10 +1,9 @@
 import type { SessionUser } from "#/modules/auth/session-user";
 import { auth } from "#/modules/auth/server/auth.server";
 
-/** Reads the signed-in user from the request cookies. Never trust a user id sent by the client. */
-export async function getSessionUser(headers: Headers): Promise<SessionUser | null> {
-    const authSession = await auth.api.getSession({ headers });
+type AuthSession = Awaited<ReturnType<typeof auth.api.getSession>>;
 
+function toSessionUser(authSession: AuthSession): SessionUser | null {
     if (authSession === null) {
         return null;
     }
@@ -17,4 +16,24 @@ export async function getSessionUser(headers: Headers): Promise<SessionUser | nu
         email: sessionUser.email,
         image: sessionUser.image ?? null,
     };
+}
+
+/**
+ * Reads the signed-in user from the request cookies (or the 5-minute signed cookie cache).
+ * Never trust a user id sent by the client.
+ */
+export async function getSessionUser(headers: Headers): Promise<SessionUser | null> {
+    const authSession = await auth.api.getSession({ headers });
+
+    return toSessionUser(authSession);
+}
+
+/**
+ * Same as getSessionUser, but skips the cookie cache: the name and photo are written straight to
+ * the database, and a session ended on another device must stop the app on the next navigation.
+ */
+export async function getFreshSessionUser(headers: Headers): Promise<SessionUser | null> {
+    const authSession = await auth.api.getSession({ headers, query: { disableCookieCache: true } });
+
+    return toSessionUser(authSession);
 }

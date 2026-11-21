@@ -4,6 +4,17 @@ import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/clip-
 const WHITESPACE = /\s+/;
 // Shorter than this a caption flashes by unread, and the subtitle file stretches it over the next one.
 export const MIN_CUE_SECONDS = 0.2;
+const CENTISECONDS_PER_SECOND = 100;
+
+/**
+ * Compared in whole hundredths: edges are rounded to hundredths, and float subtraction turns
+ * 1.1 → 1.3 into 0.19999999999999996, which would refuse a cue that is exactly long enough.
+ */
+export function isShorterThanMinimumCue(startSeconds: number, endSeconds: number): boolean {
+    const durationCentiseconds = Math.round((endSeconds - startSeconds) * CENTISECONDS_PER_SECOND);
+
+    return durationCentiseconds < Math.round(MIN_CUE_SECONDS * CENTISECONDS_PER_SECOND);
+}
 
 /** Spreads the cue's time evenly over new words when the count changed. */
 function spreadWords(texts: Array<string>, cue: CaptionCue): Array<CaptionWord> {
