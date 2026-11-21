@@ -21,10 +21,12 @@ export function PeriodTabs({ value, onChange }: PeriodTabsProps) {
                 onChange(result.data);
             }}
         >
-            <TabsList aria-label="Período" className="h-10">
+            <TabsList aria-label="Período" className="h-10 w-full sm:w-fit">
                 {OVERVIEW_PERIOD_DAYS.map((periodDays) => (
                     <TabsTrigger key={periodDays} value={String(periodDays)} className="px-3">
-                        Últimos {periodDays} dias
+                        {/* Three full labels overflow a 375 px phone; screen readers still hear them. */}
+                        <span className="max-sm:sr-only">Últimos </span>
+                        {periodDays} dias
                     </TabsTrigger>
                 ))}
             </TabsList>
