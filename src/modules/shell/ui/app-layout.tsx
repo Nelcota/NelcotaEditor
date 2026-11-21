@@ -1,5 +1,6 @@
 import { Outlet } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { ImpersonationBanner } from "#/modules/auth/ui/impersonation-banner";
 import { AppSidebar } from "#/modules/shell/ui/app-sidebar";
 import { MobileTopBar } from "#/modules/shell/ui/mobile-top-bar";
 import { useSidebarCollapsed } from "#/modules/shell/ui/use-sidebar-collapsed";
@@ -50,6 +51,7 @@ export function AppLayout(): ReactNode {
                             tabIndex={-1}
                             className="mx-auto grid outline-none max-w-[1200px] grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-6 pb-12 md:px-8 md:pt-9"
                         >
+                            <ImpersonationBanner />
                             <OfflineBanner />
                             <Outlet />
                         </main>

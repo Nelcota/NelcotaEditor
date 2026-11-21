@@ -1,3 +1,4 @@
+import { ADMIN_ROLE } from "#/modules/auth/auth.schema";
 import type { SessionUser } from "#/modules/auth/session-user";
 import { auth } from "#/modules/auth/server/auth.server";
 
@@ -9,12 +10,15 @@ function toSessionUser(authSession: AuthSession): SessionUser | null {
     }
 
     const sessionUser = authSession.user;
+    const impersonatedBy = authSession.session.impersonatedBy;
 
     return {
         id: sessionUser.id,
         name: sessionUser.name,
         email: sessionUser.email,
         image: sessionUser.image ?? null,
+        isAdmin: sessionUser.role === ADMIN_ROLE,
+        isImpersonated: impersonatedBy !== null && impersonatedBy !== undefined,
     };
 }
 

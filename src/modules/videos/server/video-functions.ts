@@ -1,9 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { rm } from "node:fs/promises";
 import { createServerFn } from "@tanstack/react-start";
-import { and, eq, notInArray, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
 import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/preferences";
@@ -20,14 +18,16 @@ import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-l
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import {
     VIDEO_ALREADY_PROCESSING_MESSAGE,
-    canMoveVideoTo,
     resetVideoToQueued,
 } from "#/modules/video-records/server/video-progress.server";
+import {
+    deleteStoppedVideo,
+    requestVideoCancellation,
+} from "#/modules/video-records/server/stop-video.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import {
     MAX_CLIP_COUNT,
     MIN_CLIP_COUNT,
-    WORKING_VIDEO_STATUSES,
     isVideoResumable,
 } from "#/modules/video-records/video-status";
 import type { VideoDetails, VideoSummary } from "#/modules/videos/video-views";
@@ -40,7 +40,6 @@ import {
     toYoutubeVideoId,
     youtubeUrlSchema,
 } from "#/modules/videos/youtube-url";
-import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const videoIdInputSchema = z.object({ videoId: z.uuid() });
@@ -176,22 +175,7 @@ export const cancelVideo = createServerFn({ method: "POST" })
     .validator(videoIdInputSchema)
     .handler(async ({ context, data }): Promise<void> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
-        const isQueued = sql`${videos.status} = 'queued'`;
-        // One statement, so a video that finishes in between is never flagged. The flag stops a
-        // running worker step; a video still in the queue has none, so it is cancelled at once.
-        const cancelledRows = await db
-            .update(videos)
-            .set({
-                cancelRequested: true,
-                status: sql`CASE WHEN ${isQueued} THEN 'cancelled'::video_status ELSE ${videos.status} END`,
-                finishedAt: sql`CASE WHEN ${isQueued} THEN ${sql.param(new Date(), videos.finishedAt)} ELSE ${videos.finishedAt} END`,
-            })
-            .where(and(eq(videos.id, video.id), canMoveVideoTo("cancelled")))
-            .returning({ id: videos.id });
-
-        if (cancelledRows.length === 0) {
-            throw new UserFacingError("Este vídeo não está sendo processado.");
-        }
+        await requestVideoCancellation(video.id);
     });
 
 export const deleteVideo = createServerFn({ method: "POST" })
@@ -199,15 +183,5 @@ export const deleteVideo = createServerFn({ method: "POST" })
     .validator(videoIdInputSchema)
     .handler(async ({ context, data }): Promise<void> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
-        // The status is checked in the same statement, so a worker that starts in between wins.
-        const deletedRows = await db
-            .delete(videos)
-            .where(and(eq(videos.id, video.id), notInArray(videos.status, WORKING_VIDEO_STATUSES)))
-            .returning({ id: videos.id });
-
-        if (deletedRows.length === 0) {
-            throw new UserFacingError("Aguarde o processamento terminar para excluir este vídeo.");
-        }
-
-        await rm(resolveStoragePath(getVideoDirectory(video.id)), { recursive: true, force: true });
+        await deleteStoppedVideo(video.id);
     });

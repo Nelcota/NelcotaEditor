@@ -1,8 +1,11 @@
 import Chart2Icon from "~icons/solar/chart-2-linear";
 import ClapperboardPlayIcon from "~icons/solar/clapperboard-play-linear";
 import Home2Icon from "~icons/solar/home-2-linear";
+import ShieldUserIcon from "~icons/solar/shield-user-linear";
 import UserCircleIcon from "~icons/solar/user-circle-linear";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
+import { currentUserQueryOptions } from "#/modules/auth/ui/current-user-query";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { isVideoWorking } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
@@ -12,7 +15,7 @@ import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 import { CollapsibleTooltip } from "#/shared/ui/collapsible-tooltip";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
-type SectionPath = "/overview" | "/" | "/clips" | "/account";
+type SectionPath = "/overview" | "/" | "/clips" | "/account" | "/admin";
 
 type SectionCounts = Partial<Record<SectionPath, number>>;
 
@@ -24,6 +27,7 @@ interface Section {
 
 const HOME_PATH = "/";
 const VIDEO_PAGE_PREFIX = "/videos/";
+const ADMIN_PATH = "/admin";
 
 const SECTIONS: ReadonlyArray<Section> = [
     { path: HOME_PATH, label: "Início", icon: Home2Icon },
@@ -32,6 +36,19 @@ const SECTIONS: ReadonlyArray<Section> = [
     { path: "/account", label: "Conta", icon: UserCircleIcon },
 ];
 
+/** Shown to admins only; the admin routes and server functions check the role on their own. */
+const ADMIN_SECTION: Section = { path: ADMIN_PATH, label: "Admin", icon: ShieldUserIcon };
+
+function useVisibleSections(): ReadonlyArray<Section> {
+    const currentUserQuery = useQuery(currentUserQueryOptions());
+
+    if (currentUserQuery.data?.isAdmin === true) {
+        return [...SECTIONS, ADMIN_SECTION];
+    }
+
+    return SECTIONS;
+}
+
 /** A video's own page belongs to "Início", but only the video itself reads as selected. */
 function getSectionState(section: Section, pathname: string): NavItemState {
     if (pathname === section.path) {
@@ -39,6 +56,10 @@ function getSectionState(section: Section, pathname: string): NavItemState {
     }
 
     if (section.path === HOME_PATH && pathname.startsWith(VIDEO_PAGE_PREFIX) === true) {
+        return "parent";
+    }
+
+    if (section.path === ADMIN_PATH && pathname.startsWith(`${ADMIN_PATH}/`) === true) {
         return "parent";
     }
 
@@ -101,10 +122,11 @@ export function SidebarSections({ isCollapsed }: { isCollapsed: boolean }) {
     const videos = videosQuery.data;
     const counts = countSectionItems(videos);
     const hasWorkingVideo = videos?.some((video) => isVideoWorking(video.status) === true);
+    const sections = useVisibleSections();
 
     return (
         <nav aria-label="Seções" className="grid gap-0.5">
-            {SECTIONS.map((section) => (
+            {sections.map((section) => (
                 <SectionLink
                     key={section.path}
                     section={section}

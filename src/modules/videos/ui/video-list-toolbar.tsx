@@ -62,6 +62,8 @@ function FilterChips({ filter, counts }: FilterChipsProps) {
                             key={option}
                             to="/"
                             search={{ status: toStatusSearch(option) }}
+                            // "Todos" leaves the status unset; without this it would match every filter.
+                            activeOptions={{ explicitUndefined: true }}
                             aria-current={toAriaCurrent(option === filter)}
                             className={CHIP_CLASS}
                         >

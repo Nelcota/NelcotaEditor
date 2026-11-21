@@ -1,0 +1,88 @@
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+import type { ReactNode } from "react";
+import type { AdminUsersSearch } from "#/modules/admin/admin-search";
+import { AdminPager } from "#/modules/admin/ui/admin-pager";
+import { adminUsersQueryOptions } from "#/modules/admin/ui/admin-queries";
+import { toPageSearch, toQuerySearch } from "#/modules/admin/ui/admin-search-params";
+import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/admin-states";
+import { AdminUserList } from "#/modules/admin/ui/admin-user-list";
+import { useSearchDraft } from "#/modules/admin/ui/use-search-draft";
+import { SearchField } from "#/modules/videos/ui/search-field";
+import { EmptyState } from "#/shared/ui/empty-state";
+import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
+
+interface AdminUsersScreenProps {
+    search: AdminUsersSearch;
+    onSearchChange: (search: AdminUsersSearch) => void;
+}
+
+/** Defaults stay out of the URL, so the plain link and the first page look the same. */
+function toAdminUsersSearch(search: AdminUsersSearch): AdminUsersSearch {
+    return { q: toQuerySearch(search.q), page: toPageSearch(search.page) };
+}
+
+function UserResults({ search, onSearchChange }: AdminUsersScreenProps): ReactNode {
+    const page = search.page ?? 1;
+    const usersQuery = useQuery(adminUsersQueryOptions({ query: search.q ?? "", page }));
+    const result = usersQuery.data;
+
+    if (usersQuery.isError === true && result === undefined) {
+        return (
+            <AdminLoadError
+                title="Não foi possível carregar as contas"
+                message="Tente de novo; se continuar, recarregue a página."
+                onRetry={async () => {
+                    await usersQuery.refetch();
+                }}
+            />
+        );
+    }
+
+    if (result === undefined) {
+        return <AdminLoading label="Carregando contas" />;
+    }
+
+    if (result.users.length === 0) {
+        return (
+            <EmptyState
+                art={<Mascot index={BRAND_MASCOT_INDEX} className="size-14" />}
+                title="Nenhuma conta encontrada"
+                description="Confira o nome ou o email digitado."
+            />
+        );
+    }
+
+    return (
+        <div className="grid gap-3">
+            <AdminUserList users={result.users} />
+            <AdminPager
+                page={page}
+                totalCount={result.totalCount}
+                onPageChange={(next) =>
+                    onSearchChange(toAdminUsersSearch({ ...search, page: next }))
+                }
+            />
+        </div>
+    );
+}
+
+export function AdminUsersScreen({ search, onSearchChange }: AdminUsersScreenProps): ReactNode {
+    const handleSearch = useCallback(
+        (next: string) => onSearchChange(toAdminUsersSearch({ q: next, page: 1 })),
+        [onSearchChange],
+    );
+    const searchDraft = useSearchDraft(search.q ?? "", handleSearch);
+
+    return (
+        <section aria-label="Contas" className="grid gap-4">
+            <SearchField
+                label="Buscar contas"
+                placeholder="Nome ou email"
+                value={searchDraft.draft}
+                onValueChange={searchDraft.setDraft}
+            />
+            <UserResults search={search} onSearchChange={onSearchChange} />
+        </section>
+    );
+}

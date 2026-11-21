@@ -2,12 +2,23 @@ import { betterAuth } from "better-auth";
 import type { User } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
+import { admin } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { z } from "zod";
 import { db } from "#/db/database.server";
-import { VIDEOS_STILL_PROCESSING_CODE } from "#/modules/auth/auth-error-message";
+import {
+    BANNED_USER_MESSAGE,
+    VIDEOS_STILL_PROCESSING_CODE,
+} from "#/modules/auth/auth-error-message";
 import { MAX_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "#/modules/auth/auth-forms.schema";
-import { account, session, user, verification } from "#/modules/auth/auth.schema";
+import {
+    ADMIN_ROLE,
+    USER_ROLE,
+    account,
+    session,
+    user,
+    verification,
+} from "#/modules/auth/auth.schema";
 import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
 import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
@@ -140,5 +151,15 @@ export const auth = betterAuth({
         },
     },
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
-    plugins: [...buildCaptchaPlugins(), tanstackStartCookies()],
+    // The admin plugin comes first: after the captcha spread, TypeScript would lose the fields it
+    // adds to the user and session types.
+    plugins: [
+        admin({
+            defaultRole: USER_ROLE,
+            adminRoles: [ADMIN_ROLE],
+            bannedUserMessage: BANNED_USER_MESSAGE,
+        }),
+        ...buildCaptchaPlugins(),
+        tanstackStartCookies(),
+    ],
 });
