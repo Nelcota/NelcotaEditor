@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/shared/ui/tooltip";
+import { useInlineEndSide } from "#/shared/ui/use-inline-end-side";
 
 interface CollapsibleTooltipProps {
     label: ReactNode;
@@ -9,6 +10,8 @@ interface CollapsibleTooltipProps {
 
 /** Names an item that only shows its icon (a collapsed sidebar); does nothing when the text is visible. */
 export function CollapsibleTooltip({ label, isEnabled, children }: CollapsibleTooltipProps) {
+    const side = useInlineEndSide();
+
     if (isEnabled === false) {
         return children;
     }
@@ -16,7 +19,7 @@ export function CollapsibleTooltip({ label, isEnabled, children }: CollapsibleTo
     return (
         <Tooltip>
             <TooltipTrigger asChild>{children}</TooltipTrigger>
-            <TooltipContent side="right">{label}</TooltipContent>
+            <TooltipContent side={side}>{label}</TooltipContent>
         </Tooltip>
     );
 }

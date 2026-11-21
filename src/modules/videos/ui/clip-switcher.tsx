@@ -26,7 +26,7 @@ export function ClipSwitcher({
     const nextClip = rankedClips[selectedIndex + 1];
 
     return (
-        <div className="mr-1 hidden h-8 shrink-0 items-center rounded-full bg-white/12 text-xs font-extrabold text-white tabular-nums @2xl:flex">
+        <div className="me-1 hidden h-8 shrink-0 items-center rounded-full bg-white/12 text-xs font-extrabold text-white tabular-nums @2xl:flex">
             <ControlButton
                 label="Corte anterior"
                 icon={SkipPreviousBoldIcon}

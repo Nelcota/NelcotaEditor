@@ -8,6 +8,7 @@ import { UserAvatar } from "#/modules/auth/ui/user-avatar";
 import { cn } from "#/shared/ui/cn";
 import { DropdownMenu, DropdownMenuTrigger } from "#/shared/ui/dropdown-menu";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
+import { useInlineEndSide } from "#/shared/ui/use-inline-end-side";
 
 const appRoute = getRouteApi("/_app");
 const ACCOUNT_PATH = "/account";
@@ -22,6 +23,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
     const user = routeContext.user;
     const pathname = useLocation({ select: (location) => location.pathname });
     const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+    const menuSide = useInlineEndSide();
     const isAccountPage = pathname === ACCOUNT_PATH;
 
     return (
@@ -38,7 +40,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
                         <Link
                             to={ACCOUNT_PATH}
                             aria-current={toAriaCurrent(isAccountPage)}
-                            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-2 text-left outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
+                            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-2 text-start outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring/70 motion-safe:active:scale-[0.99]"
                         >
                             <UserAvatar name={user.name} image={user.image} className="size-10" />
                             <span className="grid min-w-0 flex-1">
@@ -70,7 +72,7 @@ export function SidebarAccount({ isCollapsed }: { isCollapsed: boolean }): React
                     </DropdownMenuTrigger>
                 </div>
                 <AccountMenuContent
-                    side="right"
+                    side={menuSide}
                     align="end"
                     className="w-64"
                     hasAccountLink={isCollapsed}

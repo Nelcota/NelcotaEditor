@@ -20,7 +20,7 @@ export function AppLayout(): ReactNode {
             <NavigationProgress />
             <a
                 href="#main"
-                className="sr-only rounded-md bg-primary px-4 py-2 font-semibold text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus-visible:ring-4 focus-visible:ring-ring/70"
+                className="sr-only rounded-md bg-primary px-4 py-2 font-semibold text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-50 focus-visible:ring-4 focus-visible:ring-ring/70"
             >
                 Pular para o conteúdo
             </a>
@@ -34,7 +34,7 @@ export function AppLayout(): ReactNode {
                 >
                     <aside
                         className={cn(
-                            "hidden min-h-0 border-r px-3 py-3.5 md:block md:overflow-y-auto",
+                            "hidden min-h-0 border-e px-3 py-3.5 md:block md:overflow-y-auto",
                             sidebar.isCollapsed === true && "px-2",
                         )}
                     >

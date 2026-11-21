@@ -43,10 +43,13 @@ function WaitingClips({ details }: { details: VideoDetails }) {
     );
 }
 
-/** The clip being watched, large, beside the original; phones see it in the panel below instead. */
+/**
+ * The clip being watched, large, beside the original. It needs the section wide enough for the
+ * original to stand at least as tall as the vertical clip; narrower, the panel below shows it.
+ */
 function SidePreview({ clip }: { clip: ClipView }) {
     return (
-        <div className="hidden gap-2 lg:grid">
+        <div className="hidden gap-2 @5xl:grid">
             <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
                 Vira este corte
             </p>
@@ -76,9 +79,9 @@ export function VideoClipsSection({ details }: { details: VideoDetails }) {
         <section
             id={CLIPS_SECTION_ID}
             aria-label="Estúdio: vídeo original e cortes"
-            className="grid scroll-mt-6 gap-4"
+            className="@container grid scroll-mt-6 gap-4"
         >
-            <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_224px] lg:gap-5">
+            <div className="grid items-start gap-4 @5xl:grid-cols-[minmax(0,1fr)_224px] @5xl:gap-5">
                 <OriginalPlayer
                     video={video}
                     playerRef={studio.playerRef}

@@ -8,7 +8,7 @@ import type { OverviewPeriodDays } from "#/modules/overview/overview-period";
 import { OverviewBoard } from "#/modules/overview/ui/overview-board";
 import { overviewQueryOptions } from "#/modules/overview/ui/overview-queries";
 import { OverviewLoadError, OverviewLoading } from "#/modules/overview/ui/overview-states";
-import { PeriodTabs } from "#/modules/overview/ui/period-tabs";
+import { PeriodPicker } from "#/modules/overview/ui/period-picker";
 import { FirstVideoEmptyState } from "#/modules/videos/ui/video-list-states";
 import { PageHeader } from "#/shared/ui/page-header";
 
@@ -86,7 +86,7 @@ export function OverviewScreen() {
             <PageHeader
                 title="Painel"
                 description="Quanto você enviou, quantos cortes saíram e como foi cada etapa."
-                action={<PeriodTabs value={periodDays} onChange={changePeriod} />}
+                action={<PeriodPicker value={periodDays} onChange={changePeriod} />}
             />
             <OverviewContent periodDays={periodDays} onPeriodChange={changePeriod} />
         </div>
