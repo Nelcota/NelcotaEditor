@@ -59,7 +59,7 @@ export function PhoneTabBar(): ReactNode {
     return (
         <nav
             aria-label="Seções"
-            className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+            className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
         >
             {PHONE_SECTIONS.map((section) => (
                 <TabLink
