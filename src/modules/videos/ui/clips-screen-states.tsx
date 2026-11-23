@@ -6,27 +6,45 @@ import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
 
-const SKELETON_ROW_COUNT = 5;
+/** Two rows of the widest grid, so the first screen is full on any width. */
+const SKELETON_CARD_COUNT = 8;
 
-/** The toolbar over the same bordered list as the library, so nothing jumps on arrival. */
+function ClipCardSkeleton(): ReactNode {
+    return (
+        <li className="grid min-w-0 content-start gap-3">
+            <Skeleton className="aspect-[9/16] w-full" />
+            <div className="grid gap-1.5">
+                <Skeleton className="h-5 w-4/5" />
+                <Skeleton className="h-4 w-2/5" />
+                <Skeleton className="h-4 w-3/5" />
+            </div>
+            <div className="grid gap-2">
+                <Skeleton className="h-10 w-full rounded-xl" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+            </div>
+        </li>
+    );
+}
+
+/** The library's own toolbar and grid, drawn empty, so nothing jumps when the clips arrive. */
 export function ClipsLoading(): ReactNode {
     return (
-        <div role="status" className="grid gap-4">
+        <div role="status" className="grid grid-cols-[minmax(0,1fr)] gap-6">
             <span className="sr-only">Carregando cortes</span>
-            <Skeleton className="h-10 w-full rounded-full sm:w-72" />
-            <div className="rounded-2xl border bg-popover px-4 sm:px-5">
-                {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
-                    <div
-                        key={index}
-                        className="grid grid-cols-[56px_minmax(0,1fr)] items-center gap-x-4 border-b py-3 last:border-b-0"
-                    >
-                        <Skeleton className="aspect-[9/16] rounded-xl" />
-                        <div className="grid gap-2">
-                            <Skeleton className="h-5 w-3/5" />
-                            <Skeleton className="h-4 w-2/5" />
-                        </div>
-                    </div>
-                ))}
+            <div aria-hidden="true" className="flex flex-wrap items-center gap-2">
+                <Skeleton className="h-10 w-full rounded-xl sm:w-72" />
+                <Skeleton className="h-10 w-full rounded-xl sm:ms-auto sm:w-64" />
+                <div className="w-full">
+                    <Skeleton className="h-5 w-20" />
+                </div>
+            </div>
+            {/* Same columns as the grid in clip-library.tsx. */}
+            <div aria-hidden="true" className="@container/clips">
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-8 @2xl/clips:grid-cols-3 @2xl/clips:gap-x-6 @4xl/clips:grid-cols-4 @6xl/clips:grid-cols-5">
+                    {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
+                        <ClipCardSkeleton key={index} />
+                    ))}
+                </ul>
             </div>
         </div>
     );
