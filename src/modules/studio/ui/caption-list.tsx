@@ -122,18 +122,36 @@ function useCaptionReset(editor: StudioEditor, words: Array<CaptionWord>): Capti
     };
 }
 
+/** Whether focus sits on nothing: the reset button that had it just became disabled. */
+function isFocusLost(): boolean {
+    const active = document.activeElement;
+
+    if (active === null || active === document.body) {
+        return true;
+    }
+
+    return active instanceof HTMLButtonElement && active.disabled === true;
+}
+
 function ResetUndoNotice(props: {
     reset: CaptionReset;
     isLocked: boolean;
     onUndo: () => void;
 }): ReactNode {
+    const undoRef = useRef<HTMLButtonElement>(null);
+
+    // A keyboard user would otherwise be dropped at the top of the page.
+    useEffect(() => {
+        if (isFocusLost() === true) {
+            undoRef.current?.focus();
+        }
+    }, []);
+
     return (
-        <div
-            role="status"
-            className="m-3 flex items-center gap-3 rounded-xl border bg-popover px-3 py-2 text-sm"
-        >
+        <div className="m-3 flex items-center gap-3 rounded-xl border bg-popover px-3 py-2 text-sm">
             <span className="flex-1">{RESET_MESSAGES[props.reset.scope]}</span>
             <Button
+                ref={undoRef}
                 variant="outline"
                 size="sm"
                 className="pointer-coarse:h-11"
@@ -228,13 +246,16 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                     </Button>
                 </HintTooltip>
             </div>
-            {undoableReset !== null && (
-                <ResetUndoNotice
-                    reset={undoableReset}
-                    isLocked={isLocked}
-                    onUndo={captionReset.undoReset}
-                />
-            )}
+            {/* Always mounted: screen readers only announce changes inside a live region they already know. */}
+            <div role="status">
+                {undoableReset !== null && (
+                    <ResetUndoNotice
+                        reset={undoableReset}
+                        isLocked={isLocked}
+                        onUndo={captionReset.undoReset}
+                    />
+                )}
+            </div>
             {draft.captionStyle === "none" && <CaptionsOffNotice editor={editor} />}
             <div
                 ref={listRef}
