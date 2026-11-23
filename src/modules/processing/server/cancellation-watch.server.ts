@@ -1,4 +1,6 @@
+import { isFailureWorthLogging } from "#/modules/processing/server/failure-log-throttle";
 import { isCancelRequested } from "#/modules/video-records/server/video-progress.server";
+import { logger } from "#/shared/server/logger.server";
 
 const POLL_INTERVAL_MILLISECONDS = 2_000;
 
@@ -26,6 +28,7 @@ export function watchForCancellation(videoId: string): CancellationWatch {
     const controller = new AbortController();
     const signal = controller.signal;
     let isChecking = false;
+    let consecutiveFailures = 0;
 
     const check = async (): Promise<void> => {
         if ((await isCancelRequested(videoId)) === true) {
@@ -43,8 +46,11 @@ export function watchForCancellation(videoId: string): CancellationWatch {
 
         try {
             await check();
+            logRecovery(videoId, consecutiveFailures);
+            consecutiveFailures = 0;
         } catch (error) {
-            console.error(`Could not check cancellation of video ${videoId}`, error);
+            consecutiveFailures += 1;
+            logFailure(videoId, consecutiveFailures, error);
         } finally {
             isChecking = false;
         }
@@ -55,4 +61,20 @@ export function watchForCancellation(videoId: string): CancellationWatch {
     }, POLL_INTERVAL_MILLISECONDS);
 
     return { signal, stop: () => clearInterval(timer) };
+}
+
+function logFailure(videoId: string, consecutiveFailures: number, error: unknown): void {
+    if (isFailureWorthLogging(consecutiveFailures) === false) {
+        return;
+    }
+
+    logger.error("Could not check video cancellation", { videoId, consecutiveFailures, error });
+}
+
+function logRecovery(videoId: string, consecutiveFailures: number): void {
+    if (consecutiveFailures === 0) {
+        return;
+    }
+
+    logger.info("Video cancellation check recovered", { videoId, consecutiveFailures });
 }
