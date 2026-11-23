@@ -10,11 +10,15 @@ import {
 } from "#/modules/clips/caption-cues";
 import type { CaptionCue } from "#/modules/clips/clip-studio.schema";
 import { ASPECT_RATIO_SIZES } from "#/modules/clips/clip-format";
+import { buildClipOutputFileName } from "#/modules/clips/clip-output-file";
+import { buildRenderedClipUpdate } from "#/modules/clips/rendered-clip-update";
 import type { AspectRatio } from "#/modules/clips/clip-format";
 import type { ClipStatus } from "#/modules/clips/clip-status";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import { measureFileBytes } from "#/shared/server/directory-size.server";
+import { removeFileOnFailure } from "#/modules/clips/server/remove-file-on-failure.server";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
@@ -84,14 +88,19 @@ function buildVideoFilter(clip: Clip): string {
     return `${shapeFilter},ass=${clip.id}.ass`;
 }
 
-function buildFfmpegArguments(clip: Clip, sourceAbsolutePath: string): Array<string> {
+interface FfmpegFiles {
+    sourceAbsolutePath: string;
+    outputFileName: string;
+}
+
+function buildFfmpegArguments(clip: Clip, files: FfmpegFiles): Array<string> {
     const durationSeconds = clip.endSeconds - clip.startSeconds;
 
     return [
         "-y",
         "-ss",
         clip.startSeconds.toFixed(TIME_DECIMALS),
-        ...localFileInput(sourceAbsolutePath),
+        ...localFileInput(files.sourceAbsolutePath),
         "-t",
         durationSeconds.toFixed(TIME_DECIMALS),
         "-vf",
@@ -110,54 +119,94 @@ function buildFfmpegArguments(clip: Clip, sourceAbsolutePath: string): Array<str
         AUDIO_BITRATE,
         "-movflags",
         "+faststart",
-        `${clip.id}.mp4`,
+        files.outputFileName,
     ];
 }
 
-/** Renders one clip in its chosen shape with burned-in captions (unless the style is none) and stores its relative path. */
-export async function renderClip(input: RenderClipInput): Promise<void> {
-    const clip = input.clip;
-    assertValidRange(clip);
+interface ClipWorkspace {
+    clipsDirectory: string;
+    workingDirectory: string;
+    subtitlesFile: string;
+    outputFileName: string;
+}
 
+function createClipWorkspace(clip: Clip): ClipWorkspace {
     const clipsDirectory = path.posix.join(getVideoDirectory(clip.videoId), CLIPS_DIRECTORY_NAME);
     const workingDirectory = resolveStoragePath(clipsDirectory);
-    const subtitlesFile = path.join(workingDirectory, `${clip.id}.ass`);
 
-    await mkdir(workingDirectory, { recursive: true });
+    return {
+        clipsDirectory,
+        workingDirectory,
+        subtitlesFile: path.join(workingDirectory, `${clip.id}.ass`),
+        outputFileName: buildClipOutputFileName(clip.id, clip.studioDraftVersion),
+    };
+}
 
-    if (clip.captionStyle !== "none") {
-        const cues = toClipRelativeCues(resolveClipCues(clip, input.words), clip.startSeconds);
+async function writeSubtitles(input: RenderClipInput, workspace: ClipWorkspace): Promise<void> {
+    const clip = input.clip;
 
-        await writeFile(
-            subtitlesFile,
-            buildAssSubtitles(cues, {
-                aspectRatio: clip.aspectRatio,
-                style: clip.captionStyle,
-                color: clip.captionColor,
-                size: clip.captionSize,
-                position: clip.captionPosition,
-                font: clip.captionFont,
-            }),
-        );
+    if (clip.captionStyle === "none") {
+        return;
     }
+
+    const cues = toClipRelativeCues(resolveClipCues(clip, input.words), clip.startSeconds);
+    await writeFile(
+        workspace.subtitlesFile,
+        buildAssSubtitles(cues, {
+            aspectRatio: clip.aspectRatio,
+            style: clip.captionStyle,
+            color: clip.captionColor,
+            size: clip.captionSize,
+            position: clip.captionPosition,
+            font: clip.captionFont,
+        }),
+    );
+}
+
+async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Promise<void> {
+    const files = {
+        sourceAbsolutePath: resolveStoragePath(input.sourcePath),
+        outputFileName: workspace.outputFileName,
+    };
 
     try {
         // The working directory keeps the ass filter argument free of path escaping issues.
-        await runCommand(
-            "ffmpeg",
-            buildFfmpegArguments(clip, resolveStoragePath(input.sourcePath)),
-            {
-                workingDirectory,
-                signal: input.signal,
-            },
-        );
+        await runCommand("ffmpeg", buildFfmpegArguments(input.clip, files), {
+            workingDirectory: workspace.workingDirectory,
+            signal: input.signal,
+        });
     } finally {
         // A failed or cancelled render must not leave the subtitles behind.
-        await rm(subtitlesFile, { force: true });
+        await rm(workspace.subtitlesFile, { force: true });
     }
+}
 
-    const outputPath = path.posix.join(clipsDirectory, `${clip.id}.mp4`);
-    await db.update(clips).set({ status: "done", outputPath }).where(eq(clips.id, clip.id));
+async function saveRenderedClip(clip: Clip, workspace: ClipWorkspace): Promise<void> {
+    const outputFileName = workspace.outputFileName;
+    const outputPath = path.posix.join(workspace.clipsDirectory, outputFileName);
+    const outputBytes = await measureFileBytes(
+        path.join(workspace.workingDirectory, outputFileName),
+    );
+
+    await db
+        .update(clips)
+        .set(buildRenderedClipUpdate(outputPath, outputBytes))
+        .where(eq(clips.id, clip.id));
+}
+
+/** Renders one clip in its chosen shape with burned-in captions (unless the style is none) and stores its relative path and size. */
+export async function renderClip(input: RenderClipInput): Promise<void> {
+    const clip = input.clip;
+    assertValidRange(clip);
+    const workspace = createClipWorkspace(clip);
+    const outputFile = path.join(workspace.workingDirectory, workspace.outputFileName);
+
+    await mkdir(workspace.workingDirectory, { recursive: true });
+    await writeSubtitles(input, workspace);
+    await removeFileOnFailure(outputFile, async () => {
+        await encodeClip(input, workspace);
+        await saveRenderedClip(clip, workspace);
+    });
 }
 
 export async function setClipStatus(clipId: string, status: ClipStatus): Promise<void> {
