@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_app/overview")({
     loader: async ({ context, deps }): Promise<void> => {
         const periodDays = deps.period ?? DEFAULT_OVERVIEW_PERIOD_DAYS;
 
-        await context.queryClient.prefetchQuery(overviewQueryOptions(periodDays));
+        await context.queryClient.prefetchQuery({
+            ...overviewQueryOptions(periodDays),
+            staleTime: "static",
+        });
     },
     component: OverviewScreen,
 });

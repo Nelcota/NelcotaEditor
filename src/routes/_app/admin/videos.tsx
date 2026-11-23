@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_app/admin/videos")({
             ownerId: null,
         });
 
-        await context.queryClient.prefetchQuery(options);
+        await context.queryClient.prefetchQuery({ ...options, staleTime: "static" });
     },
     component: AdminVideosRoute,
 });

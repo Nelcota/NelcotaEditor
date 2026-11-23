@@ -18,8 +18,8 @@ export const Route = createFileRoute("/_app/admin/users/$userId")({
         });
 
         await Promise.all([
-            queryClient.prefetchQuery(adminUserQueryOptions(userId)),
-            queryClient.prefetchQuery(firstVideosPage),
+            queryClient.prefetchQuery({ ...adminUserQueryOptions(userId), staleTime: "static" }),
+            queryClient.prefetchQuery({ ...firstVideosPage, staleTime: "static" }),
         ]);
     },
     component: AdminUserRoute,

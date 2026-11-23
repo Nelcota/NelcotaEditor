@@ -9,8 +9,8 @@ export const Route = createFileRoute("/_app/account")({
         const queryClient = context.queryClient;
 
         await Promise.all([
-            queryClient.prefetchQuery(preferencesQueryOptions()),
-            queryClient.prefetchQuery(usageQueryOptions()),
+            queryClient.prefetchQuery({ ...preferencesQueryOptions(), staleTime: "static" }),
+            queryClient.prefetchQuery({ ...usageQueryOptions(), staleTime: "static" }),
         ]);
     },
     component: AccountScreen,

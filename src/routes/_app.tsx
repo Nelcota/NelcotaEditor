@@ -14,9 +14,11 @@ export const Route = createFileRoute("/_app")({
         return { user };
     },
     // The sidebar, the open tabs and the Vídeos list all read this list; loading it with the page
-    // keeps them from opening empty. Prefetch never throws: a failure is left to each screen.
+    // keeps them from opening empty. In every route loader, prefetch never throws (a failure is left
+    // to the screen's own error state), and "static" hands back cached data at once: the screen's
+    // query refreshes it in the background, so returning to a page never waits on the network.
     loader: async ({ context }): Promise<void> => {
-        await context.queryClient.prefetchQuery(videosQueryOptions());
+        await context.queryClient.prefetchQuery({ ...videosQueryOptions(), staleTime: "static" });
     },
     component: AppLayout,
 });

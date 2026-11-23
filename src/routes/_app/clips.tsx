@@ -5,7 +5,10 @@ import { ClipsScreen } from "#/modules/videos/ui/clips-screen";
 export const Route = createFileRoute("/_app/clips")({
     head: () => ({ meta: [{ title: "Cortes · Nelcota" }] }),
     loader: async ({ context }): Promise<void> => {
-        await context.queryClient.prefetchQuery(libraryClipsQueryOptions());
+        await context.queryClient.prefetchQuery({
+            ...libraryClipsQueryOptions(),
+            staleTime: "static",
+        });
     },
     component: ClipsScreen,
 });

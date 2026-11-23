@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_app/admin/users/")({
     loader: async ({ context, deps }): Promise<void> => {
         const options = adminUsersQueryOptions({ query: deps.q ?? "", page: deps.page ?? 1 });
 
-        await context.queryClient.prefetchQuery(options);
+        await context.queryClient.prefetchQuery({ ...options, staleTime: "static" });
     },
     component: AdminUsersRoute,
 });
