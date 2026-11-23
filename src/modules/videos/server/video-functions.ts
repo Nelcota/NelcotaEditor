@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
@@ -17,13 +17,10 @@ import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.
 import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import {
-    VIDEO_ALREADY_PROCESSING_MESSAGE,
-    resetVideoToQueued,
-} from "#/modules/video-records/server/video-progress.server";
-import {
     deleteStoppedVideo,
     requestVideoCancellation,
 } from "#/modules/video-records/server/stop-video.server";
+import { restartVideo } from "#/modules/videos/server/restart-video.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import {
     MAX_CLIP_COUNT,
@@ -144,30 +141,11 @@ export const retryVideo = createServerFn({ method: "POST" })
             );
         }
 
-        const userId = context.user.id;
-        // All or nothing: failed clips must not turn pending on a video another retry already
-        // took, and the job is sent only with the reset that needs it.
-        const isReset = await runVideoStartTransaction(
-            userId,
-            async ({ transaction, jobDatabase }) => {
-                await assertCanStartAnotherVideo(userId, transaction);
-
-                if ((await resetVideoToQueued(video.id, transaction)) === false) {
-                    return false;
-                }
-
-                await transaction
-                    .update(clips)
-                    .set({ status: "pending" })
-                    .where(and(eq(clips.videoId, video.id), eq(clips.status, "failed")));
-                await enqueueVideoProcessing({ videoId: video.id, userId }, jobDatabase);
-                return true;
-            },
-        );
-
-        if (isReset === false) {
-            throw new UserFacingError(VIDEO_ALREADY_PROCESSING_MESSAGE);
-        }
+        await restartVideo({
+            videoId: video.id,
+            userId: context.user.id,
+            clipCondition: eq(clips.status, "failed"),
+        });
     });
 
 export const cancelVideo = createServerFn({ method: "POST" })

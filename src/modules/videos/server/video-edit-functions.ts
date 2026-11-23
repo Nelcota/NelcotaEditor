@@ -4,14 +4,8 @@ import { z } from "zod";
 import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
-import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
-import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
-import {
-    VIDEO_ALREADY_PROCESSING_MESSAGE,
-    resetVideoToQueued,
-} from "#/modules/video-records/server/video-progress.server";
 import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
-import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
+import { restartVideo } from "#/modules/videos/server/restart-video.server";
 import { FINISHED_VIDEO_STATUSES, isVideoFinished } from "#/modules/video-records/video-status";
 import { videoTitleSchema } from "#/modules/video-records/video-title";
 import { videos } from "#/modules/video-records/videos.schema";
@@ -73,28 +67,9 @@ export const retryClip = createServerFn({ method: "POST" })
         }
 
         const clipId = await findOwnedFailedClipId(video.id, data.clipId);
-        const userId = context.user.id;
-        // All or nothing: the clip must not turn pending on a video another retry already took,
-        // and the job is sent only with the reset that needs it.
-        const isReset = await runVideoStartTransaction(
-            userId,
-            async ({ transaction, jobDatabase }) => {
-                await assertCanStartAnotherVideo(userId, transaction);
-
-                if ((await resetVideoToQueued(video.id, transaction)) === false) {
-                    return false;
-                }
-
-                await transaction
-                    .update(clips)
-                    .set({ status: "pending" })
-                    .where(eq(clips.id, clipId));
-                await enqueueVideoProcessing({ videoId: video.id, userId }, jobDatabase);
-                return true;
-            },
-        );
-
-        if (isReset === false) {
-            throw new UserFacingError(VIDEO_ALREADY_PROCESSING_MESSAGE);
-        }
+        await restartVideo({
+            videoId: video.id,
+            userId: context.user.id,
+            clipCondition: eq(clips.id, clipId),
+        });
     });

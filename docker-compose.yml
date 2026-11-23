@@ -39,11 +39,22 @@ services:
         build:
             context: .
             dockerfile: Dockerfile.worker
-        env_file: .env
+        # Only what the worker reads, never the whole .env: it handles files from the internet and
+        # must not hold the app's secrets (BETTER_AUTH_SECRET, Turnstile). Values come from .env.
         environment:
             DATABASE_URL: postgresql://nelcota:nelcota@postgres:5432/nelcota
             STORAGE_DIR: /app/storage
             WHISPER_URL: http://whisper:8000
+            WHISPER_MODEL: ${WHISPER_MODEL}
+            WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-}
+            DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+            DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+            STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
+            WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
         volumes:
             - ./storage:/app/storage
             # Mounted so code changes only need `npm run worker:restart`, not a rebuild.

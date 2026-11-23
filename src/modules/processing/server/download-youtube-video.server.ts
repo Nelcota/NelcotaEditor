@@ -28,8 +28,10 @@ interface DownloadOptions {
     onProgress: (percent: number) => void;
 }
 
-function buildYtDlpArguments(url: string, outputTemplate: string): Array<string> {
+export function buildYtDlpArguments(url: string, outputTemplate: string): Array<string> {
     return [
+        // A config file dropped on the machine must not add options (exec hooks, proxies, paths).
+        "--ignore-config",
         "--no-playlist",
         // Second guard behind the server schema: never walk more than one entry of a list.
         "--playlist-items",

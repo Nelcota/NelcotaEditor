@@ -47,6 +47,16 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
         to: "src/modules/admin/server/record-admin-action.server",
         reason: "The browser starts and ends impersonation straight through Better Auth, so only its session hooks, fixed at import, see it",
     },
+    {
+        from: "src/modules/processing/server/save-downloaded-source.server.ts",
+        to: "src/modules/videos/server/storage-quota.server",
+        reason: "A download's size is only known in the worker, which checks it against the same quota",
+    },
+    {
+        from: "src/modules/processing/server/save-downloaded-source.server.ts",
+        to: "src/modules/videos/server/video-start-transaction.server",
+        reason: "The download is saved under the same per-user lock as uploads, so both see each other",
+    },
 ];
 
 // Routes only route: the router, React, module screens and handlers, and the API wrapper.
