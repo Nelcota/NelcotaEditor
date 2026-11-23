@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import EyeIcon from "~icons/lucide/eye";
 import EyeOffIcon from "~icons/lucide/eye-off";
 import { cn } from "#/shared/ui/cn";
@@ -38,7 +38,7 @@ function describedBy(hasErrors: boolean, id: string, hasHint: boolean): string |
     return undefined;
 }
 
-function VisibilityIcon({ isPasswordVisible }: { isPasswordVisible: boolean }) {
+function VisibilityIcon({ isPasswordVisible }: { isPasswordVisible: boolean }): ReactNode {
     if (isPasswordVisible === true) {
         return <EyeOffIcon aria-hidden="true" className="size-4" />;
     }
@@ -51,7 +51,7 @@ function PasswordVisibilityToggle({
     inputId,
     isPasswordVisible,
     onToggle,
-}: PasswordVisibilityToggleProps) {
+}: PasswordVisibilityToggleProps): ReactNode {
     const [hasToggled, setHasToggled] = useState(false);
     const copy = getPasswordVisibilityCopy(isPasswordVisible);
 
@@ -87,7 +87,7 @@ export function TextField({
     type,
     className,
     ...inputProps
-}: TextFieldProps) {
+}: TextFieldProps): ReactNode {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const errorId = `${id}-error`;
     const hasErrors = errors.length > 0;
