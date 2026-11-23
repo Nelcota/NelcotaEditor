@@ -10,6 +10,8 @@ import {
     updateVideoStage,
 } from "#/modules/video-records/server/video-progress.server";
 import { ensureVideoThumbnail } from "#/modules/processing/server/video-thumbnail.server";
+import { saveDownloadedSource } from "#/modules/processing/server/save-downloaded-source.server";
+import { StorageQuotaExceededError } from "#/modules/videos/server/storage-quota.server";
 import { toStoredVideoTitle } from "#/modules/video-records/video-title";
 import type { Video } from "#/modules/video-records/videos.schema";
 import { probeMedia } from "#/shared/server/media-probe.server";
@@ -57,10 +59,14 @@ async function probeSourceMedia(absolutePath: string): Promise<MediaInfo> {
     }
 }
 
-/** Makes sure the source file exists locally and reads its duration. Safe to run again. */
-export async function prepareVideoSource(video: Video, signal: AbortSignal): Promise<VideoSource> {
-    const sourcePath = await obtainSourcePath(video, signal);
-    const mediaInfo = await probeSourceMedia(resolveStoragePath(sourcePath));
+interface CheckedSource extends VideoSource {
+    sourceBytes: number;
+}
+
+/** Refuses files the pipeline cannot use and reads what is saved with the path. */
+async function inspectSource(video: Video, sourcePath: string): Promise<CheckedSource> {
+    const absoluteSourcePath = resolveStoragePath(sourcePath);
+    const mediaInfo = await probeSourceMedia(absoluteSourcePath);
 
     if (mediaInfo.hasVideo === false) {
         throw new UserFacingError(
@@ -87,7 +93,6 @@ export async function prepareVideoSource(video: Video, signal: AbortSignal): Pro
 
     // yt-dlp limits each format to 4 GB, but video and audio are merged after that check:
     // the same 5 GB ceiling as uploads is enforced on the final file, whatever its origin.
-    const absoluteSourcePath = resolveStoragePath(sourcePath);
     const fileStats = await stat(absoluteSourcePath);
 
     if (fileStats.size > MAX_UPLOAD_BYTES) {
@@ -99,8 +104,36 @@ export async function prepareVideoSource(video: Video, signal: AbortSignal): Pro
         throw new UserFacingError("O vídeo passa de 5 GB. Envie um arquivo menor.");
     }
 
-    const source = { sourcePath, durationSeconds };
-    await saveVideoSource(video.id, source);
+    return { sourcePath, durationSeconds, sourceBytes: fileStats.size };
+}
+
+/** A download's size is unknown until it ends, so only here can it be checked against the quota. */
+async function saveDownload(video: Video, source: CheckedSource): Promise<void> {
+    try {
+        await saveDownloadedSource({ videoId: video.id, userId: video.userId, ...source });
+    } catch (error) {
+        if (error instanceof StorageQuotaExceededError) {
+            await rm(resolveStoragePath(source.sourcePath), { force: true });
+        }
+
+        throw error;
+    }
+}
+
+/** Makes sure the source file exists locally and reads its duration. Safe to run again. */
+export async function prepareVideoSource(video: Video, signal: AbortSignal): Promise<VideoSource> {
+    const sourcePath = await obtainSourcePath(video, signal);
+    const checkedSource = await inspectSource(video, sourcePath);
+    const source = { sourcePath, durationSeconds: checkedSource.durationSeconds };
+
+    if (video.sourcePath === null) {
+        await saveDownload(video, checkedSource);
+    }
+
+    if (video.sourcePath !== null) {
+        await saveVideoSource(video.id, source);
+    }
+
     await ensureVideoThumbnail({ video, ...source });
     return source;
 }
