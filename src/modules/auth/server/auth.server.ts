@@ -75,22 +75,29 @@ async function removeDeletedUserFiles(deletedUser: User): Promise<void> {
 
 /**
  * Better Auth's sign-up and update-user endpoints accept a name of any length; the form's limit is
- * only for the user's convenience, so the server enforces it too. Updates without a name pass.
+ * only for the user's convenience, so the server enforces it too and stores the name trimmed, as
+ * it was measured. Updates without a name pass unchanged.
  */
-async function assertNameFits(fields: { name?: unknown }): Promise<void> {
+async function trimNameWithinLimit(fields: {
+    name?: unknown;
+}): Promise<{ data: { name: string } } | undefined> {
     const name = fields.name;
 
     if (name === undefined) {
-        return;
+        return undefined;
     }
 
     if (typeof name !== "string" || name.trim().length === 0) {
         throw new APIError("BAD_REQUEST", { message: "Digite seu nome." });
     }
 
-    if (Array.from(name.trim()).length > MAX_NAME_LENGTH) {
+    const trimmedName = name.trim();
+
+    if (Array.from(trimmedName).length > MAX_NAME_LENGTH) {
         throw new APIError("BAD_REQUEST", { message: "Nome muito longo." });
     }
+
+    return { data: { name: trimmedName } };
 }
 
 const DELETE_USER_PATH = "/delete-user";
@@ -171,8 +178,8 @@ export const auth = betterAuth({
     },
     databaseHooks: {
         user: {
-            create: { before: assertNameFits },
-            update: { before: assertNameFits },
+            create: { before: trimNameWithinLimit },
+            update: { before: trimNameWithinLimit },
         },
         session: {
             update: { before: keepImpersonatedSessionExpiry },

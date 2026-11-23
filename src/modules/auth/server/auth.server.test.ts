@@ -59,3 +59,38 @@ describe("raw auth routes", () => {
         });
     }
 });
+
+describe("account name hooks", () => {
+    const newUser = {
+        id: "user-1",
+        email: "ana@example.com",
+        emailVerified: false,
+        name: "  Ana Souza  ",
+        createdAt: new Date("2026-11-23T12:00:00Z"),
+        updatedAt: new Date("2026-11-23T12:00:00Z"),
+    };
+
+    test("stores the trimmed name on sign-up", async () => {
+        const createHook = auth.options.databaseHooks?.user?.create?.before;
+
+        if (createHook === undefined) {
+            assert.fail("The user create hook is missing");
+        }
+
+        const result = await createHook(newUser);
+
+        assert.deepEqual(result, { data: { name: "Ana Souza" } });
+    });
+
+    test("stores the trimmed name when the profile is updated", async () => {
+        const updateHook = auth.options.databaseHooks?.user?.update?.before;
+
+        if (updateHook === undefined) {
+            assert.fail("The user update hook is missing");
+        }
+
+        const result = await updateHook({ name: " Ana " });
+
+        assert.deepEqual(result, { data: { name: "Ana" } });
+    });
+});
