@@ -1,11 +1,13 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "#/shared/ui/cn";
 import { formatClock } from "#/shared/ui/format";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { toAudibleVolume } from "#/shared/ui/media-player/media-state";
+import { toBarPercent } from "#/shared/ui/media-player/seek-bar";
 import type { MediaPlayer } from "#/shared/ui/media-player/use-media-player";
 
 const VOLUME_STEP = 0.05;
+const MAX_VOLUME = 1;
 const rateFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
 
 interface TimeLabelProps {
@@ -32,6 +34,16 @@ export function TimeLabel({
     );
 }
 
+/**
+ * Chrome, Edge and Safari have no pseudo-element for the filled part of a range, so the track
+ * paints it: solid up to the level, faint after.
+ */
+export function toVolumeTrackBackground(volume: number): string {
+    const filledPercent = toBarPercent(volume, MAX_VOLUME);
+
+    return `linear-gradient(to right, var(--range-fill) ${filledPercent}%, oklch(1 0 0 / 0.25) ${filledPercent}%)`;
+}
+
 export function VolumeSlider({
     player,
     className,
@@ -39,15 +51,21 @@ export function VolumeSlider({
     player: MediaPlayer;
     className?: string;
 }): ReactNode {
+    const volume = toAudibleVolume(player.media);
+    const trackStyle: CSSProperties & Record<"--range-track", string> = {
+        "--range-track": toVolumeTrackBackground(volume),
+    };
+
     return (
         <input
             type="range"
             min={0}
             max={1}
             step={VOLUME_STEP}
-            value={toAudibleVolume(player.media)}
+            value={volume}
             onChange={(event) => player.setVolume(Number(event.target.value))}
             aria-label="Volume"
+            style={trackStyle}
             className={cn(
                 "range-media w-16 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring",
                 className,
