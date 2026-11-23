@@ -5,6 +5,7 @@ import {
     formatClock,
     formatDate,
     formatDateTime,
+    formatDecimal,
     formatTimeLeft,
 } from "#/shared/ui/format";
 
@@ -86,5 +87,39 @@ describe("formatDate", () => {
 
     it("formats date and time in São Paulo", () => {
         assert.match(formatDateTime("2026-11-22T02:30:00Z"), /21.*23:30/);
+    });
+});
+
+describe("formatDecimal", () => {
+    it("uses a comma for decimals and a dot for thousands", () => {
+        assert.equal(formatDecimal(0.7), "0,7");
+        assert.equal(formatDecimal(1234.56), "1.234,6");
+    });
+
+    it("drops trailing zeros unless asked to keep them", () => {
+        assert.equal(formatDecimal(3), "3");
+        assert.equal(formatDecimal(12, { keepTrailingZeros: true }), "12,0");
+    });
+
+    it("rounds to the requested number of digits", () => {
+        assert.equal(formatDecimal(2.345, { fractionDigits: 2 }), "2,35");
+        assert.equal(formatDecimal(2.6, { fractionDigits: 0 }), "3");
+    });
+
+    it("never shows a minus sign on zero", () => {
+        assert.equal(formatDecimal(-0), "0");
+        assert.equal(formatDecimal(-0.04), "0");
+        assert.equal(formatDecimal(-1.5), "-1,5");
+    });
+
+    it("shows 0 for NaN and infinite values", () => {
+        assert.equal(formatDecimal(Number.NaN), "0");
+        assert.equal(formatDecimal(Number.POSITIVE_INFINITY), "0");
+    });
+
+    it("throws RangeError when fractionDigits is out of range", () => {
+        assert.throws(() => formatDecimal(1, { fractionDigits: 4 }), RangeError);
+        assert.throws(() => formatDecimal(1, { fractionDigits: -1 }), RangeError);
+        assert.throws(() => formatDecimal(1, { fractionDigits: 1.5 }), RangeError);
     });
 });

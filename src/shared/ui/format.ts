@@ -19,6 +19,71 @@ const oneDecimalFormatter = new Intl.NumberFormat("pt-BR", {
 // Keeps a number on the same line as its unit ("5 GB" never splits).
 const NO_BREAK_SPACE = " ";
 
+const MAX_FRACTION_DIGITS = 3;
+const decimalFormatters = new Map<string, Intl.NumberFormat>();
+
+interface DecimalOptions {
+    /** Digits after the comma, from 0 to 3. Defaults to 1. */
+    fractionDigits?: number;
+    /** Keeps "12,0" instead of "12", so a number that changes while dragging keeps its width. */
+    keepTrailingZeros?: boolean;
+}
+
+function getDecimalFormatter(
+    fractionDigits: number,
+    keepTrailingZeros: boolean,
+): Intl.NumberFormat {
+    const key = `${fractionDigits}:${keepTrailingZeros}`;
+    const cached = decimalFormatters.get(key);
+
+    if (cached !== undefined) {
+        return cached;
+    }
+
+    let minimumFractionDigits = 0;
+
+    if (keepTrailingZeros === true) {
+        minimumFractionDigits = fractionDigits;
+    }
+
+    // "negative" keeps -0 and values that round to zero (-0,04 at one digit) from showing as "-0".
+    const formatter = new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits,
+        maximumFractionDigits: fractionDigits,
+        signDisplay: "negative",
+    });
+    decimalFormatters.set(key, formatter);
+
+    return formatter;
+}
+
+/**
+ * Formats a number the Brazilian way: 0.7 → "0,7", 1234.5 → "1.234,5", 3 → "3".
+ * NaN and infinite values show as "0", like the other formatters here.
+ *
+ * @throws {RangeError} When `fractionDigits` is not a whole number from 0 to 3.
+ */
+export function formatDecimal(value: number, options: DecimalOptions = {}): string {
+    const fractionDigits = options.fractionDigits ?? 1;
+    const keepTrailingZeros = options.keepTrailingZeros ?? false;
+
+    if (
+        Number.isInteger(fractionDigits) === false ||
+        fractionDigits < 0 ||
+        fractionDigits > MAX_FRACTION_DIGITS
+    ) {
+        throw new RangeError(
+            `fractionDigits must be 0 to ${MAX_FRACTION_DIGITS}, got ${fractionDigits}`,
+        );
+    }
+
+    if (Number.isFinite(value) === false) {
+        return "0";
+    }
+
+    return getDecimalFormatter(fractionDigits, keepTrailingZeros).format(value);
+}
+
 /** 75 → "1:15", 3725 → "1:02:05". */
 export function formatClock(totalSeconds: number): string {
     if (Number.isFinite(totalSeconds) === false || totalSeconds < 0) {
