@@ -1,9 +1,9 @@
 import { renderClip, setClipStatus } from "#/modules/clips/server/render-clip.server";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { toOverallPercent } from "#/modules/processing/processing-stages";
+import { runLanesToTheEnd } from "#/modules/processing/server/run-lanes-to-the-end.server";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
-import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
@@ -51,7 +51,7 @@ async function renderAll(
 ): Promise<number> {
     const clips = input.clips;
     let finishedCount = 0;
-    const outcomes = await runWithConcurrency(clips, RENDER_CONCURRENCY, async (clip) => {
+    const outcomes = await runLanesToTheEnd(clips, RENDER_CONCURRENCY, async (clip) => {
         const isRendered = await renderOneClip(clip, input);
         finishedCount += 1;
         onProgress((finishedCount / clips.length) * PERCENT);
