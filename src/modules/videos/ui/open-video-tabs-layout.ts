@@ -60,14 +60,15 @@ export function splitOpenTabs<Tab extends { id: string }>(
         return { visible, hidden };
     }
 
-    const lastVisible = visible.at(-1);
+    const lastVisibleIndex = visible.length - 1;
+    const lastVisible = visible[lastVisibleIndex];
 
     if (lastVisible === undefined) {
         return { visible, hidden };
     }
 
     return {
-        visible: visible.with(-1, currentTab),
+        visible: visible.with(lastVisibleIndex, currentTab),
         hidden: [lastVisible, ...hidden.toSpliced(currentHiddenIndex, 1)],
     };
 }
