@@ -8,10 +8,8 @@ import {
     TooManyVideosInProgressError,
     assertCanStartAnotherVideo,
 } from "#/modules/videos/server/processing-limit.server";
-import {
-    StorageQuotaExceededError,
-    assertStorageAvailable,
-} from "#/modules/videos/server/storage-quota.server";
+import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
+import { StorageQuotaExceededError } from "#/modules/videos/storage-quota-exceeded-error";
 import {
     EmptyUploadError,
     UploadTooLargeError,

@@ -28,7 +28,7 @@ export async function reserveUploadSpace(request: UploadSpaceRequest): Promise<(
             const pending = uploadReservations.summarize(userId);
             await assertCanStartAnotherVideo(userId, transaction, pending.count);
             await assertStorageAvailable(
-                { userId, incomingBytes: pending.bytes + declaredBytes },
+                { userId, incomingBytes: declaredBytes, reservedBytes: pending.bytes },
                 transaction,
             );
             reservation.release = uploadReservations.reserve(userId, declaredBytes);
