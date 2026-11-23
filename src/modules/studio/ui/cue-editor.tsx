@@ -1,5 +1,5 @@
-import RotateCwIcon from "~icons/lucide/rotate-cw";
-import ScissorsIcon from "~icons/lucide/scissors";
+import RotateCcwIcon from "~icons/lucide/rotate-ccw";
+import ScissorsLineDashedIcon from "~icons/lucide/scissors-line-dashed";
 import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { formatPreciseClock, parseClockInput } from "#/modules/clips/clip-time";
@@ -10,13 +10,14 @@ import {
     cueLimits,
     cueText,
     editCueText,
-    resetCue,
     retimeCue,
     splitCue,
     transcriptWordsOf,
 } from "#/modules/studio/ui/cue-editing";
+import { isCueChangedFromOriginal } from "#/modules/studio/ui/caption-reset";
 import { Button } from "#/shared/ui/button";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
+import { Input } from "#/shared/ui/input";
 
 const UNREADABLE_TIME_MESSAGE = "Use segundos (8,5) ou minutos e segundos (1:08,5).";
 const OUT_OF_RANGE_MESSAGE = "Fora do espaço livre entre os blocos vizinhos.";
@@ -44,6 +45,8 @@ interface CueEditorProps {
     cue: CaptionCue;
     words: Array<CaptionWord>;
     onReplace: (replacement: Array<CaptionCue>) => void;
+    /** Brings the cue back to the transcript; the list offers the undo. */
+    onResetToOriginal: () => void;
     onClose: () => void;
 }
 
@@ -73,12 +76,11 @@ function TimeField({
 }): ReactNode {
     return (
         <label className="grid gap-1">
-            <span className="sr-only">{label}</span>
-            <input
+            <span className="text-xs font-medium text-muted-foreground">{label}</span>
+            <Input
                 key={value}
                 defaultValue={value}
                 inputMode="decimal"
-                aria-label={label}
                 aria-invalid={error !== null}
                 onBlur={(event) => onCommit(event.target.value)}
                 onKeyDown={(event) => {
@@ -88,17 +90,27 @@ function TimeField({
                 }}
                 aria-describedby={describeError(error)}
                 enterKeyHint="done"
-                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-base tabular-nums outline-none transition-colors hover:border-ring/60 sm:text-sm focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring aria-invalid:border-destructive"
+                className="tabular-nums"
             />
         </label>
     );
 }
 
 /** One caption opened for editing: its words, when it shows, split it or bring Tinta's back. */
-export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueEditorProps) {
+export function CueEditor(props: CueEditorProps): ReactNode {
+    const { draft, index, cue, words, onReplace, onResetToOriginal, onClose } = props;
     const textRef = useRef<HTMLInputElement>(null);
-    const [text, setText] = useState(cueText(cue));
+    const currentText = cueText(cue);
+    const [text, setText] = useState(currentText);
+    const [shownCueText, setShownCueText] = useState(currentText);
     const [timeError, setTimeError] = useState<string | null>(null);
+
+    // An undo or a reset changes the cue from outside; the field follows it instead of keeping old text.
+    if (currentText !== shownCueText) {
+        setShownCueText(currentText);
+        setText(currentText);
+    }
+
     const originalText = cueText({ ...cue, words: transcriptWordsOf(cue, words) });
     const limits = cueLimits(draft, index);
 
@@ -190,7 +202,7 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
 
     return (
         <div className="grid gap-2.5 border-b bg-popover px-4 py-3 shadow-[inset_3px_0_0_var(--primary)]">
-            <input
+            <Input
                 ref={textRef}
                 autoFocus
                 value={text}
@@ -208,54 +220,50 @@ export function CueEditor({ draft, index, cue, words, onReplace, onClose }: CueE
                         onClose();
                     }
                 }}
-                className="h-11 w-full rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring"
+                className="h-11"
             />
-            <div className="grid grid-cols-[1fr_1fr_auto_auto] items-center gap-2">
+            <div className="grid grid-cols-2 gap-2">
                 <TimeField
-                    label="Início do bloco"
+                    label="Início"
                     value={toClipClock(draft, cue.startSeconds)}
                     error={timeError}
                     onCommit={(typed) => commitTime("start", typed)}
                 />
                 <TimeField
-                    label="Fim do bloco"
+                    label="Fim"
                     value={toClipClock(draft, cue.endSeconds)}
                     error={timeError}
                     onCommit={(typed) => commitTime("end", typed)}
                 />
-                <HintTooltip label="Dividir no cursor">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        aria-label="Dividir o bloco onde está o cursor"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={split}
-                    >
-                        <ScissorsIcon aria-hidden="true" />
-                    </Button>
-                </HintTooltip>
-                <HintTooltip label="Voltar ao original">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        aria-label="Voltar este bloco ao texto original"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => {
-                            const original = resetCue(cue, words);
-                            setText(cueText(original));
-                            onReplace([original]);
-                        }}
-                    >
-                        <RotateCwIcon aria-hidden="true" />
-                    </Button>
-                </HintTooltip>
             </div>
             {timeError !== null && (
                 <p id={CUE_TIME_ERROR_ID} role="alert" className="text-xs text-destructive">
                     {timeError}
                 </p>
             )}
-            {originalText.length > 0 && originalText !== cueText(cue) && (
+            <div className="flex flex-wrap gap-2">
+                <HintTooltip label="Divide o bloco em dois, onde está o cursor do texto">
+                    <Button
+                        variant="outline"
+                        aria-label="Dividir o bloco onde está o cursor"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={split}
+                    >
+                        <ScissorsLineDashedIcon aria-hidden="true" />
+                        Dividir
+                    </Button>
+                </HintTooltip>
+                <Button
+                    variant="outline"
+                    disabled={isCueChangedFromOriginal(cue, words) === false}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={onResetToOriginal}
+                >
+                    <RotateCcwIcon aria-hidden="true" />
+                    Voltar ao original
+                </Button>
+            </div>
+            {originalText.length > 0 && originalText !== currentText && (
                 <p className="text-xs text-muted-foreground">Antes: “{originalText}”</p>
             )}
         </div>

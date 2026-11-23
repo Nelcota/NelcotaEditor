@@ -1,12 +1,14 @@
-import RotateCwIcon from "~icons/lucide/rotate-cw";
+import RotateCcwIcon from "~icons/lucide/rotate-ccw";
 import CaptionsIcon from "~icons/lucide/captions";
-import TargetIcon from "~icons/lucide/target";
+import LocateIcon from "~icons/lucide/locate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import type { CaptionCue, CaptionWord } from "#/modules/clips/clip-studio.schema";
+import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/clip-studio.schema";
 import { pluralize } from "#/shared/ui/pluralize";
+import { canUndoReset, hasCaptionsToReset } from "#/modules/studio/ui/caption-reset";
+import type { CaptionReset } from "#/modules/studio/ui/caption-reset";
 import { CueEditor } from "#/modules/studio/ui/cue-editor";
-import { cueText, transcriptWordsOf } from "#/modules/studio/ui/cue-editing";
+import { cueText, resetCue, transcriptWordsOf } from "#/modules/studio/ui/cue-editing";
 import type { StudioEditor } from "#/modules/studio/ui/use-studio-editor";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
@@ -56,6 +58,112 @@ function CaptionsOffNotice({ editor }: { editor: StudioEditor }): ReactNode {
     );
 }
 
+const RESET_MESSAGES = {
+    all: "Todas as legendas voltaram ao texto original.",
+    cue: "O bloco voltou ao texto original.",
+} as const;
+
+interface LastReset {
+    reset: CaptionReset;
+    before: StudioDraft;
+}
+
+interface CaptionResetControls {
+    canResetAll: boolean;
+    /** The reset that one undo step can still take back; null when there is none. */
+    undoableReset: CaptionReset | null;
+    resetAll: () => void;
+    resetCueAt: (index: number) => void;
+    undoReset: () => void;
+}
+
+/** "Voltar ao original" throws edits away, so right after it the list offers to take it back. */
+function useCaptionReset(editor: StudioEditor, words: Array<CaptionWord>): CaptionResetControls {
+    const draft = editor.draft;
+    const [lastReset, setLastReset] = useState<LastReset | null>(null);
+    const canResetAll = useMemo(() => hasCaptionsToReset(draft, words), [draft, words]);
+    const undoableReset = useMemo(() => {
+        if (lastReset === null) {
+            return null;
+        }
+
+        if (canUndoReset(draft, lastReset.before, words, lastReset.reset) === false) {
+            return null;
+        }
+
+        return lastReset.reset;
+    }, [draft, lastReset, words]);
+
+    const remember = (reset: CaptionReset): void => {
+        setLastReset({ reset, before: draft });
+    };
+
+    return {
+        canResetAll,
+        undoableReset,
+        resetAll: () => {
+            remember({ scope: "all" });
+            editor.resetAllCaptions();
+        },
+        resetCueAt: (index) => {
+            const cue = draft.cues[index];
+
+            if (cue === undefined) {
+                return;
+            }
+
+            remember({ scope: "cue", index });
+            editor.replaceCue(index, [resetCue(cue, words)]);
+        },
+        undoReset: () => {
+            setLastReset(null);
+            editor.undo();
+        },
+    };
+}
+
+/** Whether focus sits on nothing: the reset button that had it just became disabled. */
+function isFocusLost(): boolean {
+    const active = document.activeElement;
+
+    if (active === null || active === document.body) {
+        return true;
+    }
+
+    return active instanceof HTMLButtonElement && active.disabled === true;
+}
+
+function ResetUndoNotice(props: {
+    reset: CaptionReset;
+    isLocked: boolean;
+    onUndo: () => void;
+}): ReactNode {
+    const undoRef = useRef<HTMLButtonElement>(null);
+
+    // A keyboard user would otherwise be dropped at the top of the page.
+    useEffect(() => {
+        if (isFocusLost() === true) {
+            undoRef.current?.focus();
+        }
+    }, []);
+
+    return (
+        <div className="m-3 flex items-center gap-3 rounded-xl border bg-popover px-3 py-2 text-sm">
+            <span className="flex-1">{RESET_MESSAGES[props.reset.scope]}</span>
+            <Button
+                ref={undoRef}
+                variant="outline"
+                size="sm"
+                className="pointer-coarse:h-11"
+                disabled={props.isLocked}
+                onClick={props.onUndo}
+            >
+                Desfazer
+            </Button>
+        </div>
+    );
+}
+
 /** Whether the cue now says something other than what Tinta heard in its time. */
 function isCueEdited(cue: CaptionCue, words: Array<CaptionWord>): boolean {
     const original = transcriptWordsOf(cue, words);
@@ -90,6 +198,8 @@ export function CaptionList(props: CaptionListProps): ReactNode {
     const cues = draft.cues;
     // Each check scans the whole transcript; the list re-renders every frame while the clip plays.
     const editedIndexes = useMemo(() => findEditedCueIndexes(cues, words), [cues, words]);
+    const captionReset = useCaptionReset(editor, words);
+    const undoableReset = captionReset.undoableReset;
     const listRef = useRef<HTMLDivElement>(null);
     const [isFollowing, setIsFollowing] = useState(true);
 
@@ -112,7 +222,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                 props.className,
             )}
         >
-            <div className="flex items-center gap-2 border-b px-4 py-2.5">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b px-4 py-2.5">
                 <h2
                     id="studio-captions-title"
                     className="flex items-center gap-2 text-lg leading-tight font-semibold"
@@ -120,21 +230,31 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                     <CaptionsIcon className="size-5 text-muted-foreground" aria-hidden="true" />
                     Legendas
                 </h2>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm whitespace-nowrap text-muted-foreground">
                     · {cues.length} {pluralize(cues.length, "bloco", "blocos")}
                 </span>
-                <span className="flex-1" />
-                <HintTooltip label="Voltar tudo ao original">
+                <HintTooltip label="Desfaz suas mudanças em todas as legendas">
                     <Button
                         variant="ghost"
-                        size="icon-sm"
-                        aria-label="Voltar todas as legendas ao texto original"
-                        disabled={isLocked}
-                        onClick={editor.resetAllCaptions}
+                        size="sm"
+                        className="ml-auto pointer-coarse:h-11"
+                        disabled={isLocked === true || captionReset.canResetAll === false}
+                        onClick={captionReset.resetAll}
                     >
-                        <RotateCwIcon aria-hidden="true" />
+                        <RotateCcwIcon aria-hidden="true" />
+                        Voltar ao original
                     </Button>
                 </HintTooltip>
+            </div>
+            {/* Always mounted: screen readers only announce changes inside a live region they already know. */}
+            <div role="status">
+                {undoableReset !== null && (
+                    <ResetUndoNotice
+                        reset={undoableReset}
+                        isLocked={isLocked}
+                        onUndo={captionReset.undoReset}
+                    />
+                )}
             </div>
             {draft.captionStyle === "none" && <CaptionsOffNotice editor={editor} />}
             <div
@@ -161,6 +281,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                                     onReplace={(replacement) =>
                                         editor.replaceCue(index, replacement)
                                     }
+                                    onResetToOriginal={() => captionReset.resetCueAt(index)}
                                     onClose={() => onOpen(null)}
                                 />
                             </div>
@@ -205,7 +326,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                     onClick={() => setIsFollowing(true)}
                     className="absolute bottom-3 left-1/2 inline-flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full bg-foreground px-3 text-sm font-semibold whitespace-nowrap text-background outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
-                    <TargetIcon className="size-4" aria-hidden="true" />
+                    <LocateIcon className="size-4" aria-hidden="true" />
                     Voltar ao trecho tocando
                 </button>
             )}
