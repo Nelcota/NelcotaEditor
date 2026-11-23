@@ -130,7 +130,12 @@ async function requestCandidates(
         throw new UserFacingError(BROKEN_ANSWER_MESSAGE, { cause: result.error });
     }
 
-    return toCandidates(parseHighlightClips(result.data.clips));
+    const returnedItems = result.data.clips;
+    const candidates = toCandidates(parseHighlightClips(returnedItems));
+    console.info(
+        `Highlights of video ${video.id}: ${returnedItems.length} returned, ${candidates.length} valid.`,
+    );
+    return candidates;
 }
 
 function titleOrFallback(title: string, position: number): string {
@@ -186,6 +191,9 @@ export async function ensureHighlights(input: HighlightSelectionInput): Promise<
         maxCount: video.requestedClipCount,
         clipLength: video.clipLength,
     });
+    console.info(
+        `Highlights of video ${video.id}: ${highlights.length} of ${candidates.length} kept after fitting.`,
+    );
 
     if (highlights.length === 0) {
         throw new UserFacingError(describeNoHighlights(durationSeconds));

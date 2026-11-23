@@ -87,15 +87,28 @@ function parseJsonContent(content: string | null): unknown {
     }
 }
 
+function logCompletion(
+    completion: OpenAI.Chat.Completions.ChatCompletion,
+    startedAt: number,
+): void {
+    const usage = completion.usage;
+    const durationMs = Math.round(performance.now() - startedAt);
+
+    console.info(
+        `DeepSeek answered in ${durationMs} ms (${usage?.prompt_tokens ?? "?"} prompt tokens, ${usage?.completion_tokens ?? "?"} completion tokens).`,
+    );
+}
+
 async function createCompletion(
     prompt: ChatPrompt,
     signal: AbortSignal,
 ): Promise<OpenAI.Chat.Completions.ChatCompletion> {
     const environment = getEnvironment();
     const client = createDeepSeekClient();
+    const startedAt = performance.now();
 
     try {
-        return await client.chat.completions.create(
+        const completion = await client.chat.completions.create(
             {
                 model: environment.DEEPSEEK_MODEL,
                 temperature: TEMPERATURE,
@@ -107,6 +120,8 @@ async function createCompletion(
             },
             { signal },
         );
+        logCompletion(completion, startedAt);
+        return completion;
     } catch (error) {
         throw toUserFacingError(error);
     }
