@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { MAX_CAPTION_CUES, studioDraftSchema } from "#/modules/clips/clip-studio.schema";
 import type { CaptionCue } from "#/modules/clips/clip-studio.schema";
+import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/transcript-word";
 
 function cue(startSeconds: number, endSeconds: number, text: string = "oi"): CaptionCue {
     return { startSeconds, endSeconds, words: [{ text, startSeconds, endSeconds }] };
@@ -77,6 +78,15 @@ describe("studioDraftSchema fields", () => {
 
         assert.equal(isValid({ cues: [blankWord] }), false);
         assert.equal(isValid({ cues: [spacesOnly] }), false);
+    });
+
+    it("measures word length in characters, as the transcript cuts it, so an emoji fits", () => {
+        const emoji = String.fromCodePoint(0x1f600);
+        const atLimit = `${"a".repeat(MAX_CAPTION_WORD_LENGTH - 1)}${emoji}`;
+        const overLimit = `${"a".repeat(MAX_CAPTION_WORD_LENGTH)}${emoji}`;
+
+        assert.equal(isValid({ cues: [cue(11, 12, atLimit)] }), true);
+        assert.equal(isValid({ cues: [cue(11, 12, overLimit)] }), false);
     });
 });
 
