@@ -46,9 +46,11 @@ function getDecimalFormatter(
         minimumFractionDigits = fractionDigits;
     }
 
+    // "negative" keeps -0 and values that round to zero (-0,04 at one digit) from showing as "-0".
     const formatter = new Intl.NumberFormat("pt-BR", {
         minimumFractionDigits,
         maximumFractionDigits: fractionDigits,
+        signDisplay: "negative",
     });
     decimalFormatters.set(key, formatter);
 
@@ -70,7 +72,9 @@ export function formatDecimal(value: number, options: DecimalOptions = {}): stri
         fractionDigits < 0 ||
         fractionDigits > MAX_FRACTION_DIGITS
     ) {
-        throw new RangeError(`fractionDigits must be 0 to 3, got ${fractionDigits}`);
+        throw new RangeError(
+            `fractionDigits must be 0 to ${MAX_FRACTION_DIGITS}, got ${fractionDigits}`,
+        );
     }
 
     if (Number.isFinite(value) === false) {

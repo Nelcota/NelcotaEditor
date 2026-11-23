@@ -106,6 +106,12 @@ describe("formatDecimal", () => {
         assert.equal(formatDecimal(2.6, { fractionDigits: 0 }), "3");
     });
 
+    it("never shows a minus sign on zero", () => {
+        assert.equal(formatDecimal(-0), "0");
+        assert.equal(formatDecimal(-0.04), "0");
+        assert.equal(formatDecimal(-1.5), "-1,5");
+    });
+
     it("shows 0 for NaN and infinite values", () => {
         assert.equal(formatDecimal(Number.NaN), "0");
         assert.equal(formatDecimal(Number.POSITIVE_INFINITY), "0");
