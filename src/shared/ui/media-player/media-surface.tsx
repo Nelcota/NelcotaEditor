@@ -60,7 +60,7 @@ function IdleProgress({ player }: { player: MediaPlayer }): ReactNode {
 /**
  * The frame every custom-controlled video shares: click the picture to play or pause, keyboard
  * shortcuts once it has focus, the big play button while paused, and controls that hide while
- * the video plays and the mouse rests.
+ * the video plays and the mouse rests. The browser's own right-click menu is turned off.
  */
 export function MediaSurface({
     player,
@@ -84,6 +84,10 @@ export function MediaSurface({
                 await player.handleKeyDown(event);
             }}
             onPointerMove={player.wake}
+            onContextMenu={(event) => {
+                // The browser menu offers "Show controls", which stacks its bar over ours; "Baixar" covers saving.
+                event.preventDefault();
+            }}
             className={cn(
                 "group/player @container relative isolate overflow-hidden bg-black outline-none focus-visible:ring-4 focus-visible:ring-ring data-[idle=true]:cursor-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0",
                 className,

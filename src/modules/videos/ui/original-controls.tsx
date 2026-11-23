@@ -1,6 +1,4 @@
-import RotateCcwIcon from "~icons/lucide/rotate-ccw";
-import RotateCwIcon from "~icons/lucide/rotate-cw";
-import type { ReactNode } from "react";
+import type { ReactNode, SVGProps } from "react";
 import type { ClipView } from "#/modules/clips/clip-view";
 import { findClipAt, rankOfClip } from "#/modules/videos/ui/clip-ranking";
 import { ClipMarks } from "#/modules/videos/ui/clip-marks";
@@ -21,6 +19,44 @@ import { SeekBar } from "#/shared/ui/media-player/seek-bar";
 import type { MediaPlayer } from "#/shared/ui/media-player/use-media-player";
 
 const SKIP_SECONDS = 10;
+
+/** The skip arrows carry the "10" inside, so they do not read as the "Tentar de novo" arrow. */
+function SkipBackIcon(props: SVGProps<SVGSVGElement>): ReactNode {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} {...props}>
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" strokeLinecap="round" />
+            <path d="M3 3v5h5" strokeLinecap="round" strokeLinejoin="round" />
+            <SkipSecondsText />
+        </svg>
+    );
+}
+
+function SkipForwardIcon(props: SVGProps<SVGSVGElement>): ReactNode {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} {...props}>
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" strokeLinecap="round" />
+            <path d="M21 3v5h-5" strokeLinecap="round" strokeLinejoin="round" />
+            <SkipSecondsText />
+        </svg>
+    );
+}
+
+function SkipSecondsText(): ReactNode {
+    return (
+        <text
+            x="12"
+            y="15.5"
+            textAnchor="middle"
+            fill="currentColor"
+            stroke="none"
+            fontSize="9"
+            fontWeight="700"
+            fontFamily="inherit"
+        >
+            {SKIP_SECONDS}
+        </text>
+    );
+}
 
 /** The original and its clips, as the studio hands them over. */
 export interface StudioLink {
@@ -88,13 +124,13 @@ export function OriginalControls({
                 <PlayToggleButton player={player} />
                 <ControlButton
                     label="Voltar 10 s (J)"
-                    icon={RotateCcwIcon}
+                    icon={SkipBackIcon}
                     onClick={() => player.seekBy(-SKIP_SECONDS)}
                     className="hidden @lg:grid"
                 />
                 <ControlButton
                     label="Avançar 10 s (L)"
-                    icon={RotateCwIcon}
+                    icon={SkipForwardIcon}
                     onClick={() => player.seekBy(SKIP_SECONDS)}
                     className="hidden @lg:grid"
                 />

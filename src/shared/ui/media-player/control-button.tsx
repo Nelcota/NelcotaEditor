@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "#/shared/ui/cn";
+import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import type { IconComponent } from "#/shared/ui/icon-component";
 
 export type ControlSize = "md" | "sm";
@@ -18,7 +19,10 @@ interface ControlButtonProps {
     className?: string;
 }
 
-/** An icon button drawn over video: white, with a soft light behind it on hover. */
+/**
+ * An icon button drawn over video: white, with a soft light behind it on hover. Its hint is the
+ * app's own, not the native `title`, so it follows the theme and shows on keyboard focus.
+ */
 export function ControlButton({
     label,
     icon: Icon,
@@ -28,21 +32,22 @@ export function ControlButton({
     className,
 }: ControlButtonProps): ReactNode {
     return (
-        <button
-            type="button"
-            aria-label={label}
-            title={label}
-            disabled={isDisabled}
-            onClick={async () => {
-                await onClick();
-            }}
-            className={cn(
-                "grid shrink-0 place-items-center rounded-lg text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent motion-safe:active:scale-[0.99]",
-                SIZE_CLASSES[size],
-                className,
-            )}
-        >
-            <Icon aria-hidden="true" />
-        </button>
+        <HintTooltip label={label}>
+            <button
+                type="button"
+                aria-label={label}
+                disabled={isDisabled}
+                onClick={async () => {
+                    await onClick();
+                }}
+                className={cn(
+                    "grid shrink-0 place-items-center rounded-lg text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent motion-safe:active:scale-[0.99]",
+                    SIZE_CLASSES[size],
+                    className,
+                )}
+            >
+                <Icon aria-hidden="true" />
+            </button>
+        </HintTooltip>
     );
 }
