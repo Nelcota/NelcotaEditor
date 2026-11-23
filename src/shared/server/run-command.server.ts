@@ -1,21 +1,34 @@
 import { ExecaError, execa } from "execa";
 
 const STDERR_IN_MESSAGE_LENGTH = 500;
+const URL_PATTERN = /https?:\/\/\S+/g;
+// yt-dlp names the video in its messages: "ERROR: [youtube] dQw4w9WgXcQ: Private video".
+const YOUTUBE_ID_PATTERN = /\[youtube\] [\w-]{11}/g;
 // Same as the processing job expiry: a stalled yt-dlp or ffmpeg must not outlive its job and keep
 // the only worker busy until someone cancels by hand.
 const MAX_COMMAND_MILLISECONDS = 6 * 60 * 60 * 1000;
 
+/**
+ * Carries no `cause` and no raw stderr: the execa error's message holds the full command line,
+ * links included, and printing the error prints both.
+ */
 export class CommandFailedError extends Error {
-    readonly stderr: string;
-
-    constructor(command: string, exitCode: number | null, stderr: string, options?: ErrorOptions) {
+    constructor(command: string, exitCode: number | null, stderr: string) {
         super(
-            `${command} exited with code ${String(exitCode)}: ${stderr.slice(-STDERR_IN_MESSAGE_LENGTH)}`,
-            options,
+            `${command} exited with code ${String(exitCode)}: ${redactLinks(stderr.slice(-STDERR_IN_MESSAGE_LENGTH))}`,
         );
         this.name = "CommandFailedError";
-        this.stderr = stderr;
     }
+}
+
+/**
+ * The message is logged, and links and YouTube ids are the user's data, so they are replaced; the
+ * rest of the stderr tail stays so ffmpeg and yt-dlp failures can still be diagnosed.
+ */
+function redactLinks(text: string): string {
+    return text
+        .replaceAll(URL_PATTERN, "<url>")
+        .replaceAll(YOUTUBE_ID_PATTERN, "[youtube] <youtube-id>");
 }
 
 export class EmptyCommandError extends Error {
@@ -44,7 +57,7 @@ function toCommandError(command: string, error: unknown): unknown {
         stderr = error.stderr;
     }
 
-    return new CommandFailedError(command, error.exitCode ?? null, stderr, { cause: error });
+    return new CommandFailedError(command, error.exitCode ?? null, stderr);
 }
 
 /**
