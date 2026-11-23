@@ -133,7 +133,13 @@ function ResetUndoNotice(props: {
             className="m-3 flex items-center gap-3 rounded-xl border bg-popover px-3 py-2 text-sm"
         >
             <span className="flex-1">{RESET_MESSAGES[props.reset.scope]}</span>
-            <Button variant="outline" size="sm" disabled={props.isLocked} onClick={props.onUndo}>
+            <Button
+                variant="outline"
+                size="sm"
+                className="pointer-coarse:h-11"
+                disabled={props.isLocked}
+                onClick={props.onUndo}
+            >
                 Desfazer
             </Button>
         </div>
@@ -198,7 +204,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                 props.className,
             )}
         >
-            <div className="flex items-center gap-2 border-b px-4 py-2.5">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b px-4 py-2.5">
                 <h2
                     id="studio-captions-title"
                     className="flex items-center gap-2 text-lg leading-tight font-semibold"
@@ -209,11 +215,11 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                 <span className="text-sm whitespace-nowrap text-muted-foreground">
                     · {cues.length} {pluralize(cues.length, "bloco", "blocos")}
                 </span>
-                <span className="flex-1" />
                 <HintTooltip label="Desfaz suas mudanças em todas as legendas">
                     <Button
                         variant="ghost"
                         size="sm"
+                        className="ml-auto pointer-coarse:h-11"
                         disabled={isLocked === true || captionReset.canResetAll === false}
                         onClick={captionReset.resetAll}
                     >
