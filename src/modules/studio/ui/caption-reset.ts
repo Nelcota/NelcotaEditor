@@ -1,5 +1,6 @@
 import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/clip-studio.schema";
 import { replaceCueAt, resetAllCues, resetCue } from "#/modules/studio/ui/cue-editing";
+import { toCueKey } from "#/modules/studio/ui/cue-key";
 
 /** Which captions "Voltar ao original" brings back to the transcript. */
 export type CaptionReset = { scope: "all" } | { scope: "cue"; index: number };
@@ -23,30 +24,8 @@ export function resetCaptions(
     return replaceCueAt(draft, reset.index, [resetCue(cue, words)]);
 }
 
-// Field by field, never through JSON.stringify: a draft read back from the database lists its keys
-// in another order, which would make an untouched caption look edited.
-function isSameWord(first: CaptionWord, second: CaptionWord): boolean {
-    return (
-        first.text === second.text &&
-        first.startSeconds === second.startSeconds &&
-        first.endSeconds === second.endSeconds
-    );
-}
-
 function isSameCue(first: CaptionCue, second: CaptionCue): boolean {
-    if (first.startSeconds !== second.startSeconds || first.endSeconds !== second.endSeconds) {
-        return false;
-    }
-
-    if (first.words.length !== second.words.length) {
-        return false;
-    }
-
-    return first.words.every((word, index) => {
-        const other = second.words[index];
-
-        return other !== undefined && isSameWord(word, other);
-    });
+    return toCueKey(first) === toCueKey(second);
 }
 
 function isSameCueList(first: Array<CaptionCue>, second: Array<CaptionCue>): boolean {
