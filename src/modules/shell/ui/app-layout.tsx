@@ -8,6 +8,7 @@ import { useFocusMainOnNavigate } from "#/modules/shell/ui/use-focus-main-on-nav
 import { InspectorToggle } from "#/modules/videos/ui/inspector-toggle";
 import { OpenVideoTabs } from "#/modules/videos/ui/open-video-tabs";
 import { BrandLogo } from "#/shared/ui/brand-logo";
+import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { NavigationProgress } from "#/shared/ui/navigation-progress";
@@ -17,9 +18,6 @@ import { TooltipProvider } from "#/shared/ui/tooltip";
 import { useStoredFlag } from "#/shared/ui/use-stored-flag";
 
 const SIDEBAR_HIDDEN_KEY = "nelcota:sidebar-hidden";
-
-const BAR_BUTTON_CLASS =
-    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] [&>svg]:size-5";
 
 /** The video page lays out its own columns (page and inspector) and scrolls them apart. */
 function useIsVideoPage(): boolean {
@@ -62,14 +60,15 @@ function TopBar({ isSidebarHidden, onToggleSidebar, isVideoPage }: TopBarProps):
                     <BrandLogo className="gap-2 text-base" />
                 </Link>
                 <HintTooltip label={sidebarLabel}>
-                    <button
-                        type="button"
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={onToggleSidebar}
                         aria-label={sidebarLabel}
-                        className={cn(BAR_BUTTON_CLASS, "max-md:hidden")}
+                        className="text-muted-foreground hover:text-foreground max-md:hidden"
                     >
                         <PanelLeftIcon aria-hidden="true" />
-                    </button>
+                    </Button>
                 </HintTooltip>
             </div>
             <div className="ms-3 min-w-0 flex-1 max-md:hidden">
