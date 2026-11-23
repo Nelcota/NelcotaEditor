@@ -23,6 +23,7 @@ import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
 import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
+import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
 import {
     deleteVideoFiles,
     hasWorkingVideos,
@@ -172,6 +173,9 @@ export const auth = betterAuth({
         user: {
             create: { before: assertNameFits },
             update: { before: assertNameFits },
+        },
+        session: {
+            update: { before: keepImpersonatedSessionExpiry },
         },
     },
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
