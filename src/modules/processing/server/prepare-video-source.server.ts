@@ -115,7 +115,8 @@ async function inspectSource(sourcePath: string): Promise<CheckedSource> {
     return { sourcePath, durationSeconds, sourceBytes: fileStats.size };
 }
 
-async function prepareUploadedSource(video: Video, sourcePath: string): Promise<VideoSource> {
+/** An upload, or a download a previous run already saved. */
+async function prepareStoredSource(video: Video, sourcePath: string): Promise<VideoSource> {
     const checkedSource = await inspectSource(sourcePath);
     const source = { sourcePath, durationSeconds: checkedSource.durationSeconds };
     await saveVideoSource(video.id, source);
@@ -143,7 +144,7 @@ async function obtainSource(video: Video, signal: AbortSignal): Promise<VideoSou
     const storedSourcePath = video.sourcePath;
 
     if (storedSourcePath !== null) {
-        return prepareUploadedSource(video, storedSourcePath);
+        return prepareStoredSource(video, storedSourcePath);
     }
 
     return prepareDownloadedSource(video, signal);
