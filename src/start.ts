@@ -2,6 +2,8 @@ import { isNotFound, isRedirect } from "@tanstack/react-router";
 import { createCsrfMiddleware, createMiddleware, createStart } from "@tanstack/react-start";
 import { setResponseHeader } from "@tanstack/react-start/server";
 import { buildContentSecurityPolicy } from "#/shared/server/content-security-policy";
+import { logger } from "#/shared/server/logger.server";
+import { SECURITY_HEADERS, withNoStoreByDefault } from "#/shared/server/security-headers";
 import { UserFacingError, toUserMessage } from "#/shared/server/user-facing-error";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -16,23 +18,13 @@ const csrfMiddleware = createCsrfMiddleware({
         context.handlerType === "serverFn" || SAFE_METHODS.has(context.request.method) === false,
 });
 
-/**
- * No other site may frame the app (clickjacking on the delete and cancel buttons), and URLs with
- * ids do not leak to other origins. The Content-Security-Policy is set per request (its nonce).
- */
-const SECURITY_HEADERS = [
-    ["X-Frame-Options", "DENY"],
-    ["Referrer-Policy", "strict-origin-when-cross-origin"],
-    ["X-Content-Type-Options", "nosniff"],
-] as const;
-
 /** A fresh random nonce per response; dashes dropped so it is plain base16. */
 function createCspNonce(): string {
     return crypto.randomUUID().replaceAll("-", "");
 }
 
 /** The nonce travels in the request context so getRouter can stamp it on the SSR scripts. */
-const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(({ next }) => {
+const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(async ({ next }) => {
     const cspNonce = createCspNonce();
     const policy = buildContentSecurityPolicy({
         nonce: cspNonce,
@@ -44,7 +36,8 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server((
     }
 
     setResponseHeader("Content-Security-Policy", policy);
-    return next({ context: { cspNonce } });
+    const result = await next({ context: { cspNonce } });
+    return { ...result, response: withNoStoreByDefault(result.response) };
 });
 
 /** Server function errors reach the browser; only messages meant for users get through. */
@@ -62,10 +55,11 @@ const hideInternalErrorsMiddleware = createMiddleware({ type: "function" }).serv
             }
 
             // Only the function's name: its input may hold personal data.
-            console.error(
-                `Server function ${serverFnMeta.name} (${serverFnMeta.id}) failed`,
+            logger.error("Server function failed", {
+                serverFunction: serverFnMeta.name,
+                serverFunctionId: serverFnMeta.id,
                 error,
-            );
+            });
             throw toPublicError(error);
         }
     },
