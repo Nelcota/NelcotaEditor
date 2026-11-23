@@ -10,6 +10,7 @@ import {
 } from "#/modules/clips/caption-cues";
 import type { CaptionCue } from "#/modules/clips/clip-studio.schema";
 import { ASPECT_RATIO_SIZES } from "#/modules/clips/clip-format";
+import { buildClipOutputFileName } from "#/modules/clips/clip-output-file";
 import type { AspectRatio } from "#/modules/clips/clip-format";
 import type { ClipStatus } from "#/modules/clips/clip-status";
 import { clips } from "#/modules/clips/clips.schema";
@@ -84,14 +85,19 @@ function buildVideoFilter(clip: Clip): string {
     return `${shapeFilter},ass=${clip.id}.ass`;
 }
 
-function buildFfmpegArguments(clip: Clip, sourceAbsolutePath: string): Array<string> {
+interface FfmpegFiles {
+    sourceAbsolutePath: string;
+    outputFileName: string;
+}
+
+function buildFfmpegArguments(clip: Clip, files: FfmpegFiles): Array<string> {
     const durationSeconds = clip.endSeconds - clip.startSeconds;
 
     return [
         "-y",
         "-ss",
         clip.startSeconds.toFixed(TIME_DECIMALS),
-        ...localFileInput(sourceAbsolutePath),
+        ...localFileInput(files.sourceAbsolutePath),
         "-t",
         durationSeconds.toFixed(TIME_DECIMALS),
         "-vf",
@@ -110,7 +116,7 @@ function buildFfmpegArguments(clip: Clip, sourceAbsolutePath: string): Array<str
         AUDIO_BITRATE,
         "-movflags",
         "+faststart",
-        `${clip.id}.mp4`,
+        files.outputFileName,
     ];
 }
 
@@ -122,6 +128,7 @@ export async function renderClip(input: RenderClipInput): Promise<void> {
     const clipsDirectory = path.posix.join(getVideoDirectory(clip.videoId), CLIPS_DIRECTORY_NAME);
     const workingDirectory = resolveStoragePath(clipsDirectory);
     const subtitlesFile = path.join(workingDirectory, `${clip.id}.ass`);
+    const outputFileName = buildClipOutputFileName(clip.id, clip.studioDraftVersion);
 
     await mkdir(workingDirectory, { recursive: true });
 
@@ -145,7 +152,10 @@ export async function renderClip(input: RenderClipInput): Promise<void> {
         // The working directory keeps the ass filter argument free of path escaping issues.
         await runCommand(
             "ffmpeg",
-            buildFfmpegArguments(clip, resolveStoragePath(input.sourcePath)),
+            buildFfmpegArguments(clip, {
+                sourceAbsolutePath: resolveStoragePath(input.sourcePath),
+                outputFileName,
+            }),
             {
                 workingDirectory,
                 signal: input.signal,
@@ -156,7 +166,7 @@ export async function renderClip(input: RenderClipInput): Promise<void> {
         await rm(subtitlesFile, { force: true });
     }
 
-    const outputPath = path.posix.join(clipsDirectory, `${clip.id}.mp4`);
+    const outputPath = path.posix.join(clipsDirectory, outputFileName);
     await db.update(clips).set({ status: "done", outputPath }).where(eq(clips.id, clip.id));
 }
 

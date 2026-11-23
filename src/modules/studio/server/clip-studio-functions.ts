@@ -20,6 +20,7 @@ import {
     readStoredDraft,
 } from "#/modules/studio/server/clip-studio.server";
 import { findClipOfVideo } from "#/modules/clips/server/find-clip-of-video.server";
+import { requeueThenRemoveOldOutput } from "#/modules/studio/server/remove-old-output-after-requeue";
 import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
 import {
     VIDEO_ALREADY_PROCESSING_MESSAGE,
@@ -121,14 +122,12 @@ async function applyDraftAndRequeue(target: DraftToApply): Promise<RenderDraftRe
             }
 
             await enqueueVideoProcessing({ videoId, userId }, jobDatabase);
-            // Removed before the commit: once the job is visible the worker may already be
-            // writing the new file at the same path.
-            await removeOldOutput(clip);
             return { kind: "queued" };
         },
     );
 }
 
+/** Runs after the commit, so a failure here only leaves an unused file behind. */
 async function removeOldOutput(clip: Clip): Promise<void> {
     const outputPath = clip.outputPath;
 
@@ -136,12 +135,16 @@ async function removeOldOutput(clip: Clip): Promise<void> {
         return;
     }
 
-    await rm(resolveStoragePath(outputPath), { force: true });
+    try {
+        await rm(resolveStoragePath(outputPath), { force: true });
+    } catch (error) {
+        console.error(`Failed to remove the previous file of clip ${clip.id}`, error);
+    }
 }
 
 /**
- * Applies the saved draft to the clip and sends it back to Brasa. The old file is removed; the
- * pipeline keeps every finished step, so only this clip is rendered again.
+ * Applies the saved draft to the clip and sends it back to Brasa. The old file is removed once that
+ * is committed; the pipeline keeps every finished step, so only this clip is rendered again.
  */
 export const renderClipDraft = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
@@ -161,11 +164,15 @@ export const renderClipDraft = createServerFn({ method: "POST" })
         }
 
         assertDraftFitsVideo(draft, video);
-        return applyDraftAndRequeue({
-            userId: context.user.id,
-            videoId: video.id,
-            clip,
-            draft,
-            expectedVersion: data.expectedVersion,
-        });
+        return requeueThenRemoveOldOutput(
+            () =>
+                applyDraftAndRequeue({
+                    userId: context.user.id,
+                    videoId: video.id,
+                    clip,
+                    draft,
+                    expectedVersion: data.expectedVersion,
+                }),
+            () => removeOldOutput(clip),
+        );
     });
