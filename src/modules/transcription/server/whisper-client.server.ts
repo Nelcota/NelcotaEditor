@@ -1,5 +1,5 @@
 import { openAsBlob } from "node:fs";
-import OpenAI, { APIConnectionError, toFile } from "openai";
+import OpenAI, { APIConnectionError, APIError, APIUserAbortError, toFile } from "openai";
 import { z } from "zod";
 import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/transcript-word";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
@@ -12,10 +12,17 @@ import { UserFacingError } from "#/shared/server/user-facing-error";
 const LOCAL_API_KEY = "speaches";
 const MAX_RETRIES = 2;
 
-// The SDK types the answer but does not check it; speaches may leave fields out.
+const TRANSCRIPTION_UNAVAILABLE_MESSAGE =
+    "A transcrição está indisponível agora. Tente de novo em alguns minutos.";
+const TRANSCRIPTION_FAILED_MESSAGE =
+    "Não conseguimos transcrever a fala deste vídeo. Tente de novo em alguns minutos.";
+
+// The SDK types the answer but does not check it. speaches answers `words: []` for silence and
+// `words: null` when it produced no word timestamps; only the first is a real empty chunk, so a
+// missing list must fail instead of being saved as a transcript with no speech.
 const whisperResponseSchema = z.object({
     language: z.string().trim().min(1).optional().catch(undefined),
-    words: z.array(z.object({ word: z.string(), start: z.number(), end: z.number() })).default([]),
+    words: z.array(z.object({ word: z.string(), start: z.number(), end: z.number() })),
 });
 
 type WhisperWord = z.infer<typeof whisperResponseSchema>["words"][number];
@@ -33,18 +40,20 @@ export interface ChunkTranscription {
 }
 
 /**
- * The Whisper server being down or too slow is something the person can wait out, so it gets a
- * message instead of the generic failure. APIConnectionTimeoutError extends APIConnectionError.
+ * Says the transcription is the step that failed instead of the generic failure; the SDK error
+ * stays as the cause, for the server log. Cancellation passes through untouched.
+ * APIConnectionTimeoutError extends APIConnectionError.
  */
-function toUserFacingError(error: unknown): unknown {
-    if (error instanceof APIConnectionError) {
-        return new UserFacingError(
-            "A transcrição está indisponível agora. Tente de novo em alguns minutos.",
-            { cause: error },
-        );
+export function toUserFacingError(error: unknown): unknown {
+    if (error instanceof APIUserAbortError || error instanceof APIError === false) {
+        return error;
     }
 
-    return error;
+    if (error instanceof APIConnectionError) {
+        return new UserFacingError(TRANSCRIPTION_UNAVAILABLE_MESSAGE, { cause: error });
+    }
+
+    return new UserFacingError(TRANSCRIPTION_FAILED_MESSAGE, { cause: error });
 }
 
 function createWhisperClient(): OpenAI {
@@ -118,11 +127,13 @@ function resolveLanguage(videoLanguage: string | null): string {
     return environment.WHISPER_LANGUAGE.trim();
 }
 
-function toChunkTranscription(response: unknown, offsetSeconds: number): ChunkTranscription {
+export function toChunkTranscription(response: unknown, offsetSeconds: number): ChunkTranscription {
     const result = whisperResponseSchema.safeParse(response);
 
     if (result.success === false) {
-        throw new WhisperResponseError();
+        throw new UserFacingError(TRANSCRIPTION_FAILED_MESSAGE, {
+            cause: new WhisperResponseError(),
+        });
     }
 
     const verified = result.data;
