@@ -19,6 +19,10 @@ import {
     user,
     verification,
 } from "#/modules/auth/auth.schema";
+import {
+    recordImpersonationStart,
+    recordImpersonationStop,
+} from "#/modules/admin/server/record-admin-action.server";
 import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
 import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
@@ -171,7 +175,11 @@ export const auth = betterAuth({
             update: { before: trimNameWithinLimit },
         },
         session: {
+            // "Entrar como cliente" is called by the browser straight to Better Auth, so its start
+            // and end are recorded here, from the visit's session row.
+            create: { after: recordImpersonationStart },
             update: { before: keepImpersonatedSessionExpiry },
+            delete: { after: recordImpersonationStop },
         },
     },
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.

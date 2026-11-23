@@ -6,10 +6,12 @@ import {
     adminUserListInputSchema,
 } from "#/modules/admin/admin-search";
 import type { AdminUserDetails, AdminUserPage } from "#/modules/admin/admin-views";
+import { toBanDetails } from "#/modules/admin/server/admin-audit-entry.server";
 import { adminMiddleware } from "#/modules/admin/server/admin-middleware";
 import { findAdminUserDetails, listAdminUsers } from "#/modules/admin/server/admin-users.server";
 import { deleteUserAccount } from "#/modules/admin/server/delete-user-account.server";
 import { findNonAdminTarget, findTargetUser } from "#/modules/admin/server/find-target-user.server";
+import { recordAdminAction } from "#/modules/admin/server/record-admin-action.server";
 import { ADMIN_ROLE, USER_ROLE } from "#/modules/auth/auth.schema";
 import { auth } from "#/modules/auth/server/auth.server";
 
@@ -49,6 +51,13 @@ export const banUser = createServerFn({ method: "POST" })
             headers: context.headers,
             body: { userId: target.id, banReason },
         });
+        await recordAdminAction({
+            action: "ban-user",
+            adminId: context.admin.id,
+            targetUserId: target.id,
+            videoId: null,
+            details: toBanDetails(data.reason),
+        });
     });
 
 export const unbanUser = createServerFn({ method: "POST" })
@@ -58,6 +67,13 @@ export const unbanUser = createServerFn({ method: "POST" })
         const target = await findTargetUser({ userId: data.userId, adminId: context.admin.id });
 
         await auth.api.unbanUser({ headers: context.headers, body: { userId: target.id } });
+        await recordAdminAction({
+            action: "unban-user",
+            adminId: context.admin.id,
+            targetUserId: target.id,
+            videoId: null,
+            details: null,
+        });
     });
 
 export const setUserAdminRole = createServerFn({ method: "POST" })
@@ -68,6 +84,13 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
         const role = toRole(data.isAdmin);
 
         await auth.api.setRole({ headers: context.headers, body: { userId: target.id, role } });
+        await recordAdminAction({
+            action: "set-role",
+            adminId: context.admin.id,
+            targetUserId: target.id,
+            videoId: null,
+            details: { role },
+        });
     });
 
 export const revokeUserSessions = createServerFn({ method: "POST" })
@@ -80,6 +103,13 @@ export const revokeUserSessions = createServerFn({ method: "POST" })
             headers: context.headers,
             body: { userId: target.id },
         });
+        await recordAdminAction({
+            action: "revoke-sessions",
+            adminId: context.admin.id,
+            targetUserId: target.id,
+            videoId: null,
+            details: null,
+        });
     });
 
 export const deleteUser = createServerFn({ method: "POST" })
@@ -89,4 +119,11 @@ export const deleteUser = createServerFn({ method: "POST" })
         const target = await findNonAdminTarget({ userId: data.userId, adminId: context.admin.id });
 
         await deleteUserAccount(target.id);
+        await recordAdminAction({
+            action: "delete-user",
+            adminId: context.admin.id,
+            targetUserId: target.id,
+            videoId: null,
+            details: null,
+        });
     });
