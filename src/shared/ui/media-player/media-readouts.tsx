@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "#/shared/ui/cn";
 import { formatClock } from "#/shared/ui/format";
+import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { toAudibleVolume } from "#/shared/ui/media-player/media-state";
 import type { MediaPlayer } from "#/shared/ui/media-player/use-media-player";
 
@@ -60,16 +61,17 @@ export function PlaybackRateButton({ player }: { player: MediaPlayer }): ReactNo
     const rateLabel = `${rateFormatter.format(player.media.playbackRate)}×`;
 
     return (
-        <button
-            type="button"
-            aria-label={`Velocidade ${rateLabel}. Clique para trocar`}
-            title="Velocidade"
-            onClick={player.stepRate}
-            className="group/rate grid h-10 min-w-10 shrink-0 place-items-center rounded-lg px-1 text-white outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
-        >
-            <span className="grid h-7 min-w-9 place-items-center rounded-md border border-white/35 px-1.5 text-xs font-semibold tabular-nums transition-colors group-hover/rate:bg-white/15">
-                {rateLabel}
-            </span>
-        </button>
+        <HintTooltip label="Velocidade">
+            <button
+                type="button"
+                aria-label={`Velocidade ${rateLabel}. Clique para trocar`}
+                onClick={player.stepRate}
+                className="group/rate grid h-10 min-w-10 shrink-0 place-items-center rounded-lg px-1 text-white outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
+            >
+                <span className="grid h-7 min-w-9 place-items-center rounded-md border border-white/35 px-1.5 text-xs font-semibold tabular-nums transition-colors group-hover/rate:bg-white/15">
+                    {rateLabel}
+                </span>
+            </button>
+        </HintTooltip>
     );
 }
