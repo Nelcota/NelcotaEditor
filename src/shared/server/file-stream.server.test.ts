@@ -101,4 +101,29 @@ describe("createFileStream", () => {
 
         assert.equal(openedFiles.closeCount(), 1);
     });
+
+    it("logs a read that fails mid-way without the server's directories, then closes the file", async () => {
+        const openedFiles = spyOnOpenedFiles();
+        const warnings: Array<string> = [];
+        mock.method(console, "warn", (message: string) => {
+            warnings.push(message);
+        });
+        const stream = createFileStream(filePath, 0, FILE_CONTENT.length - 1);
+        await waitForOpen(openedFiles);
+        const handle = openedFiles.handles[0];
+
+        if (handle === undefined) {
+            throw new Error("The stream never opened its file");
+        }
+
+        mock.method(handle, "read", async (): Promise<never> => {
+            throw new Error("disk read failed");
+        });
+
+        await assert.rejects(new Response(stream).text(), /disk read failed/);
+
+        const expectedFile = `${path.basename(directory)}/source.mp4`;
+        assert.deepEqual(warnings, [`File stream failed mid-way: ${expectedFile}`]);
+        assert.equal(openedFiles.closeCount(), 1);
+    });
 });

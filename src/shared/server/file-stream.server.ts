@@ -1,5 +1,6 @@
 import fileSystem from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
+import path from "node:path";
 
 const CHUNK_SIZE_BYTES = 256 * 1024;
 
@@ -38,6 +39,14 @@ function assertValidRange(start: number, end: number): void {
     if (start < 0 || end < start - 1) {
         throw new InvalidStreamRangeError(start, end);
     }
+}
+
+/** The storage-relative tail (for example "<video id>/source.mp4"), enough to find the file without logging the server's directories. */
+function describeFileForLog(absolutePath: string): string {
+    const parentDirectory = path.basename(path.dirname(absolutePath));
+    const fileName = path.basename(absolutePath);
+
+    return `${parentDirectory}/${fileName}`;
 }
 
 /** Streams the inclusive byte range [start, end] of a file as a web stream. */
@@ -92,6 +101,11 @@ export function createFileStream(
             try {
                 await enqueueNextChunk(handle, controller);
             } catch (error) {
+                // The response has already started, so the route handler cannot log this failure.
+                console.warn(
+                    `File stream failed mid-way: ${describeFileForLog(absolutePath)}`,
+                    error,
+                );
                 // A failed read errors the stream, which never calls cancel(); close the file here.
                 await handle.close();
                 throw error;
