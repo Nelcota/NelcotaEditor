@@ -68,7 +68,10 @@ function padEnd(range: TimeRange, limits: EndPaddingLimits): TimeRange {
     return { startSeconds, endSeconds };
 }
 
-/** How far a clip may grow: up to the next accepted clip, and never past the video. */
+/**
+ * How far a clip may grow: up to the next accepted clip, and never past the video. A clip that
+ * starts after this one counts even when its padded start sits just before this clip's end.
+ */
 function findEndLimit(
     range: TimeRange,
     durationSeconds: number,
@@ -76,7 +79,7 @@ function findEndLimit(
 ): number {
     const laterStarts = accepted
         .map((other) => other.startSeconds)
-        .filter((startSeconds) => startSeconds >= range.endSeconds);
+        .filter((startSeconds) => startSeconds > range.startSeconds);
 
     return Math.min(durationSeconds, ...laterStarts);
 }

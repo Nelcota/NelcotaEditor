@@ -10,7 +10,10 @@ import {
 import { buildHighlightSystemPrompt } from "#/modules/highlights/highlight-prompt";
 import { normalizeHighlights } from "#/modules/highlights/normalize-highlights";
 import type { HighlightCandidate } from "#/modules/highlights/normalize-highlights";
-import { requestJsonCompletion } from "#/modules/highlights/server/deepseek-client.server";
+import {
+    BROKEN_ANSWER_MESSAGE,
+    requestJsonCompletion,
+} from "#/modules/highlights/server/deepseek-client.server";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 import type { Video } from "#/modules/video-records/videos.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
@@ -124,10 +127,15 @@ async function requestCandidates(
     const result = highlightResponseSchema.safeParse(answer);
 
     if (result.success === false) {
-        throw new UserFacingError("A DeepSeek devolveu uma resposta inválida. Tente novamente.");
+        throw new UserFacingError(BROKEN_ANSWER_MESSAGE, { cause: result.error });
     }
 
-    return toCandidates(parseHighlightClips(result.data.clips));
+    const returnedItems = result.data.clips;
+    const candidates = toCandidates(parseHighlightClips(returnedItems));
+    console.info(
+        `Highlights of video ${video.id}: ${returnedItems.length} returned, ${candidates.length} valid.`,
+    );
+    return candidates;
 }
 
 function titleOrFallback(title: string, position: number): string {
@@ -183,6 +191,9 @@ export async function ensureHighlights(input: HighlightSelectionInput): Promise<
         maxCount: video.requestedClipCount,
         clipLength: video.clipLength,
     });
+    console.info(
+        `Highlights of video ${video.id}: ${highlights.length} of ${candidates.length} kept after fitting.`,
+    );
 
     if (highlights.length === 0) {
         throw new UserFacingError(describeNoHighlights(durationSeconds));

@@ -272,6 +272,20 @@ describe("normalizeHighlights", () => {
             assert.ok(first.endSeconds <= second.startSeconds);
         });
 
+        it("keeps a short clip that ends where an accepted clip starts", () => {
+            // The accepted clip's start padding puts it at 129.85 s, just before this clip's 130 s end.
+            const result = normalizeHighlights([candidate(130, 190, 90), candidate(100, 130, 80)], {
+                ...minuteOptions,
+                words: spokenWords(0, 200),
+            });
+
+            assert.equal(result.length, 2);
+            const first = result[0];
+            assert.ok(first !== undefined);
+            assert.equal(toCentiseconds(first.startSeconds), 9985);
+            assert.equal(toCentiseconds(first.endSeconds), 13035);
+        });
+
         it("never extends past the end of the video", () => {
             const result = normalizeHighlights([candidate(5, 25, 80)], {
                 ...minuteOptions,

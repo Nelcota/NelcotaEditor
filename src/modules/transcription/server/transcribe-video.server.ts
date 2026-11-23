@@ -82,10 +82,16 @@ async function transcribeAudio(request: TranscriptRequest): Promise<Transcriptio
             throw new UserFacingError("Não foi possível extrair o áudio do vídeo.");
         }
 
-        return await runWithProgress(
+        const startedAt = performance.now();
+        const transcription = await runWithProgress(
             (onProgress) => transcribeChunks({ chunks, language, signal }, onProgress),
             saveProgress,
         );
+        const durationMs = Math.round(performance.now() - startedAt);
+        console.info(
+            `Transcribed video ${videoId}: ${chunks.length} chunk(s), ${transcription.words.length} word(s), language ${transcription.language ?? "unknown"}, ${durationMs} ms.`,
+        );
+        return transcription;
     } finally {
         await rm(audioDirectory, { recursive: true, force: true });
     }
@@ -101,7 +107,7 @@ export async function ensureTranscript(request: TranscriptRequest): Promise<Arra
     }
 
     await saveProgress(0);
-    await ensureWhisperModel();
+    await ensureWhisperModel(request.signal);
 
     const transcription = await transcribeAudio(request);
     await db.insert(transcripts).values({ videoId, ...transcription });
