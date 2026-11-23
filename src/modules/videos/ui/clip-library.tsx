@@ -10,6 +10,10 @@ import { pluralize } from "#/shared/ui/pluralize";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 
+/** The clip grid's columns, shared with the loading state so nothing jumps on arrival. */
+export const CLIP_GRID_CLASS =
+    "grid grid-cols-2 gap-x-4 gap-y-8 @2xl/clips:grid-cols-3 @2xl/clips:gap-x-6 @4xl/clips:grid-cols-4 @6xl/clips:grid-cols-5";
+
 function describeCount(visibleCount: number, totalCount: number): string {
     if (visibleCount === totalCount) {
         return `${totalCount} ${pluralize(totalCount, "corte", "cortes")}`;
@@ -40,7 +44,7 @@ function NoClipMatch({ query, onClear }: { query: string; onClear: () => void })
 function ClipGrid({ items }: { items: Array<LibraryClip> }) {
     return (
         <div className="@container/clips">
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-8 @2xl/clips:grid-cols-3 @2xl/clips:gap-x-6 @4xl/clips:grid-cols-4 @6xl/clips:grid-cols-5">
+            <ul className={CLIP_GRID_CLASS}>
                 {items.map((item) => (
                     <ClipCard key={item.clip.id} item={item} />
                 ))}

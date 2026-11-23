@@ -11,6 +11,7 @@ function ClipsContent() {
     if (clipsQuery.isError === true && items === undefined) {
         return (
             <ClipsLoadError
+                errorCount={clipsQuery.errorUpdateCount}
                 onRetry={async () => {
                     await clipsQuery.refetch();
                 }}

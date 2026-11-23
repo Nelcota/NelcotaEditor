@@ -1,10 +1,29 @@
-import ArrowUpDownIcon from "~icons/lucide/arrow-up-down";
+import ClockIcon from "~icons/lucide/clock";
+import StarIcon from "~icons/lucide/star";
+import type { ComponentType, SVGProps } from "react";
 import { CLIP_ORDERS, CLIP_ORDER_LABELS, isClipOrder } from "#/modules/videos/ui/clip-order";
 import type { ClipOrder } from "#/modules/videos/ui/clip-order";
 import { SearchField } from "#/modules/videos/ui/search-field";
 import { SegmentedControl } from "#/shared/ui/segmented-control";
 
-const ORDER_OPTIONS = CLIP_ORDERS.map((value) => ({ value, label: CLIP_ORDER_LABELS[value] }));
+const ORDER_ICONS: Record<ClipOrder, ComponentType<SVGProps<SVGSVGElement>>> = {
+    newest: ClockIcon,
+    best: StarIcon,
+};
+
+const ORDER_OPTIONS = CLIP_ORDERS.map((value) => {
+    const Icon = ORDER_ICONS[value];
+
+    return {
+        value,
+        label: (
+            <span className="inline-flex items-center justify-center gap-1.5">
+                <Icon aria-hidden="true" className="size-4 shrink-0" />
+                {CLIP_ORDER_LABELS[value]}
+            </span>
+        ),
+    };
+});
 
 interface ClipsToolbarProps {
     query: string;
@@ -26,24 +45,18 @@ export function ClipsToolbar(props: ClipsToolbarProps) {
                 onValueChange={onQueryChange}
             />
             {/* Two fixed orders: both visible instead of a list that opens over the page. */}
-            <div className="flex w-full items-center gap-2 sm:ms-auto sm:w-auto">
-                <ArrowUpDownIcon
-                    aria-hidden="true"
-                    className="size-5 shrink-0 text-muted-foreground"
-                />
-                <SegmentedControl
-                    label="Ordenar cortes"
-                    value={order}
-                    options={ORDER_OPTIONS}
-                    onValueChange={(value) => {
-                        // The options are the known orders, so anything else is ignored.
-                        if (isClipOrder(value) === true) {
-                            onOrderChange(value);
-                        }
-                    }}
-                    className="flex-1 sm:flex-none"
-                />
-            </div>
+            <SegmentedControl
+                label="Ordenar cortes"
+                value={order}
+                options={ORDER_OPTIONS}
+                onValueChange={(value) => {
+                    // The options are the known orders, so anything else is ignored.
+                    if (isClipOrder(value) === true) {
+                        onOrderChange(value);
+                    }
+                }}
+                className="w-full sm:ms-auto sm:w-auto"
+            />
             <span
                 aria-hidden="true"
                 className="w-full text-meta text-muted-foreground tabular-nums"

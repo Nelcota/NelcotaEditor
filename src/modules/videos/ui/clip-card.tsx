@@ -9,9 +9,10 @@ import { SourceVideoLink } from "#/modules/videos/ui/source-video-link";
 import type { LibraryClip } from "#/modules/videos/video-views";
 import { formatClock } from "#/shared/ui/format";
 
-const ICON_BUTTON_CLASS = "size-10 min-w-0 shrink-0 px-0 has-[>svg]:px-0";
+/** Grows to share a row, and drops to its own row when the card is too narrow for both words. */
+const SHARED_ROW_BUTTON_CLASS = "min-w-0 flex-auto";
 
-/** The actions under a card: download takes the room, Studio and copy are icons with their names read out. */
+/** The actions under a card, each with its word: download on its own row, then edit and copy. */
 function ClipCardActions({ item }: { item: LibraryClip }): ReactNode {
     const clip = item.clip;
 
@@ -20,26 +21,20 @@ function ClipCardActions({ item }: { item: LibraryClip }): ReactNode {
     }
 
     return (
-        <div className="flex gap-2">
-            {/* Two phone columns leave no room for the word; the icon keeps it as its name. */}
+        <div className="flex flex-wrap gap-2">
             <ClipDownloadLink
                 clip={clip}
                 label="Baixar"
                 emphasis="secondary"
-                className="min-w-0 flex-1 max-sm:px-0"
-                labelClassName="max-sm:sr-only"
+                className="min-w-0 basis-full"
             />
             <OpenInStudioLink
                 videoId={item.videoId}
                 clipId={clip.id}
-                className={ICON_BUTTON_CLASS}
-                labelClassName="sr-only"
+                className={SHARED_ROW_BUTTON_CLASS}
+                placeClassName="sr-only"
             />
-            <CopyTitleButton
-                title={clip.title}
-                className={ICON_BUTTON_CLASS}
-                labelClassName="sr-only"
-            />
+            <CopyTitleButton title={clip.title} className={SHARED_ROW_BUTTON_CLASS} />
         </div>
     );
 }
