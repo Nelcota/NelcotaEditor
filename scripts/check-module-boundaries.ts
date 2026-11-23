@@ -52,11 +52,6 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
         to: "src/modules/videos/server/video-start-transaction.server",
         reason: "The download is saved under the same per-user lock as uploads, so both see each other",
     },
-    {
-        from: "src/modules/processing/server/prepare-video-source.server.ts",
-        to: "src/modules/videos/server/storage-quota.server",
-        reason: "A download refused by the quota is deleted, since no row will ever point at it",
-    },
 ];
 
 // Routes only route: the router, React, module screens and handlers, and the API wrapper.

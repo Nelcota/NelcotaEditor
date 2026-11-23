@@ -1,4 +1,4 @@
-import { rm, stat } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 import { toOverallPercent } from "#/modules/processing/processing-stages";
 import { MAX_UPLOAD_BYTES } from "#/modules/video-records/upload-limits";
 import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/video-status";
@@ -11,12 +11,12 @@ import {
 } from "#/modules/video-records/server/video-progress.server";
 import { ensureVideoThumbnail } from "#/modules/processing/server/video-thumbnail.server";
 import { saveDownloadedSource } from "#/modules/processing/server/save-downloaded-source.server";
-import { StorageQuotaExceededError } from "#/modules/videos/server/storage-quota.server";
+import { removeDownloadFiles } from "#/modules/processing/server/download-files.server";
 import { toStoredVideoTitle } from "#/modules/video-records/video-title";
 import type { Video } from "#/modules/video-records/videos.schema";
 import { probeMedia } from "#/shared/server/media-probe.server";
 import type { MediaInfo } from "#/shared/server/media-probe.server";
-import { resolveStoragePath } from "#/shared/server/storage.server";
+import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const UNREADABLE_FILE_MESSAGE =
@@ -27,11 +27,11 @@ export interface VideoSource {
     durationSeconds: number;
 }
 
-async function obtainSourcePath(video: Video, signal: AbortSignal): Promise<string> {
-    if (video.sourcePath !== null) {
-        return video.sourcePath;
-    }
+function removeVideoDownloadFiles(videoId: string): Promise<void> {
+    return removeDownloadFiles(resolveStoragePath(getVideoDirectory(videoId)));
+}
 
+async function downloadSource(video: Video, signal: AbortSignal): Promise<string> {
     const saveProgress = (downloadPercent: number): Promise<void> =>
         updateVideoStage(video.id, "downloading", toOverallPercent("downloading", downloadPercent));
 
@@ -50,6 +50,19 @@ async function obtainSourcePath(video: Video, signal: AbortSignal): Promise<stri
     return downloaded.sourcePath;
 }
 
+/** A cancelled or failed download leaves partial files behind; they go with it. */
+async function downloadSourceOrClean(video: Video, signal: AbortSignal): Promise<string> {
+    // Parts of a run the worker never finished (a crash, a restart) would sit next to this one.
+    await removeVideoDownloadFiles(video.id);
+
+    try {
+        return await downloadSource(video, signal);
+    } catch (error) {
+        await removeVideoDownloadFiles(video.id);
+        throw error;
+    }
+}
+
 /** ffprobe fails on damaged or unusual files; the person can fix that by exporting again. */
 async function probeSourceMedia(absolutePath: string): Promise<MediaInfo> {
     try {
@@ -64,7 +77,7 @@ interface CheckedSource extends VideoSource {
 }
 
 /** Refuses files the pipeline cannot use and reads what is saved with the path. */
-async function inspectSource(video: Video, sourcePath: string): Promise<CheckedSource> {
+async function inspectSource(sourcePath: string): Promise<CheckedSource> {
     const absoluteSourcePath = resolveStoragePath(sourcePath);
     const mediaInfo = await probeSourceMedia(absoluteSourcePath);
 
@@ -96,44 +109,49 @@ async function inspectSource(video: Video, sourcePath: string): Promise<CheckedS
     const fileStats = await stat(absoluteSourcePath);
 
     if (fileStats.size > MAX_UPLOAD_BYTES) {
-        // A download that is never saved would otherwise sit on disk and count against the quota.
-        if (video.sourcePath === null) {
-            await rm(absoluteSourcePath, { force: true });
-        }
-
         throw new UserFacingError("O vídeo passa de 5 GB. Envie um arquivo menor.");
     }
 
     return { sourcePath, durationSeconds, sourceBytes: fileStats.size };
 }
 
-/** A download's size is unknown until it ends, so only here can it be checked against the quota. */
-async function saveDownload(video: Video, source: CheckedSource): Promise<void> {
-    try {
-        await saveDownloadedSource({ videoId: video.id, userId: video.userId, ...source });
-    } catch (error) {
-        if (error instanceof StorageQuotaExceededError) {
-            await rm(resolveStoragePath(source.sourcePath), { force: true });
-        }
+async function prepareUploadedSource(video: Video, sourcePath: string): Promise<VideoSource> {
+    const checkedSource = await inspectSource(sourcePath);
+    const source = { sourcePath, durationSeconds: checkedSource.durationSeconds };
+    await saveVideoSource(video.id, source);
+    return source;
+}
 
+/**
+ * A download's size is unknown until it ends, so only here can it be checked against the quota.
+ * Any refusal deletes the download, since no row points at it.
+ */
+async function prepareDownloadedSource(video: Video, signal: AbortSignal): Promise<VideoSource> {
+    const sourcePath = await downloadSourceOrClean(video, signal);
+
+    try {
+        const checkedSource = await inspectSource(sourcePath);
+        await saveDownloadedSource({ videoId: video.id, userId: video.userId, ...checkedSource });
+        return { sourcePath, durationSeconds: checkedSource.durationSeconds };
+    } catch (error) {
+        await removeVideoDownloadFiles(video.id);
         throw error;
     }
 }
 
+async function obtainSource(video: Video, signal: AbortSignal): Promise<VideoSource> {
+    const storedSourcePath = video.sourcePath;
+
+    if (storedSourcePath !== null) {
+        return prepareUploadedSource(video, storedSourcePath);
+    }
+
+    return prepareDownloadedSource(video, signal);
+}
+
 /** Makes sure the source file exists locally and reads its duration. Safe to run again. */
 export async function prepareVideoSource(video: Video, signal: AbortSignal): Promise<VideoSource> {
-    const sourcePath = await obtainSourcePath(video, signal);
-    const checkedSource = await inspectSource(video, sourcePath);
-    const source = { sourcePath, durationSeconds: checkedSource.durationSeconds };
-
-    if (video.sourcePath === null) {
-        await saveDownload(video, checkedSource);
-    }
-
-    if (video.sourcePath !== null) {
-        await saveVideoSource(video.id, source);
-    }
-
+    const source = await obtainSource(video, signal);
     await ensureVideoThumbnail({ video, ...source });
     return source;
 }
