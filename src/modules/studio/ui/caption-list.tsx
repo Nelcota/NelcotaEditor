@@ -206,7 +206,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                     <CaptionsIcon className="size-5 text-muted-foreground" aria-hidden="true" />
                     Legendas
                 </h2>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm whitespace-nowrap text-muted-foreground">
                     · {cues.length} {pluralize(cues.length, "bloco", "blocos")}
                 </span>
                 <span className="flex-1" />
