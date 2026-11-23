@@ -8,6 +8,8 @@ import type { MediaPlayer } from "#/shared/ui/media-player/use-media-player";
 
 const VOLUME_STEP = 0.05;
 const MAX_VOLUME = 1;
+// Same as the `--range-track` token in styles.css, which this gradient replaces on the volume bar.
+const UNFILLED_TRACK_COLOR = "oklch(1 0 0 / 0.25)";
 const rateFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
 
 interface TimeLabelProps {
@@ -41,7 +43,7 @@ export function TimeLabel({
 export function toVolumeTrackBackground(volume: number): string {
     const filledPercent = toBarPercent(volume, MAX_VOLUME);
 
-    return `linear-gradient(to right, var(--range-fill) ${filledPercent}%, oklch(1 0 0 / 0.25) ${filledPercent}%)`;
+    return `linear-gradient(to right, var(--range-fill) ${filledPercent}%, ${UNFILLED_TRACK_COLOR} ${filledPercent}%)`;
 }
 
 export function VolumeSlider({
@@ -60,7 +62,7 @@ export function VolumeSlider({
         <input
             type="range"
             min={0}
-            max={1}
+            max={MAX_VOLUME}
             step={VOLUME_STEP}
             value={volume}
             onChange={(event) => player.setVolume(Number(event.target.value))}
