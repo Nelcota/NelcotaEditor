@@ -112,8 +112,32 @@ const requirePasswordToDeleteUser = createAuthMiddleware(async (ctx) => {
     }
 });
 
+const adminPlugin = admin({
+    defaultRole: USER_ROLE,
+    adminRoles: [ADMIN_ROLE],
+    bannedUserMessage: BANNED_USER_MESSAGE,
+});
+
+/** The only admin routes the browser calls; the admin screens reach the rest through server code. */
+const ADMIN_PATHS_FOR_THE_BROWSER = ["/admin/impersonate-user", "/admin/stop-impersonating"];
+
+/**
+ * Better Auth serves every endpoint over HTTP, but server code calls them directly and never
+ * through these paths. Open, they let an admin skip the panel's checks (set another admin's
+ * password, create a hidden admin, delete an account and leave its files) and let anyone holding
+ * a session guess its password 100 times a minute. Built from the plugin, so admin routes added by
+ * an upgrade start closed.
+ */
+const PATHS_CLOSED_TO_THE_BROWSER = [
+    ...Object.values(adminPlugin.endpoints)
+        .map((endpoint) => endpoint.path)
+        .filter((path) => ADMIN_PATHS_FOR_THE_BROWSER.includes(path) === false),
+    "/verify-password",
+];
+
 export const auth = betterAuth({
     baseURL: environment.BETTER_AUTH_URL,
+    disabledPaths: PATHS_CLOSED_TO_THE_BROWSER,
     secret: readAuthSecret(),
     database: drizzleAdapter(db, {
         provider: "pg",
@@ -153,13 +177,5 @@ export const auth = betterAuth({
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
     // The admin plugin comes first: after the captcha spread, TypeScript would lose the fields it
     // adds to the user and session types.
-    plugins: [
-        admin({
-            defaultRole: USER_ROLE,
-            adminRoles: [ADMIN_ROLE],
-            bannedUserMessage: BANNED_USER_MESSAGE,
-        }),
-        ...buildCaptchaPlugins(),
-        tanstackStartCookies(),
-    ],
+    plugins: [adminPlugin, ...buildCaptchaPlugins(), tanstackStartCookies()],
 });
