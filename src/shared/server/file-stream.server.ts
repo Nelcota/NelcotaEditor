@@ -61,14 +61,32 @@ export function createFileStream(
     let isCancelled = false;
     let position = start;
 
+    // cancel() can run while a pull() is still reading, and both would close the file; whoever
+    // gets here first closes it, the other finds nothing left to close.
+    const closeFile = async (): Promise<void> => {
+        const handle = fileHandle;
+        fileHandle = null;
+
+        if (handle === null) {
+            return;
+        }
+
+        await handle.close();
+    };
+
     const enqueueNextChunk = async (
         handle: FileHandle,
         controller: ReadableStreamDefaultController<Uint8Array>,
     ): Promise<void> => {
         const chunk = await readChunk(handle, position, end - position + 1);
 
+        // Cancelled during the read: the stream is already closed and takes no more chunks.
+        if (isCancelled === true) {
+            return;
+        }
+
         if (chunk.length === 0) {
-            await handle.close();
+            await closeFile();
             controller.close();
             return;
         }
@@ -107,18 +125,13 @@ export function createFileStream(
                     error,
                 );
                 // A failed read errors the stream, which never calls cancel(); close the file here.
-                await handle.close();
+                await closeFile();
                 throw error;
             }
         },
         async cancel() {
             isCancelled = true;
-
-            if (fileHandle === null) {
-                return;
-            }
-
-            await fileHandle.close();
+            await closeFile();
         },
     });
 }

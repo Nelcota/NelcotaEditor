@@ -36,6 +36,21 @@ function spyOnOpenedFiles(): OpenedFiles {
 
 const MAX_EVENT_LOOP_TURNS = 1000;
 
+interface Signal {
+    promise: Promise<void>;
+    fire: () => void;
+}
+
+/** A promise the test resolves by hand, to hold a read until the cancel has been sent. */
+function createSignal(): Signal {
+    let resolvePromise: (() => void) | undefined;
+    const promise = new Promise<void>((resolve) => {
+        resolvePromise = resolve;
+    });
+
+    return { promise, fire: () => resolvePromise?.() };
+}
+
 async function nextEventLoopTurn(): Promise<void> {
     await new Promise((resolve) => setImmediate(resolve));
 }
@@ -98,6 +113,39 @@ describe("createFileStream", () => {
         await waitForOpen(openedFiles);
 
         await stream.cancel();
+
+        assert.equal(openedFiles.closeCount(), 1);
+    });
+
+    it("closes the file once when the stream is cancelled while a read is in flight", async () => {
+        const openedFiles = spyOnOpenedFiles();
+        const stream = createFileStream(filePath, 0, FILE_CONTENT.length - 1);
+        await waitForOpen(openedFiles);
+        const handle = openedFiles.handles[0];
+
+        if (handle === undefined) {
+            throw new Error("The stream never opened its file");
+        }
+
+        const realRead = handle.read.bind(handle);
+        const readStarted = createSignal();
+        const releaseRead = createSignal();
+        const markReadStarted = readStarted.fire;
+        const letReadFinish = releaseRead.fire;
+        mock.method(handle, "read", async (...readArguments: Parameters<FileHandle["read"]>) => {
+            markReadStarted();
+            await releaseRead.promise;
+            return await realRead(...readArguments);
+        });
+        const reader = stream.getReader();
+        const pendingChunk = reader.read();
+        await readStarted.promise;
+
+        const cancelled = reader.cancel();
+        letReadFinish();
+        await cancelled;
+        await pendingChunk;
+        await nextEventLoopTurn();
 
         assert.equal(openedFiles.closeCount(), 1);
     });
