@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { MoreVideoTabs } from "#/modules/videos/ui/more-video-tabs";
 import { countVisibleTabs, splitOpenTabs } from "#/modules/videos/ui/open-video-tabs-layout";
-import { useElementWidth } from "#/modules/videos/ui/use-element-width";
+import { useElementWidth } from "#/shared/ui/use-element-width";
 import { useOpenVideoTabs } from "#/modules/videos/ui/use-open-video-tabs";
 import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 import { VideoMascot } from "#/modules/videos/ui/video-mascot";
@@ -105,7 +105,7 @@ export function OpenVideoTabs(): ReactNode {
     const openVideos = toOpenVideos(tabs.videoIds, videosQuery.data ?? []);
     const visibleCount = toVisibleCount(navWidth, openVideos.length);
     const split = splitOpenTabs(openVideos, visibleCount, currentVideoId);
-    const isLoadingVideos = videosQuery.data === undefined;
+    const isLoadingVideos = videosQuery.isPending;
     const placeholderCount = toVisibleCount(navWidth, tabs.videoIds.length);
     // The closed tab's button leaves with it; focus waits on the plus instead of falling to the page.
     const newVideoRef = useRef<HTMLAnchorElement>(null);
