@@ -3,7 +3,7 @@ import { Link, Outlet, useMatchRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ImpersonationBanner } from "#/modules/auth/ui/impersonation-banner";
 import { AppSidebar } from "#/modules/shell/ui/app-sidebar";
-import { PhoneTabBar } from "#/modules/shell/ui/phone-tab-bar";
+import { PhoneTabBar, SectionRail } from "#/modules/shell/ui/phone-tab-bar";
 import { useFocusMainOnNavigate } from "#/modules/shell/ui/use-focus-main-on-navigate";
 import { InspectorToggle } from "#/modules/videos/ui/inspector-toggle";
 import { OpenVideoTabs } from "#/modules/videos/ui/open-video-tabs";
@@ -109,9 +109,17 @@ export function AppLayout(): ReactNode {
                 <div
                     className={cn(
                         "flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[280px_minmax(0,1fr)] md:pe-2 md:pb-2",
-                        sidebar.isOn === true && "md:grid-cols-[minmax(0,1fr)] md:ps-2",
+                        sidebar.isOn === true && "md:grid-cols-[88px_minmax(0,1fr)]",
                     )}
                 >
+                    {sidebar.isOn === true && (
+                        <aside
+                            aria-label="Barra lateral recolhida"
+                            className="hidden min-h-0 md:block"
+                        >
+                            <SectionRail />
+                        </aside>
+                    )}
                     {sidebar.isOn === false && (
                         <aside aria-label="Barra lateral" className="hidden min-h-0 md:block">
                             <AppSidebar />
