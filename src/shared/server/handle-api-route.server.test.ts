@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
 import { DrizzleQueryError } from "drizzle-orm/errors";
 import { handleApiRoute } from "#/shared/server/handle-api-route.server";
+import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const SHARE_TOKEN = "share-token-123";
 
@@ -29,5 +30,18 @@ describe("handleApiRoute", () => {
         const output = stderr.read();
         assert.equal(output.includes("GET /api/share/$token"), true);
         assert.equal(output.includes(SHARE_TOKEN), false);
+    });
+});
+
+describe("handleApiRoute status", () => {
+    it("answers a user-facing error as a client error with its message", async () => {
+        const response = await handleApiRoute("POST /api/videos/upload", async () => {
+            throw new UserFacingError("O vídeo passa de 5 GB. Envie um arquivo menor.");
+        });
+
+        assert.equal(response.status, 400);
+        assert.deepEqual(await response.json(), {
+            error: "O vídeo passa de 5 GB. Envie um arquivo menor.",
+        });
     });
 });
