@@ -3,6 +3,7 @@ import type { SQL } from "drizzle-orm";
 import { clips } from "#/modules/clips/clips.schema";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
+import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import {
     VIDEO_ALREADY_PROCESSING_MESSAGE,
@@ -25,6 +26,8 @@ export async function restartVideo(request: RestartRequest): Promise<void> {
     const { videoId, userId, clipCondition } = request;
     const isReset = await runVideoStartTransaction(userId, async ({ transaction, jobDatabase }) => {
         await assertCanStartAnotherVideo(userId, transaction);
+        // A retry renders new files too, so a full account is refused like a new video.
+        await assertStorageAvailable({ userId, incomingBytes: 0 }, transaction);
 
         if ((await resetVideoToQueued(videoId, transaction)) === false) {
             return false;
