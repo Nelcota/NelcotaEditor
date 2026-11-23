@@ -17,4 +17,9 @@ RUN npm ci --ignore-scripts
 COPY tsconfig.json ./
 COPY src ./src
 
+# The worker runs ffmpeg and yt-dlp on files from the internet; it gets no root rights. The `node`
+# user (uid 1000) of the base image owns the storage folder, so a fresh volume is writable too.
+RUN mkdir -p /app/storage && chown node:node /app/storage
+USER node
+
 CMD ["node", "--import", "tsx", "src/modules/processing/server/worker-main.server.ts"]
