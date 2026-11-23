@@ -65,7 +65,11 @@ describe("restartVideo", () => {
 
     test("refuses to restart a video of an account that is already full", async () => {
         const userId = await createTestUser();
-        await insertVideo({ userId, status: "done", sourceBytes: getStorageQuotaBytes() });
+        await insertVideo({
+            userId,
+            status: "done",
+            sourceBytes: Math.ceil(getStorageQuotaBytes()),
+        });
         const failedVideoId = await insertVideo({ userId, status: "failed", sourceBytes: null });
 
         const restart = restartVideo({

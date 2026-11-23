@@ -13,10 +13,15 @@ import { getEnvironment } from "#/shared/server/env.server";
 const BYTES_PER_GIGABYTE = 1024 * 1024 * 1024;
 const REQUESTED_CLIP_COUNT = 3;
 const DURATION_SECONDS = 120;
-const DOWNLOAD_BYTES = BYTES_PER_GIGABYTE;
+const DOWNLOAD_SHARE_OF_QUOTA = 4;
 
 function getQuotaBytes(): number {
-    return getEnvironment().STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIGABYTE;
+    return Math.floor(getEnvironment().STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIGABYTE);
+}
+
+/** A quarter of the quota, whatever the .env sets it to. */
+function getDownloadBytes(): number {
+    return Math.floor(getQuotaBytes() / DOWNLOAD_SHARE_OF_QUOTA);
 }
 
 // Plain SQL: the processing module does not depend on auth, which owns the user table.
@@ -61,14 +66,15 @@ describe("saveDownloadedSource", () => {
 
     test("refuses a download that does not fit in the free space", async () => {
         const userId = await createTestUser();
-        await insertVideo(userId, getQuotaBytes() - DOWNLOAD_BYTES / 2);
+        const downloadBytes = getDownloadBytes();
+        await insertVideo(userId, getQuotaBytes() - Math.floor(downloadBytes / 2));
         const videoId = await insertVideo(userId, null);
 
         const save = saveDownloadedSource({
             videoId,
             userId,
             sourcePath: `videos/${videoId}/source.mp4`,
-            sourceBytes: DOWNLOAD_BYTES,
+            sourceBytes: downloadBytes,
             durationSeconds: DURATION_SECONDS,
         });
 
@@ -79,15 +85,16 @@ describe("saveDownloadedSource", () => {
     test("saves a download that fits with its real size", async () => {
         const userId = await createTestUser();
         const videoId = await insertVideo(userId, null);
+        const downloadBytes = getDownloadBytes();
 
         await saveDownloadedSource({
             videoId,
             userId,
             sourcePath: `videos/${videoId}/source.mp4`,
-            sourceBytes: DOWNLOAD_BYTES,
+            sourceBytes: downloadBytes,
             durationSeconds: DURATION_SECONDS,
         });
 
-        assert.equal(await readSourceBytes(videoId), DOWNLOAD_BYTES);
+        assert.equal(await readSourceBytes(videoId), downloadBytes);
     });
 });
