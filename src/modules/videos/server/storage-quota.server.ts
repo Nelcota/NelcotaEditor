@@ -3,22 +3,20 @@ import {
     getStorageQuotaBytes,
     measureUserStorage,
 } from "#/modules/videos/server/usage-summary.server";
-import { UserFacingError } from "#/shared/server/user-facing-error";
-import { formatBytes } from "#/shared/ui/format";
-
-export class StorageQuotaExceededError extends UserFacingError {
-    constructor(usedBytes: number, quotaBytes: number) {
-        super(
-            `Seu espaço acabou (${formatBytes(usedBytes)} de ${formatBytes(quotaBytes)}). Exclua vídeos antigos para liberar espaço.`,
-        );
-        this.name = "StorageQuotaExceededError";
-    }
-}
+import { StorageQuotaExceededError } from "#/modules/videos/storage-quota-exceeded-error";
 
 interface StorageRequest {
     userId: string;
     /** Bytes about to be stored; 0 when unknown. */
     incomingBytes: number;
+    /** Uploads still writing, which have no row yet; they count as used. */
+    reservedBytes?: number;
+}
+
+function assertValidByteCount(name: string, bytes: number): void {
+    if (Number.isFinite(bytes) === false || bytes < 0) {
+        throw new RangeError(`Invalid ${name} byte count: ${String(bytes)}`);
+    }
 }
 
 /**
@@ -31,20 +29,20 @@ export async function assertStorageAvailable(
     executor: Pick<typeof db, "select">,
 ): Promise<void> {
     const { userId, incomingBytes } = request;
+    const reservedBytes = request.reservedBytes ?? 0;
 
     if (userId.trim().length === 0) {
         throw new RangeError("Cannot check the storage quota of a user without an id");
     }
 
-    if (Number.isFinite(incomingBytes) === false || incomingBytes < 0) {
-        throw new RangeError(`Invalid incoming byte count: ${String(incomingBytes)}`);
-    }
+    assertValidByteCount("incoming", incomingBytes);
+    assertValidByteCount("reserved", reservedBytes);
 
     const storage = await measureUserStorage(userId, executor);
-    const usedBytes = storage.totalBytes;
+    const usedBytes = storage.totalBytes + reservedBytes;
     const quotaBytes = getStorageQuotaBytes();
 
     if (usedBytes >= quotaBytes || usedBytes + incomingBytes > quotaBytes) {
-        throw new StorageQuotaExceededError(usedBytes, quotaBytes);
+        throw new StorageQuotaExceededError({ usedBytes, incomingBytes, quotaBytes });
     }
 }

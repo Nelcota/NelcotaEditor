@@ -7,8 +7,8 @@ import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.s
 const SOURCE_FILE_NAME = "source";
 
 export class UploadTooLargeError extends Error {
-    constructor() {
-        super(`Upload is larger than ${MAX_UPLOAD_BYTES} bytes`);
+    constructor(maxBytes: number) {
+        super(`Upload is larger than ${maxBytes} bytes`);
         this.name = "UploadTooLargeError";
     }
 }
@@ -20,11 +20,18 @@ export class EmptyUploadError extends Error {
     }
 }
 
+interface UploadDestination {
+    fileHandle: FileHandle;
+    /** The space reserved for the upload; a body that sends more is refused. */
+    maxBytes: number;
+}
+
 /** Copies every chunk to the file and returns how many bytes were written. */
 async function copyChunks(
     body: ReadableStream<Uint8Array>,
-    fileHandle: FileHandle,
+    destination: UploadDestination,
 ): Promise<number> {
+    const { fileHandle, maxBytes } = destination;
     const reader = body.getReader();
     let writtenBytes = 0;
 
@@ -32,8 +39,8 @@ async function copyChunks(
         const bytes = chunk.value;
         writtenBytes += bytes.byteLength;
 
-        if (writtenBytes > MAX_UPLOAD_BYTES) {
-            throw new UploadTooLargeError();
+        if (writtenBytes > maxBytes) {
+            throw new UploadTooLargeError(maxBytes);
         }
 
         await fileHandle.write(bytes);
@@ -45,13 +52,13 @@ async function copyChunks(
 /** Writes the body straight to disk, so multi-gigabyte files never sit in memory. */
 async function writeBodyToFile(
     body: ReadableStream<Uint8Array>,
-    absolutePath: string,
+    target: { absolutePath: string; maxBytes: number },
 ): Promise<number> {
-    const fileHandle = await open(absolutePath, "w");
+    const fileHandle = await open(target.absolutePath, "w");
     let writtenBytes = 0;
 
     try {
-        writtenBytes = await copyChunks(body, fileHandle);
+        writtenBytes = await copyChunks(body, { fileHandle, maxBytes: target.maxBytes });
     } finally {
         await fileHandle.close();
     }
@@ -70,6 +77,8 @@ export async function removeVideoDirectory(videoId: string): Promise<void> {
 interface UploadTarget {
     videoId: string;
     extension: string;
+    /** The upload's reserved size, at most MAX_UPLOAD_BYTES. */
+    maxBytes: number;
 }
 
 export interface StoredUpload {
@@ -82,13 +91,22 @@ export async function storeVideoUpload(
     body: ReadableStream<Uint8Array>,
     target: UploadTarget,
 ): Promise<StoredUpload> {
+    const maxBytes = target.maxBytes;
+
+    if (Number.isSafeInteger(maxBytes) === false || maxBytes <= 0 || maxBytes > MAX_UPLOAD_BYTES) {
+        throw new RangeError(`Invalid upload size limit: ${String(maxBytes)}`);
+    }
+
     const videoDirectory = getVideoDirectory(target.videoId);
     const sourcePath = path.posix.join(videoDirectory, `${SOURCE_FILE_NAME}${target.extension}`);
 
     await mkdir(resolveStoragePath(videoDirectory), { recursive: true });
 
     try {
-        const sourceBytes = await writeBodyToFile(body, resolveStoragePath(sourcePath));
+        const sourceBytes = await writeBodyToFile(body, {
+            absolutePath: resolveStoragePath(sourcePath),
+            maxBytes,
+        });
         return { sourcePath, sourceBytes };
     } catch (error) {
         await removeVideoDirectory(target.videoId);

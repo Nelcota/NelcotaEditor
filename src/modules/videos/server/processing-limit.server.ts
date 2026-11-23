@@ -31,19 +31,27 @@ async function countVideosInProgress(userId: string, executor: QueryExecutor): P
 
 /**
  * Throws when the user already has the most videos the worker takes from one person. Run it inside
- * runVideoStartTransaction so the count cannot change before the insert.
+ * runVideoStartTransaction so the count cannot change before the insert. Uploads still writing
+ * have no row yet, so the caller passes how many there are.
  */
 export async function assertCanStartAnotherVideo(
     userId: string,
     executor: QueryExecutor,
+    uploadsStillWriting: number = 0,
 ): Promise<void> {
     if (userId.trim().length === 0) {
         throw new RangeError("Cannot check the processing limit of a user without an id");
     }
 
+    if (Number.isSafeInteger(uploadsStillWriting) === false || uploadsStillWriting < 0) {
+        throw new RangeError(
+            `Invalid count of uploads still writing: ${String(uploadsStillWriting)}`,
+        );
+    }
+
     const inProgressCount = await countVideosInProgress(userId, executor);
 
-    if (inProgressCount >= MAX_VIDEOS_IN_PROGRESS) {
+    if (inProgressCount + uploadsStillWriting >= MAX_VIDEOS_IN_PROGRESS) {
         throw new TooManyVideosInProgressError();
     }
 }
