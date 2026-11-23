@@ -62,6 +62,23 @@ describe("hasCaptionsToReset", () => {
 });
 
 describe("isCueChangedFromOriginal", () => {
+    it("is false for an untouched cue whose keys came back from the database in another order", () => {
+        const untouched = transcriptDraft().cues[0];
+
+        assert.ok(untouched !== undefined);
+        const fromDatabase = {
+            words: untouched.words.map((item) => ({
+                text: item.text,
+                endSeconds: item.endSeconds,
+                startSeconds: item.startSeconds,
+            })),
+            endSeconds: untouched.endSeconds,
+            startSeconds: untouched.startSeconds,
+        };
+
+        assert.equal(isCueChangedFromOriginal(fromDatabase, WORDS), false);
+    });
+
     it("is false for an untouched cue and true for an edited one", () => {
         const untouched = transcriptDraft().cues[0];
         const edited = editFirstCue(transcriptDraft()).cues[0];

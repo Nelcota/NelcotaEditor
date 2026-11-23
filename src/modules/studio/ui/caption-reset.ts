@@ -23,14 +23,62 @@ export function resetCaptions(
     return replaceCueAt(draft, reset.index, [resetCue(cue, words)]);
 }
 
+// Field by field, never through JSON.stringify: a draft read back from the database lists its keys
+// in another order, which would make an untouched caption look edited.
+function isSameWord(first: CaptionWord, second: CaptionWord): boolean {
+    return (
+        first.text === second.text &&
+        first.startSeconds === second.startSeconds &&
+        first.endSeconds === second.endSeconds
+    );
+}
+
+function isSameCue(first: CaptionCue, second: CaptionCue): boolean {
+    if (first.startSeconds !== second.startSeconds || first.endSeconds !== second.endSeconds) {
+        return false;
+    }
+
+    if (first.words.length !== second.words.length) {
+        return false;
+    }
+
+    return first.words.every((word, index) => {
+        const other = second.words[index];
+
+        return other !== undefined && isSameWord(word, other);
+    });
+}
+
+function isSameCueList(first: Array<CaptionCue>, second: Array<CaptionCue>): boolean {
+    if (first.length !== second.length) {
+        return false;
+    }
+
+    return first.every((cue, index) => {
+        const other = second[index];
+
+        return other !== undefined && isSameCue(cue, other);
+    });
+}
+
+function settingsKey(draft: StudioDraft): string {
+    const { cues: _cues, ...settings } = draft;
+
+    return JSON.stringify(settings, Object.keys(settings).toSorted());
+}
+
+function isSameDraft(first: StudioDraft, second: StudioDraft): boolean {
+    return settingsKey(first) === settingsKey(second) && isSameCueList(first.cues, second.cues);
+}
+
 /** Whether bringing every caption back would change anything. */
 export function hasCaptionsToReset(draft: StudioDraft, words: Array<CaptionWord>): boolean {
-    return JSON.stringify(resetAllCues(draft, words).cues) !== JSON.stringify(draft.cues);
+    return isSameCueList(resetAllCues(draft, words).cues, draft.cues) === false;
 }
 
 /** Whether bringing this cue back would change anything. */
 export function isCueChangedFromOriginal(cue: CaptionCue, words: Array<CaptionWord>): boolean {
-    return JSON.stringify(resetCue(cue, words)) !== JSON.stringify(cue);
+    return isSameCue(resetCue(cue, words), cue) === false;
 }
 
 /**
@@ -43,11 +91,9 @@ export function canUndoReset(
     words: Array<CaptionWord>,
     reset: CaptionReset,
 ): boolean {
-    const current = JSON.stringify(draft);
-
-    if (current === JSON.stringify(before)) {
+    if (isSameDraft(draft, before) === true) {
         return false;
     }
 
-    return current === JSON.stringify(resetCaptions(before, words, reset));
+    return isSameDraft(draft, resetCaptions(before, words, reset));
 }
