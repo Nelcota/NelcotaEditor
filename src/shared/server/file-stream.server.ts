@@ -1,4 +1,4 @@
-import { open } from "node:fs/promises";
+import fileSystem from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
 
 const CHUNK_SIZE_BYTES = 256 * 1024;
@@ -49,6 +49,7 @@ export function createFileStream(
     assertValidRange(start, end);
 
     let fileHandle: FileHandle | null = null;
+    let isCancelled = false;
     let position = start;
 
     const enqueueNextChunk = async (
@@ -70,7 +71,16 @@ export function createFileStream(
     return new ReadableStream<Uint8Array>({
         // Opening here (not eagerly) turns a failed open into a stream error, never an unhandled rejection.
         async start() {
-            fileHandle = await open(absolutePath, "r");
+            const handle = await fileSystem.open(absolutePath, "r");
+
+            // cancel() does not wait for start(): a HEAD request or an aborted download can cancel
+            // while the file is still opening, and nothing else would ever close it.
+            if (isCancelled === true) {
+                await handle.close();
+                return;
+            }
+
+            fileHandle = handle;
         },
         async pull(controller) {
             if (fileHandle === null) {
@@ -88,6 +98,8 @@ export function createFileStream(
             }
         },
         async cancel() {
+            isCancelled = true;
+
             if (fileHandle === null) {
                 return;
             }
