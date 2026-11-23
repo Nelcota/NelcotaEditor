@@ -41,7 +41,7 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 | `npm run services:down`               | Stops them                                                     |
 | `npm run worker:logs`                 | Follows what the worker is doing                               |
 | `npm run worker:restart`              | Recreates the worker so it reads `.env` and code changes again |
-| `npm run services:rebuild`            | Rebuilds the worker image (also updates yt-dlp)                |
+| `npm run services:rebuild`            | Rebuilds the worker image (yt-dlp is pinned in it)             |
 | `npm run db:generate` / `db:migrate`  | Creates / applies database migrations                          |
 | `npm run typecheck`, `lint`, `format` | Code checks                                                    |
 
@@ -53,6 +53,12 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 | `WHISPER_LANGUAGE` | `pt`                           | Spoken language; empty means auto-detect                                                                                                             |
 | `DEEPSEEK_MODEL`   | `deepseek-chat`                |                                                                                                                                                      |
 | `STORAGE_DIR`      | `./storage`                    | Uploaded videos and rendered clips                                                                                                                   |
+
+The worker container does not read the whole `.env`: `docker-compose.yml` passes it only the variables it uses
+(Whisper, DeepSeek, storage quota and concurrency). A new setting the worker needs goes there too.
+It runs as the unprivileged `node` user (uid 1000); on Linux, `./storage` must be writable by that uid
+(`sudo chown -R 1000:1000 storage` once, if an older root worker created files there).
+To update yt-dlp, change its version and checksum in `Dockerfile.worker`.
 
 ## How it is built
 
