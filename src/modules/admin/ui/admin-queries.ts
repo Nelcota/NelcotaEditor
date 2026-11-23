@@ -5,14 +5,16 @@ import { getAdminUserDetails, getAdminUsers } from "#/modules/admin/server/admin
 import { getAdminOverview, getAdminVideos } from "#/modules/admin/server/admin-video-functions";
 
 const ADMIN_QUERY_KEY = "admin";
-// Videos move through the pipeline while the admin watches; a short refresh keeps statuses honest.
-const ADMIN_REFRESH_MILLISECONDS = 15 * 1000;
+// Statuses move while the admin watches, but each refresh counts every user, video and clip, so a
+// minute is enough; hidden tabs never poll, and coming back to the tab refetches stale data.
+const ADMIN_REFRESH_MILLISECONDS = 60 * 1000;
 
 export function adminOverviewQueryOptions() {
     return queryOptions({
         queryKey: [ADMIN_QUERY_KEY, "overview"],
         queryFn: () => getAdminOverview(),
         refetchInterval: ADMIN_REFRESH_MILLISECONDS,
+        refetchIntervalInBackground: false,
     });
 }
 
@@ -37,6 +39,7 @@ export function adminVideosQueryOptions(input: AdminVideoListInput) {
         queryFn: () => getAdminVideos({ data: input }),
         placeholderData: keepPreviousData,
         refetchInterval: ADMIN_REFRESH_MILLISECONDS,
+        refetchIntervalInBackground: false,
     });
 }
 
