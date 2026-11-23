@@ -21,13 +21,11 @@ import {
 } from "#/modules/auth/auth.schema";
 import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
 import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
-import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
 import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
 import {
-    deleteVideoFiles,
-    hasWorkingVideos,
-    listUserVideoIds,
+    AccountHasWorkingVideosError,
+    deleteAccountWithFiles,
 } from "#/modules/video-records/server/delete-user-videos.server";
 import { getEnvironment, InvalidEnvironmentError } from "#/shared/server/env.server";
 
@@ -46,31 +44,23 @@ function readAuthSecret(): string {
     return secret;
 }
 
-// Video ids of accounts being deleted: read before the rows go (with the user, through the
-// foreign keys), used after the delete succeeds so no file is removed for an account that stays.
-const videoIdsOfDeletedUsers = new Map<string, Array<string>>();
+/**
+ * Deletes the account in the same transaction as its videos, so a video started meanwhile cannot
+ * leave files behind. Better Auth's own delete, which runs next, then finds nothing left to remove.
+ */
+async function deleteAccountBeforeBetterAuth(deletedUser: User): Promise<void> {
+    try {
+        await deleteAccountWithFiles(deletedUser.id);
+    } catch (error) {
+        if (error instanceof AccountHasWorkingVideosError) {
+            throw new APIError("BAD_REQUEST", {
+                message: "Cancele os vídeos em processamento antes de excluir a conta.",
+                code: VIDEOS_STILL_PROCESSING_CODE,
+            });
+        }
 
-/** The worker may be writing files of a video in progress, so those must be cancelled first. */
-async function prepareUserDeletion(deletedUser: User): Promise<void> {
-    const userId = deletedUser.id;
-
-    if ((await hasWorkingVideos(userId)) === true) {
-        throw new APIError("BAD_REQUEST", {
-            message: "Cancele os vídeos em processamento antes de excluir a conta.",
-            code: VIDEOS_STILL_PROCESSING_CODE,
-        });
+        throw error;
     }
-
-    videoIdsOfDeletedUsers.set(userId, await listUserVideoIds(userId));
-}
-
-async function removeDeletedUserFiles(deletedUser: User): Promise<void> {
-    const userId = deletedUser.id;
-    const videoIds = videoIdsOfDeletedUsers.get(userId) ?? [];
-    videoIdsOfDeletedUsers.delete(userId);
-
-    await deleteVideoFiles(videoIds);
-    await deleteAvatarPhotos(userId);
 }
 
 /**
@@ -165,8 +155,7 @@ export const auth = betterAuth({
         // The before hook requires a password, and Better Auth checks it before calling beforeDelete.
         deleteUser: {
             enabled: true,
-            beforeDelete: prepareUserDeletion,
-            afterDelete: removeDeletedUserFiles,
+            beforeDelete: deleteAccountBeforeBetterAuth,
         },
     },
     hooks: {
