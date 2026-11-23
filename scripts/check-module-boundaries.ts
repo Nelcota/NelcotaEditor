@@ -43,6 +43,11 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
         reason: "Better Auth's delete-user hooks are fixed when the auth instance is built at import",
     },
     {
+        from: "src/modules/auth/server/auth.server.ts",
+        to: "src/modules/admin/server/record-admin-action.server",
+        reason: "The browser starts and ends impersonation straight through Better Auth, so only its session hooks, fixed at import, see it",
+    },
+    {
         from: "src/modules/processing/server/save-downloaded-source.server.ts",
         to: "src/modules/videos/server/storage-quota.server",
         reason: "A download's size is only known in the worker, which checks it against the same quota",
