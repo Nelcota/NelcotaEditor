@@ -9,8 +9,11 @@ const SETTING_KEYS = [
     "captionFont",
 ] as const;
 
+// Built field by field: the same caption read from jsonb or through Zod has its keys in a different order.
 function cueKey(cue: CaptionCue): string {
-    return JSON.stringify(cue);
+    const words = cue.words.map((word) => [word.text, word.startSeconds, word.endSeconds]);
+
+    return JSON.stringify([cue.startSeconds, cue.endSeconds, words]);
 }
 
 /** Captions that are new, changed or gone, counted once each. */
