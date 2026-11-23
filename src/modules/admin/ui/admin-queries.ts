@@ -3,18 +3,15 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { AdminUserListInput, AdminVideoListInput } from "#/modules/admin/admin-search";
 import { getAdminUserDetails, getAdminUsers } from "#/modules/admin/server/admin-user-functions";
 import { getAdminOverview, getAdminVideos } from "#/modules/admin/server/admin-video-functions";
+import { ADMIN_POLLING_OPTIONS } from "#/modules/admin/ui/admin-polling";
 
 const ADMIN_QUERY_KEY = "admin";
-// Statuses move while the admin watches, but each refresh counts every user, video and clip, so a
-// minute is enough; hidden tabs never poll, and coming back to the tab refetches stale data.
-const ADMIN_REFRESH_MILLISECONDS = 60 * 1000;
 
 export function adminOverviewQueryOptions() {
     return queryOptions({
         queryKey: [ADMIN_QUERY_KEY, "overview"],
         queryFn: () => getAdminOverview(),
-        refetchInterval: ADMIN_REFRESH_MILLISECONDS,
-        refetchIntervalInBackground: false,
+        ...ADMIN_POLLING_OPTIONS,
     });
 }
 
@@ -38,8 +35,7 @@ export function adminVideosQueryOptions(input: AdminVideoListInput) {
         queryKey: [ADMIN_QUERY_KEY, "videos", input],
         queryFn: () => getAdminVideos({ data: input }),
         placeholderData: keepPreviousData,
-        refetchInterval: ADMIN_REFRESH_MILLISECONDS,
-        refetchIntervalInBackground: false,
+        ...ADMIN_POLLING_OPTIONS,
     });
 }
 
