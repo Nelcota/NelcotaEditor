@@ -1,15 +1,10 @@
-import { eq } from "drizzle-orm";
-import { db } from "#/db/database.server";
 import { renderClip, setClipStatus } from "#/modules/clips/server/render-clip.server";
-import { clips as clipsTable } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { toOverallPercent } from "#/modules/processing/processing-stages";
 import type { TranscriptWord } from "#/modules/transcription/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
-import { measureFileBytes } from "#/shared/server/directory-size.server";
 import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
-import { resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 /** Clips rendered at once; ffmpeg already uses several cores, so more lanes stop paying off. */
@@ -24,24 +19,6 @@ interface RenderPendingClipsInput {
     signal: AbortSignal;
 }
 
-/** Saves the rendered file's size with it, so usage and quota sum the database, not the disk. */
-async function recordClipOutputBytes(clipId: string): Promise<void> {
-    const rows = await db
-        .select({ outputPath: clipsTable.outputPath })
-        .from(clipsTable)
-        .where(eq(clipsTable.id, clipId))
-        .limit(1);
-    const outputPath = rows[0]?.outputPath;
-
-    // Deleted with its video meanwhile, or not rendered: there is no file to measure.
-    if (outputPath === undefined || outputPath === null) {
-        return;
-    }
-
-    const outputBytes = await measureFileBytes(resolveStoragePath(outputPath));
-    await db.update(clipsTable).set({ outputBytes }).where(eq(clipsTable.id, clipId));
-}
-
 /** Returns whether the clip ended up rendered. */
 async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promise<boolean> {
     const { videoId, sourcePath, words, signal } = input;
@@ -53,7 +30,6 @@ async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promis
     try {
         await setClipStatus(clip.id, "rendering");
         await renderClip({ clip, sourcePath, words, signal });
-        await recordClipOutputBytes(clip.id);
         return true;
     } catch (error) {
         if (signal.aborted === true) {
