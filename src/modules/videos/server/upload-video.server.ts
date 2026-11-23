@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { z } from "zod";
-import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/preferences";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
@@ -20,6 +19,7 @@ import {
     storeVideoUpload,
 } from "#/modules/videos/server/store-video-upload.server";
 import type { StoredUpload } from "#/modules/videos/server/store-video-upload.server";
+import { reserveUploadSpace } from "#/modules/videos/server/reserve-upload-space.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import {
     ALLOWED_VIDEO_EXTENSIONS,
@@ -41,6 +41,8 @@ import {
 } from "#/shared/server/http-response";
 
 const MAX_FILE_NAME_LENGTH = 255;
+const HTTP_LENGTH_REQUIRED = 411;
+const DECIMAL_DIGITS_PATTERN = /^\d+$/;
 
 const uploadQuerySchema = z.object({
     fileName: z.string().trim().min(1).max(MAX_FILE_NAME_LENGTH),
@@ -56,6 +58,7 @@ const TOO_LARGE_MESSAGE = "O arquivo passa do limite de 5 GB.";
 const EMPTY_FILE_MESSAGE = "O arquivo enviado está vazio.";
 const NO_FILE_MESSAGE = "Nenhum arquivo foi enviado.";
 const UNSUPPORTED_FORMAT_MESSAGE = "Formato não suportado. Use MP4, MOV, MKV, WEBM ou AVI.";
+const UNKNOWN_SIZE_MESSAGE = "Não foi possível saber o tamanho do arquivo. Tente enviar de novo.";
 const UPLOAD_PLACEHOLDER_TITLE = "Vídeo enviado";
 
 function resolveTitle(query: UploadQuery): string {
@@ -76,30 +79,34 @@ interface ValidUpload {
     query: UploadQuery;
     extension: string;
     body: ReadableStream<Uint8Array>;
+    /** Reserved against the quota before writing; the stream is cut there. */
+    declaredBytes: number;
 }
 
-/** A missing or unparsable Content-Length is fine: the stream is still capped while writing. */
-function isDeclaredTooLarge(request: Request): boolean {
-    const declaredLength = Number(request.headers.get("content-length"));
-
-    return Number.isFinite(declaredLength) === true && declaredLength > MAX_UPLOAD_BYTES;
-}
-
-/** The declared size, or 0 when the browser did not send a usable one. */
-function readDeclaredBytes(request: Request): number {
+/**
+ * The size the request declares, or null when it is missing or not a plain number. The browser
+ * always sends it for a file; without it the space could not be reserved before writing.
+ */
+function readDeclaredBytes(request: Request): number | null {
     const header = request.headers.get("content-length");
 
     if (header === null) {
-        return 0;
+        return null;
     }
 
-    const declaredLength = Number(header);
+    const headerText = header.trim();
 
-    if (Number.isFinite(declaredLength) === false || declaredLength < 0) {
-        return 0;
+    if (DECIMAL_DIGITS_PATTERN.test(headerText) === false) {
+        return null;
     }
 
-    return declaredLength;
+    const declaredBytes = Number(headerText);
+
+    if (Number.isSafeInteger(declaredBytes) === false) {
+        return null;
+    }
+
+    return declaredBytes;
 }
 
 /** Turns a refused limit or quota into its response; anything else propagates. */
@@ -116,14 +123,15 @@ function toLimitResponse(error: unknown): Response {
 }
 
 /**
- * Runs before the file is stored, so an upload that is clearly refused never touches the disk.
- * Only a first pass: the checks that count run again, locked, with the insert.
+ * Runs before the file is stored, so a refused upload never touches the disk. Returns the release
+ * of the reserved space, or the response that refuses the upload.
  */
-async function checkUserLimits(request: Request, userId: string): Promise<Response | null> {
+async function reserveSpaceOrRespond(
+    userId: string,
+    declaredBytes: number,
+): Promise<(() => void) | Response> {
     try {
-        await assertCanStartAnotherVideo(userId, db);
-        await assertStorageAvailable({ userId, incomingBytes: readDeclaredBytes(request) }, db);
-        return null;
+        return await reserveUploadSpace({ userId, declaredBytes });
     } catch (error) {
         return toLimitResponse(error);
     }
@@ -145,8 +153,18 @@ function validateUpload(request: Request): ValidUpload | Response {
         return errorResponse(HTTP_UNSUPPORTED_MEDIA_TYPE, UNSUPPORTED_FORMAT_MESSAGE);
     }
 
-    if (isDeclaredTooLarge(request) === true) {
+    const declaredBytes = readDeclaredBytes(request);
+
+    if (declaredBytes === null) {
+        return errorResponse(HTTP_LENGTH_REQUIRED, UNKNOWN_SIZE_MESSAGE);
+    }
+
+    if (declaredBytes > MAX_UPLOAD_BYTES) {
         return errorResponse(HTTP_PAYLOAD_TOO_LARGE, TOO_LARGE_MESSAGE);
+    }
+
+    if (declaredBytes === 0) {
+        return errorResponse(HTTP_BAD_REQUEST, EMPTY_FILE_MESSAGE);
     }
 
     const body = request.body;
@@ -155,7 +173,7 @@ function validateUpload(request: Request): ValidUpload | Response {
         return errorResponse(HTTP_BAD_REQUEST, NO_FILE_MESSAGE);
     }
 
-    return { query, extension, body };
+    return { query, extension, body, declaredBytes };
 }
 
 /** Turns the upload errors the user can fix into responses; anything else propagates. */
@@ -221,7 +239,11 @@ async function storeUploadOrRespond(
     videoId: string,
 ): Promise<StoredUpload | Response> {
     try {
-        return await storeVideoUpload(upload.body, { videoId, extension: upload.extension });
+        return await storeVideoUpload(upload.body, {
+            videoId,
+            extension: upload.extension,
+            maxBytes: upload.declaredBytes,
+        });
     } catch (error) {
         const response = toUploadErrorResponse(error);
 
@@ -269,11 +291,15 @@ export async function handleVideoUpload(request: Request): Promise<Response> {
         return upload;
     }
 
-    const limitResponse = await checkUserLimits(request, user.id);
+    const releaseSpace = await reserveSpaceOrRespond(user.id, upload.declaredBytes);
 
-    if (limitResponse !== null) {
-        return limitResponse;
+    if (releaseSpace instanceof Response) {
+        return releaseSpace;
     }
 
-    return saveUploadedVideo(upload, user.id);
+    try {
+        return await saveUploadedVideo(upload, user.id);
+    } finally {
+        releaseSpace();
+    }
 }
