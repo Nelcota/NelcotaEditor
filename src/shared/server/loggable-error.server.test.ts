@@ -57,6 +57,14 @@ describe("toLoggableError", () => {
         });
     });
 
+    it("keeps the system code of a connection failure, whose message is empty", () => {
+        const refused = Object.assign(new AggregateError([], ""), { code: "ECONNREFUSED" });
+
+        const loggable = toLoggableError(new DrizzleQueryError("select 1", [], refused));
+
+        assert.equal(loggable.cause?.code, "ECONNREFUSED");
+    });
+
     it("describes a thrown value that is not an error without printing it", () => {
         assert.deepEqual(toLoggableError("ana@example.com"), {
             name: "NonErrorThrown",

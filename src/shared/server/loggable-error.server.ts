@@ -41,7 +41,22 @@ function toLoggableErrorAtDepth(error: unknown, depth: number): LoggableError {
         return toLoggablePostgresError(error);
     }
 
-    return withCause({ name: error.name, message: error.message }, error, depth);
+    return withCause(
+        withSystemCode({ name: error.name, message: error.message }, error),
+        error,
+        depth,
+    );
+}
+
+/** Node network and file errors name the failure only in `code` ("ECONNREFUSED", "ENOSPC"). */
+function withSystemCode(loggable: LoggableError, error: Error): LoggableError {
+    const code: unknown = Reflect.get(error, "code");
+
+    if (typeof code !== "string") {
+        return loggable;
+    }
+
+    return { ...loggable, code };
 }
 
 function withCause(loggable: LoggableError, error: Error, depth: number): LoggableError {
