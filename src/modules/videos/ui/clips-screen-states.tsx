@@ -1,7 +1,6 @@
-import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
-import { libraryClipsQueryOptions } from "#/modules/videos/ui/library-queries";
+import { CLIP_GRID_CLASS } from "#/modules/videos/ui/clip-library";
 import { NewVideoLink } from "#/modules/videos/ui/new-video-link";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
@@ -40,9 +39,8 @@ export function ClipsLoading(): ReactNode {
                     <Skeleton className="h-5 w-20" />
                 </div>
             </div>
-            {/* Same columns as the grid in clip-library.tsx. */}
             <div aria-hidden="true" className="@container/clips">
-                <ul className="grid grid-cols-2 gap-x-4 gap-y-8 @2xl/clips:grid-cols-3 @2xl/clips:gap-x-6 @4xl/clips:grid-cols-4 @6xl/clips:grid-cols-5">
+                <ul className={CLIP_GRID_CLASS}>
                     {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
                         <ClipCardSkeleton key={index} />
                     ))}
@@ -55,11 +53,13 @@ export function ClipsLoading(): ReactNode {
 /** The first failure plus a retry that failed too: the next press reloads the page instead. */
 const FAILURES_BEFORE_RELOAD = 2;
 
-export function ClipsLoadError({ onRetry }: { onRetry: () => void }) {
-    const queryClient = useQueryClient();
-    // Read from the cache: a retry swaps this screen for the loading one, so local state would not last.
-    const clipsState = queryClient.getQueryState(libraryClipsQueryOptions().queryKey);
+interface ClipsLoadErrorProps {
+    /** Failed loads so far, from the query itself, so it survives the loading screen in between. */
+    errorCount: number;
+    onRetry: () => void;
+}
 
+export function ClipsLoadError({ errorCount, onRetry }: ClipsLoadErrorProps): ReactNode {
     return (
         <EmptyState
             art={<StageCrewMascot status="failed" className="size-14" />}
@@ -70,10 +70,7 @@ export function ClipsLoadError({ onRetry }: { onRetry: () => void }) {
                     variant="secondary"
                     onClick={() => {
                         // Still failing after a retry: a fresh page clears whatever got stuck.
-                        if (
-                            clipsState !== undefined &&
-                            clipsState.errorUpdateCount >= FAILURES_BEFORE_RELOAD
-                        ) {
+                        if (errorCount >= FAILURES_BEFORE_RELOAD) {
                             window.location.reload();
                             return;
                         }
