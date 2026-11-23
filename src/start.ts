@@ -2,6 +2,7 @@ import { isNotFound, isRedirect } from "@tanstack/react-router";
 import { createCsrfMiddleware, createMiddleware, createStart } from "@tanstack/react-start";
 import { setResponseHeader } from "@tanstack/react-start/server";
 import { buildContentSecurityPolicy } from "#/shared/server/content-security-policy";
+import { logger } from "#/shared/server/logger.server";
 import { UserFacingError, toUserMessage } from "#/shared/server/user-facing-error";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -62,10 +63,11 @@ const hideInternalErrorsMiddleware = createMiddleware({ type: "function" }).serv
             }
 
             // Only the function's name: its input may hold personal data.
-            console.error(
-                `Server function ${serverFnMeta.name} (${serverFnMeta.id}) failed`,
+            logger.error("Server function failed", {
+                serverFunction: serverFnMeta.name,
+                serverFunctionId: serverFnMeta.id,
                 error,
-            );
+            });
             throw toPublicError(error);
         }
     },

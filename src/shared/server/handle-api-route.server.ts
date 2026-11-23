@@ -1,4 +1,5 @@
 import { HTTP_INTERNAL_SERVER_ERROR, errorResponse } from "#/shared/server/http-response";
+import { logger } from "#/shared/server/logger.server";
 import { UserFacingError, toUserMessage } from "#/shared/server/user-facing-error";
 
 /**
@@ -17,7 +18,7 @@ export async function handleApiRoute(
             return errorResponse(HTTP_INTERNAL_SERVER_ERROR, error.message);
         }
 
-        console.error(`API route ${routeName} failed`, error);
+        logger.error("API route failed", { route: routeName, error });
         return errorResponse(HTTP_INTERNAL_SERVER_ERROR, toUserMessage(error));
     }
 }
