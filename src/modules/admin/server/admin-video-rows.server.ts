@@ -10,15 +10,17 @@ import { clips } from "#/modules/clips/clips.schema";
 import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/video-status";
 import { videos } from "#/modules/video-records/videos.schema";
 
-const clipTotals = db
-    .select({
-        videoId: clips.videoId,
-        readyCount: sql<number>`count(*) filter (where ${clips.status} = 'done')`.as("ready_count"),
-        clipBytes: sql<number>`coalesce(sum(${clips.outputBytes}), 0)`.as("clip_bytes"),
-    })
+// Correlated subqueries instead of a join on a whole-table aggregate: Postgres evaluates them only for
+// the rows that survive ORDER BY and LIMIT, so a page reads its own videos' clips, not every clip.
+const readyClipCount = db
+    .select({ value: count() })
     .from(clips)
-    .groupBy(clips.videoId)
-    .as("clip_totals");
+    .where(and(eq(clips.videoId, videos.id), eq(clips.status, "done")));
+
+const clipBytes = db
+    .select({ value: sql<number>`coalesce(sum(${clips.outputBytes}), 0)` })
+    .from(clips)
+    .where(eq(clips.videoId, videos.id));
 
 const FILTER_CONDITIONS: Record<AdminVideoFilter, SQL | undefined> = {
     all: undefined,
@@ -73,11 +75,10 @@ export async function selectAdminVideoRows(query: VideoRowQuery): Promise<Array<
             errorMessage: videos.errorMessage,
             durationSeconds: videos.durationSeconds,
             requestedClipCount: videos.requestedClipCount,
-            readyClipCount: sql<number>`coalesce(${clipTotals.readyCount}, 0)`.mapWith(Number),
-            storageBytes:
-                sql<number>`coalesce(${videos.sourceBytes}, 0) + coalesce(${clipTotals.clipBytes}, 0)`.mapWith(
-                    Number,
-                ),
+            readyClipCount: sql<number>`(${readyClipCount})`.mapWith(Number),
+            storageBytes: sql<number>`coalesce(${videos.sourceBytes}, 0) + (${clipBytes})`.mapWith(
+                Number,
+            ),
             createdAt: videos.createdAt,
             ownerId: user.id,
             ownerName: user.name,
@@ -85,7 +86,6 @@ export async function selectAdminVideoRows(query: VideoRowQuery): Promise<Array<
         })
         .from(videos)
         .innerJoin(user, eq(user.id, videos.userId))
-        .leftJoin(clipTotals, eq(clipTotals.videoId, videos.id))
         .where(query.where)
         .orderBy(desc(videos.createdAt))
         .limit(query.limit)
