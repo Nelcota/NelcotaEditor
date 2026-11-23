@@ -1,4 +1,3 @@
-import SearchIcon from "~icons/lucide/search";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -8,6 +7,7 @@ import type { NavSection } from "#/modules/shell/ui/nav-sections";
 import { SectionIcon } from "#/modules/shell/ui/section-icon";
 import { useNavSections } from "#/modules/shell/ui/use-nav-sections";
 import type { VideoSummary } from "#/modules/videos/video-views";
+import { SearchField } from "#/modules/videos/ui/search-field";
 import { SIDEBAR_ITEM_CLASS, SidebarVideos } from "#/modules/videos/ui/sidebar-videos";
 import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
@@ -59,32 +59,6 @@ function SectionLinks(): ReactNode {
     );
 }
 
-/** Finds a video by name; the lists under it narrow as you type. */
-function SidebarSearch({
-    query,
-    onQueryChange,
-}: {
-    query: string;
-    onQueryChange: (query: string) => void;
-}) {
-    return (
-        <label className="flex h-11 items-center gap-3 rounded-xl border border-input bg-foreground/[0.04] px-[11px] text-muted-foreground transition-colors focus-within:bg-background focus-within:ring-4 focus-within:ring-ring hover:bg-foreground/[0.06]">
-            <SearchIcon aria-hidden="true" className="size-5 shrink-0" />
-            <span className="sr-only">Buscar vídeo</span>
-            <input
-                type="search"
-                enterKeyHint="search"
-                autoComplete="off"
-                spellCheck={false}
-                value={query}
-                onChange={(event) => onQueryChange(event.target.value)}
-                placeholder="Buscar"
-                className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
-            />
-        </label>
-    );
-}
-
 /**
  * The sidebar on the window frame. Lines: boxes 12px in, icon column centred at 34, labels at 56,
  * trailing 12px in. Section titles start on the icon column's leading edge (24).
@@ -94,7 +68,13 @@ export function AppSidebar(): ReactNode {
 
     return (
         <div className="flex h-full min-h-0 flex-col px-3 pb-3">
-            <SidebarSearch query={query} onQueryChange={setQuery} />
+            <SearchField
+                label="Buscar vídeo"
+                placeholder="Buscar"
+                value={query}
+                onValueChange={setQuery}
+                className="sm:w-full"
+            />
             <nav aria-label="Seções" className="pt-3">
                 <SectionLinks />
             </nav>

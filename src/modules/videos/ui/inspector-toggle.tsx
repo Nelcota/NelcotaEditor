@@ -1,5 +1,6 @@
 import PanelLeftIcon from "~icons/lucide/panel-left";
 import type { ReactNode } from "react";
+import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { useStoredFlag } from "#/shared/ui/use-stored-flag";
@@ -23,17 +24,15 @@ export function InspectorToggle({ className }: { className?: string }): ReactNod
 
     return (
         <HintTooltip label={label}>
-            <button
-                type="button"
+            <Button
+                variant="ghost"
+                size="icon"
                 onClick={inspector.toggle}
                 aria-label={label}
-                className={cn(
-                    "grid size-10 shrink-0 place-items-center rounded-xl text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-foreground/5 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
-                    className,
-                )}
+                className={cn("text-muted-foreground hover:text-foreground", className)}
             >
                 <PanelLeftIcon aria-hidden="true" className="size-5 -scale-x-100" />
-            </button>
+            </Button>
         </HintTooltip>
     );
 }
