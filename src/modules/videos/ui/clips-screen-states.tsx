@@ -1,5 +1,7 @@
+import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
+import { libraryClipsQueryOptions } from "#/modules/videos/ui/library-queries";
 import { NewVideoLink } from "#/modules/videos/ui/new-video-link";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
@@ -50,14 +52,35 @@ export function ClipsLoading(): ReactNode {
     );
 }
 
+/** The first failure plus a retry that failed too: the next press reloads the page instead. */
+const FAILURES_BEFORE_RELOAD = 2;
+
 export function ClipsLoadError({ onRetry }: { onRetry: () => void }) {
+    const queryClient = useQueryClient();
+    // Read from the cache: a retry swaps this screen for the loading one, so local state would not last.
+    const clipsState = queryClient.getQueryState(libraryClipsQueryOptions().queryKey);
+
     return (
         <EmptyState
             art={<StageCrewMascot status="failed" className="size-14" />}
             title="Não foi possível carregar seus cortes"
-            description="Eles continuam salvos. Tente de novo; se continuar, recarregue a página."
+            description="Seus vídeos e cortes continuam salvos."
             action={
-                <Button variant="secondary" onClick={onRetry}>
+                <Button
+                    variant="secondary"
+                    onClick={() => {
+                        // Still failing after a retry: a fresh page clears whatever got stuck.
+                        if (
+                            clipsState !== undefined &&
+                            clipsState.errorUpdateCount >= FAILURES_BEFORE_RELOAD
+                        ) {
+                            window.location.reload();
+                            return;
+                        }
+
+                        onRetry();
+                    }}
+                >
                     <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>
