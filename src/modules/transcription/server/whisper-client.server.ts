@@ -56,24 +56,32 @@ export function toUserFacingError(error: unknown): unknown {
     return new UserFacingError(TRANSCRIPTION_FAILED_MESSAGE, { cause: error });
 }
 
-function createWhisperClient(): OpenAI {
-    const environment = getEnvironment();
+// One client per process, so every chunk reuses the same connection pool.
+let cachedClient: OpenAI | null = null;
 
-    return new OpenAI({
+function getWhisperClient(): OpenAI {
+    if (cachedClient !== null) {
+        return cachedClient;
+    }
+
+    const environment = getEnvironment();
+    cachedClient = new OpenAI({
         apiKey: LOCAL_API_KEY,
         baseURL: `${environment.WHISPER_URL}/v1`,
         maxRetries: MAX_RETRIES,
     });
+    return cachedClient;
 }
 
 /** Downloads the model on first use; speaches answers 201 when it is already there. */
-export async function ensureWhisperModel(): Promise<void> {
+export async function ensureWhisperModel(signal: AbortSignal): Promise<void> {
     const environment = getEnvironment();
-    const client = createWhisperClient();
+    const client = getWhisperClient();
 
     // A speaches-only route, so it goes through the SDK's generic POST (same retries and errors).
+    // The first download can take minutes, so cancelling the video must stop the wait.
     try {
-        await client.post(`/models/${environment.WHISPER_MODEL}`);
+        await client.post(`/models/${environment.WHISPER_MODEL}`, { signal });
     } catch (error) {
         throw toUserFacingError(error);
     }
@@ -150,7 +158,7 @@ export async function transcribeAudioChunk(
     signal: AbortSignal,
 ): Promise<ChunkTranscription> {
     const environment = getEnvironment();
-    const client = createWhisperClient();
+    const client = getWhisperClient();
     const audio = await toFile(await openAsBlob(chunk.absolutePath), "audio.wav");
     let transcription: unknown = null;
 

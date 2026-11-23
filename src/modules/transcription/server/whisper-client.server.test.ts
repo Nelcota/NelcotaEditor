@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { APIConnectionError, APIError, APIUserAbortError } from "openai";
 import {
+    ensureWhisperModel,
     toChunkTranscription,
     toUserFacingError,
 } from "#/modules/transcription/server/whisper-client.server";
@@ -37,6 +38,20 @@ describe("toChunkTranscription", () => {
         const result = toChunkTranscription(response, 120);
 
         assert.deepEqual(result.words, [{ text: "oi", startSeconds: 121, endSeconds: 121.5 }]);
+    });
+});
+
+describe("ensureWhisperModel", () => {
+    it("stops waiting for the model as soon as the video is cancelled", async () => {
+        // Nothing listens on port 9: without the signal the SDK would retry and fail to connect.
+        process.env.DATABASE_URL = "postgres://test@127.0.0.1:9/test";
+        process.env.STORAGE_DIR = "storage-test";
+        process.env.WHISPER_URL = "http://127.0.0.1:9";
+        process.env.WHISPER_MODEL = "test-model";
+
+        const download = ensureWhisperModel(AbortSignal.abort());
+
+        await assert.rejects(download, APIUserAbortError);
     });
 });
 

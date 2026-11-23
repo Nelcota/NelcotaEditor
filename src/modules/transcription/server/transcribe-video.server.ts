@@ -101,7 +101,7 @@ export async function ensureTranscript(request: TranscriptRequest): Promise<Arra
     }
 
     await saveProgress(0);
-    await ensureWhisperModel();
+    await ensureWhisperModel(request.signal);
 
     const transcription = await transcribeAudio(request);
     await db.insert(transcripts).values({ videoId, ...transcription });
