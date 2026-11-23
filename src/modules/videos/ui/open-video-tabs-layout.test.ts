@@ -25,6 +25,15 @@ describe("countVisibleTabs", () => {
         assert.equal(visibleCount, 4);
     });
 
+    it("counts the gap before the more button", () => {
+        // Four tabs of 144 with their gaps, the +N with its gap and the plus: 592 + 52 + 40.
+        const visibleAtExactFit = countVisibleTabs(684, 7);
+        const visibleOnePixelShort = countVisibleTabs(683, 7);
+
+        assert.equal(visibleAtExactFit, 4);
+        assert.equal(visibleOnePixelShort, 3);
+    });
+
     it("never squeezes a tab under its minimum width", () => {
         const width = 900;
 

@@ -3,7 +3,9 @@ export const TAB_MIN_WIDTH_PIXELS = 144;
 const TAB_GAP_PIXELS = 4;
 const NEW_VIDEO_BUTTON_PIXELS = 40;
 const MORE_TABS_BUTTON_PIXELS = 48;
+// Each slot is an item plus the gap after it: the tab list, "+N" and the plus sit in one flex row.
 const TAB_SLOT_PIXELS = TAB_MIN_WIDTH_PIXELS + TAB_GAP_PIXELS;
+const MORE_TABS_SLOT_PIXELS = MORE_TABS_BUTTON_PIXELS + TAB_GAP_PIXELS;
 
 export interface SplitTabs<Tab> {
     visible: Array<Tab>;
@@ -33,7 +35,7 @@ export function countVisibleTabs(availableWidthPixels: number, tabCount: number)
         return tabCount;
     }
 
-    const widthForTabs = availableWidthPixels - NEW_VIDEO_BUTTON_PIXELS - MORE_TABS_BUTTON_PIXELS;
+    const widthForTabs = availableWidthPixels - NEW_VIDEO_BUTTON_PIXELS - MORE_TABS_SLOT_PIXELS;
     const fittingTabs = Math.floor(widthForTabs / TAB_SLOT_PIXELS);
 
     return Math.min(Math.max(fittingTabs, 0), tabCount - 1);
