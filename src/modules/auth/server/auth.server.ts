@@ -21,12 +21,11 @@ import {
 } from "#/modules/auth/auth.schema";
 import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
 import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
-import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
+import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
 import {
-    deleteVideoFiles,
-    hasWorkingVideos,
-    listUserVideoIds,
+    AccountHasWorkingVideosError,
+    deleteAccountWithFiles,
 } from "#/modules/video-records/server/delete-user-videos.server";
 import { getEnvironment, InvalidEnvironmentError } from "#/shared/server/env.server";
 
@@ -45,51 +44,50 @@ function readAuthSecret(): string {
     return secret;
 }
 
-// Video ids of accounts being deleted: read before the rows go (with the user, through the
-// foreign keys), used after the delete succeeds so no file is removed for an account that stays.
-const videoIdsOfDeletedUsers = new Map<string, Array<string>>();
+/**
+ * Deletes the account in the same transaction as its videos, so a video started meanwhile cannot
+ * leave files behind. Better Auth's own delete, which runs next, then finds nothing left to remove.
+ */
+async function deleteAccountBeforeBetterAuth(deletedUser: User): Promise<void> {
+    try {
+        await deleteAccountWithFiles(deletedUser.id);
+    } catch (error) {
+        if (error instanceof AccountHasWorkingVideosError) {
+            throw new APIError("BAD_REQUEST", {
+                message: "Cancele os vídeos em processamento antes de excluir a conta.",
+                code: VIDEOS_STILL_PROCESSING_CODE,
+            });
+        }
 
-/** The worker may be writing files of a video in progress, so those must be cancelled first. */
-async function prepareUserDeletion(deletedUser: User): Promise<void> {
-    const userId = deletedUser.id;
-
-    if ((await hasWorkingVideos(userId)) === true) {
-        throw new APIError("BAD_REQUEST", {
-            message: "Cancele os vídeos em processamento antes de excluir a conta.",
-            code: VIDEOS_STILL_PROCESSING_CODE,
-        });
+        throw error;
     }
-
-    videoIdsOfDeletedUsers.set(userId, await listUserVideoIds(userId));
-}
-
-async function removeDeletedUserFiles(deletedUser: User): Promise<void> {
-    const userId = deletedUser.id;
-    const videoIds = videoIdsOfDeletedUsers.get(userId) ?? [];
-    videoIdsOfDeletedUsers.delete(userId);
-
-    await deleteVideoFiles(videoIds);
-    await deleteAvatarPhotos(userId);
 }
 
 /**
  * Better Auth's sign-up and update-user endpoints accept a name of any length; the form's limit is
- * only for the user's convenience, so the server enforces it too. Updates without a name pass.
+ * only for the user's convenience, so the server enforces it too and stores the name trimmed, as
+ * it was measured. Updates without a name pass unchanged.
  */
-async function assertNameFits(fields: { name?: unknown }): Promise<void> {
+async function trimNameWithinLimit(fields: {
+    name?: unknown;
+}): Promise<{ data: { name: string } } | undefined> {
     const name = fields.name;
 
     if (name === undefined) {
-        return;
+        return undefined;
     }
 
     if (typeof name !== "string" || name.trim().length === 0) {
         throw new APIError("BAD_REQUEST", { message: "Digite seu nome." });
     }
 
-    if (Array.from(name.trim()).length > MAX_NAME_LENGTH) {
+    const trimmedName = name.trim();
+
+    if (Array.from(trimmedName).length > MAX_NAME_LENGTH) {
         throw new APIError("BAD_REQUEST", { message: "Nome muito longo." });
     }
+
+    return { data: { name: trimmedName } };
 }
 
 const DELETE_USER_PATH = "/delete-user";
@@ -112,8 +110,32 @@ const requirePasswordToDeleteUser = createAuthMiddleware(async (ctx) => {
     }
 });
 
+const adminPlugin = admin({
+    defaultRole: USER_ROLE,
+    adminRoles: [ADMIN_ROLE],
+    bannedUserMessage: BANNED_USER_MESSAGE,
+});
+
+/** The only admin routes the browser calls; the admin screens reach the rest through server code. */
+const ADMIN_PATHS_FOR_THE_BROWSER = ["/admin/impersonate-user", "/admin/stop-impersonating"];
+
+/**
+ * Better Auth serves every endpoint over HTTP, but server code calls them directly and never
+ * through these paths. Open, they let an admin skip the panel's checks (set another admin's
+ * password, create a hidden admin, delete an account and leave its files) and let anyone holding
+ * a session guess its password 100 times a minute. Built from the plugin, so admin routes added by
+ * an upgrade start closed.
+ */
+const PATHS_CLOSED_TO_THE_BROWSER = [
+    ...Object.values(adminPlugin.endpoints)
+        .map((endpoint) => endpoint.path)
+        .filter((path) => ADMIN_PATHS_FOR_THE_BROWSER.includes(path) === false),
+    "/verify-password",
+];
+
 export const auth = betterAuth({
     baseURL: environment.BETTER_AUTH_URL,
+    disabledPaths: PATHS_CLOSED_TO_THE_BROWSER,
     secret: readAuthSecret(),
     database: drizzleAdapter(db, {
         provider: "pg",
@@ -133,8 +155,7 @@ export const auth = betterAuth({
         // The before hook requires a password, and Better Auth checks it before calling beforeDelete.
         deleteUser: {
             enabled: true,
-            beforeDelete: prepareUserDeletion,
-            afterDelete: removeDeletedUserFiles,
+            beforeDelete: deleteAccountBeforeBetterAuth,
         },
     },
     hooks: {
@@ -146,20 +167,15 @@ export const auth = betterAuth({
     },
     databaseHooks: {
         user: {
-            create: { before: assertNameFits },
-            update: { before: assertNameFits },
+            create: { before: trimNameWithinLimit },
+            update: { before: trimNameWithinLimit },
+        },
+        session: {
+            update: { before: keepImpersonatedSessionExpiry },
         },
     },
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
     // The admin plugin comes first: after the captcha spread, TypeScript would lose the fields it
     // adds to the user and session types.
-    plugins: [
-        admin({
-            defaultRole: USER_ROLE,
-            adminRoles: [ADMIN_ROLE],
-            bannedUserMessage: BANNED_USER_MESSAGE,
-        }),
-        ...buildCaptchaPlugins(),
-        tanstackStartCookies(),
-    ],
+    plugins: [adminPlugin, ...buildCaptchaPlugins(), tanstackStartCookies()],
 });
