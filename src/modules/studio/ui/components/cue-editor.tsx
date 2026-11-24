@@ -212,7 +212,7 @@ export function CueEditor(props: CueEditorProps): ReactNode {
     };
 
     return (
-        <div className="grid gap-2.5 border-b bg-popover px-4 py-3 shadow-[inset_3px_0_0_var(--primary)]">
+        <div className="grid gap-2.5 rounded-lg bg-popover px-3 py-3 shadow-[inset_3px_0_0_var(--primary)]">
             <Input
                 ref={textRef}
                 value={text}

@@ -1,5 +1,4 @@
 import RotateCcwIcon from "~icons/lucide/rotate-ccw";
-import CaptionsIcon from "~icons/lucide/captions";
 import LocateIcon from "~icons/lucide/locate";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -225,22 +224,13 @@ export function CaptionList(props: CaptionListProps): ReactNode {
     return (
         <section
             aria-labelledby="studio-captions-title"
-            className={cn(
-                "relative flex min-h-0 flex-col rounded-2xl border bg-popover",
-                props.className,
-            )}
+            className={cn("relative flex min-h-0 flex-col", props.className)}
         >
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b px-4 py-2.5">
-                <h2
-                    id="studio-captions-title"
-                    className="flex items-center gap-2 text-lg leading-tight font-semibold"
-                >
-                    <CaptionsIcon className="size-5 text-muted-foreground" aria-hidden="true" />
-                    Legendas
+                <h2 id="studio-captions-title" className="text-sm font-semibold whitespace-nowrap">
+                    <span className="sr-only">Legendas, </span>
+                    {cues.length} {pluralize(cues.length, "bloco", "blocos")}
                 </h2>
-                <span className="text-sm whitespace-nowrap text-muted-foreground">
-                    · {cues.length} {pluralize(cues.length, "bloco", "blocos")}
-                </span>
                 <HintTooltip label="Desfaz suas mudanças em todas as legendas">
                     <Button
                         variant="ghost"
@@ -270,7 +260,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                 onWheel={() => setIsFollowing(false)}
                 onTouchMove={() => setIsFollowing(false)}
                 className={cn(
-                    "min-h-0 flex-1 overflow-y-auto",
+                    "min-h-0 flex-1 overflow-y-auto p-2",
                     isLocked === true && "pointer-events-none opacity-50",
                 )}
             >
@@ -308,7 +298,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                                 onSeek(cue.startSeconds);
                             }}
                             className={cn(
-                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 border-b px-4 py-2.5 text-left text-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-inset",
+                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 rounded-lg px-3 py-2.5 text-left text-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-inset",
                                 index === playingIndex &&
                                     "bg-primary/10 shadow-[inset_3px_0_0_var(--primary)]",
                             )}

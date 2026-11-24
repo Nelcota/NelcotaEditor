@@ -3,29 +3,25 @@ import type { ClipStudioView } from "#/modules/studio/model/clip-studio-view";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import type { ClipView } from "#/modules/clips/model/clip-view";
-import type { StudioDraft } from "#/modules/clips/model/clip-studio";
 import { findCueAt } from "#/modules/studio/ui/components/caption-overlay";
 import { usePlaybackValue } from "#/modules/studio/ui/hooks/playback-clock";
 import { RenderRequestDialogs } from "#/modules/studio/ui/components/render-request-dialogs";
+import { StudioBar } from "#/modules/studio/ui/components/studio-bar";
 import { StudioMessages } from "#/modules/studio/ui/components/studio-messages";
 import { StudioStage } from "#/modules/studio/ui/components/studio-stage";
-import { StudioStepFooter } from "#/modules/studio/ui/components/studio-step-footer";
-import { StudioStepTools } from "#/modules/studio/ui/components/studio-step-tools";
-import { StudioStepper } from "#/modules/studio/ui/components/studio-steps";
-import type { StudioStep } from "#/modules/studio/ui/components/studio-steps";
-import { StudioToolPanel } from "#/modules/studio/ui/components/studio-tool-panel";
-import { StudioToolbar } from "#/modules/studio/ui/components/studio-toolbar";
+import { StudioTimeline } from "#/modules/studio/ui/components/studio-timeline";
+import { StudioTools } from "#/modules/studio/ui/components/studio-tools";
+import type { StudioToolTab } from "#/modules/studio/ui/components/studio-tools";
+import { computeTimelineWindow } from "#/modules/studio/client/timeline-geometry";
 import { useRenderRequest } from "#/modules/studio/ui/hooks/use-render-request";
 import { useStudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
 import { useStudioPlayback } from "#/modules/studio/ui/hooks/use-studio-playback";
 import { useStudioShortcuts } from "#/modules/studio/ui/hooks/use-studio-shortcuts";
 import { useTrimMarks } from "#/modules/studio/ui/hooks/use-trim-marks";
-import { pluralize } from "#/shared/ui/pluralize";
 import { useIsAtLeastWidth } from "#/shared/ui/use-is-at-least-width";
 
-// The Studio's own width, not the window's: the page frame and the video page's own columns
-// leave less than the window. Matches the @4xl/studio (56rem) variant, where the stage and the
-// tools sit side by side and the timeline shows.
+// The Studio's own width, not the window's. Matches the @4xl/studio (56rem) variant, where the
+// tools sit beside the preview and the timeline runs under both.
 const WIDE_STUDIO_MIN_PIXELS = 896;
 
 interface StudioWorkspaceProps {
@@ -35,20 +31,19 @@ interface StudioWorkspaceProps {
     onSelectClip: (clipId: string) => void;
 }
 
-function summarizeSteps(draft: StudioDraft): Record<StudioStep, string | null> {
-    const lengthSeconds = draft.endSeconds - draft.startSeconds;
-    const cueCount = draft.cues.length;
+/** Wide screens trim on the timeline, so a Trecho tab left open on a phone shows the captions. */
+function shownTab(tab: StudioToolTab, isDesktop: boolean): StudioToolTab {
+    if (isDesktop === true && tab === "trim") {
+        return "captions";
+    }
 
-    return {
-        trim: `${lengthSeconds.toFixed(1).replace(".", ",")} s`,
-        captions: `${cueCount} ${pluralize(cueCount, "bloco", "blocos")}`,
-        style: null,
-    };
+    return tab;
 }
 
 /**
- * The Studio for one clip, one step at a time: the trim, the captions, then their look. The
- * preview stays on its stage throughout, and every step can render the draft.
+ * The editor for one clip, filling the window: the bar on top, the captions and style beside a
+ * large preview, and the timeline with the trim and the caption blocks under both. Phones stack
+ * the preview over the tools and trim with buttons instead of the timeline.
  */
 export function StudioWorkspace({
     video,
@@ -62,7 +57,7 @@ export function StudioWorkspace({
     const videoRef = useRef<HTMLVideoElement>(null);
     const playback = useStudioPlayback(videoRef, draft);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-    const [step, setStep] = useState<StudioStep>("trim");
+    const [tab, setTab] = useState<StudioToolTab>("captions");
     const isRendering = isVideoFinished(video.status) === false;
     const renderRequest = useRenderRequest(editor, clip.sharePath);
     const durationSeconds = studio.videoDurationSeconds ?? draft.endSeconds;
@@ -92,7 +87,7 @@ export function StudioWorkspace({
 
     const openCueFromTimeline = (index: number): void => {
         setOpenIndex(index);
-        setStep("captions");
+        setTab("captions");
         const cue = draft.cues[index];
 
         if (cue !== undefined) {
@@ -101,67 +96,71 @@ export function StudioWorkspace({
     };
 
     return (
-        <div
-            ref={setRootElement}
-            className="@container/studio grid grid-cols-[minmax(0,1fr)] gap-4"
-        >
-            <StudioMessages
-                videoId={video.id}
-                clip={clip}
-                editor={editor}
-                isRendering={isRendering}
-            />
-            <StudioToolbar
-                rankedClips={rankedClips}
-                clipId={clip.id}
-                onSelectClip={onSelectClip}
-                editor={editor}
-                isRendering={isRendering}
-                stepper={
-                    <StudioStepper
-                        step={step}
-                        summaries={summarizeSteps(draft)}
-                        onStepChange={setStep}
-                    />
-                }
-            />
-            {/* From @4xl the pair fills the window's height, so nothing below the fold. */}
-            <div className="grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-2xl border @4xl/studio:h-[clamp(520px,calc(100dvh-320px),900px)] @4xl/studio:grid-cols-[minmax(0,1fr)_456px] @4xl/studio:grid-rows-[minmax(0,1fr)] @6xl/studio:grid-cols-[minmax(0,1fr)_520px]">
-                <StudioStage
-                    video={video}
+        <div ref={setRootElement} className="@container/studio min-h-full md:h-full">
+            <div className="grid min-h-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_auto_auto] @4xl/studio:h-full @4xl/studio:grid-rows-[auto_auto_minmax(0,1fr)_auto]">
+                <StudioBar
+                    videoId={video.id}
+                    rankedClips={rankedClips}
+                    clipId={clip.id}
+                    onSelectClip={onSelectClip}
                     editor={editor}
-                    videoRef={videoRef}
-                    playback={playback}
                     isRendering={isRendering}
+                    onRender={renderRequest.request}
                 />
-                <StudioToolPanel
-                    step={step}
-                    footer={
-                        <StudioStepFooter
-                            step={step}
-                            onStepChange={setStep}
+                <div className="grid gap-2 px-4 py-3 empty:p-0">
+                    <StudioMessages
+                        videoId={video.id}
+                        clip={clip}
+                        editor={editor}
+                        isRendering={isRendering}
+                    />
+                </div>
+                <div className="grid min-h-0 grid-cols-[minmax(0,1fr)] @4xl/studio:grid-cols-[400px_minmax(0,1fr)] @4xl/studio:grid-rows-[minmax(0,1fr)] @6xl/studio:grid-cols-[440px_minmax(0,1fr)]">
+                    <div className="grid min-h-0 @4xl/studio:col-start-2 @4xl/studio:row-start-1">
+                        <StudioStage
+                            video={video}
                             editor={editor}
+                            videoRef={videoRef}
+                            playback={playback}
                             isRendering={isRendering}
-                            onRender={renderRequest.request}
                         />
-                    }
-                >
-                    <StudioStepTools
-                        step={step}
+                    </div>
+                    <StudioTools
+                        tab={shownTab(tab, isDesktop)}
+                        onTabChange={setTab}
                         video={video}
                         studio={studio}
                         editor={editor}
                         playback={playback}
-                        marks={marks}
                         videoDurationSeconds={durationSeconds}
                         isDesktop={isDesktop}
                         isRendering={isRendering}
                         playingIndex={playingIndex}
                         openIndex={openIndex}
                         onOpenCue={setOpenIndex}
-                        onOpenCueFromTimeline={openCueFromTimeline}
                     />
-                </StudioToolPanel>
+                </div>
+                {/* Not just hidden on phones: the filmstrip loads ten videos that nobody would see. */}
+                {isDesktop === true && (
+                    <StudioTimeline
+                        editor={editor}
+                        window={computeTimelineWindow(
+                            draft,
+                            editor.applied,
+                            studio.videoDurationSeconds,
+                        )}
+                        sourceUrl={video.originalFileUrl}
+                        videoDurationSeconds={durationSeconds}
+                        clock={playback.clock}
+                        playingIndex={playingIndex}
+                        openIndex={openIndex}
+                        isLocked={isRendering}
+                        onOpen={openCueFromTimeline}
+                        onSeek={playback.seek}
+                        onMarkStart={marks.markStart}
+                        onMarkEnd={marks.markEnd}
+                    />
+                )}
             </div>
             <RenderRequestDialogs editor={editor} renderRequest={renderRequest} />
         </div>

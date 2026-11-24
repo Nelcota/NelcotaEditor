@@ -121,7 +121,13 @@ Each drawing has one meaning only:
   row shows Brilho's reason and the actions. Original: the full video with the clips marked on its bar
   and the transcript under it. From lg the inspector (400px) sits beside it: the video's mascot and
   state, the name in a field (opens rename), then Cortes, Origem, Arquivos and Ações as grouped cards.
-  The Studio takes the full width; the top bar's last button hides the inspector anywhere.
+  The top bar's last button hides the inspector anywhere.
+- Studio (`?tab=studio`): a full-window editor with no sidebar, top bar, page header or tab bar. One
+  bar: back to Cortes, the clip's title (the page's h1) with previous/next and "Corte N de M" to
+  pick another, the draft state, undo/redo and "Renderizar corte". From 56rem of its own width: the
+  Legendas · Estilo tabs on the left (400px, 440px from 72rem), the preview on the dark stage, and
+  the timeline under both (trim handles, caption blocks; clicking a block opens it in Legendas).
+  Narrower: the preview on top, then the tabs Trecho · Legendas · Estilo.
 
 ## Interaction rules (from CLAUDE.md)
 
@@ -250,3 +256,4 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-21 | The window design from the owner's reference replaces direction A's rail and list pane: grey frame with a top bar of open-video tabs and a sidebar (search, sections with counts, videos, person), one white rounded panel, and an inspector with grouped cards on the video page | The person sent the reference and asked to redo everything to match it |
 | 2026-11-24 | Primary fill (`primary`, `primary-solid`) darkened to `oklch(0.56 0.2 260)` light and `oklch(0.56 0.2 258)` dark | The axe check in the end-to-end tests measured white text on the blue at 4.39:1 and 4.03:1; AA needs 4.5:1 |
 | 2026-11-24 | Focus ring (`--ring`) is the solid primary instead of a 55% mix, and the link box uses it at full strength | The see-through ring measured 1.93:1 on the dark panel and 2.25:1 on white, under the 3:1 a focus indicator needs; the solid one is 3.66:1 and 4.81:1 |
+| 2026-11-24 | Studio, direction A "Editor com linha do tempo" (board `design/explore/studio-editor/`): the Studio leaves the page frame for a full-window editor with one bar; the Trecho · Legendas · Estilo steps and their footer are gone, captions and style are tabs beside a larger preview, and the timeline sits under both with an 8 s margin around the clip instead of 20 s. Left out of the board for now: the right column with the selected block's times (they stay in the open block), "Juntar com o próximo", marking low-confidence words (the transcript has no confidence) and tapping the caption on the preview | The person found the stepped Studio hard to use: little room, captions and style never visible together, the editor buried under the page header |

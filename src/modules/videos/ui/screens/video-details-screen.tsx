@@ -18,6 +18,8 @@ import { cn } from "#/shared/ui/cn";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { AsyncButton } from "#/shared/ui/async-button";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { useVideoTabNavigation } from "#/modules/videos/ui/hooks/use-video-tab-navigation";
 
 const SKELETON_CLIP_COUNT = 4;
 
@@ -87,14 +89,33 @@ interface VideoWorkspaceProps {
     StudioTab: ComponentType<StudioTabProps>;
 }
 
+/** The Studio fills the window on its own: no page header, tabs or inspector around it. */
+function StudioWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): ReactNode {
+    const track = useTrackPromise();
+    const goTo = useVideoTabNavigation(details.video.id, search);
+
+    return (
+        <StudioTab
+            details={details}
+            clipId={search.clip}
+            onSelectClip={(clipId) => track(goTo("studio", clipId))}
+            onShowClips={() => track(goTo("clips"))}
+        />
+    );
+}
+
 /**
- * The page column and, from lg, the inspector beside it, each scrolling on its own. The Studio
- * needs the width, so the inspector steps aside there; the top bar's toggle hides it anywhere.
+ * The page column and, from lg, the inspector beside it, each scrolling on its own; the top bar's
+ * toggle hides the inspector.
  */
 function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): ReactNode {
     const video = details.video;
     const isInspectorHidden = useIsInspectorHidden();
-    const isInspectorShown = isInspectorHidden === false && search.tab !== "studio";
+    const isInspectorShown = isInspectorHidden === false;
+
+    if (search.tab === "studio") {
+        return <StudioWorkspace details={details} search={search} StudioTab={StudioTab} />;
+    }
 
     return (
         <div
@@ -104,15 +125,11 @@ function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): Re
             )}
         >
             <div className={cn(PAGE_COLUMN_CLASS, "lg:overflow-y-auto")}>
-                <VideoHeader
-                    video={video}
-                    isInspectorShown={isInspectorShown}
-                    isCompact={search.tab === "studio"}
-                />
+                <VideoHeader video={video} isInspectorShown={isInspectorShown} />
                 {(search.tab === undefined || search.tab === "clips") && (
                     <VideoResultSummary video={video} />
                 )}
-                <VideoPageTabs details={details} search={search} StudioTab={StudioTab} />
+                <VideoPageTabs details={details} search={search} />
             </div>
             {isInspectorShown === true && (
                 <aside

@@ -84,14 +84,9 @@ interface VideoHeaderProps {
      * element is ever visually hidden.
      */
     isInspectorShown: boolean;
-    /**
-     * The Studio needs the window's height: the title shrinks to one line and the meta, which the
-     * other tabs show, steps aside.
-     */
-    isCompact: boolean;
 }
 
-export function VideoHeader({ video, isInspectorShown, isCompact }: VideoHeaderProps) {
+export function VideoHeader({ video, isInspectorShown }: VideoHeaderProps) {
     const inspectorOwnedClass = cn(isInspectorShown === true && "lg:hidden");
 
     return (
@@ -102,17 +97,14 @@ export function VideoHeader({ video, isInspectorShown, isCompact }: VideoHeaderP
                     <h1
                         className={cn(
                             "line-clamp-2 text-title font-semibold tracking-[-0.02em] text-balance [overflow-wrap:anywhere]",
-                            isCompact === true && "line-clamp-1 text-xl",
                             isInspectorShown === true && "lg:sr-only",
                         )}
                     >
                         {video.title}
                     </h1>
-                    {isCompact === false && (
-                        <div className={inspectorOwnedClass}>
-                            <VideoMeta video={video} />
-                        </div>
-                    )}
+                    <div className={inspectorOwnedClass}>
+                        <VideoMeta video={video} />
+                    </div>
                 </div>
                 <div className={cn("-mt-1", inspectorOwnedClass)}>
                     <VideoActionsMenu video={video} />

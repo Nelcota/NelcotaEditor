@@ -29,11 +29,11 @@ export function StudioStage({
     return (
         <section
             aria-label="Prévia do corte"
-            className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] justify-items-center gap-3 bg-stage p-4 text-stage-foreground @4xl/studio:p-6"
+            className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] justify-items-center gap-3 bg-stage p-3 text-stage-foreground @4xl/studio:p-6"
         >
             {/* A size container: the preview reads both sides to fit its shape. */}
             <div
-                className="grid h-[min(58dvh,560px)] w-full place-items-center @4xl/studio:h-full"
+                className="grid h-[min(46dvh,520px)] w-full place-items-center @4xl/studio:h-full"
                 style={{ containerType: "size" }}
             >
                 <StudioPreview
