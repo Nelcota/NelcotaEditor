@@ -1,3 +1,4 @@
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import {
     adminBanInputSchema,
@@ -13,6 +14,7 @@ import { deleteUserAccount } from "#/modules/admin/server/delete-user-account.se
 import { findNonAdminTarget, findTargetUser } from "#/modules/admin/server/find-target-user.server";
 import { recordAdminAction } from "#/modules/admin/server/record-admin-action.server";
 import { ADMIN_ROLE, USER_ROLE } from "#/modules/auth/auth.schema";
+import { removeAdminRole } from "#/modules/auth/server/admin-role.server";
 import { auth } from "#/modules/auth/server/auth.server";
 
 function toRole(isAdmin: boolean): typeof ADMIN_ROLE | typeof USER_ROLE {
@@ -23,6 +25,25 @@ function toRole(isAdmin: boolean): typeof ADMIN_ROLE | typeof USER_ROLE {
     return USER_ROLE;
 }
 
+interface RoleChange {
+    headers: Headers;
+    userId: string;
+    isAdmin: boolean;
+}
+
+/** Removing goes through our own guarded update: Better Auth's would demote the last admin too. */
+async function changeAdminRole(change: RoleChange): Promise<void> {
+    if (change.isAdmin === false) {
+        await removeAdminRole(change.userId);
+        return;
+    }
+
+    await auth.api.setRole({
+        headers: change.headers,
+        body: { userId: change.userId, role: ADMIN_ROLE },
+    });
+}
+
 export const getAdminUsers = createServerFn({ method: "GET" })
     .middleware([adminMiddleware])
     .validator(adminUserListInputSchema)
@@ -31,9 +52,19 @@ export const getAdminUsers = createServerFn({ method: "GET" })
 export const getAdminUserDetails = createServerFn({ method: "GET" })
     .middleware([adminMiddleware])
     .validator(adminUserIdInputSchema)
-    .handler(async ({ context, data }): Promise<AdminUserDetails> =>
-        findAdminUserDetails({ userId: data.userId, adminId: context.admin.id }),
-    );
+    .handler(async ({ context, data }): Promise<AdminUserDetails> => {
+        const details = await findAdminUserDetails({
+            userId: data.userId,
+            adminId: context.admin.id,
+        });
+
+        // The account page answers 404 for an account that is gone.
+        if (details === null) {
+            throw notFound();
+        }
+
+        return details;
+    });
 
 /** Blocking ends every session of the account at once (Better Auth's admin plugin does it). */
 export const banUser = createServerFn({ method: "POST" })
@@ -83,7 +114,11 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
         const target = await findTargetUser({ userId: data.userId, adminId: context.admin.id });
         const role = toRole(data.isAdmin);
 
-        await auth.api.setRole({ headers: context.headers, body: { userId: target.id, role } });
+        await changeAdminRole({
+            headers: context.headers,
+            userId: target.id,
+            isAdmin: data.isAdmin,
+        });
         await recordAdminAction({
             action: "set-role",
             adminId: context.admin.id,

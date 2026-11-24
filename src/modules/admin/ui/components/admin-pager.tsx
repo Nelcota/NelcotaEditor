@@ -2,6 +2,7 @@ import ChevronLeftIcon from "~icons/lucide/chevron-left";
 import ChevronRightIcon from "~icons/lucide/chevron-right";
 import type { ReactNode } from "react";
 import { ADMIN_PAGE_SIZE } from "#/modules/admin/model/admin-search";
+import { countAdminPages } from "#/modules/admin/model/count-admin-pages";
 import { Button } from "#/shared/ui/button";
 
 // At the first or last page the button only looks disabled (aria-disabled): a native `disabled`
@@ -17,7 +18,7 @@ interface AdminPagerProps {
 
 /** "26 a 50 de 132" and the two arrows; nothing when everything fits on one page. */
 export function AdminPager({ page, totalCount, onPageChange }: AdminPagerProps): ReactNode {
-    const pageCount = Math.ceil(totalCount / ADMIN_PAGE_SIZE);
+    const pageCount = countAdminPages(totalCount);
 
     if (pageCount <= 1) {
         return null;

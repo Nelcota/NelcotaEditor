@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { SECTION_LINK_ACTIVE_OPTIONS } from "#/modules/shell/model/nav-sections";
 import type { NavSection, NavSectionState } from "#/modules/shell/model/nav-sections";
 import { SectionIcon } from "#/modules/shell/ui/components/section-icon";
 import { cn } from "#/shared/ui/cn";
@@ -31,6 +32,7 @@ export function SectionTabLink({
     return (
         <Link
             to={section.path}
+            activeOptions={SECTION_LINK_ACTIVE_OPTIONS}
             aria-current={toAriaCurrent(state === "current")}
             className={cn(TAB_CLASS, STATE_CLASSES[state], className)}
         >

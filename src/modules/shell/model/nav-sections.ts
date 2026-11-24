@@ -4,6 +4,7 @@ import ScissorsIcon from "~icons/lucide/scissors";
 import ShieldIcon from "~icons/lucide/shield";
 import SquarePlayIcon from "~icons/lucide/square-play";
 import UserRoundIcon from "~icons/lucide/user-round";
+import type { ActiveOptions } from "@tanstack/react-router";
 import type { IconComponent } from "#/shared/ui/icon-component";
 
 export type SectionPath = "/" | "/videos" | "/clips" | "/overview" | "/account" | "/admin";
@@ -26,6 +27,16 @@ export interface AdminSubSection {
  * a video is open), so the navigation still says where you are.
  */
 export type NavSectionState = "current" | "parent" | "none";
+
+/**
+ * The router sets aria-current="page" on every active link, over our own value, and by default a
+ * link is active on every page under its path (Vídeos on an open video). Only the page itself is
+ * current, whatever its search; the section of a deeper page is styled through data-parent.
+ */
+export const SECTION_LINK_ACTIVE_OPTIONS = {
+    exact: true,
+    includeSearch: false,
+} as const satisfies ActiveOptions;
 
 export const HOME_PATH = "/";
 export const VIDEOS_PATH = "/videos";

@@ -14,6 +14,7 @@ import {
 import type { AdminVideoFilter, AdminVideosSearch } from "#/modules/admin/model/admin-search";
 import { toPageSearch, toQuerySearch } from "#/modules/admin/model/admin-search-params";
 import { AdminPager } from "#/modules/admin/ui/components/admin-pager";
+import { AdminPagePastEnd } from "#/modules/admin/ui/components/admin-page-past-end";
 import { adminVideosQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
 import { AdminVideoList } from "#/modules/admin/ui/components/admin-video-list";
@@ -133,6 +134,13 @@ function VideoResults({ search, onSearchChange }: ResultsProps): ReactNode {
         return <AdminLoading label="Carregando vídeos" />;
     }
 
+    const goToPage = (next: number): void =>
+        onSearchChange(toAdminVideosSearch({ ...search, page: next }));
+
+    if (result.videos.length === 0 && result.totalCount > 0) {
+        return <AdminPagePastEnd totalCount={result.totalCount} onPageChange={goToPage} />;
+    }
+
     if (result.videos.length === 0) {
         return (
             <EmptyState
@@ -146,13 +154,7 @@ function VideoResults({ search, onSearchChange }: ResultsProps): ReactNode {
     return (
         <div className="grid gap-3">
             <AdminVideoList videos={result.videos} showOwner={true} />
-            <AdminPager
-                page={page}
-                totalCount={result.totalCount}
-                onPageChange={(next) =>
-                    onSearchChange(toAdminVideosSearch({ ...search, page: next }))
-                }
-            />
+            <AdminPager page={page} totalCount={result.totalCount} onPageChange={goToPage} />
         </div>
     );
 }
