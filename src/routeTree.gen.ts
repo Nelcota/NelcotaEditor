@@ -21,6 +21,7 @@ import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
 import { Route as AppUsageRouteImport } from './routes/_app/usage'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppAdminVideosRouteImport } from './routes/_app/admin/videos'
+import { Route as AppVideosIndexRouteImport } from './routes/_app/videos.index'
 import { Route as AppVideosVideoIdRouteImport } from './routes/_app/videos.$videoId'
 import { Route as ApiAccountAvatarRouteImport } from './routes/api/account/avatar'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -91,6 +92,11 @@ const AppAdminVideosRoute = AppAdminVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppVideosIndexRoute = AppVideosIndexRouteImport.update({
+  id: '/videos/',
+  path: '/videos/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppVideosVideoIdRoute = AppVideosVideoIdRouteImport.update({
   id: '/videos/$videoId',
   path: '/videos/$videoId',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/videos/upload': typeof ApiVideosUploadRoute
   '/admin/': typeof AppAdminIndexRoute
+  '/videos/': typeof AppVideosIndexRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/videos/upload': typeof ApiVideosUploadRoute
   '/admin': typeof AppAdminIndexRoute
+  '/videos': typeof AppVideosIndexRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/videos/upload': typeof ApiVideosUploadRoute
   '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/videos/': typeof AppVideosIndexRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/api/share/$token'
     | '/api/videos/upload'
     | '/admin/'
+    | '/videos/'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/source'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/api/share/$token'
     | '/api/videos/upload'
     | '/admin'
+    | '/videos'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/source'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/api/share/$token'
     | '/api/videos/upload'
     | '/_app/admin/'
+    | '/_app/videos/'
     | '/_app/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/source'
@@ -384,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminVideosRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/videos/': {
+      id: '/_app/videos/'
+      path: '/videos'
+      fullPath: '/videos/'
+      preLoaderRoute: typeof AppVideosIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/videos/$videoId': {
       id: '/_app/videos/$videoId'
       path: '/videos/$videoId'
@@ -484,6 +503,7 @@ interface AppRouteChildren {
   AppUsageRoute: typeof AppUsageRoute
   AppIndexRoute: typeof AppIndexRoute
   AppVideosVideoIdRoute: typeof AppVideosVideoIdRoute
+  AppVideosIndexRoute: typeof AppVideosIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -495,6 +515,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppUsageRoute: AppUsageRoute,
   AppIndexRoute: AppIndexRoute,
   AppVideosVideoIdRoute: AppVideosVideoIdRoute,
+  AppVideosIndexRoute: AppVideosIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

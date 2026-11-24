@@ -1,4 +1,5 @@
-import type { VideoSummary } from "#/modules/videos/video-views";
+import { constructSortFn } from "@tanstack/react-table";
+import type { SortingState } from "@tanstack/react-table";
 
 export const VIDEO_SORTS = ["newest", "oldest", "title"] as const;
 
@@ -14,15 +15,22 @@ export const VIDEO_SORT_LABELS: Record<VideoSort, string> = {
 
 const titleCollator = new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true });
 
-const COMPARATORS: Record<VideoSort, (first: VideoSummary, second: VideoSummary) => number> = {
-    newest: (first, second) => second.createdAt.localeCompare(first.createdAt),
-    oldest: (first, second) => first.createdAt.localeCompare(second.createdAt),
-    title: (first, second) => titleCollator.compare(first.title, second.title),
-};
+/** "Edição 2" before "edicao 10": ignores case and accents, and reads numbers as numbers. */
+export const titleSortFn = constructSortFn({
+    sort: (first: unknown, second: unknown) => titleCollator.compare(String(first), String(second)),
+});
 
-export function sortVideos(videos: Array<VideoSummary>, sort: VideoSort): Array<VideoSummary> {
-    return videos.toSorted(COMPARATORS[sort]);
-}
+/** ISO timestamps sort as text in time order. */
+export const isoDateSortFn = constructSortFn({
+    sort: (first: unknown, second: unknown) => String(first).localeCompare(String(second)),
+});
+
+/** Each sort choice as the table's sorting state, by the columns in video-list-filter. */
+export const VIDEO_SORTING: Record<VideoSort, SortingState> = {
+    newest: [{ id: "createdAt", desc: true }],
+    oldest: [{ id: "createdAt", desc: false }],
+    title: [{ id: "title", desc: false }],
+};
 
 export function toVideoSort(value: string): VideoSort {
     return VIDEO_SORTS.find((sort) => sort === value) ?? DEFAULT_VIDEO_SORT;

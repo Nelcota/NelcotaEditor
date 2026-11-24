@@ -1,8 +1,8 @@
-import LanguagesIcon from "~icons/lucide/languages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { ReactNode } from "react";
 import {
+    CLIP_LENGTH_HINTS,
     TRANSCRIPTION_LANGUAGES,
     TRANSCRIPTION_LANGUAGE_LABELS,
 } from "#/modules/preferences/preferences";
@@ -12,15 +12,11 @@ import { PREFERENCES_QUERY_KEY } from "#/modules/preferences/ui/preferences-quer
 import { SaveStatus } from "#/modules/preferences/ui/save-status";
 import { ClipCountStepper } from "#/modules/preferences/ui/clip-count-stepper";
 import { ClipLengthPicker } from "#/modules/preferences/ui/clip-length-picker";
-import { SegmentedControl } from "#/shared/ui/segmented-control";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
+import { SettingsRow } from "#/shared/ui/settings-row";
 
-// Radix radio values cannot be "", so "detect automatically" is "auto" on screen only.
+// Radix select values cannot be "", so "detect automatically" is "auto" on screen only.
 const AUTO_OPTION = "auto";
-
-const LANGUAGE_OPTIONS = TRANSCRIPTION_LANGUAGES.map((language) => ({
-    value: toOptionValue(language),
-    label: TRANSCRIPTION_LANGUAGE_LABELS[language],
-}));
 
 function toOptionValue(language: TranscriptionLanguage): string {
     if (language === "") {
@@ -36,42 +32,42 @@ function fromOptionValue(value: string): TranscriptionLanguage {
     return language ?? "";
 }
 
-function PreferenceField(props: { description: string; children: ReactNode }): ReactNode {
-    return (
-        <div className="grid content-start gap-2">
-            {props.children}
-            <p className="text-sm text-muted-foreground">{props.description}</p>
-        </div>
-    );
-}
-
-function LanguageSelect(props: {
+interface LanguageSelectProps {
+    labelId: string;
     value: TranscriptionLanguage;
     onValueChange: (language: TranscriptionLanguage) => void;
-}): ReactNode {
-    // Four fixed choices: all visible at once instead of a list that opens over the page.
+}
+
+function LanguageSelect({ labelId, value, onValueChange }: LanguageSelectProps): ReactNode {
     return (
-        <div className="grid gap-2">
-            <span className="flex items-center gap-2 text-sm font-medium">
-                <LanguagesIcon aria-hidden="true" className="size-[18px] text-muted-foreground" />
-                Idioma da transcrição
-            </span>
-            <SegmentedControl
-                label="Idioma da transcrição"
-                value={toOptionValue(props.value)}
-                options={LANGUAGE_OPTIONS}
-                onValueChange={(value) => props.onValueChange(fromOptionValue(value))}
-                // "Detectar automaticamente" gets the whole first row; the three languages share
-                // the second, so no pill breaks its label in two.
-                className="grid-flow-row grid-cols-3 [&>button:first-child]:col-span-3"
-            />
-        </div>
+        <Select
+            value={toOptionValue(value)}
+            onValueChange={(next) => onValueChange(fromOptionValue(next))}
+        >
+            <SelectTrigger
+                aria-labelledby={labelId}
+                className="h-9 rounded-xl border-transparent bg-card font-semibold hover:border-input/40 hover:bg-accent"
+            >
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" align="end">
+                {TRANSCRIPTION_LANGUAGES.map((language) => (
+                    <SelectItem key={toOptionValue(language)} value={toOptionValue(language)}>
+                        {TRANSCRIPTION_LANGUAGE_LABELS[language]}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     );
 }
 
-/** Each change saves on its own; the status line says whether it reached the server. */
+/**
+ * The Seus cortes group's rows. Each change saves on its own; the last line says whether it
+ * reached the server.
+ */
 export function PreferencesForm({ initial }: { initial: Preferences }): ReactNode {
     const queryClient = useQueryClient();
+    const languageLabelId = useId();
     const [preferences, setPreferences] = useState<Preferences>(initial);
     const save = useMutation({
         mutationFn: (next: Preferences) => savePreferences({ data: next }),
@@ -86,36 +82,55 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
     };
 
     return (
-        <div className="@container grid gap-5 rounded-2xl border bg-popover p-4 sm:p-5">
-            <div className="grid gap-6 @2xl:grid-cols-2">
-                <PreferenceField description="Já vem escolhido quando você adiciona um vídeo; dá para mudar em cada um.">
+        <>
+            <SettingsRow
+                label="Cortes por vídeo"
+                description="Já vem escolhido em cada vídeo novo; dá para mudar ao enviar."
+            >
+                <div className="w-48">
                     <ClipCountStepper
                         id="default-clip-count"
                         label="Cortes por vídeo"
+                        labelClassName="sr-only"
                         value={preferences.defaultClipCount}
                         onValueChange={(defaultClipCount) =>
                             change({ ...preferences, defaultClipCount })
                         }
                     />
-                </PreferenceField>
-                <PreferenceField description="Também vem escolhida em cada vídeo novo; dá para mudar ao enviar.">
-                    <ClipLengthPicker
-                        value={preferences.defaultClipLength}
-                        onValueChange={(defaultClipLength) =>
-                            change({ ...preferences, defaultClipLength })
-                        }
-                    />
-                </PreferenceField>
-                <PreferenceField description="Escolher o idioma deixa a legenda mais precisa nos próximos vídeos.">
-                    <LanguageSelect
-                        value={preferences.transcriptionLanguage}
-                        onValueChange={(transcriptionLanguage) =>
-                            change({ ...preferences, transcriptionLanguage })
-                        }
-                    />
-                </PreferenceField>
+                </div>
+            </SettingsRow>
+            <SettingsRow
+                label="Duração dos cortes"
+                description={
+                    <span aria-live="polite">
+                        {CLIP_LENGTH_HINTS[preferences.defaultClipLength]}
+                    </span>
+                }
+            >
+                <ClipLengthPicker
+                    isInline
+                    value={preferences.defaultClipLength}
+                    onValueChange={(defaultClipLength) =>
+                        change({ ...preferences, defaultClipLength })
+                    }
+                />
+            </SettingsRow>
+            <SettingsRow
+                label="Idioma da transcrição"
+                labelId={languageLabelId}
+                description="Escolher o idioma deixa a legenda mais precisa."
+            >
+                <LanguageSelect
+                    labelId={languageLabelId}
+                    value={preferences.transcriptionLanguage}
+                    onValueChange={(transcriptionLanguage) =>
+                        change({ ...preferences, transcriptionLanguage })
+                    }
+                />
+            </SettingsRow>
+            <div className="px-4 py-1 sm:px-5">
+                <SaveStatus status={save.status} onRetry={() => save.mutate(preferences)} />
             </div>
-            <SaveStatus status={save.status} onRetry={() => save.mutate(preferences)} />
-        </div>
+        </>
     );
 }

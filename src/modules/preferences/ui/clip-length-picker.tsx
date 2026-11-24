@@ -13,12 +13,30 @@ const CLIP_LENGTH_OPTIONS = CLIP_LENGTHS.map((clipLength) => ({
 }));
 
 interface ClipLengthPickerProps {
+    /** In a settings row the row names it and says the hint, so both step aside here. */
+    isInline?: boolean;
     value: ClipLength;
     onValueChange: (clipLength: ClipLength) => void;
 }
 
 /** Three fixed choices side by side; the line below says what the chosen one means. */
-export function ClipLengthPicker({ value, onValueChange }: ClipLengthPickerProps): ReactNode {
+export function ClipLengthPicker({
+    isInline = false,
+    value,
+    onValueChange,
+}: ClipLengthPickerProps): ReactNode {
+    if (isInline === true) {
+        return (
+            <SegmentedControl
+                label={LABEL}
+                value={value}
+                options={CLIP_LENGTH_OPTIONS}
+                onValueChange={onValueChange}
+                className="flex-nowrap [&>button]:whitespace-nowrap"
+            />
+        );
+    }
+
     return (
         <div className="grid gap-2">
             <span className="flex items-center gap-2 text-sm font-medium">

@@ -5,7 +5,8 @@
             "name": "nelcota",
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "local"],
-            "port": 3210
+            "port": 3210,
+            "autoPort": false
         },
         {
             "name": "landing",

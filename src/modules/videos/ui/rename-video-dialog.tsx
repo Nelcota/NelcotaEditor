@@ -7,15 +7,15 @@ import type { VideoSummary } from "#/modules/videos/video-views";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { invalidateVideoQueries } from "#/modules/videos/ui/video-queries";
 import { Button } from "#/shared/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "#/shared/ui/dialog";
+import { cn } from "#/shared/ui/cn";
+import { Dialog, DialogClose, DialogContent } from "#/shared/ui/dialog";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { toErrorMessages } from "#/shared/ui/form-errors";
+import {
+    STEP_DIALOG_CONTENT_CLASS,
+    STEP_DIALOG_SINGLE_CLASS,
+    StepDialogFrame,
+} from "#/shared/ui/step-dialog-frame";
 import { TextField } from "#/shared/ui/text-field";
 
 const FALLBACK_ERROR_MESSAGE =
@@ -66,39 +66,56 @@ function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
     return (
         <form
             noValidate
-            className="grid gap-4"
+            className="grid min-h-0"
             onSubmit={async (event) => {
                 event.preventDefault();
                 await form.handleSubmit();
             }}
         >
-            <form.Field name="title">
-                {(field) => (
-                    <TextField
-                        id={TITLE_FIELD_ID}
-                        label="Título"
-                        autoComplete="off"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onValueChange={field.handleChange}
-                        errors={toErrorMessages(field.state.meta.errors)}
-                    />
-                )}
-            </form.Field>
-            <FormAlert message={errorMessage} />
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-                {(isSubmitting) => (
-                    <Button
-                        type="submit"
-                        size="lg"
-                        className="justify-self-end font-medium"
-                        disabled={isSubmitting}
-                        aria-busy={isSubmitting}
-                    >
-                        Salvar título
-                    </Button>
-                )}
-            </form.Subscribe>
+            <StepDialogFrame
+                kind="dialog"
+                rail={null}
+                progress={null}
+                title="Renomear vídeo"
+                description="O título aparece na lista e na busca. Os títulos dos cortes não mudam."
+                footer={
+                    <>
+                        <DialogClose asChild>
+                            <Button type="button" variant="ghost" className="text-muted-foreground">
+                                Cancelar
+                            </Button>
+                        </DialogClose>
+                        <form.Subscribe selector={(state) => state.isSubmitting}>
+                            {(isSubmitting) => (
+                                <Button
+                                    type="submit"
+                                    size="lg"
+                                    className="ms-auto font-medium max-sm:flex-1"
+                                    disabled={isSubmitting}
+                                    aria-busy={isSubmitting}
+                                >
+                                    Salvar título
+                                </Button>
+                            )}
+                        </form.Subscribe>
+                    </>
+                }
+            >
+                <form.Field name="title">
+                    {(field) => (
+                        <TextField
+                            id={TITLE_FIELD_ID}
+                            label="Título"
+                            autoComplete="off"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onValueChange={field.handleChange}
+                            errors={toErrorMessages(field.state.meta.errors)}
+                        />
+                    )}
+                </form.Field>
+                <FormAlert message={errorMessage} />
+            </StepDialogFrame>
         </form>
     );
 }
@@ -113,13 +130,7 @@ interface RenameVideoDialogProps {
 export function RenameVideoDialog({ video, isOpen, onOpenChange }: RenameVideoDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Renomear vídeo</DialogTitle>
-                    <DialogDescription>
-                        O título aparece na lista e na busca. Os títulos dos cortes não mudam.
-                    </DialogDescription>
-                </DialogHeader>
+            <DialogContent className={cn(STEP_DIALOG_CONTENT_CLASS, STEP_DIALOG_SINGLE_CLASS)}>
                 <RenameVideoForm video={video} onDone={() => onOpenChange(false)} />
             </DialogContent>
         </Dialog>

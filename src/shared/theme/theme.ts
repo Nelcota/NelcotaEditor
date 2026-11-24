@@ -5,7 +5,7 @@ declare global {
 }
 
 /** Browser bar colours for the two themes; they match --background. */
-export const THEME_BAR_COLORS = { light: "#f3f3f7", dark: "#121214" };
+export const THEME_BAR_COLORS = { light: "#ececec", dark: "#1a1a1a" };
 const THEME_CHANGE_EVENT = "nelcota-theme-change";
 
 export function syncThemeColor(): void {

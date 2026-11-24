@@ -30,7 +30,7 @@ interface ClipMarksProps {
     durationSeconds: number;
 }
 
-/** Where every clip comes from, in green on the original's progress bar; the one picked is outlined. */
+/** Where every clip comes from, in blue on the original's progress bar; the one picked is outlined. */
 export function ClipMarks({ clips, selectedClipId, durationSeconds }: ClipMarksProps): ReactNode {
     if (Number.isFinite(durationSeconds) === false || durationSeconds <= 0) {
         return null;

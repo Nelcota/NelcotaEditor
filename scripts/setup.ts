@@ -1,6 +1,6 @@
-import { execSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { execa } from "execa";
 
 const ENV_FILE = ".env";
 const ENV_EXAMPLE_FILE = ".env.example";
@@ -17,9 +17,10 @@ class SetupError extends Error {
     }
 }
 
-function runStep(description: string, command: string): void {
+/** Runs a program without a shell, so no argument is ever interpreted by one. */
+async function runStep(description: string, command: string, args: Array<string>): Promise<void> {
     console.info(`\n> ${description}`);
-    execSync(command, { stdio: "inherit" });
+    await execa(command, args, { stdio: "inherit" });
 }
 
 function createEnvFile(): void {
@@ -77,8 +78,25 @@ function printNextSteps(): void {
 
 createEnvFile();
 mkdirSync(STORAGE_DIRECTORY, { recursive: true });
-runStep("Enabling the git hooks in .githooks", "git config core.hooksPath .githooks");
-runStep("Starting PostgreSQL and Whisper", "docker compose up -d --wait postgres whisper");
-runStep("Applying database migrations", "npx drizzle-kit migrate");
-runStep("Building and starting the worker", "docker compose up -d --build worker");
+await runStep("Enabling the git hooks in .githooks", "git", [
+    "config",
+    "core.hooksPath",
+    ".githooks",
+]);
+await runStep("Starting PostgreSQL and Whisper", "docker", [
+    "compose",
+    "up",
+    "-d",
+    "--wait",
+    "postgres",
+    "whisper",
+]);
+await runStep("Applying database migrations", "npx", ["drizzle-kit", "migrate"]);
+await runStep("Building and starting the worker", "docker", [
+    "compose",
+    "up",
+    "-d",
+    "--build",
+    "worker",
+]);
 printNextSteps();

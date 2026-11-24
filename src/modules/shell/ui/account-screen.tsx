@@ -1,52 +1,39 @@
 import type { ReactNode } from "react";
-import { ProfileCard } from "#/modules/auth/ui/profile-card";
+import { DeleteAccountRow } from "#/modules/auth/ui/delete-account-row";
+import { ProfileRows } from "#/modules/auth/ui/profile-rows";
 import { useFirstName } from "#/modules/auth/ui/use-first-name";
 import { PreferencesSection } from "#/modules/preferences/ui/preferences-section";
-import { AccountSectionHeading } from "#/modules/shell/ui/account-section-heading";
-import { DeleteAccountDisclosure } from "#/modules/shell/ui/delete-account-disclosure";
 import { CREW_NAMES } from "#/modules/videos/crew-lines";
-import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
-import { CrewUsagePanel } from "#/modules/videos/ui/crew-usage-panel";
+import { UsageRows } from "#/modules/videos/ui/usage-rows";
 import { PageHeader } from "#/shared/ui/page-header";
-
-const SECTION_MASCOT_CLASS = "size-11 shrink-0";
+import { SettingsGroup } from "#/shared/ui/settings-group";
 
 /**
- * A greeting, then each section hosted by the crew member behind that part of the work, with one
- * short line beside the facts: Brilho picks the moments, Sorte reports, Guarda keeps the way out.
+ * Conta as one column of grouped rows (direction C): Perfil, Seus cortes and Uso, each name on
+ * the leading side and its control trailing, then the way out in its own red box.
  */
 export function AccountScreen(): ReactNode {
     const firstName = useFirstName();
 
     return (
-        <div className="grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-8">
+        <div className="mx-auto grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-7">
             <PageHeader
                 title="Conta"
                 description={`Oi, ${firstName}! A turma trabalha do jeito que você deixar aqui.`}
             />
-            <ProfileCard />
-            <section aria-labelledby="preferences-title" className="grid gap-3">
-                <AccountSectionHeading
-                    id="preferences-title"
-                    title="Seus cortes"
-                    description={`${CREW_NAMES.selecting} escolhe os momentos seguindo isto em cada vídeo novo.`}
-                    art={<StageCrewMascot status="selecting" className={SECTION_MASCOT_CLASS} />}
-                />
+            <SettingsGroup title="Perfil">
+                <ProfileRows />
+            </SettingsGroup>
+            <SettingsGroup
+                title="Seus cortes"
+                description={`${CREW_NAMES.selecting} segue isto em cada vídeo novo.`}
+            >
                 <PreferencesSection />
-            </section>
-            <section aria-labelledby="usage-title" className="grid gap-3">
-                <AccountSectionHeading
-                    id="usage-title"
-                    title="O que a turma já fez"
-                    description="Cada número é de quem fez aquela parte."
-                    art={<StageCrewMascot status="done" className={SECTION_MASCOT_CLASS} />}
-                />
-                <CrewUsagePanel />
-            </section>
-            <DeleteAccountDisclosure
-                summary="Excluir conta"
-                art={<StageCrewMascot status="failed" className="size-6" />}
-            />
+            </SettingsGroup>
+            <SettingsGroup title="Uso">
+                <UsageRows />
+            </SettingsGroup>
+            <DeleteAccountRow />
         </div>
     );
 }

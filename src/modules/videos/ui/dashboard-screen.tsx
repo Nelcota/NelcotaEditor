@@ -4,9 +4,8 @@ import type { DashboardSearch } from "#/modules/videos/ui/dashboard-search";
 import { NewVideoDialog } from "#/modules/videos/ui/new-video-dialog";
 import { NewVideoLink } from "#/modules/videos/ui/new-video-link";
 import { VideoList } from "#/modules/videos/ui/video-list";
-import { PageHeader } from "#/shared/ui/page-header";
 
-const dashboardRoute = getRouteApi("/_app/");
+const dashboardRoute = getRouteApi("/_app/videos/");
 
 /** A closed dialog leaves no trace in the URL; the status filter is kept either way. */
 function withNewVideo(search: DashboardSearch, isOpen: boolean): DashboardSearch {
@@ -22,18 +21,14 @@ export function DashboardScreen(): ReactNode {
     const navigate = useNavigate();
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
-            <PageHeader
-                title="Vídeos"
-                description="Seus vídeos e os cortes que saíram de cada um."
-                action={<NewVideoLink emphasis="primary" className="max-sm:w-full" />}
-            />
-            <VideoList />
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+            <h1 className="sr-only">Vídeos</h1>
+            <VideoList action={<NewVideoLink emphasis="primary" className="max-sm:w-full" />} />
             <NewVideoDialog
                 isOpen={search.newVideo === true}
                 onOpenChange={async (isOpen) => {
                     await navigate({
-                        to: "/",
+                        to: "/videos",
                         search: withNewVideo(search, isOpen),
                         replace: true,
                     });

@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { dashboardSearchSchema } from "#/modules/videos/ui/dashboard-search";
-import { DashboardScreen } from "#/modules/videos/ui/dashboard-screen";
+import { HomeScreen } from "#/modules/shell/ui/home-screen";
 
 export const Route = createFileRoute("/_app/")({
-    head: () => ({ meta: [{ title: "Vídeos · Nelcota" }] }),
-    validateSearch: dashboardSearchSchema,
-    component: DashboardScreen,
+    head: () => ({ meta: [{ title: "Início · Nelcota" }] }),
+    component: HomeScreen,
 });

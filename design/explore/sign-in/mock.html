@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Entrar · direções</title>
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@500&family=Inter:opsz,wght@14..32,400..750&display=swap"
+        />
+        <script src="icons.js"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+            }
+            body {
+                min-height: 100vh;
+                -webkit-font-smoothing: antialiased;
+            }
+            svg.i {
+                width: 18px;
+                height: 18px;
+                flex: none;
+            }
+            .field {
+                display: grid;
+                gap: 6px;
+            }
+            .field label {
+                font-weight: 500;
+                font-size: 13.5px;
+            }
+            .input {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: 44px;
+                padding: 0 14px;
+                border-radius: 12px;
+                font-size: 15px;
+            }
+            .input .end {
+                margin-left: auto;
+                display: inline-flex;
+                gap: 6px;
+                align-items: center;
+                font-size: 13.5px;
+            }
+            .btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                height: 46px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 15px;
+            }
+            .mascot {
+                display: inline-block;
+                flex: none;
+                background-repeat: no-repeat;
+                background-size: 400% 400%;
+            }
+
+            /* A: the website's own system. */
+            .a {
+                font-family: "Geist", sans-serif;
+                background: oklch(0.9653 0.0053 286.3);
+                color: oklch(0.2115 0.0117 254.088);
+            }
+            .a .frame {
+                max-width: 1152px;
+                margin: 0 auto;
+                min-height: 100vh;
+                border-inline: 1px solid rgba(0, 0, 0, 0.08);
+                background-image:
+                    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+                background-size: 68px 68px;
+                display: grid;
+                grid-template-rows: auto 1fr auto;
+            }
+            .a header {
+                display: flex;
+                align-items: center;
+                height: 78px;
+                padding: 0 48px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+                background: oklch(0.9653 0.0053 286.3);
+            }
+            .a .logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 700;
+                font-size: 23px;
+                letter-spacing: -0.01em;
+                margin-right: auto;
+            }
+            .a .ghostbtn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                height: 40px;
+                padding: 0 16px;
+                border-radius: 12px;
+                background: rgba(0, 0, 0, 0.05);
+                font-weight: 500;
+                font-size: 15px;
+            }
+            .a main {
+                display: grid;
+                place-content: center;
+                justify-items: center;
+                gap: 28px;
+                padding: 40px 16px;
+            }
+            .a .eyebrow {
+                font:
+                    500 11px "Geist Mono",
+                    monospace;
+                letter-spacing: 0.08em;
+                color: rgba(0, 0, 0, 0.6);
+            }
+            .a .eyebrow b {
+                color: oklch(0.5683 0.1821 257.313);
+                font-weight: 500;
+            }
+            .a h1 {
+                font-size: 46px;
+                font-weight: 420;
+                letter-spacing: -0.035em;
+                line-height: 1.05;
+                text-align: center;
+            }
+            .a h1 strong {
+                font-weight: 560;
+                display: block;
+            }
+            .a .lede {
+                margin-top: -12px;
+                color: rgba(0, 0, 0, 0.6);
+                font-size: 16px;
+                text-align: center;
+            }
+            .a .card {
+                width: 420px;
+                background: #fff;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                padding: 28px;
+                display: grid;
+                gap: 16px;
+            }
+            .a .input {
+                border: 1px solid rgba(0, 0, 0, 0.16);
+                background: #fff;
+                color: rgba(0, 0, 0, 0.45);
+            }
+            .a .btn {
+                background: oklch(0.48 0.1821 257.313);
+                color: #fff;
+            }
+            .a .alt {
+                text-align: center;
+                font-size: 14px;
+                color: rgba(0, 0, 0, 0.6);
+            }
+            .a .alt b,
+            .a .link {
+                color: oklch(0.52 0.1821 257.313);
+                font-weight: 500;
+            }
+            .a .crew {
+                display: flex;
+                gap: 18px;
+                align-items: center;
+                color: rgba(0, 0, 0, 0.55);
+                font-size: 13.5px;
+            }
+            .a footer {
+                height: 56px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 48px;
+                border-top: 1px solid rgba(0, 0, 0, 0.08);
+                font-size: 13px;
+                color: rgba(0, 0, 0, 0.55);
+                background: oklch(0.9653 0.0053 286.3);
+            }
+
+            /* B: the website's light form beside the app's dark product. */
+            .b {
+                font-family: "Geist", sans-serif;
+                background: oklch(0.9653 0.0053 286.3);
+                color: oklch(0.2115 0.0117 254.088);
+                display: grid;
+                grid-template-columns: minmax(420px, 1fr) 1.15fr;
+                gap: 8px;
+                padding: 8px;
+            }
+            .b .left {
+                display: grid;
+                grid-template-rows: auto 1fr auto;
+                padding: 28px 40px;
+            }
+            .b .logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 700;
+                font-size: 21px;
+            }
+            .b form {
+                align-self: center;
+                justify-self: center;
+                width: 380px;
+                display: grid;
+                gap: 16px;
+            }
+            .b .eyebrow {
+                font:
+                    500 11px "Geist Mono",
+                    monospace;
+                letter-spacing: 0.08em;
+                color: rgba(0, 0, 0, 0.6);
+            }
+            .b .eyebrow b {
+                color: #1f9d55;
+                font-weight: 500;
+            }
+            .b h1 {
+                font-size: 38px;
+                font-weight: 420;
+                letter-spacing: -0.035em;
+                line-height: 1.08;
+            }
+            .b h1 strong {
+                font-weight: 560;
+            }
+            .b .lede {
+                color: rgba(0, 0, 0, 0.6);
+                margin-top: -6px;
+            }
+            .b .input {
+                border: 1px solid rgba(0, 0, 0, 0.16);
+                background: #fff;
+                color: rgba(0, 0, 0, 0.45);
+            }
+            .b .btn {
+                background: #1f9d55;
+                color: #fff;
+            }
+            .b .alt {
+                text-align: center;
+                font-size: 14px;
+                color: rgba(0, 0, 0, 0.6);
+            }
+            .b .alt b {
+                color: #15803d;
+                font-weight: 600;
+            }
+            .b .foot {
+                font-size: 13px;
+                color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: space-between;
+            }
+            .b .right {
+                border-radius: 18px;
+                background: #1b1b1d;
+                color: #f2f2f3;
+                padding: 48px;
+                display: grid;
+                align-content: center;
+                gap: 28px;
+                overflow: hidden;
+                font-family: "Inter", sans-serif;
+            }
+            .b .say {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 28px;
+                font-weight: 650;
+                letter-spacing: -0.035em;
+            }
+            .b .compose {
+                border-radius: 16px;
+                background: #222225;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                padding: 16px;
+                display: grid;
+                gap: 18px;
+                color: #9a9aa1;
+            }
+            .b .row {
+                display: flex;
+                gap: 6px;
+                align-items: center;
+            }
+            .b .pill {
+                height: 28px;
+                padding: 0 10px;
+                border-radius: 99px;
+                background: #2a2a2e;
+                display: inline-flex;
+                align-items: center;
+                font-size: 12.5px;
+                font-weight: 600;
+            }
+            .b .send {
+                margin-left: auto;
+                width: 32px;
+                height: 32px;
+                border-radius: 99px;
+                background: #3ecf72;
+                color: #0d1f13;
+                display: grid;
+                place-items: center;
+            }
+            .b .cards {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+            .b .cc {
+                border-radius: 12px;
+                background: #222225;
+                border: 1px solid rgba(255, 255, 255, 0.07);
+                overflow: hidden;
+            }
+            .b .cc img {
+                width: 100%;
+                height: 170px;
+                object-fit: cover;
+                display: block;
+            }
+            .b .cc div {
+                padding: 8px 10px 10px;
+                font-size: 12.5px;
+                font-weight: 600;
+            }
+            .b .cc small {
+                display: block;
+                color: #9a9aa1;
+                font-weight: 500;
+            }
+            .b .cc span {
+                margin-top: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 28px;
+                border-radius: 8px;
+                background: #3ecf72;
+                color: #0d1f13;
+                font-weight: 600;
+            }
+
+            /* C: the app's own window, centred like Início. */
+            .c {
+                font-family: "Inter", sans-serif;
+                background: #141415;
+                color: #f2f2f3;
+                padding: 8px;
+            }
+            .c .panel {
+                min-height: calc(100vh - 16px);
+                border-radius: 18px;
+                background: #1b1b1d;
+                border: 1px solid rgba(255, 255, 255, 0.07);
+                display: grid;
+                grid-template-rows: auto 1fr auto;
+            }
+            .c .top {
+                height: 56px;
+                display: flex;
+                align-items: center;
+                padding: 0 24px;
+                gap: 8px;
+                color: #9a9aa1;
+                font-size: 14px;
+            }
+            .c .top .logo {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                color: #f2f2f3;
+                font-weight: 700;
+                font-size: 19px;
+                letter-spacing: -0.04em;
+                margin-right: auto;
+            }
+            .c main {
+                display: grid;
+                place-content: center;
+                justify-items: center;
+                gap: 22px;
+                padding-bottom: 40px;
+            }
+            .c h1 {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 30px;
+                font-weight: 650;
+                letter-spacing: -0.035em;
+            }
+            .c .lede {
+                color: #9a9aa1;
+                margin-top: -12px;
+                text-align: center;
+            }
+            .c .box {
+                width: 440px;
+                border-radius: 16px;
+                background: #222225;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                padding: 20px;
+                display: grid;
+                gap: 14px;
+            }
+            .c .field label {
+                color: #c9c9ce;
+            }
+            .c .input {
+                background: #1b1b1d;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                color: #6d6d74;
+            }
+            .c .input .end {
+                color: #9a9aa1;
+            }
+            .c .btn {
+                background: #3ecf72;
+                color: #0d1f13;
+            }
+            .c .chips {
+                display: flex;
+                gap: 8px;
+            }
+            .c .chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                height: 36px;
+                padding: 0 13px;
+                border-radius: 10px;
+                background: #222225;
+                border: 1px solid rgba(255, 255, 255, 0.07);
+                font-weight: 500;
+                font-size: 13.5px;
+            }
+            .c .chip svg {
+                color: #57d98a;
+                width: 16px;
+                height: 16px;
+            }
+            .c .foot {
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                color: #6d6d74;
+                font-size: 12.5px;
+            }
+
+            /* Phones */
+            .phone.a header,
+            .phone.a footer {
+                padding: 0 20px;
+            }
+            .phone.a h1 {
+                font-size: 34px;
+            }
+            .phone .card,
+            .phone .box,
+            .phone.b form {
+                width: 100%;
+            }
+            .phone.a main,
+            .phone.c main {
+                place-content: start stretch;
+                padding: 36px 20px;
+            }
+            .phone.b {
+                grid-template-columns: 1fr;
+                padding: 0;
+            }
+            .phone.b .left {
+                padding: 24px 20px;
+                min-height: 100vh;
+            }
+            .phone.b .right {
+                display: none;
+            }
+            .phone.c {
+                padding: 0;
+            }
+            .phone.c .panel {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            .phone.c .chips {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .phone.c h1 {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            const q = new URLSearchParams(location.search);
+            const D = q.get("d") || "a";
+            document.body.className = D + (q.get("p") === "1" ? " phone" : "");
+            const ic = (k, s = 18) =>
+                `<svg class="i" style="width:${s}px;height:${s}px" viewBox="0 0 24 24" aria-hidden="true">${ICONS[k]}</svg>`;
+            const m = (n, s) => {
+                const sheet = n < 16 ? "shapes" : "objects";
+                const t = n % 16;
+                return `<span class="mascot" style="width:${s}px;height:${s}px;background-image:url(img/${sheet}.webp);background-position:${(t % 4) * 33.333}% ${Math.floor(t / 4) * 33.333}%"></span>`;
+            };
+            const fields = (cls = "") => `
+                <div class="field"><label>Email</label><div class="input">voce@email.com</div></div>
+                <div class="field"><label>Senha</label><div class="input">••••••••<span class="end">${ic("eye", 16)}Mostrar</span></div></div>`;
+
+            const A = () => `<div class="frame">
+                <header><span class="logo">${m(15, 30)}NELCOTA</span><span class="ghostbtn">${ic("back", 16)}Voltar para o site</span></header>
+                <main>
+                    <span class="eyebrow"><b>[</b> ENTRAR <b>]</b></span>
+                    <h1>Bem-vindo<strong>de volta</strong></h1>
+                    <p class="lede">Entre para ver seus vídeos e cortes.</p>
+                    <div class="card">${fields()}<span class="btn">Entrar ${ic("arrow", 18)}</span>
+                        <p class="alt">Ainda não tem conta? <b>Começar grátis</b></p></div>
+                    <div class="crew">${m(16, 26)}${m(18, 26)}${m(19, 26)}${m(20, 26)}<span>A equipe já está esperando o próximo vídeo.</span></div>
+                </main>
+                <footer><span>© 2026 Nelcota</span><span>Termos · Privacidade</span></footer>
+            </div>`;
+
+            const B = () => {
+                const cards = [
+                    ["v1", "A largada que ninguém esperava", 94],
+                    ["v2", "O ronco do motor no túnel", 91],
+                    ["v3", "Reação no primeiro 0 a 100", 88],
+                    ["v7", "O preço de tudo isso", 85],
+                ]
+                    .map(
+                        ([i, t, s]) =>
+                            `<div class="cc"><img src="img/${i}.jpg" alt="" /><div>${t}<small>Nota ${s}</small><span>Baixar</span></div></div>`,
+                    )
+                    .join("");
+                return `<div class="left">
+                    <span class="logo">${m(15, 28)}NELCOTA</span>
+                    <form>
+                        <span class="eyebrow"><b>[</b> ENTRAR <b>]</b></span>
+                        <h1>Bem-vindo <strong>de volta</strong></h1>
+                        <p class="lede">Seus vídeos e cortes estão te esperando.</p>
+                        ${fields()}
+                        <span class="btn">Entrar ${ic("arrow", 18)}</span>
+                        <p class="alt">Ainda não tem conta? <b>Começar grátis</b></p>
+                    </form>
+                    <div class="foot"><span>${ic("back", 14)} Voltar para o site</span><span>Termos · Privacidade</span></div>
+                </div>
+                <div class="right">
+                    <div class="say">${m(15, 34)}Cole um link. O Nel corta.</div>
+                    <div class="compose">Cole um link do YouTube para cortar...<div class="row"><span class="pill">5 cortes</span><span class="pill">30 a 60 s</span><span class="send">${ic("up", 16)}</span></div></div>
+                    <div class="cards">${cards}</div>
+                </div>`;
+            };
+
+            const C = () => `<div class="panel">
+                <div class="top"><span class="logo">${m(15, 24)}nelcota</span>Ainda não tem conta? <span style="color:#57d98a;font-weight:600">Criar conta</span></div>
+                <main>
+                    <h1>${m(15, 34)}Boa noite.</h1>
+                    <p class="lede">Entre para continuar cortando seus vídeos.</p>
+                    <div class="box">${fields()}<span class="btn">Entrar</span></div>
+                    <div class="chips"><span class="chip">${ic("magic")}Cortes com nota de 1 a 100</span><span class="chip">${ic("text")}Legenda palavra por palavra</span></div>
+                </main>
+                <div class="foot">Voltar para o site · Termos · Privacidade</div>
+            </div>`;
+
+            document.body.innerHTML = { a: A, b: B, c: C }[D]();
+        </script>
+    </body>
+</html>

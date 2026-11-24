@@ -6,12 +6,14 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
 } from "#/shared/ui/alert-dialog";
+import { cn } from "#/shared/ui/cn";
 import { FormAlert } from "#/shared/ui/form-alert";
+import {
+    STEP_DIALOG_CONTENT_CLASS,
+    STEP_DIALOG_SINGLE_CLASS,
+    StepDialogFrame,
+} from "#/shared/ui/step-dialog-frame";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 
 const FALLBACK_ERROR_MESSAGE = "Não foi possível concluir. Confira sua conexão e tente de novo.";
@@ -66,34 +68,44 @@ export function AdminConfirmDialog({
                 }
             }}
         >
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>{confirmation?.title}</AlertDialogTitle>
-                    <AlertDialogDescription>{confirmation?.description}</AlertDialogDescription>
-                </AlertDialogHeader>
-                {children}
-                {action.isError === true && (
-                    <FormAlert message={toErrorMessage(action.error, FALLBACK_ERROR_MESSAGE)} />
-                )}
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                        variant={variant}
-                        disabled={action.isPending}
-                        aria-busy={action.isPending}
-                        onClick={(event) => {
-                            event.preventDefault();
+            <AlertDialogContent className={cn(STEP_DIALOG_CONTENT_CLASS, STEP_DIALOG_SINGLE_CLASS)}>
+                <StepDialogFrame
+                    kind="alert"
+                    rail={null}
+                    progress={null}
+                    title={confirmation?.title}
+                    description={confirmation?.description}
+                    footer={
+                        <>
+                            <AlertDialogCancel variant="ghost" className="text-muted-foreground">
+                                Cancelar
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                variant={variant}
+                                size="lg"
+                                className="ms-auto font-medium max-sm:flex-1"
+                                disabled={action.isPending}
+                                aria-busy={action.isPending}
+                                onClick={(event) => {
+                                    event.preventDefault();
 
-                            if (confirmation === null) {
-                                return;
-                            }
+                                    if (confirmation === null) {
+                                        return;
+                                    }
 
-                            action.mutate(confirmation);
-                        }}
-                    >
-                        {confirmation?.confirmLabel}
-                    </AlertDialogAction>
-                </AlertDialogFooter>
+                                    action.mutate(confirmation);
+                                }}
+                            >
+                                {confirmation?.confirmLabel}
+                            </AlertDialogAction>
+                        </>
+                    }
+                >
+                    {children}
+                    {action.isError === true && (
+                        <FormAlert message={toErrorMessage(action.error, FALLBACK_ERROR_MESSAGE)} />
+                    )}
+                </StepDialogFrame>
             </AlertDialogContent>
         </AlertDialog>
     );

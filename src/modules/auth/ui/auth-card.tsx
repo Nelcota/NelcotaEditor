@@ -1,69 +1,72 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { BrandLogo } from "#/shared/ui/brand-logo";
-import { MASCOT_COUNT, Mascot } from "#/shared/ui/mascot";
+import { AuthShowcase } from "#/modules/auth/ui/auth-showcase";
+import { BrandMark } from "#/shared/ui/brand-logo";
 
-const ALL_MASCOT_INDEXES = Array.from({ length: MASCOT_COUNT }, (_, index) => index);
+export interface AuthTitle {
+    lead: string;
+    /** The heavier half, as on the public site's hero ("Bem-vindo **de volta**"). */
+    emphasis: string;
+}
 
 interface AuthCardProps {
-    title: string;
+    /** The bracketed tag over the title, as on the site's sections. */
+    eyebrow: string;
+    title: AuthTitle;
     description: string;
     footer: { text: string; linkLabel: string; linkTo: "/sign-in" | "/sign-up" };
     children: ReactNode;
 }
 
-/** Decorative: every mascot a video can get. Phones skip it so the form is the first thing seen. */
-function MascotShowcase(): ReactNode {
+/** The site's logo: the ghost and the uppercase wordmark. */
+function SiteLogo(): ReactNode {
     return (
-        <div
-            aria-hidden="true"
-            className="hidden content-center gap-10 rounded-2xl bg-secondary p-12 lg:grid"
-        >
-            <div className="mx-auto grid w-full max-w-xl grid-cols-8 gap-3.5">
-                {ALL_MASCOT_INDEXES.map((index) => (
-                    <Mascot
-                        key={index}
-                        index={index}
-                        className="aspect-square size-auto w-full odd:translate-y-2"
-                    />
-                ))}
-            </div>
-            <div className="mx-auto max-w-md text-center">
-                <p className="text-heading font-semibold tracking-[-0.02em]">
-                    Vídeos longos viram cortes verticais
-                </p>
-                <p className="mt-3 text-muted-foreground">
-                    Cada vídeo ganha um mascote, e uma equipe cuida de cada etapa: um baixa, outro
-                    transcreve, outro escolhe os melhores momentos e o último faz os cortes.
-                </p>
-            </div>
-        </div>
+        <span className="flex items-center gap-2.5 text-[1.3125rem] leading-none font-bold tracking-[-0.01em]">
+            <BrandMark className="size-7" />
+            NELCOTA
+        </span>
     );
 }
 
-export function AuthCard({ title, description, footer, children }: AuthCardProps): ReactNode {
+/**
+ * Sign-in and sign-up (direction B): the form on the public site's page, so the step from the
+ * site's "Entrar" keeps its look, and the dark app beside it from lg. Phones keep the form only.
+ */
+export function AuthCard({
+    eyebrow,
+    title,
+    description,
+    footer,
+    children,
+}: AuthCardProps): ReactNode {
     return (
-        <main className="grid min-h-dvh lg:grid-cols-[minmax(380px,1fr)_1.1fr] lg:gap-2 lg:p-2">
-            <div className="flex justify-center px-4 py-8 lg:items-center">
-                <div className="grid w-full max-w-sm gap-6">
-                    <BrandLogo />
-                    <div>
-                        <h1 className="text-title font-semibold tracking-[-0.02em]">{title}</h1>
-                        <p className="mt-2 text-muted-foreground">{description}</p>
+        <main className="theme-site grid min-h-dvh bg-background text-foreground lg:grid-cols-[minmax(26rem,1fr)_1.15fr] lg:gap-2 lg:p-2">
+            <div className="grid grid-rows-[auto_1fr] gap-8 px-5 py-6 sm:px-10 lg:py-5">
+                <SiteLogo />
+                <div className="grid w-full max-w-sm content-center gap-6 justify-self-center">
+                    <div className="grid gap-3">
+                        <p className="font-mono text-[0.6875rem] font-medium tracking-[0.08em] text-foreground/65 uppercase">
+                            <span className="text-primary-ink">[</span> {eyebrow}{" "}
+                            <span className="text-primary-ink">]</span>
+                        </p>
+                        <h1 className="text-[2.375rem] leading-[1.08] font-[420] tracking-[-0.035em] text-balance">
+                            {title.lead} <strong className="font-[560]">{title.emphasis}</strong>
+                        </h1>
+                        <p className="text-foreground/65">{description}</p>
                     </div>
                     {children}
-                    <p className="text-center text-sm text-muted-foreground">
+                    <p className="text-center text-sm text-foreground/65">
                         {footer.text}{" "}
                         <Link
                             to={footer.linkTo}
-                            className="inline-block rounded font-medium text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
+                            className="inline-block rounded font-semibold text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                         >
                             {footer.linkLabel}
                         </Link>
                     </p>
                 </div>
             </div>
-            <MascotShowcase />
+            <AuthShowcase />
         </main>
     );
 }

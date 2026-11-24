@@ -2,12 +2,8 @@ import FilmIcon from "~icons/lucide/film";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
-import { cn } from "#/shared/ui/cn";
 import { toYoutubeThumbnailUrl } from "#/modules/videos/youtube-preview";
-import {
-    describeClipCount,
-    describeNewVideoSource,
-} from "#/modules/videos/ui/describe-new-video-source";
+import { describeNewVideoSource } from "#/modules/videos/ui/describe-new-video-source";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { toLinkVideoId } from "#/modules/videos/ui/video-source";
 import type { VideoSource } from "#/modules/videos/ui/video-source";
@@ -19,9 +15,6 @@ const FRAME_CLASS =
 interface NewVideoPreviewProps {
     source: VideoSource;
     title: string;
-    clipCount: number;
-    clipLengthLabel: string;
-    languageLabel: string;
 }
 
 /** A frame from the chosen file, read straight from the computer; nothing is uploaded for it. */
@@ -73,30 +66,8 @@ function PreviewFrame({ source }: { source: VideoSource }): ReactNode {
     );
 }
 
-interface FactProps {
-    label: string;
-    value: string;
-    /** Takes the whole row: a long value such as "Detectar automaticamente" wraps in half. */
-    isWide?: boolean;
-}
-
-function Fact({ label, value, isWide = false }: FactProps): ReactNode {
-    return (
-        <div className={cn("grid gap-0.5", isWide === true && "col-span-2")}>
-            <dt className="text-meta text-muted-foreground">{label}</dt>
-            <dd className="text-sm font-semibold">{value}</dd>
-        </div>
-    );
-}
-
-/** How the video will show up in the list, filled in as the person fills the form. */
-export function NewVideoPreview({
-    source,
-    title,
-    clipCount,
-    clipLengthLabel,
-    languageLabel,
-}: NewVideoPreviewProps): ReactNode {
+/** How the video will show up in the list: its frame, title and where it comes from. */
+export function NewVideoPreview({ source, title }: NewVideoPreviewProps): ReactNode {
     const videoId = toLinkVideoId(source);
     const previewQuery = useQuery({
         ...youtubePreviewQueryOptions(videoId ?? ""),
@@ -105,14 +76,7 @@ export function NewVideoPreview({
     const text = describeNewVideoSource(source, title, previewQuery.data);
 
     return (
-        <aside
-            aria-label="Prévia"
-            className="hidden min-h-0 content-start gap-4 overflow-y-auto border-l p-5 lg:grid"
-        >
-            <div className="grid gap-1">
-                <h3 className="font-semibold">Prévia</h3>
-                <p className="text-meta text-muted-foreground">Como o vídeo entra na sua lista.</p>
-            </div>
+        <figure aria-label="Prévia" className="m-0 grid content-start">
             <div className="grid gap-3 rounded-3xl border bg-background/40 p-3">
                 <div className="relative">
                     <PreviewFrame source={source} />
@@ -129,13 +93,7 @@ export function NewVideoPreview({
                         {text.detail}
                     </p>
                 </div>
-                <dl className="mx-1 grid grid-cols-2 gap-x-4 gap-y-3 border-t pt-3 pb-1">
-                    <Fact label="Cortes" value={describeClipCount(clipCount)} />
-                    <Fact label="Duração" value={clipLengthLabel} />
-                    <Fact label="Formato" value="9:16 · legenda" />
-                    <Fact label="Idioma da fala" value={languageLabel} isWide />
-                </dl>
             </div>
-        </aside>
+        </figure>
     );
 }

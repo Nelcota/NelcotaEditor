@@ -1,0 +1,762 @@
+:root {
+    --bg: oklch(0.185 0 0);
+    --panel: oklch(0.215 0 0);
+    --popover: oklch(0.255 0 0);
+    --side: oklch(0.225 0 0);
+    --card: oklch(0.29 0 0);
+    --fg: oklch(0.96 0 0);
+    --muted: oklch(0.7 0 0);
+    --faint: oklch(0.55 0 0);
+    --border: color-mix(in oklab, var(--fg) 9%, transparent);
+    --primary: oklch(0.6 0.2 258);
+    --ink: oklch(0.74 0.14 255);
+    --tint: color-mix(in oklab, var(--primary) 16%, transparent);
+    --success: oklch(0.76 0.15 152);
+    --danger: oklch(0.7 0.18 25);
+    --danger-solid: oklch(0.58 0.2 25);
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--fg);
+    font:
+        14px/1.45 "Inter",
+        "Segoe UI",
+        system-ui,
+        sans-serif;
+    padding: 40px 32px 80px;
+}
+
+.board {
+    max-width: 1500px;
+    margin: 0 auto;
+    display: grid;
+    gap: 44px;
+}
+
+.board-head h1 {
+    font-size: 28px;
+    letter-spacing: -0.02em;
+}
+
+.board-head p {
+    color: var(--muted);
+    max-width: 760px;
+    margin-top: 6px;
+}
+
+.legend {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.legend article {
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--panel);
+    display: grid;
+    gap: 8px;
+    align-content: start;
+}
+
+.legend p {
+    color: var(--muted);
+}
+
+.tag {
+    display: inline-grid;
+    place-items: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    justify-self: start;
+}
+
+.tag-muted {
+    background: var(--card);
+    color: var(--fg);
+}
+
+.direction {
+    display: grid;
+    gap: 16px;
+}
+
+.direction-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 900px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.stack {
+    display: grid;
+    gap: 24px;
+}
+
+.minor {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+}
+
+.caption {
+    font-size: 12px;
+    color: var(--faint);
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* The backdrop the modal sits on, so the frame reads as an overlay. */
+.scrim {
+    background: oklch(0.12 0 0);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    display: grid;
+    place-items: center;
+}
+
+.modal {
+    width: 100%;
+    background: var(--popover);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.6);
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr);
+    min-height: 540px;
+}
+
+.modal.is-short {
+    min-height: 0;
+}
+
+.modal.no-side {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.side {
+    background: var(--side);
+    border-right: 1px solid var(--border);
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.side-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.side-title .glyph {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    color: white;
+}
+
+.side-title.is-danger .glyph {
+    background: var(--danger-solid);
+}
+
+.steps {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 12px;
+    align-items: start;
+    position: relative;
+}
+
+.step .num {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 1.5px solid color-mix(in oklab, var(--fg) 22%, transparent);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--side);
+    position: relative;
+    z-index: 1;
+}
+
+.step b {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 28px;
+}
+
+.step small {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: -3px;
+}
+
+.step.is-done .num {
+    background: var(--success);
+    border-color: var(--success);
+    color: oklch(0.2 0.04 152);
+}
+
+.step.is-now {
+    background: var(--tint);
+}
+
+.step.is-now .num {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.step.is-now b {
+    color: var(--ink);
+}
+
+.step.is-later b {
+    color: var(--muted);
+}
+
+/* Direction A: a line joins the numbers. */
+.trail .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 21px;
+    top: 37px;
+    bottom: -11px;
+    width: 1.5px;
+    background: color-mix(in oklab, var(--fg) 14%, transparent);
+}
+
+.trail .step.is-done:not(:last-child)::after {
+    background: var(--success);
+}
+
+/* Direction B: the chosen value is the second line. */
+.summary .step small.value {
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.summary .step .edit {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.side-foot {
+    margin-top: auto;
+    display: grid;
+    gap: 10px;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 0 8px;
+}
+
+.bar {
+    height: 4px;
+    background: color-mix(in oklab, var(--fg) 10%, transparent);
+    border-radius: 99px;
+    margin: 0 8px;
+    overflow: hidden;
+}
+
+.bar i {
+    display: block;
+    height: 100%;
+    background: var(--primary);
+    border-radius: 99px;
+}
+
+.thumb {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+}
+
+.thumb .img {
+    aspect-ratio: 16 / 9;
+    border-radius: 7px;
+    background: oklch(0.42 0.06 250);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 11px;
+}
+
+.thumb b {
+    display: block;
+    font-size: 12px;
+}
+
+.thumb span {
+    color: var(--muted);
+}
+
+/* Direction C: the guide's speech bubble. */
+.nel {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 8px;
+    align-items: start;
+    padding: 0 4px;
+}
+
+.nel .ghost {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background: var(--card);
+    display: grid;
+    place-items: center;
+    font-size: 19px;
+}
+
+.nel p {
+    background: var(--card);
+    border-radius: 4px 14px 14px 14px;
+    padding: 9px 11px;
+    font-size: 12.5px;
+    color: var(--fg);
+}
+
+.body {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-width: 0;
+}
+
+.body-head {
+    padding: 22px 26px 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.kicker {
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.body-head h3 {
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    margin-top: 2px;
+}
+
+.body-head p {
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.close {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    font-size: 18px;
+}
+
+.content {
+    padding: 22px 26px;
+    display: grid;
+    gap: 20px;
+    align-content: start;
+}
+
+.field-label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.field-label span {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12.5px;
+}
+
+.choices {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.choices.three {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.choice {
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    border-radius: 14px;
+    padding: 12px;
+    display: grid;
+    gap: 2px;
+}
+
+.choice b {
+    font-size: 18px;
+}
+
+.choice span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.choice.is-on {
+    border-color: var(--primary);
+    background: var(--tint);
+}
+
+.choice.is-on b {
+    color: var(--ink);
+}
+
+.choice .rec {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+.chip.is-on {
+    border-color: var(--primary);
+    background: var(--tint);
+    color: var(--ink);
+}
+
+.select {
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in oklab, var(--fg) 30%, transparent);
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+}
+
+.hint {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+.note {
+    border-radius: 12px;
+    background: var(--card);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+}
+
+.foot {
+    border-top: 1px solid var(--border);
+    padding: 14px 26px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.foot .grow {
+    flex: 1;
+    color: var(--muted);
+    font-size: 12.5px;
+}
+
+.btn {
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    border: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--card);
+}
+
+.btn.primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn.danger {
+    background: var(--danger-solid);
+    color: white;
+}
+
+.btn.ghost {
+    background: transparent;
+    color: var(--muted);
+}
+
+.loss {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.loss li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--card);
+}
+
+.loss li span {
+    color: var(--muted);
+}
+
+/* The current screen, for comparison. */
+.old {
+    grid-template-columns: minmax(0, 1fr) 260px;
+}
+
+.old .old-form {
+    padding: 22px 26px;
+    display: grid;
+    gap: 18px;
+    align-content: start;
+}
+
+.old .old-preview {
+    border-left: 1px solid var(--border);
+    background: var(--side);
+    padding: 22px 18px;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.old .field {
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in oklab, var(--fg) 30%, transparent);
+    background: var(--panel);
+}
+
+.old .grid4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.old .grid4 div {
+    height: 40px;
+    border-radius: 10px;
+    background: var(--card);
+}
+
+.critique {
+    display: grid;
+    gap: 10px;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+}
+
+.critique li {
+    color: var(--muted);
+    margin-left: 18px;
+}
+
+/* Phone frame. */
+.phone {
+    width: 340px;
+    height: 780px;
+    border-radius: 34px;
+    border: 1px solid var(--border);
+    background: oklch(0.12 0 0);
+    padding: 10px;
+    display: grid;
+}
+
+.sheet {
+    margin-top: 40px;
+    border-radius: 24px 24px 22px 22px;
+    background: var(--popover);
+    border: 1px solid var(--border);
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    overflow: hidden;
+}
+
+.sheet .grab {
+    width: 40px;
+    height: 4px;
+    border-radius: 99px;
+    background: color-mix(in oklab, var(--fg) 25%, transparent);
+    margin: 8px auto 0;
+}
+
+.sheet .top {
+    padding: 12px 18px 0;
+    display: grid;
+    gap: 10px;
+}
+
+.sheet .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.sheet .top-row b {
+    color: var(--fg);
+}
+
+.segments {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.segments i {
+    height: 4px;
+    border-radius: 99px;
+    background: color-mix(in oklab, var(--fg) 12%, transparent);
+}
+
+.segments i.on {
+    background: var(--primary);
+}
+
+.segments i.done {
+    background: var(--success);
+}
+
+.sheet .content {
+    padding: 16px 18px;
+}
+
+.sheet .choices {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.sheet .foot {
+    padding: 12px 18px 16px;
+}
+
+.sheet .foot .btn {
+    flex: 1;
+    justify-content: center;
+    height: 46px;
+}
+
+.sheet .foot .btn.ghost {
+    flex: 0 0 auto;
+}
+
+.map table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+.map th,
+.map td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.map th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+}

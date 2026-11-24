@@ -151,6 +151,7 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
                     </Button>
                     {props.hasAvatar === true && (
                         <Button
+                            type="button"
                             variant="destructive"
                             className="w-full"
                             disabled={props.isBusy}

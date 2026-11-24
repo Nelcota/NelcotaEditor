@@ -1,12 +1,25 @@
 # Nelcota — design brief
 
-Nelcota turns long videos into vertical short clips with captions. Since 2026-11-21 the app follows the
-owner's reference design: a desktop-style window. A light grey frame holds the top bar (brand, sidebar
-toggle, the open videos as tabs, theme, inspector toggle) and the sidebar (search, sections with counts,
-the videos at work and the rest, the person at the foot). One white rounded panel holds the page; on a
-video it splits into the page and a soft grey inspector of white grouped cards. Ink-black primary
-buttons; blue kept for focus and progress. Light by default; dark only when the person picks it with the
-toggle in the top bar (saved in `localStorage`, applied before the first paint).
+Nelcota turns long videos into vertical short clips with captions. Since 2026-11-23 the app follows the
+owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
+(the owner asked for nothing bluish) and the brand green as the one action colour. The frame holds the
+sidebar: the lowercase logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
+the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
+(used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
+rounded panel holds the breadcrumb bar (theme toggle trailing) and the page; page titles live in the
+breadcrumb and stay for screen readers only. Light stays available through the toggle.
+
+- **Início** is the reference's Copilot: a greeting from Nel, a box to paste a YouTube link (it starts
+  the video with the saved preferences, shown as pills; the plus opens the full form), and shortcuts.
+- **Vídeos** is a table (status pill, source, clips, progress with the stage, date), columns by a
+  container query so a narrow panel falls back to compact rows.
+- **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
+- **Cortes** are cards with the green download button; a finished video's page opens with the summary
+  bubble and its settings as tags.
+- **Entrar / Criar conta** (direction B, 2026-11-23): the form wears the public site (`.theme-site`:
+  lavender page, white fields, Geist, the bracketed eyebrow and the light/heavy title), so the step
+  from the site keeps its look; from lg the dark app sits beside it (`.theme-app`): the link box and
+  four finished clips, using the site's Pexels frames in `public/auth/`. Phones show the form only.
 
 ## Principles
 
@@ -18,22 +31,20 @@ toggle in the top bar (saved in `localStorage`, applied before the first paint).
 
 ## Tokens (`src/styles.css`)
 
-| Token                                   | Use                                                      |
-| --------------------------------------- | -------------------------------------------------------- |
-| `background` (white, dark: near-black)  | The rounded panel and the inspector's cards              |
-| `frame` (light grey)                    | Window frame: top bar and sidebar                        |
-| `inspector` (between frame and panel)   | The video inspector behind its white cards               |
-| `card` (white, dark: raised grey)       | Panels, `card-border` = ink at 10%                       |
-| `secondary` / `muted` (light grey)      | Sunken tracks: segmented controls, filters, placeholders |
-| `primary` (blue, oklch 0.58 0.21 263)   | Focus ring, progress, activity dots                      |
-| `primary-solid` (ink, dark: near-white) | The one primary button and the open clip's number        |
-| `primary-ink`                           | Blue text and links                                      |
-| `muted-foreground`                      | Secondary text                                           |
-| `success` (teal)                        | Finished videos and clip scores                          |
-| `destructive` (red)                     | Failures and delete                                      |
+| Token                                 | Use                                                    |
+| ------------------------------------- | ------------------------------------------------------ |
+| `frame` (dark: near-black)            | Window frame behind the sidebar                        |
+| `background` (dark: charcoal)         | The rounded panel                                      |
+| `card` (a step above the panel)       | Filled boxes: search, table head, cards, sidebar cards |
+| `secondary` / `muted` / `accent`      | Pills, tracks, hover fills                             |
+| `primary` / `primary-solid` (green)   | Primary buttons, current section, progress, focus      |
+| `primary-ink`                         | Green text, links and the sidebar icons                |
+| `muted-foreground`                    | Secondary text                                         |
+| `success` (green) / `warning` (amber) | Finished videos, storage bars / warnings               |
+| `destructive` (red)                   | Failures and delete                                    |
 
-- Font: Geist (400 to 600). Page titles 28px semibold, tracking -0.02em, one muted line under them.
-  No eyebrows, no grid backdrop, no gradients.
+- Font: Inter (400 to 700). Big numbers and the greeting bold with tight tracking. No gradients
+  (flat fills and the dot texture only).
 - Radius: controls 10px (`rounded-xl`), panels and covers 12px (`rounded-md`, `rounded-2xl`), small
   chips 8px (`rounded-lg`). Buttons are never pills; round is kept for avatars, dots and the big play button.
 - Scrollbar: a 4px strip.
@@ -128,7 +139,7 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Page rhythm:** sections of a page are 32px apart (`gap-8`); a section's title and its content 16px
   (`gap-4`); items in a list or grid 12–20px; parts of one card 8–12px. Card padding 16px on phones, 20–24px
   from `sm` up.
-- **Shell:** top bar 56px; sidebar 280px on the frame; the panel fills the rest with 8px of frame on
+- **Shell:** top bar 56px; sidebar 288px on the frame; the panel fills the rest with 8px of frame on
   its trailing and bottom sides, 14px corners. Plain pages pad 32px inside the panel (16px on phones);
   the video page pads its column 32px and its inspector 24px.
 - **Reading width:** paragraphs (page descriptions, clip reasons, empty states) stop at about 65
@@ -140,21 +151,31 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Same piece, same size:** the search field is 288px wide from `sm` up and full width on phones.
 - **Phones:** nothing sits alone on a row that it does not need; actions go full width under the
   content they act on.
-- **Edge lines** (gridline pass, 2026-11-21, set by Claude at the person's request): measured on
-  ink, not boxes, within 1px.
-    - Top bar: every item centres on y = 28. The brand's ghost centres on the sidebar's icon column
-      (34) and its name starts on the label line (56). The inspector toggle centres on the inspector
-      cards' trailing line.
-    - Sidebar: boxes 12px in (search, rows, account), icon column centred at 34, labels at 56,
-      trailing 12px in. Section titles start on the icon column's leading edge (24). The search field
-      pads 11px to take back its 1px border. The photo's ring starts on the box line and the name on 56.
-      The current row gets a 4px bar on the window's edge.
+- **Edge lines** (gridline pass, 2026-11-21, redrawn 2026-11-23 after the creators redesign; set by
+  Claude at the person's request): measured on ink, not boxes, within 1px.
+    - Sidebar (288px, enlarged 2026-11-23 at the owner's request): 44px rows with 15px labels and
+      22px icons. Boxes 10px in (new video card, rows, storage card, account), icon column centred
+      at 33, labels at 56, trailing line 22px in (counts, the upload glyph, the account menu glyph,
+      the storage card's numbers). The two cards pad 11px to take back their 1px border, so their
+      content starts on the icons' leading edge (22). The brand's 26px ghost centres on the icon
+      column and its name starts on the label line; the 30px photo centres on the icon column too.
+    - Panel: the breadcrumb and every plain page's content share one text line, 32px in (16px on
+      phones). The page bar's trailing icon buttons sit 24px in, so their glyph ends on the page's
+      trailing line. The page bar and the sidebar's first row share one centre line.
     - Inspector: cards 24px in; rows 16px in on both sides with a 20px icon and the label 12px after
       it (56px rows); field labels and group titles 4px in from the cards, as in the reference.
     - Clip list: rows 16px in on both sides; the number badge is the icon column, the open row's
       details start on the title line after it (56px).
     - Tabs (video page, admin) have no side padding: the first label's icon sits on the text line.
     - Dialogs: the close glyph ends on `--dialog-padding` and centres on the title.
+- **Dialogs are stepped** (2026-11-23, the owner's pick "A, Trilha" from `design/explore/modals/`):
+  every dialog uses `StepDialogFrame`. A flow with more than one question gets the `StepRail`
+  sidebar: the dialog's name, numbered steps joined by a line (done in green, current in blue,
+  each with a one-line hint, the ones reached can be reopened) and "Passo X de N" with a bar.
+  Phones hide the rail and show segments above the title. Each step asks one thing, starts filled
+  in, and has Voltar on the leading side of the footer with the step's action trailing. A
+  permanent action lists what goes away (`LossList`) before the step that does it. A single
+  question (rename, Studio warnings, admin confirmations) uses the same frame without the rail.
 
 ## Decisions log
 

@@ -4,13 +4,16 @@ import {
     createColumnHelper,
     createFilteredRowModel,
     createPaginatedRowModel,
+    createSortedRowModel,
     filterFn_includesString,
     rowPaginationFeature,
+    rowSortingFeature,
     tableFeatures,
 } from "@tanstack/react-table";
 import { isVideoFinished } from "#/modules/video-records/video-status";
 import type { VideoStatus } from "#/modules/video-records/video-status";
 import type { VideoSummary } from "#/modules/videos/video-views";
+import { isoDateSortFn, titleSortFn } from "#/modules/videos/ui/video-sort";
 import { normalizeForSearch } from "#/shared/ui/normalize-for-search";
 
 export const VIDEO_FILTERS = ["all", "processing", "done", "failed", "cancelled"] as const;
@@ -70,17 +73,20 @@ const statusGroupFilter = constructFilterFn({
 
 export const videoTableFeatures = tableFeatures({
     columnFilteringFeature,
+    rowSortingFeature,
     rowPaginationFeature,
     filteredRowModel: createFilteredRowModel(),
+    sortedRowModel: createSortedRowModel(),
     paginatedRowModel: createPaginatedRowModel(),
 });
 
 const columnHelper = createColumnHelper<typeof videoTableFeatures, VideoSummary>();
 
-/** Only the columns the table filters on; the row layout itself stays in VideoRow. */
+/** Only the columns the table filters and sorts on; the row layout itself stays in VideoRow. */
 export const videoTableColumns = columnHelper.columns([
-    columnHelper.accessor("title", { filterFn: titleSearchFilter }),
+    columnHelper.accessor("title", { filterFn: titleSearchFilter, sortFn: titleSortFn }),
     columnHelper.accessor("status", { filterFn: statusGroupFilter }),
+    columnHelper.accessor("createdAt", { sortFn: isoDateSortFn }),
 ]);
 
 export function countVideosByFilter(videos: Array<VideoSummary>): Record<VideoFilter, number> {

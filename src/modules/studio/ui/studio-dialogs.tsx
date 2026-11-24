@@ -4,11 +4,16 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
 } from "#/shared/ui/alert-dialog";
+import { cn } from "#/shared/ui/cn";
+import {
+    STEP_DIALOG_CONTENT_CLASS,
+    STEP_DIALOG_SINGLE_CLASS,
+    StepDialogFrame,
+} from "#/shared/ui/step-dialog-frame";
+
+const CONTENT_CLASS = cn(STEP_DIALOG_CONTENT_CLASS, STEP_DIALOG_SINGLE_CLASS);
+const ACTION_CLASS = "ms-auto font-medium max-sm:flex-1";
 
 interface ConflictDialogProps {
     isOpen: boolean;
@@ -20,30 +25,35 @@ interface ConflictDialogProps {
 export function ConflictDialog({ isOpen, onTakeTheirs, onKeepMine }: ConflictDialogProps) {
     return (
         <AlertDialog open={isOpen}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Este corte mudou em outra aba</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Outra aba salvou alterações neste corte. Se você mantiver as suas, as
-                        daquela aba se perdem.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel
-                        onClick={async () => {
-                            await onTakeTheirs();
-                        }}
-                    >
-                        Ver a outra versão
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                        onClick={async () => {
-                            await onKeepMine();
-                        }}
-                    >
-                        Manter as minhas
-                    </AlertDialogAction>
-                </AlertDialogFooter>
+            <AlertDialogContent className={CONTENT_CLASS}>
+                <StepDialogFrame
+                    kind="alert"
+                    rail={null}
+                    progress={null}
+                    title="Este corte mudou em outra aba"
+                    description="Outra aba salvou alterações neste corte. Se você mantiver as suas, as daquela aba se perdem."
+                    footer={
+                        <>
+                            <AlertDialogCancel
+                                variant="ghost"
+                                onClick={async () => {
+                                    await onTakeTheirs();
+                                }}
+                            >
+                                Ver a outra versão
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                size="lg"
+                                className={ACTION_CLASS}
+                                onClick={async () => {
+                                    await onKeepMine();
+                                }}
+                            >
+                                Manter as minhas
+                            </AlertDialogAction>
+                        </>
+                    }
+                />
             </AlertDialogContent>
         </AlertDialog>
     );
@@ -59,24 +69,30 @@ interface SharedRenderDialogProps {
 export function SharedRenderDialog(props: SharedRenderDialogProps): ReactNode {
     return (
         <AlertDialog open={props.isOpen} onOpenChange={props.onOpenChange}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Renderizar o corte de novo?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        O arquivo atual é substituído pelo novo. Este corte tem link público: quem
-                        abrir o link verá a versão nova depois que a Brasa terminar.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                        onClick={async () => {
-                            await props.onConfirm();
-                        }}
-                    >
-                        Renderizar
-                    </AlertDialogAction>
-                </AlertDialogFooter>
+            <AlertDialogContent className={CONTENT_CLASS}>
+                <StepDialogFrame
+                    kind="alert"
+                    rail={null}
+                    progress={null}
+                    title="Renderizar o corte de novo?"
+                    description="O arquivo atual é substituído pelo novo. Este corte tem link público: quem abrir o link verá a versão nova depois que a Brasa terminar."
+                    footer={
+                        <>
+                            <AlertDialogCancel variant="ghost" className="text-muted-foreground">
+                                Cancelar
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                size="lg"
+                                className={ACTION_CLASS}
+                                onClick={async () => {
+                                    await props.onConfirm();
+                                }}
+                            >
+                                Renderizar
+                            </AlertDialogAction>
+                        </>
+                    }
+                />
             </AlertDialogContent>
         </AlertDialog>
     );

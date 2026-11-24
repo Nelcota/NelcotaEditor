@@ -22,7 +22,8 @@ interface LanguageStepProps {
 export function LanguageStepFields({ language, onLanguageChange }: LanguageStepProps): ReactNode {
     return (
         <fieldset className="grid gap-4">
-            <legend className="mb-3 text-sm font-medium">Em que idioma as pessoas falam?</legend>
+            {/* The step's title asks the same question out loud; the legend names the group. */}
+            <legend className="sr-only">Em que idioma as pessoas falam?</legend>
             <div className="grid gap-3 sm:grid-cols-2">
                 {TRANSCRIPTION_LANGUAGES.map((option) => (
                     <label
@@ -47,8 +48,7 @@ export function LanguageStepFields({ language, onLanguageChange }: LanguageStepP
                 ))}
             </div>
             <p className="max-w-prose text-sm text-muted-foreground">
-                Escolher o idioma certo deixa a legenda mais precisa. O padrão vem das suas
-                preferências, na página Conta.
+                O padrão vem das suas preferências, na página Conta.
             </p>
         </fieldset>
     );
