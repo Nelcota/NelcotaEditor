@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, test } from "node:test";
+import { describe, test } from "vitest";
 
 // Behind a proxy the client IP comes from its header, so no request event is needed here.
 process.env.DATABASE_URL = "postgres://test:test@127.0.0.1:1/test";

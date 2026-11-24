@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { after, describe, test } from "node:test";
+import { afterAll, describe, test } from "vitest";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
@@ -11,8 +11,7 @@ import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.serv
 import { videos } from "#/modules/video-records/video-records.schema";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 
-// Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
-// of `bun run check`. Run: bun test ./src/modules/videos/server/restart-video.server.integration.ts
+// Runs against the test database from .env.test: bun run test:integration
 
 const REQUESTED_CLIP_COUNT = 3;
 
@@ -59,7 +58,7 @@ async function readStatus(videoId: string): Promise<VideoStatus | undefined> {
 }
 
 describe("restartVideo", () => {
-    after(async () => {
+    afterAll(async () => {
         await db.$client.end();
     });
 

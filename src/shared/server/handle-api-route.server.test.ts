@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it, mock } from "node:test";
+import { describe, it, vi } from "vitest";
 import { DrizzleQueryError } from "drizzle-orm/errors";
 import { handleApiRoute } from "#/shared/server/handle-api-route.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
@@ -8,11 +8,11 @@ const SHARE_TOKEN = "share-token-123";
 
 function captureStderr(): { read: () => string; restore: () => void } {
     const written: Array<string> = [];
-    const writeMock = mock.method(process.stderr, "write", (chunk: unknown) => {
+    const writeMock = vi.spyOn(process.stderr, "write").mockImplementation((chunk: unknown) => {
         written.push(String(chunk));
         return true;
     });
-    return { read: () => written.join(""), restore: () => writeMock.mock.restore() };
+    return { read: () => written.join(""), restore: () => writeMock.mockRestore() };
 }
 
 describe("handleApiRoute", () => {

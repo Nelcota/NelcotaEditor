@@ -817,7 +817,10 @@ Pull requests:
   `transcription` · `preferences`, `video-records` (the video row, its statuses and transitions),
   `auth`. The exact map and each file-level exception (with its reason) live in
   `scripts/check-module-boundaries.ts`; `bun run check` enforces them.
+- Integration tests (`*.integration.test.ts`, database included) run with
+  `bun run test:integration` against `nelcota_test`; `bun run setup` and `bun run local` create
+  `.env.test` and keep that database migrated. `bun run test` and `bun run check` run the unit
+  project only.
 - Migration in progress (from npm/tsx/node:test): the rules above are the target. Until a stage
-  lands, code that predates it may not follow it yet (folder layout, Vitest, pino, GlitchTip,
-  Playwright, React Compiler, type-aware lint, the format-on-edit hook); new code follows the
-  rules.
+  lands, code that predates it may not follow it yet (pino, GlitchTip, Playwright, React
+  Compiler, the format-on-edit hook); new code follows the rules.

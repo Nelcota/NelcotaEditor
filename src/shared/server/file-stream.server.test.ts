@@ -5,7 +5,7 @@ import fileSystem from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { after, afterEach, before, describe, it, mock } from "node:test";
+import { afterAll, afterEach, beforeAll, describe, it, vi } from "vitest";
 import { createFileStream } from "#/shared/server/file-stream.server";
 
 const logEntrySchema = z.object({ message: z.string(), file: z.string() });
@@ -23,16 +23,18 @@ function spyOnOpenedFiles(): OpenedFiles {
     const handles: Array<FileHandle> = [];
     let closedFiles = 0;
 
-    mock.method(fileSystem, "open", async (...openArguments: Parameters<typeof realOpen>) => {
-        const handle = await realOpen(...openArguments);
-        const realClose = handle.close.bind(handle);
-        handle.close = async (): Promise<void> => {
-            closedFiles += 1;
-            await realClose();
-        };
-        handles.push(handle);
-        return handle;
-    });
+    vi.spyOn(fileSystem, "open").mockImplementation(
+        async (...openArguments: Parameters<typeof realOpen>) => {
+            const handle = await realOpen(...openArguments);
+            const realClose = handle.close.bind(handle);
+            handle.close = async (): Promise<void> => {
+                closedFiles += 1;
+                await realClose();
+            };
+            handles.push(handle);
+            return handle;
+        },
+    );
 
     return { handles, closeCount: () => closedFiles };
 }
@@ -76,18 +78,18 @@ describe("createFileStream", () => {
     let directory = "";
     let filePath = "";
 
-    before(async () => {
+    beforeAll(async () => {
         directory = await mkdtemp(path.join(tmpdir(), "file-stream-test-"));
         filePath = path.join(directory, "source.mp4");
         await writeFile(filePath, FILE_CONTENT);
     });
 
-    after(async () => {
+    afterAll(async () => {
         await rm(directory, { recursive: true, force: true });
     });
 
     afterEach(() => {
-        mock.restoreAll();
+        vi.restoreAllMocks();
     });
 
     it("streams the requested range and closes the file at the end", async () => {
@@ -135,11 +137,13 @@ describe("createFileStream", () => {
         const releaseRead = createSignal();
         const markReadStarted = readStarted.fire;
         const letReadFinish = releaseRead.fire;
-        mock.method(handle, "read", async (...readArguments: Parameters<FileHandle["read"]>) => {
-            markReadStarted();
-            await releaseRead.promise;
-            return await realRead(...readArguments);
-        });
+        vi.spyOn(handle, "read").mockImplementation(
+            async (...readArguments: Parameters<FileHandle["read"]>) => {
+                markReadStarted();
+                await releaseRead.promise;
+                return await realRead(...readArguments);
+            },
+        );
         const reader = stream.getReader();
         const pendingChunk = reader.read();
         await readStarted.promise;
@@ -156,7 +160,7 @@ describe("createFileStream", () => {
     it("logs a read that fails mid-way without the server's directories, then closes the file", async () => {
         const openedFiles = spyOnOpenedFiles();
         const logLines: Array<string> = [];
-        mock.method(process.stderr, "write", (chunk: unknown) => {
+        vi.spyOn(process.stderr, "write").mockImplementation((chunk: unknown) => {
             logLines.push(String(chunk));
             return true;
         });
@@ -168,7 +172,7 @@ describe("createFileStream", () => {
             throw new Error("The stream never opened its file");
         }
 
-        mock.method(handle, "read", async (): Promise<never> => {
+        vi.spyOn(handle, "read").mockImplementation(async (): Promise<never> => {
             throw new Error("disk read failed");
         });
 

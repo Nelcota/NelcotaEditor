@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { after, describe, test } from "node:test";
+import { afterAll, describe, test } from "vitest";
 import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import {
@@ -11,8 +11,7 @@ import { reserveUploadSpace } from "#/modules/videos/server/reserve-upload-space
 import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
 
-// Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
-// of `bun run check`. Run: bun test ./src/modules/videos/server/reserve-upload-space.server.integration.ts
+// Runs against the test database from .env.test: bun run test:integration
 
 const SMALL_UPLOAD_BYTES = 1024;
 const OVER_HALF_RATIO = 0.6;
@@ -35,7 +34,7 @@ function overHalfTheQuota(): number {
 }
 
 describe("reserveUploadSpace", () => {
-    after(async () => {
+    afterAll(async () => {
         await db.$client.end();
     });
 

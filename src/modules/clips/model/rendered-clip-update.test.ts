@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { buildRenderedClipUpdate } from "#/modules/clips/model/rendered-clip-update";
 
 const OUTPUT_PATH = "videos/abc/clips/abc-v1.mp4";

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { InvalidFileSizeError, parseByteRange } from "#/shared/server/byte-range.server";
 
 const FILE_SIZE = 1000;

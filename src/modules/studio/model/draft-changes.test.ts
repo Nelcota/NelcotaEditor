@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
 import { countDraftChanges } from "#/modules/studio/model/draft-changes";
 

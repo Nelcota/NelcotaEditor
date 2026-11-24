@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import type { RenderDraftResult } from "#/modules/studio/model/clip-studio-view";
 import { requeueThenRemoveOldOutput } from "#/modules/studio/server/remove-old-output-after-requeue";
 

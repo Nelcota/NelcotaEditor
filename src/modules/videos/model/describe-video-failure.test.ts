@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { describeVideoFailure } from "#/modules/videos/model/describe-video-failure";
 
 const STORED_ERROR = "O vídeo é privado.";

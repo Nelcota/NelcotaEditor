@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { ADMIN_POLLING_OPTIONS } from "#/modules/admin/model/admin-polling";
 
 const ONE_MINUTE_MILLISECONDS = 60 * 1000;

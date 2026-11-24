@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, test } from "node:test";
+import { describe, test } from "vitest";
 
 // auth.server reads the environment when it is imported; nothing here opens a database connection.
 process.env.DATABASE_URL = "postgres://test:test@127.0.0.1:1/test";

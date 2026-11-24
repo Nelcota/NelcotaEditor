@@ -26,8 +26,9 @@
         "lint": "oxlint --type-aware",
         "check:copy": "bun scripts/check-copy-dashes.ts",
         "check:boundaries": "bun scripts/check-module-boundaries.ts",
-        "test": "bun test --isolate",
-        "check": "oxfmt --check && oxlint --type-aware && tsc --noEmit && bun scripts/check-copy-dashes.ts && bun scripts/check-module-boundaries.ts && bun test --isolate"
+        "test": "vitest run --project unit",
+        "test:integration": "vitest run --project integration",
+        "check": "oxfmt --check && oxlint --type-aware && tsc --noEmit && bun scripts/check-copy-dashes.ts && bun scripts/check-module-boundaries.ts && vitest run --project unit"
     },
     "dependencies": {
         "@date-fns/tz": "^1.5.0",
@@ -63,18 +64,23 @@
         "@iconify-json/lucide": "^1.2.158",
         "@svgr/core": "^8.1.0",
         "@svgr/plugin-jsx": "^8.1.0",
+        "@testing-library/dom": "10.4.2",
+        "@testing-library/react": "16.3.3",
+        "@testing-library/user-event": "14.6.13",
         "@types/node": "^22.10.2",
         "@types/pg": "^8.15.6",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
         "@vitejs/plugin-react": "^6.0.1",
         "dotenv": "^17.3.1",
+        "happy-dom": "21.0.4",
         "oxfmt": "0.79.0",
         "oxlint": "1.94.0",
         "oxlint-tsgolint": "7.0.2008",
         "typescript": "^6.0.2",
         "unplugin-icons": "^24.0.0",
-        "vite": "^8.0.0"
+        "vite": "^8.0.0",
+        "vitest": "5.1.1"
     },
     "packageManager": "bun@1.4.5"
 }

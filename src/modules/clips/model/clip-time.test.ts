@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { formatPreciseClock, parseClockInput } from "#/modules/clips/model/clip-time";
 
 describe("formatPreciseClock", () => {

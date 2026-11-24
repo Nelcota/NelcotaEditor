@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, test } from "node:test";
+import { describe, test } from "vitest";
 import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
 
 const MEGABYTE = 1024 * 1024;

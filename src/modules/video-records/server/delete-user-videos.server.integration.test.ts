@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { after, describe, test } from "node:test";
+import { afterAll, describe, test } from "vitest";
 import { eq } from "drizzle-orm";
 import { Client } from "pg";
 import { db } from "#/db/database.server";
@@ -12,8 +12,7 @@ import {
 import { videos } from "#/modules/video-records/video-records.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 
-// Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
-// of `bun run check`. Run: bun test ./src/modules/video-records/server/delete-user-videos.server.integration.ts
+// Runs against the test database from .env.test: bun run test:integration
 
 const WAIT_FOR_LOCK_MILLISECONDS = 300;
 
@@ -41,7 +40,7 @@ async function insertVideoInOpenTransaction(client: Client, userId: string): Pro
 }
 
 describe("deleteUserAccountRecords", () => {
-    after(async () => {
+    afterAll(async () => {
         await db.$client.end();
     });
 

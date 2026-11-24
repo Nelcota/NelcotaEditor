@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { MAX_CAPTION_CUES, studioDraftSchema } from "#/modules/clips/model/clip-studio";
 import type { CaptionCue } from "#/modules/clips/model/clip-studio";
 import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/model/transcript-word";

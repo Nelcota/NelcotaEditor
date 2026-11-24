@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { buildClipOutputFileName } from "#/modules/clips/model/clip-output-file";
 
 const CLIP_ID = "6f1c2f0e-6a43-4d8e-9a39-0c2b8f0f4a11";

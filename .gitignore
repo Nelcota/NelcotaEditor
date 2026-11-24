@@ -3,9 +3,11 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
+.env*
+!.env.example
 .nitro
 .tanstack
 .output
 __unconfig*
 storage/
+storage-test/

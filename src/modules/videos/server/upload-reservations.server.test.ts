@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, test } from "node:test";
+import { describe, test } from "vitest";
 import { UploadReservations } from "#/modules/videos/server/upload-reservations.server";
 
 const USER_ID = "user-1";

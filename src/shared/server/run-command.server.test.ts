@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { inspect } from "node:util";
 import { CommandFailedError, runCommand } from "#/shared/server/run-command.server";
 

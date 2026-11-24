@@ -44,6 +44,8 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 | `bun run services:rebuild`            | Rebuilds the worker image (yt-dlp is pinned in it)             |
 | `bun run db:generate` / `db:migrate`  | Creates / applies database migrations                          |
 | `bun run typecheck`, `lint`, `format` | Code checks                                                    |
+| `bun run test`                        | Unit tests (Vitest)                                            |
+| `bun run test:integration`            | Tests against the `nelcota_test` database (`.env.test`)        |
 
 ## Settings (`.env`)
 

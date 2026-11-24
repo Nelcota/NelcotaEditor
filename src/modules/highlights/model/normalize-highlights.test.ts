@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { MAX_CLIP_SECONDS, MIN_CLIP_SECONDS } from "#/modules/clips/model/clip-limits";
 import { normalizeHighlights } from "#/modules/highlights/model/normalize-highlights";
 import type { HighlightCandidate } from "#/modules/highlights/model/normalize-highlights";

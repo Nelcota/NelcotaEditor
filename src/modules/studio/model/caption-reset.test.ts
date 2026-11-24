@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { groupWordsIntoCues } from "#/modules/clips/model/caption-cues";
 import type { CaptionWord, StudioDraft } from "#/modules/clips/model/clip-studio";
 import {

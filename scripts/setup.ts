@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execa } from "execa";
+import { prepareTestDatabase } from "./prepare-test-database";
 
 const ENV_FILE = ".env";
 const ENV_EXAMPLE_FILE = ".env.example";
@@ -92,6 +93,7 @@ await runStep("Starting PostgreSQL and Whisper", "docker", [
     "whisper",
 ]);
 await runStep("Applying database migrations", "bunx", ["drizzle-kit", "migrate"]);
+await prepareTestDatabase();
 await runStep("Building and starting the worker", "docker", [
     "compose",
     "up",

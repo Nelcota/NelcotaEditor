@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { execa } from "execa";
+import { prepareTestDatabase } from "./prepare-test-database";
 
 // Everything "run it locally" needs, in order: Docker up, services up, schema current, worker
 // rebuilt from the current code, then the dev server. Each step is safe to run again.
@@ -69,6 +70,7 @@ await runStep("Starting PostgreSQL and Whisper", "docker", [
     "whisper",
 ]);
 await runStep("Applying database migrations", "bunx", ["drizzle-kit", "migrate"]);
+await prepareTestDatabase();
 // Docker's layer cache makes this quick when the worker code has not changed.
 await runStep("Building and starting the worker", "docker", [
     "compose",
