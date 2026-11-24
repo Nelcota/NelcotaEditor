@@ -2,59 +2,17 @@ import { rm } from "node:fs/promises";
 import path from "node:path";
 import { db } from "#/db/database.server";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
+import { transcribeChunks } from "#/modules/transcription/server/transcribe-chunks.server";
+import type { Transcription } from "#/modules/transcription/server/transcribe-chunks.server";
 import { transcripts } from "#/modules/transcription/transcription.schema";
 import { extractAudioChunks } from "#/modules/transcription/server/extract-audio-chunks.server";
-import type { AudioChunk } from "#/modules/transcription/server/extract-audio-chunks.server";
 import { findTranscriptWords } from "#/modules/transcription/server/find-transcript-words.server";
-import {
-    ensureWhisperModel,
-    transcribeAudioChunk,
-} from "#/modules/transcription/server/whisper-client.server";
-import type { ChunkTranscription } from "#/modules/transcription/server/whisper-client.server";
-import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
+import { ensureWhisperModel } from "#/modules/transcription/server/whisper-client.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { logger } from "#/shared/server/logger.server";
 
-/**
- * Chunks sent to Whisper at once. Measured on 8 CPU cores with speaches running 4 workers of
- * 2 threads: 3 parallel requests transcribed 10 minutes of audio in 51s (165s one at a time).
- */
-const TRANSCRIPTION_CONCURRENCY = 3;
-const PERCENT = 100;
 const AUDIO_DIRECTORY_NAME = "audio";
-
-interface Transcription {
-    words: Array<TranscriptWord>;
-    language: string | null;
-}
-
-interface ChunksToTranscribe {
-    chunks: Array<AudioChunk>;
-    language: string | null;
-    signal: AbortSignal;
-}
-
-async function transcribeChunks(
-    input: ChunksToTranscribe,
-    onProgress: (percent: number) => void,
-): Promise<Transcription> {
-    const { chunks, language, signal } = input;
-    let completedChunks = 0;
-    const results = await runWithConcurrency(
-        chunks,
-        TRANSCRIPTION_CONCURRENCY,
-        async (chunk): Promise<ChunkTranscription> => {
-            const result = await transcribeAudioChunk(chunk, language, signal);
-            completedChunks += 1;
-            onProgress((completedChunks / chunks.length) * PERCENT);
-            return result;
-        },
-    );
-    const detectedLanguage = results.find((result) => result.language !== null)?.language ?? null;
-
-    return { words: results.flatMap((result) => result.words), language: detectedLanguage };
-}
 
 interface TranscriptRequest {
     videoId: string;
