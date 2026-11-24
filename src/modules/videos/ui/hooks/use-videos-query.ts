@@ -9,14 +9,14 @@ import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { mergeVideoProgress } from "#/modules/videos/model/merge-video-progress";
 import {
+    PROGRESS_KEY_SEGMENT,
     VIDEOS_QUERY_KEY,
+    invalidateVideoQueries,
     pollWhileProcessing,
     videosQueryOptions,
 } from "#/modules/videos/model/video-queries";
 
-const PROGRESS_KEY_SEGMENT = "progress";
-
-/** Writes the polled numbers into the list, or refetches the list when a video changed stage. */
+/** Writes the polled numbers into the list, or refreshes every video query when a stage changed. */
 async function syncVideoList(
     queryClient: QueryClient,
     watchedIds: Array<string>,
@@ -32,7 +32,8 @@ async function syncVideoList(
     const merged = mergeVideoProgress(list, watchedIds, progress);
 
     if (merged === null) {
-        await queryClient.invalidateQueries({ queryKey: listQueryKey, exact: true });
+        // A new stage can change more than the list: ready clips, the space used, the open video.
+        await invalidateVideoQueries(queryClient);
         return;
     }
 
@@ -45,6 +46,7 @@ function toProgress(video: VideoSummary): VideoProgress {
         status: video.status,
         progressPercent: video.progressPercent,
         isCancelling: video.isCancelling,
+        readyClipCount: video.readyClipCount,
     };
 }
 

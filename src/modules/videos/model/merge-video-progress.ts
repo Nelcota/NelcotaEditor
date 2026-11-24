@@ -8,7 +8,8 @@ function withProgress(video: VideoSummary, progress: VideoProgress | undefined):
 
     if (
         progress.progressPercent === video.progressPercent &&
-        progress.isCancelling === video.isCancelling
+        progress.isCancelling === video.isCancelling &&
+        progress.readyClipCount === video.readyClipCount
     ) {
         return video;
     }
@@ -17,6 +18,7 @@ function withProgress(video: VideoSummary, progress: VideoProgress | undefined):
         ...video,
         progressPercent: progress.progressPercent,
         isCancelling: progress.isCancelling,
+        readyClipCount: progress.readyClipCount,
     };
 }
 
