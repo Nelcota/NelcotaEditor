@@ -14,6 +14,7 @@ import {
 import {
     findVideoById,
     markVideoCancelled,
+    toVideoRun,
 } from "#/modules/video-records/server/video-progress.server";
 import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
@@ -36,13 +37,18 @@ const RESUMABLE_ON_START_STATUSES: Array<VideoStatus> = ["queued", ...WORKING_VI
 
 async function requeueInterruptedVideos(): Promise<void> {
     const interrupted = await db
-        .select({ id: videos.id, userId: videos.userId, cancelRequested: videos.cancelRequested })
+        .select({
+            id: videos.id,
+            userId: videos.userId,
+            cancelRequested: videos.cancelRequested,
+            processingStartedAt: videos.processingStartedAt,
+        })
         .from(videos)
         .where(inArray(videos.status, RESUMABLE_ON_START_STATUSES));
 
     for (const video of interrupted) {
         if (video.cancelRequested === true) {
-            await markVideoCancelled(video.id);
+            await markVideoCancelled(toVideoRun(video));
             continue;
         }
 
