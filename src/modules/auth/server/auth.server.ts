@@ -20,6 +20,7 @@ import {
     ADMIN_ROLE,
     USER_ROLE,
     account,
+    rateLimit,
     session,
     user,
     verification,
@@ -162,7 +163,7 @@ export const auth = betterAuth({
     secret: readAuthSecret(),
     database: drizzleAdapter(db, {
         provider: "pg",
-        schema: { user, session, account, verification },
+        schema: { user, session, account, verification, rateLimit },
     }),
     emailAndPassword: {
         enabled: true,
