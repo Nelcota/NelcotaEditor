@@ -101,11 +101,12 @@ function MetricTile(props: MetricTileProps): ReactNode {
     );
 }
 
+/** The Vídeos list has no date filter, so the label promises every failure, not the period's. */
 function FailedVideosLink(): ReactNode {
     return (
         <Button asChild variant="secondary" size="sm">
             <Link to="/videos" search={{ status: "failed" }}>
-                Ver vídeos com falha
+                Ver todas as falhas
                 <ArrowRightIcon aria-hidden="true" className="size-4" />
             </Link>
         </Button>

@@ -67,7 +67,7 @@ export const METRIC_DEFINITIONS: ReadonlyArray<MetricDefinition> = [
     {
         key: "failures",
         label: "Falhas",
-        help: "Vídeos do período que não chegaram ao fim.",
+        help: "Vídeos do período que pararam com erro. Os que você cancelou não contam.",
         format: formatInteger,
         unit: null,
         betterWhen: "down",
