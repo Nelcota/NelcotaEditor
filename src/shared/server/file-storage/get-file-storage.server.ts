@@ -5,7 +5,9 @@ import { getEnvironment } from "#/shared/server/env.server";
 
 export class MissingR2SettingError extends Error {
     constructor() {
-        super("STORAGE_DRIVER is r2 but an R2 setting is missing");
+        super(
+            "An R2 setting is missing: set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_BUCKET",
+        );
         this.name = "MissingR2SettingError";
     }
 }

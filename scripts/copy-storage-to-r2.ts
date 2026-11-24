@@ -64,10 +64,12 @@ async function copyFile(storageRoot: string, absolutePath: string): Promise<numb
         return null;
     }
 
-    if (process.argv.includes(DRY_RUN_FLAG) === false) {
-        await storage.storeLocalFile(key, absolutePath);
+    if (process.argv.includes(DRY_RUN_FLAG) === true) {
+        console.info(`would copy ${key} (${localBytes} bytes)`);
+        return localBytes;
     }
 
+    await storage.storeLocalFile(key, absolutePath);
     console.info(`copied ${key} (${localBytes} bytes)`);
     return localBytes;
 }
@@ -97,7 +99,7 @@ async function copyStorageToR2(): Promise<void> {
     }
 
     console.info(
-        `${mode}: ${files.length} files, ${totals.copied} copied (${totals.copiedBytes} bytes), ${totals.skipped} already in the bucket`,
+        `${mode}: ${files.length} files, ${totals.copied} to copy or copied (${totals.copiedBytes} bytes), ${totals.skipped} already in the bucket`,
     );
 }
 
