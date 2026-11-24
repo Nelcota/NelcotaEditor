@@ -6,6 +6,7 @@ import {
     UploadLargerThanDeclaredError,
     storeVideoUpload,
 } from "#/modules/videos/server/store-video-upload.server";
+import { getEnvironment } from "#/shared/server/env.server";
 import {
     HTTP_BAD_REQUEST,
     HTTP_NOT_FOUND,
@@ -38,6 +39,12 @@ function toUploadErrorResponse(error: unknown): Response {
  * files only through the app (the disk). The reservation already checked the limits.
  */
 export async function receiveUploadFile(request: Request, uploadId: string): Promise<Response> {
+    // A store with signed links never needs this route; open, it would let one upload send many
+    // bodies at once, each spooled to this server's disk before it reaches the store.
+    if (getEnvironment().STORAGE_DRIVER !== "disk") {
+        return new Response(null, { status: HTTP_NOT_FOUND });
+    }
+
     const user = await getSessionUser(request.headers);
 
     if (user === null) {
