@@ -1,6 +1,8 @@
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/model/video-status";
 import type { Video } from "#/modules/video-records/video-records.schema";
+import { getEnvironment } from "#/shared/server/env.server";
 import { CommandFailedError, runCommand } from "#/shared/server/run-command.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
@@ -15,6 +17,8 @@ const PROGRESS_MARKER = "NELCOTA_PROGRESS ";
 const PERCENT_PATTERN = /(\d+(?:\.\d+)?)%/;
 const OUTPUT_FILE_TEMPLATE = "source.%(ext)s";
 const MERGE_OUTPUT_FORMAT = "mp4";
+const COOKIES_FILE_NAME = "youtube-cookies.txt";
+const OWNER_ONLY_FILE_MODE = 0o600;
 
 export interface DownloadedVideo {
     /** Absolute path of the merged file inside the output directory. */
@@ -29,16 +33,30 @@ interface DownloadOptions {
     onProgress: (percent: number) => void;
 }
 
-export function buildYtDlpArguments(url: string, outputTemplate: string): Array<string> {
+function buildCookiesArguments(cookiesPath: string | null): Array<string> {
+    if (cookiesPath === null) {
+        return [];
+    }
+
+    return ["--cookies", cookiesPath];
+}
+
+export function buildYtDlpArguments(
+    url: string,
+    outputTemplate: string,
+    cookiesPath: string | null,
+): Array<string> {
     return [
         // A config file dropped on the machine must not add options (exec hooks, proxies, paths).
         "--ignore-config",
+        ...buildCookiesArguments(cookiesPath),
         "--no-playlist",
         // Second guard behind the server schema: never walk more than one entry of a list.
         "--playlist-items",
         "1",
+        // The worker image has Bun only; its "node" is a shim that cannot solve YouTube's challenges.
         "--js-runtimes",
-        "node",
+        "bun",
         "--format",
         FORMAT_SELECTOR,
         "--format-sort",
@@ -92,13 +110,31 @@ function createProgressParser(onProgress: (percent: number) => void): (line: str
     };
 }
 
-async function runYtDlp(
-    url: string,
-    outputTemplate: string,
-    options: DownloadOptions,
-): Promise<string> {
+/**
+ * yt-dlp rewrites the cookies file as YouTube rotates them, so each run gets its own copy inside
+ * its work folder, which goes away with the run.
+ */
+async function writeCookiesFile(outputDirectory: string): Promise<string | null> {
+    const encodedCookies = getEnvironment().YOUTUBE_COOKIES_BASE64;
+
+    if (encodedCookies === undefined) {
+        return null;
+    }
+
+    const cookiesPath = path.join(outputDirectory, COOKIES_FILE_NAME);
+    await writeFile(cookiesPath, Buffer.from(encodedCookies, "base64"), {
+        mode: OWNER_ONLY_FILE_MODE,
+    });
+    return cookiesPath;
+}
+
+async function runYtDlp(url: string, options: DownloadOptions): Promise<string> {
+    const outputDirectory = options.outputDirectory;
+    const outputTemplate = path.join(outputDirectory, OUTPUT_FILE_TEMPLATE);
+    const cookiesPath = await writeCookiesFile(outputDirectory);
+
     try {
-        return await runCommand("yt-dlp", buildYtDlpArguments(url, outputTemplate), {
+        return await runCommand("yt-dlp", buildYtDlpArguments(url, outputTemplate, cookiesPath), {
             signal: options.signal,
             onOutputLine: createProgressParser(options.onProgress),
         });
@@ -134,8 +170,7 @@ export async function downloadYoutubeVideo(
         throw new UserFacingError("Este vídeo não tem link do YouTube.");
     }
 
-    const outputTemplate = path.join(options.outputDirectory, OUTPUT_FILE_TEMPLATE);
-    const output = await runYtDlp(sourceUrl, outputTemplate, options);
+    const output = await runYtDlp(sourceUrl, options);
     const downloadedFile = readMarkedLine(output, FILE_MARKER);
 
     if (downloadedFile === null) {

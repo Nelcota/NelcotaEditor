@@ -73,6 +73,9 @@ const baseEnvironmentSchema = z.object({
     // Videos one worker processes at once (each from a different person). Size it by the CPU and
     // the Whisper workers: every video runs ffmpeg and Whisper of its own.
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(2),
+    // A Netscape cookies.txt of a dedicated YouTube account, in base64. YouTube asks datacenter
+    // addresses to sign in, so production downloads fail without it. Unset: no cookies are sent.
+    YOUTUBE_COOKIES_BASE64: optionalTextSchema.pipe(z.base64().optional()),
 });
 
 type BaseEnvironment = z.infer<typeof baseEnvironmentSchema>;
