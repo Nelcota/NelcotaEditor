@@ -179,8 +179,12 @@ extend the existing one.
   from their `<module>.schema.ts`.
 - Dependencies point one way: `routes → modules → shared`. `shared` never imports from
   `modules`.
-- A module may import another module's server functions, `model/` and tables, never its
-  `ui/` internals. Only the owning module writes (insert, update, delete) to its tables; other
+- A module may import another module's server functions, `model/`, `client/` and tables, never
+  its `ui/` internals. When a screen shows another module's UI, the route composes them: it
+  renders the piece and passes it in as a prop (`<AccountScreen profileRows={<ProfileRows />} />`).
+  A piece several modules need either becomes generic in `src/shared/ui/` (the business values
+  come from the owning module's `model/`) or belongs to the one module that uses it. Only the
+  owning module writes (insert, update, delete) to its tables; other
   modules may reference them (foreign keys) and read them (joins). No circular imports between
   modules.
 - Hexagonal layers (`domain/`, `application/`, `ports/`, `adapters/`) only inside modules that
