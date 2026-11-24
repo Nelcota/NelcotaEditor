@@ -47,7 +47,7 @@ test("returns to the page asked for after signing in", async ({ page, browser })
     const freshPage = await freshContext.newPage();
     await useOwnClientAddress(freshPage);
 
-    await freshPage.goto("/videos");
+    await openPage(freshPage, "/videos");
     await expect(freshPage).toHaveURL(/\/sign-in\?redirect=/);
     await freshPage.getByLabel("Email").fill(account.email);
     await freshPage.getByLabel("Senha", { exact: true }).fill(account.password);
