@@ -1,0 +1,17 @@
+{
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "cd \"$CLAUDE_PROJECT_DIR\" && bun scripts/format-edited-file.ts",
+                        "timeout": 30,
+                        "statusMessage": "Formatting the edited file"
+                    }
+                ]
+            }
+        ]
+    }
+}
