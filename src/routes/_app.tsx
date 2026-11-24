@@ -10,11 +10,12 @@ import { videosQueryOptions } from "#/modules/videos/model/video-queries";
 import { VideoProgressWatcher } from "#/modules/videos/ui/components/video-progress-watcher";
 
 export const Route = createFileRoute("/_app")({
-    beforeLoad: async ({ context }) => {
+    beforeLoad: async ({ context, location }) => {
         const user = await context.queryClient.fetchQuery(currentUserQueryOptions());
 
+        // The page asked for comes back after signing in; href is relative (path, search, hash).
         if (user === null) {
-            throw redirect({ to: "/sign-in" });
+            throw redirect({ to: "/sign-in", search: { redirect: location.href } });
         }
 
         return { user };

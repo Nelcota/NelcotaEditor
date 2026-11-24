@@ -23,9 +23,11 @@ const FIELD_NAMES = ["email", "password"] as const;
 interface SignInScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
     captchaSiteKey: string | null;
+    /** A path inside the app, already checked; the page that sent the user here, or home. */
+    redirectTarget: string;
 }
 
-export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
+export function SignInScreen({ captchaSiteKey, redirectTarget }: SignInScreenProps): ReactNode {
     const track = useTrackPromise();
     const router = useRouter();
     const captcha = useCaptcha(captchaSiteKey);
@@ -56,7 +58,7 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
 
             // A session that expired in this tab may have left another account's videos cached.
             queryClient.clear();
-            await router.navigate({ to: "/" });
+            await router.navigate({ href: redirectTarget });
         },
     });
 
