@@ -1,5 +1,6 @@
 import ChevronLeftIcon from "~icons/lucide/chevron-left";
 import ChevronRightIcon from "~icons/lucide/chevron-right";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import type { ClipView } from "#/modules/clips/model/clip-view";
 import { Button } from "#/shared/ui/button";
@@ -18,6 +19,19 @@ interface StudioClipSwitcherProps {
  */
 export function StudioClipSwitcher(props: StudioClipSwitcherProps): ReactNode {
     const { rankedClips, clipId, onSelectClip } = props;
+    const titleRef = useRef<HTMLHeadingElement>(null);
+
+    // Switching clips remounts the editor, the arrows and list included, so focus would fall to
+    // the page; the new clip's title takes it and a screen reader announces the clip.
+    useEffect(() => {
+        const title = titleRef.current;
+
+        if (title === null || document.activeElement !== document.body) {
+            return;
+        }
+
+        title.focus({ preventScroll: true });
+    }, []);
     const index = rankedClips.findIndex((clip) => clip.id === clipId);
     const clip = rankedClips[index];
     const previous = rankedClips[index - 1];
@@ -36,7 +50,9 @@ export function StudioClipSwitcher(props: StudioClipSwitcherProps): ReactNode {
     };
 
     return (
-        <div className="flex min-w-0 items-center gap-1">
+        // Grows from nothing: in the wrapping bar a long title shrinks instead of pushing
+        // Renderizar to a second line.
+        <div className="flex min-w-0 flex-1 basis-0 items-center gap-1">
             <HintTooltip label="Corte anterior">
                 <Button
                     variant="ghost"
@@ -50,7 +66,13 @@ export function StudioClipSwitcher(props: StudioClipSwitcherProps): ReactNode {
                 </Button>
             </HintTooltip>
             <div className="grid min-w-0 px-1">
-                <h1 className="truncate text-base leading-snug font-semibold">{clip.title}</h1>
+                <h1
+                    ref={titleRef}
+                    tabIndex={-1}
+                    className="truncate text-base leading-snug font-semibold outline-none"
+                >
+                    {clip.title}
+                </h1>
                 <Select value={clipId} onValueChange={onSelectClip}>
                     <SelectTrigger
                         aria-label={`Corte ${index + 1} de ${rankedClips.length}. Trocar de corte`}

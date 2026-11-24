@@ -77,7 +77,7 @@ export function AppLayout({
     const isSidebarHidden = sidebar.isOn;
     const isVideoPage = useIsVideoPage();
     const isStudioPage = useIsStudioPage();
-    useFocusMainOnNavigate();
+    useFocusMainOnNavigate(isStudioPage);
 
     if (isStudioPage === true) {
         return (
