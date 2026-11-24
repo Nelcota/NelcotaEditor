@@ -138,6 +138,8 @@ describe("markVideoCancelled", () => {
         const run = await insertQueuedVideo();
         await requestVideoCancellation(run.videoId);
         await resetVideoToQueued(run.videoId);
+        // The newer run is cancelled too, so only the run check keeps the stale run from writing.
+        await db.update(videos).set({ cancelRequested: true }).where(eq(videos.id, run.videoId));
 
         await markVideoCancelled(run);
 
