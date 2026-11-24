@@ -6,7 +6,7 @@ import { clampPageIndex } from "#/modules/videos/ui/clamp-page-index";
 import type { VideoListControls } from "#/modules/videos/ui/use-video-list-controls";
 import { videoTableColumns, videoTableFeatures } from "#/modules/videos/ui/video-list-filter";
 import type { VideoFilter } from "#/modules/videos/ui/video-list-filter";
-import { sortVideos } from "#/modules/videos/ui/video-sort";
+import { VIDEO_SORTING } from "#/modules/videos/ui/video-sort";
 
 interface VideoPageInput {
     videos: Array<VideoSummary>;
@@ -22,12 +22,11 @@ export interface VideoPage {
 }
 
 /**
- * Filtering and pagination run in TanStack Table. The status filter comes from the URL; the title
+ * Filtering, sorting and pagination run in TanStack Table. The status filter comes from the URL; the title
  * search and the sort are local to the page.
  */
 export function useVideoPage({ videos, filter, controls }: VideoPageInput): VideoPage {
     const { query, sort, pagination, changePagination } = controls;
-    const sortedVideos = useMemo(() => sortVideos(videos, sort), [videos, sort]);
     const columnFilters = useMemo<ColumnFiltersState>(
         () => [
             { id: "title", value: query },
@@ -38,9 +37,9 @@ export function useVideoPage({ videos, filter, controls }: VideoPageInput): Vide
     const table = useTable({
         features: videoTableFeatures,
         columns: videoTableColumns,
-        data: sortedVideos,
+        data: videos,
         getRowId: (video) => video.id,
-        state: { columnFilters, pagination },
+        state: { columnFilters, sorting: VIDEO_SORTING[sort], pagination },
         onPaginationChange: changePagination,
     });
     const pageCount = table.getPageCount();

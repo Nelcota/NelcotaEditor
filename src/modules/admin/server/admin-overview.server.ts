@@ -1,3 +1,4 @@
+import { subDays } from "date-fns";
 import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import type { SQL, SQLWrapper } from "drizzle-orm";
 import { db } from "#/db/database.server";
@@ -11,7 +12,6 @@ import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/video-status";
 import { videos } from "#/modules/video-records/videos.schema";
 
 const RECENT_DAYS = 30;
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 const HIGHLIGHT_ROW_COUNT = 5;
 
 interface UserCounts {
@@ -87,7 +87,7 @@ async function countClips(since: Date): Promise<ClipCounts | undefined> {
 }
 
 export async function summarizeAdminOverview(): Promise<AdminOverview> {
-    const since = new Date(Date.now() - RECENT_DAYS * MILLISECONDS_PER_DAY);
+    const since = subDays(new Date(), RECENT_DAYS);
     const [userCounts, videoCounts, clipCounts, recentFailures, topStorageUsers] =
         await Promise.all([
             countUsers(since),

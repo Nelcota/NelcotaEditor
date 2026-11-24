@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type { StudioDraft } from "#/modules/clips/clip-studio.schema";
 import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
@@ -6,6 +7,7 @@ import { useIsOnline } from "#/shared/ui/use-is-online";
 
 // Long enough to group a burst of typing into one request, short enough to feel instant.
 const SAVE_DELAY_MILLISECONDS = 800;
+const SAVE_SCOPE_PREFIX = "studio-draft-save:";
 
 export type SaveStatus = "saved" | "saving" | "failed" | "offline" | "conflict";
 
@@ -45,7 +47,6 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
     const versionRef = useRef(input.initialVersion);
     const savedDraftRef = useRef(input.savedDraft);
     const draftRef = useRef(draft);
-    const tailRef = useRef<Promise<boolean>>(Promise.resolve(true));
 
     useEffect(() => {
         draftRef.current = draft;
@@ -85,18 +86,17 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
         }
     };
 
-    const saveAfter = async (previous: Promise<boolean>): Promise<boolean> => {
-        await previous;
-        return saveOnce();
-    };
+    // Mutations of one scope run one after another, so two callers never send the same expected
+    // version (the server would call that a conflict). "always": offline, a save still runs and
+    // fails into the browser backup instead of waiting, so flush() never hangs. saveOnce never
+    // rejects.
+    const saveMutation = useMutation({
+        mutationFn: saveOnce,
+        scope: { id: `${SAVE_SCOPE_PREFIX}${clipId}` },
+        networkMode: "always",
+    });
 
-    // Each save waits for the one queued before it, so two callers never send the same
-    // expected version (the server would call that a conflict). saveOnce never rejects.
-    const flush = (): Promise<boolean> => {
-        const next = saveAfter(tailRef.current);
-        tailRef.current = next;
-        return next;
-    };
+    const flush = (): Promise<boolean> => saveMutation.mutateAsync();
 
     const saveLater = useEffectEvent((): void => {
         void flush();
