@@ -1,5 +1,6 @@
+import { stat } from "node:fs/promises";
 import path from "node:path";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import type { Video } from "#/modules/video-records/video-records.schema";
 import { videos } from "#/modules/video-records/video-records.schema";
@@ -32,37 +33,79 @@ interface ThumbnailSource {
     workDirectory: string;
 }
 
+interface StoredThumbnail {
+    thumbnailPath: string;
+    thumbnailBytes: number;
+}
+
 /**
- * Saves one frame as the video's thumbnail, once. A thumbnail is a nice-to-have, so a failure is
- * logged and the pipeline goes on; the screen falls back to the mascot.
+ * The source size counts "the original video and its thumbnail", so the quota sees the frame
+ * too. Added in place, since the source was just saved with its own size alone.
  */
-export async function ensureVideoThumbnail(input: ThumbnailSource): Promise<void> {
+async function recordThumbnail(videoId: string, thumbnail: StoredThumbnail): Promise<void> {
+    const { thumbnailPath, thumbnailBytes } = thumbnail;
+
+    await db
+        .update(videos)
+        .set({
+            thumbnailPath,
+            sourceBytes: sql`coalesce(${videos.sourceBytes}, 0) + ${thumbnailBytes}`,
+        })
+        .where(eq(videos.id, videoId));
+}
+
+async function createThumbnail(input: ThumbnailSource): Promise<StoredThumbnail> {
     const { video, localSourcePath, durationSeconds, workDirectory } = input;
-
-    if (video.thumbnailPath !== null) {
-        return;
-    }
-
     const thumbnailPath = path.posix.join(getVideoDirectory(video.id), THUMBNAIL_FILE_NAME);
     const localThumbnailPath = path.join(workDirectory, THUMBNAIL_FILE_NAME);
 
+    await runCommand("ffmpeg", [
+        "-y",
+        "-ss",
+        pickThumbnailSecond(durationSeconds).toFixed(2),
+        ...localFileInput(localSourcePath),
+        "-frames:v",
+        "1",
+        "-vf",
+        `scale=${THUMBNAIL_WIDTH}:-2`,
+        "-q:v",
+        JPEG_QUALITY,
+        localThumbnailPath,
+    ]);
+    const thumbnailStats = await stat(localThumbnailPath);
+    await getFileStorage().storeLocalFile(thumbnailPath, localThumbnailPath);
+    return { thumbnailPath, thumbnailBytes: thumbnailStats.size };
+}
+
+/** A frame an earlier run saved; this run has just stored the source size without it. */
+async function measureStoredThumbnail(thumbnailPath: string): Promise<StoredThumbnail> {
+    const thumbnailBytes = await getFileStorage().measureFile(thumbnailPath);
+    return { thumbnailPath, thumbnailBytes };
+}
+
+async function obtainThumbnail(input: ThumbnailSource): Promise<StoredThumbnail> {
+    const storedThumbnailPath = input.video.thumbnailPath;
+
+    if (storedThumbnailPath !== null) {
+        return measureStoredThumbnail(storedThumbnailPath);
+    }
+
+    return createThumbnail(input);
+}
+
+/**
+ * Saves one frame as the video's thumbnail, once, and counts its size. It runs right after every
+ * run saves the source with its size alone, so a frame from an earlier run is counted again here.
+ * A thumbnail is a nice-to-have, so a failure is logged and the pipeline goes on; the screen
+ * falls back to the mascot.
+ */
+export async function ensureVideoThumbnail(input: ThumbnailSource): Promise<void> {
+    const videoId = input.video.id;
+
     try {
-        await runCommand("ffmpeg", [
-            "-y",
-            "-ss",
-            pickThumbnailSecond(durationSeconds).toFixed(2),
-            ...localFileInput(localSourcePath),
-            "-frames:v",
-            "1",
-            "-vf",
-            `scale=${THUMBNAIL_WIDTH}:-2`,
-            "-q:v",
-            JPEG_QUALITY,
-            localThumbnailPath,
-        ]);
-        await getFileStorage().storeLocalFile(thumbnailPath, localThumbnailPath);
-        await db.update(videos).set({ thumbnailPath }).where(eq(videos.id, video.id));
+        const thumbnail = await obtainThumbnail(input);
+        await recordThumbnail(videoId, thumbnail);
     } catch (error) {
-        logger.warn({ videoId: video.id, error }, "Could not create the video thumbnail");
+        logger.warn({ videoId, error }, "Could not create the video thumbnail");
     }
 }
