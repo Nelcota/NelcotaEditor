@@ -12,34 +12,13 @@ import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
+import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 /** In page order; each field's input id matches its name. */
 const FIELD_NAMES = ["email", "password"] as const;
-
-type SignInFieldName = (typeof FIELD_NAMES)[number];
-
-/**
- * Reads the form state instead of `[aria-invalid=true]`: the inputs only get that attribute on the
- * next render, after this runs.
- */
-function focusFirstInvalidField(hasErrors: (name: SignInFieldName) => boolean): void {
-    const firstInvalidName = FIELD_NAMES.find((name) => hasErrors(name));
-
-    if (firstInvalidName === undefined) {
-        return;
-    }
-
-    const input = document.getElementById(firstInvalidName);
-
-    if (input === null) {
-        return;
-    }
-
-    input.focus();
-}
 
 interface SignInScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
@@ -55,17 +34,7 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
     const form = useForm({
         defaultValues: { email: "", password: "" },
         validators: { onSubmit: signInSchema },
-        onSubmitInvalid: ({ formApi }) => {
-            focusFirstInvalidField((name) => {
-                const meta = formApi.getFieldMeta(name);
-
-                if (meta === undefined) {
-                    return false;
-                }
-
-                return meta.errors.length > 0;
-            });
-        },
+        onSubmitInvalid: ({ formApi }) => focusFirstInvalidField(FIELD_NAMES, formApi),
         onSubmit: async ({ value }) => {
             setErrorMessage(null);
 
@@ -94,7 +63,7 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
     return (
         <AuthCard
             eyebrow="Entrar"
-            title={{ lead: "Bem-vindo", emphasis: "de volta" }}
+            title={{ lead: "Que bom", emphasis: "te ver de novo" }}
             description="Seus vídeos e cortes estão te esperando."
             footer={{ text: "Ainda não tem conta?", linkLabel: "Criar conta", linkTo: "/sign-up" }}
         >

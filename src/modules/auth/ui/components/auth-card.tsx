@@ -5,7 +5,7 @@ import { BrandMark } from "#/shared/ui/brand-logo";
 
 export interface AuthTitle {
     lead: string;
-    /** The heavier half, as on the public site's hero ("Bem-vindo **de volta**"). */
+    /** The heavier half, as on the public site's hero ("Que bom **te ver de novo**"). */
     emphasis: string;
 }
 
@@ -45,7 +45,7 @@ export function AuthCard({
                 <SiteLogo />
                 <div className="grid w-full max-w-sm content-center gap-6 justify-self-center">
                     <div className="grid gap-3">
-                        <p className="font-mono text-[0.6875rem] font-medium tracking-[0.08em] text-foreground/65 uppercase">
+                        <p className="font-mono text-xs font-medium tracking-[0.08em] text-foreground/65 uppercase">
                             <span className="text-primary-ink">[</span> {eyebrow}{" "}
                             <span className="text-primary-ink">]</span>
                         </p>

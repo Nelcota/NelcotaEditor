@@ -92,7 +92,7 @@ export function VideoLinkComposer(): ReactNode {
 
     return (
         <form noValidate onSubmit={submit} className="grid w-full gap-2">
-            <div className="grid gap-10 rounded-3xl border border-input/40 bg-card px-5 pt-5 pb-4 transition-[border-color,box-shadow] focus-within:border-primary/60 focus-within:ring-4 focus-within:ring-ring/40">
+            <div className="grid gap-10 rounded-3xl border border-input/40 bg-card px-5 pt-5 pb-4 transition-[border-color,box-shadow] focus-within:border-primary/60 focus-within:ring-4 focus-within:ring-ring">
                 <label htmlFor={`${problemId}-input`} className="sr-only">
                     Link do vídeo no YouTube
                 </label>
@@ -104,7 +104,7 @@ export function VideoLinkComposer(): ReactNode {
                     spellCheck={false}
                     autoCapitalize="none"
                     enterKeyHint="send"
-                    placeholder="Cole um link do YouTube para cortar..."
+                    placeholder="youtube.com/watch?v=…"
                     value={text}
                     disabled={isBusy}
                     aria-invalid={problem !== null}

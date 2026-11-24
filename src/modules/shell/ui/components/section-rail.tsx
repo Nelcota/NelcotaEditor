@@ -59,7 +59,7 @@ export function SectionRail({ onExpand }: { onExpand: () => void }): ReactNode {
                     to="/videos"
                     search={{ newVideo: true }}
                     aria-label="Novo vídeo"
-                    className="my-2 grid size-11 place-items-center rounded-xl bg-primary-solid text-primary-foreground outline-none transition-[filter,scale] hover:brightness-110 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
+                    className="my-2 grid size-11 place-items-center rounded-xl bg-primary-solid text-primary-foreground outline-none transition-[filter,scale] hover:brightness-110 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-frame motion-safe:active:scale-[0.99]"
                 >
                     <SquarePlusIcon aria-hidden="true" className="size-5" />
                 </Link>

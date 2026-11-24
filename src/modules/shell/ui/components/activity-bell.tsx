@@ -32,7 +32,7 @@ export function ActivityBell(): ReactNode {
                     {workingCount > 0 && (
                         <span
                             aria-hidden="true"
-                            className="absolute -top-0.5 -end-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-primary-solid px-1 text-[0.625rem] leading-none font-bold text-primary-foreground tabular-nums"
+                            className="absolute -top-0.5 -end-0.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-primary-solid px-1 text-xs leading-none font-bold text-primary-foreground tabular-nums"
                         >
                             {workingCount}
                         </span>

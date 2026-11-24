@@ -53,7 +53,7 @@ export function AuthShowcase(): ReactNode {
                 Cole um link. O Nel corta.
             </p>
             <div className="grid gap-5 rounded-2xl border border-border bg-card p-4 text-muted-foreground">
-                <span>Cole um link do YouTube para cortar...</span>
+                <span>youtube.com/watch?v=…</span>
                 <span className="flex items-center gap-1.5">
                     <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold">
                         5 cortes
