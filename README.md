@@ -145,6 +145,22 @@ If your machine has a different number of cores, tune `WHISPER__NUM_WORKERS` and
 `WHISPER__CPU_THREADS` (workers x threads ≈ cores) and `TRANSCRIPTION_CONCURRENCY` in
 `src/modules/transcription/server/transcribe-video.server.ts`.
 
+## Production
+
+Dokploy deploys `docker-compose.production.yml` as a Compose service. Each deploy builds the
+images, runs `migrate` (Drizzle migrations and the pg-boss schema, as the database owner) and
+then starts `web` and `worker`, which connect as `nelcota_app`: a role that reads and writes rows
+but cannot create, alter or drop anything. Media lives in R2; no port but Traefik's is published.
+
+Set these in the service's environment: `POSTGRES_PASSWORD`, `APP_DATABASE_PASSWORD`,
+`BETTER_AUTH_URL` (the https origin), `BETTER_AUTH_SECRET`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+`R2_SECRET_ACCESS_KEY`, `R2_BUCKET` and `DEEPSEEK_API_KEY`. Optional: `TURNSTILE_SITE_KEY` with
+`TURNSTILE_SECRET_KEY`, `WHISPER_MODEL`, `WHISPER_LANGUAGE`, `WORKER_CONCURRENCY` (default 1)
+and `STORAGE_QUOTA_GIGABYTES`. Generate passwords and the secret with `openssl rand -hex 32`.
+
+The app reads the client address from `CF-Connecting-IP`, so the server must accept web traffic
+only from Cloudflare.
+
 ## Limits
 
 - Uploads up to 5 GB; videos up to 3 hours.
