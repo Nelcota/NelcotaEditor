@@ -1,5 +1,6 @@
 import ClapperboardIcon from "~icons/lucide/clapperboard";
 import type { ReactNode } from "react";
+import { RENDER_BLOCKED_HINT_ID } from "#/modules/studio/ui/components/studio-render-hint";
 import type { StudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
 import { Button } from "#/shared/ui/button";
 
@@ -10,7 +11,10 @@ interface StudioRenderButtonProps {
     onRender: () => void;
 }
 
-function RenderLabel({ editor, isRendering }: Omit<StudioRenderButtonProps, "onRender">) {
+function RenderLabel({
+    editor,
+    isRendering,
+}: Omit<StudioRenderButtonProps, "onRender">): ReactNode {
     if (editor.isSendingRender === true) {
         return "Enviando…";
     }
@@ -39,6 +43,7 @@ export function StudioRenderButton(props: StudioRenderButtonProps): ReactNode {
                 editor.changeCount === 0 || isBusy === true || editor.autosave.status === "offline"
             }
             aria-busy={isBusy}
+            aria-describedby={RENDER_BLOCKED_HINT_ID}
             onClick={onRender}
         >
             <ClapperboardIcon aria-hidden="true" className="max-sm:hidden" />

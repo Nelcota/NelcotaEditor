@@ -10,6 +10,7 @@ import type { StudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
 import { StudioBackLink } from "#/modules/studio/ui/components/studio-back-link";
 import { StudioClipSwitcher } from "#/modules/studio/ui/components/studio-clip-switcher";
 import { StudioRenderButton } from "#/modules/studio/ui/components/studio-render-button";
+import { StudioRenderHint } from "#/modules/studio/ui/components/studio-render-hint";
 import { Button } from "#/shared/ui/button";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { cn } from "#/shared/ui/cn";
@@ -70,14 +71,10 @@ function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
     );
 }
 
-/** How much the file is behind the draft; "Nada mudou" says why Renderizar is off. */
+/** How much the file is behind the draft. */
 function ChangeCount({ changeCount }: { changeCount: number }): ReactNode {
     if (changeCount === 0) {
-        return (
-            <span className="text-sm whitespace-nowrap text-muted-foreground @max-5xl/studio:hidden">
-                Nada mudou
-            </span>
-        );
+        return null;
     }
 
     return (
@@ -90,7 +87,10 @@ function ChangeCount({ changeCount }: { changeCount: number }): ReactNode {
     );
 }
 
-function HistoryButtons({ editor, isRendering }: Pick<StudioBarProps, "editor" | "isRendering">) {
+function HistoryButtons({
+    editor,
+    isRendering,
+}: Pick<StudioBarProps, "editor" | "isRendering">): ReactNode {
     return (
         <div className="flex items-center">
             <HintTooltip label="Desfazer" shortcut="Ctrl+Z">
@@ -138,7 +138,7 @@ export function StudioBar(props: StudioBarProps): ReactNode {
     const { editor, isRendering } = props;
 
     return (
-        <header className="flex h-15 items-center gap-2 border-b bg-background px-2 @2xl/studio:gap-3 @2xl/studio:px-4">
+        <header className="flex min-h-15 flex-wrap items-center gap-x-2 border-b bg-background px-2 @2xl/studio:gap-x-3 @2xl/studio:px-4 @3xl/studio:flex-nowrap">
             <StudioBackLink videoId={props.videoId} clipId={props.clipId} />
             <span aria-hidden="true" className="h-6 w-px bg-border max-sm:hidden" />
             <StudioClipSwitcher
@@ -146,9 +146,9 @@ export function StudioBar(props: StudioBarProps): ReactNode {
                 clipId={props.clipId}
                 onSelectClip={props.onSelectClip}
             />
-            <span className="flex-1" />
             {isRendering === false && <SaveState editor={editor} />}
             {isRendering === false && <ChangeCount changeCount={editor.changeCount} />}
+            <StudioRenderHint editor={editor} isRendering={isRendering} />
             <HistoryButtons editor={editor} isRendering={isRendering} />
             <StudioRenderButton
                 editor={editor}
