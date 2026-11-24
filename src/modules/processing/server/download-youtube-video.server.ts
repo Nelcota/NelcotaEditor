@@ -1,9 +1,7 @@
-import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/model/video-status";
 import type { Video } from "#/modules/video-records/video-records.schema";
 import { CommandFailedError, runCommand } from "#/shared/server/run-command.server";
-import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const MAX_FILE_SIZE = "4G";
@@ -19,11 +17,14 @@ const OUTPUT_FILE_TEMPLATE = "source.%(ext)s";
 const MERGE_OUTPUT_FORMAT = "mp4";
 
 export interface DownloadedVideo {
-    sourcePath: string;
+    /** Absolute path of the merged file inside the output directory. */
+    localPath: string;
     title: string;
 }
 
 interface DownloadOptions {
+    /** An absolute, empty folder of the worker; partial files stay there for its owner to remove. */
+    outputDirectory: string;
     signal: AbortSignal;
     onProgress: (percent: number) => void;
 }
@@ -133,11 +134,7 @@ export async function downloadYoutubeVideo(
         throw new UserFacingError("Este vídeo não tem link do YouTube.");
     }
 
-    const videoDirectory = getVideoDirectory(video.id);
-    const absoluteVideoDirectory = resolveStoragePath(videoDirectory);
-    await mkdir(absoluteVideoDirectory, { recursive: true });
-
-    const outputTemplate = path.join(absoluteVideoDirectory, OUTPUT_FILE_TEMPLATE);
+    const outputTemplate = path.join(options.outputDirectory, OUTPUT_FILE_TEMPLATE);
     const output = await runYtDlp(sourceUrl, outputTemplate, options);
     const downloadedFile = readMarkedLine(output, FILE_MARKER);
 
@@ -148,7 +145,8 @@ export async function downloadYoutubeVideo(
     }
 
     return {
-        sourcePath: path.posix.join(videoDirectory, path.basename(downloadedFile)),
+        // Only the name is taken from yt-dlp's output, so the path cannot leave the folder.
+        localPath: path.join(options.outputDirectory, path.basename(downloadedFile)),
         title: readMarkedLine(output, TITLE_MARKER) ?? video.title,
     };
 }

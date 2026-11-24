@@ -28,3 +28,27 @@ test("keeps the app layout on the 404 page of a missing video's Studio", async (
     await expect(page.getByRole("navigation").first()).toBeVisible();
     await expectNoAccessibilityViolations(page);
 });
+
+test("uploads a file and opens the new video's page", async ({ page }) => {
+    await openPage(page, "/videos");
+    await page.getByRole("link", { name: "Novo vídeo" }).first().click();
+    const dialog = page.getByRole("dialog");
+
+    await dialog.getByLabel(/escolha no computador/).setInputFiles({
+        name: "entrevista.mp4",
+        mimeType: "video/mp4",
+        buffer: Buffer.alloc(2048),
+    });
+
+    const sendButton = dialog.getByRole("button", { name: "Gerar cortes" });
+    const continueButton = dialog.getByRole("button", { name: "Continuar" });
+
+    while ((await sendButton.isVisible()) === false) {
+        await continueButton.click();
+    }
+
+    await sendButton.click();
+
+    await expect(page).toHaveURL(/\/videos\/[0-9a-f-]{36}$/);
+    await expect(page.getByRole("heading", { level: 1, name: "entrevista" })).toBeVisible();
+});

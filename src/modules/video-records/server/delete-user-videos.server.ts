@@ -1,11 +1,11 @@
-import { rm } from "node:fs/promises";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
 import { isVideoWorking } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
-import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
+import { getVideoDirectory } from "#/shared/server/storage.server";
 
 export class AccountHasWorkingVideosError extends Error {
     constructor(userId: string) {
@@ -55,11 +55,12 @@ export async function deleteUserAccountRecords(userId: string): Promise<Array<st
 
 /** Removes the files of videos whose rows are already gone. */
 async function deleteVideoFiles(videoIds: Array<string>): Promise<void> {
-    await Promise.all(
-        videoIds.map((videoId) =>
-            rm(resolveStoragePath(getVideoDirectory(videoId)), { recursive: true, force: true }),
-        ),
-    );
+    const storage = getFileStorage();
+
+    // One at a time: an account can hold many videos, and a remote store limits its requests.
+    for (const videoId of videoIds) {
+        await storage.deleteFolder(getVideoDirectory(videoId));
+    }
 }
 
 /**
