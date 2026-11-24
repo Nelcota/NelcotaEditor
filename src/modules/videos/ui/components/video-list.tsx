@@ -64,7 +64,7 @@ function FilterableVideoList({ videos, action }: FilterableVideoListProps): Reac
     const filter = libraryFilter.filter;
     const controls = useVideoListControls(filter);
     const page = useVideoPage({ videos, filter, controls });
-    const announcement = useStageAnnouncement(page.videos);
+    const announcement = useStageAnnouncement(videos);
     const pagination = controls.pagination;
     const matchingCount = page.matchingCount;
 
