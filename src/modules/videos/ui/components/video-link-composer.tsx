@@ -154,8 +154,8 @@ export function VideoLinkComposer(): ReactNode {
                         type="submit"
                         size="icon-sm"
                         aria-label="Cortar este vídeo"
-                        disabled={isBusy}
-                        aria-busy={isBusy}
+                        disabled={isBusy === true || preferencesQuery.isPending === true}
+                        aria-busy={isBusy === true || preferencesQuery.isPending === true}
                         className={cn(
                             "rounded-full",
                             isReady === false &&
