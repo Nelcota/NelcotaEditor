@@ -101,15 +101,10 @@ function StageHeadline({ video }: { video: VideoSummary }) {
     );
 }
 
-/** Download only happens for YouTube links, so uploaded files skip that step. */
 function ProcessingSteps({ video }: { video: VideoSummary }) {
-    const steps = PROCESSING_STEPS.filter(
-        (step) => step.onlyFor === undefined || step.onlyFor === video.source,
-    );
-
     return (
         <ol className="grid gap-3 sm:auto-cols-fr sm:grid-flow-col">
-            {steps.map((step) => {
+            {PROCESSING_STEPS.map((step) => {
                 const state = stepState(step.status, video.status);
 
                 return (
