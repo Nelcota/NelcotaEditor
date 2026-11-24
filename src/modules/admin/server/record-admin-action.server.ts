@@ -1,5 +1,5 @@
 import { db } from "#/db/database.server";
-import { adminAuditLog } from "#/modules/admin/admin-audit.schema";
+import { adminAuditLog } from "#/modules/admin/admin.schema";
 import type { AdminAuditEntry } from "#/modules/admin/server/admin-audit-entry.server";
 import {
     toImpersonationStartEntry,

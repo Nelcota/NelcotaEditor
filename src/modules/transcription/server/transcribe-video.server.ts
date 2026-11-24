@@ -1,7 +1,7 @@
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { db } from "#/db/database.server";
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { transcripts } from "#/modules/transcription/transcription.schema";
 import { extractAudioChunks } from "#/modules/transcription/server/extract-audio-chunks.server";
 import type { AudioChunk } from "#/modules/transcription/server/extract-audio-chunks.server";

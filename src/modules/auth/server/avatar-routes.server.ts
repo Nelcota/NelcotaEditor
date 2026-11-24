@@ -3,8 +3,8 @@ import {
     MAX_AVATAR_BYTES,
     readPhotoExtension,
     toPhotoImage,
-} from "#/modules/auth/avatar";
-import type { AvatarPhotoExtension } from "#/modules/auth/avatar";
+} from "#/modules/auth/model/avatar";
+import type { AvatarPhotoExtension } from "#/modules/auth/model/avatar";
 import {
     findUserImage,
     readAvatarPhoto,

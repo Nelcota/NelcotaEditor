@@ -80,8 +80,8 @@ Each drawing has one meaning only:
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
-  (`src/modules/videos/video-mascot.ts`). Gallery cards and the video header.
-- **Objects (16–31) are the crew**, one per stage (`src/modules/videos/stage-crew.ts`):
+  (`src/modules/videos/model/video-mascot.ts`). Gallery cards and the video header.
+- **Objects (16–31) are the crew**, one per stage (`src/modules/videos/model/stage-crew.ts`):
 
 | Stage        | Crew      | Why                                                                |
 | ------------ | --------- | ------------------------------------------------------------------ |
@@ -97,7 +97,7 @@ Each drawing has one meaning only:
 - The crew appears in the processing panel, the failed/cancelled panels, clip placeholders and
   empty/error states. It is decorative: the stage is always written next to it.
 - The member at work bobs (`animate-crew-work`, motion-safe only); upcoming ones wait in grey.
-- **The cast** (`src/modules/videos/crew-lines.ts`), friendly and discreet — one short line, always
+- **The cast** (`src/modules/videos/model/crew-lines.ts`), friendly and discreet — one short line, always
   next to the facts, never instead of them: **Nel** (brand ghost, host of empty screens), **Luna**
   (queue), **Faísca** (download), **Tinta** (transcription), **Brilho** (best moments), **Brasa**
   (clips), **Sorte** (done), **Guarda** (failed), **Cogu** (cancelled).

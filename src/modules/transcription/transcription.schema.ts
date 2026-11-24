@@ -1,5 +1,5 @@
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
-import { videos } from "#/modules/video-records/videos.schema";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const transcripts = pgTable("transcripts", {

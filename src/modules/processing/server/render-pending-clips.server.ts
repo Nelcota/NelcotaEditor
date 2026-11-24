@@ -1,8 +1,8 @@
 import { renderClip, setClipStatus } from "#/modules/clips/server/render-clip.server";
 import type { Clip } from "#/modules/clips/clips.schema";
-import { toOverallPercent } from "#/modules/processing/processing-stages";
+import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import { runLanesToTheEnd } from "#/modules/processing/server/run-lanes-to-the-end.server";
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";

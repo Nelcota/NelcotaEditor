@@ -9,7 +9,7 @@ import {
     AccountHasWorkingVideosError,
     deleteUserAccountRecords,
 } from "#/modules/video-records/server/delete-user-videos.server";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part

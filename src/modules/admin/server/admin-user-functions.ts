@@ -4,8 +4,8 @@ import {
     adminRoleInputSchema,
     adminUserIdInputSchema,
     adminUserListInputSchema,
-} from "#/modules/admin/admin-search";
-import type { AdminUserDetails, AdminUserPage } from "#/modules/admin/admin-views";
+} from "#/modules/admin/model/admin-search";
+import type { AdminUserDetails, AdminUserPage } from "#/modules/admin/model/admin-views";
 import { toBanDetails } from "#/modules/admin/server/admin-audit-entry.server";
 import { adminMiddleware } from "#/modules/admin/server/admin-middleware";
 import { findAdminUserDetails, listAdminUsers } from "#/modules/admin/server/admin-users.server";

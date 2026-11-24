@@ -76,9 +76,10 @@ src/
     transcription/         audio extraction + Whisper
     highlights/            DeepSeek prompt and clip selection
     clips/                 captions (ASS) and rendering with FFmpeg
-    processing/            the pipeline and the worker entry point
+    processing/            the video pipeline the worker runs
   shared/                  UI kit and server infrastructure
   db/                      database client and schema index
+scripts/worker.ts          the worker entry point (runs in its container)
 ```
 
 Long steps report progress and an estimated time left, and any video can be cancelled while it's processing. Each step of the pipeline saves its result, so **Retry** on a failed video continues where it

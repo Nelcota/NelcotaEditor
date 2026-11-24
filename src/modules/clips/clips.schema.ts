@@ -21,17 +21,17 @@ import {
     DEFAULT_CAPTION_FONT,
     DEFAULT_CAPTION_POSITION,
     DEFAULT_CAPTION_SIZE,
-} from "#/modules/clips/caption-style";
-import type { CaptionCue, StudioDraft } from "#/modules/clips/clip-studio.schema";
+} from "#/modules/clips/model/caption-style";
+import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
 import {
     ASPECT_RATIOS,
     CAPTION_STYLES,
     DEFAULT_ASPECT_RATIO,
     DEFAULT_CAPTION_STYLE,
-} from "#/modules/clips/clip-format";
-import { CLIP_STATUSES } from "#/modules/clips/clip-status";
-import { MAX_SCORE, MIN_SCORE } from "#/modules/clips/clip-limits";
-import { videos } from "#/modules/video-records/videos.schema";
+} from "#/modules/clips/model/clip-format";
+import { CLIP_STATUSES } from "#/modules/clips/model/clip-status";
+import { MAX_SCORE, MIN_SCORE } from "#/modules/clips/model/clip-limits";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 export const clipStatusEnum = pgEnum("clip_status", CLIP_STATUSES);
 export const aspectRatioEnum = pgEnum("clip_aspect_ratio", ASPECT_RATIOS);

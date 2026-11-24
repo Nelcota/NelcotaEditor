@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { AVATAR_MASCOT_COUNT, toMascotImage } from "#/modules/auth/avatar";
+import { AVATAR_MASCOT_COUNT, toMascotImage } from "#/modules/auth/model/avatar";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { deleteAvatarPhotos, saveUserImage } from "#/modules/auth/server/avatar-storage.server";
 

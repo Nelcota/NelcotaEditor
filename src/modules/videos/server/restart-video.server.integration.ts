@@ -6,10 +6,10 @@ import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
 import { restartVideo } from "#/modules/videos/server/restart-video.server";
-import { StorageQuotaExceededError } from "#/modules/videos/storage-quota-exceeded-error";
+import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
-import { videos } from "#/modules/video-records/videos.schema";
-import type { VideoStatus } from "#/modules/video-records/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
 // of `bun run check`. Run: bun test ./src/modules/videos/server/restart-video.server.integration.ts

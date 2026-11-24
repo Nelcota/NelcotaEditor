@@ -13,6 +13,11 @@ const DB_PREFIX = "src/db/";
 const SCHEMA_SUFFIX = ".schema";
 const SOURCE_EXTENSIONS = [".ts", ".tsx"];
 const GENERATED_FILES = ["routeTree.gen.ts"];
+const DB_SCHEMA_INDEX = "src/db/schema";
+const MODULE_FOLDERS = ["model", "client", "server", "domain", "application", "ports", "adapters"];
+const UI_FOLDERS = ["screens", "components", "hooks"];
+const MODULE_LAYOUT_HINT =
+    "<module>.schema.ts, model/, client/, server/, ui/screens|components|hooks/ or hexagonal layers";
 
 const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>>> = {
     auth: [],
@@ -257,6 +262,14 @@ function checkDatabaseImport(edge: ImportEdge): string | null {
     return "db/ may only import the modules' *.schema.ts table files";
 }
 
+function checkSchemaIndexImport(edge: ImportEdge): string | null {
+    if (edge.target !== DB_SCHEMA_INDEX || edge.file.startsWith(DB_PREFIX) === true) {
+        return null;
+    }
+
+    return "import tables from their <module>.schema.ts, not from db/schema.ts";
+}
+
 function checkRouteImport(edge: ImportEdge): string | null {
     const specifier = edge.specifier;
 
@@ -276,6 +289,7 @@ function checkEdge(edge: ImportEdge, usedExceptions: Set<AllowedException>): Arr
         checkModuleImport(edge, usedExceptions),
         checkSharedImport(edge),
         checkDatabaseImport(edge),
+        checkSchemaIndexImport(edge),
         checkRouteImport(edge),
     ];
 
@@ -340,6 +354,38 @@ function findMapProblems(): Array<string> {
     return problems;
 }
 
+function isAllowedModulePath(moduleName: string, relativePath: string): boolean {
+    const segments = relativePath.split("/");
+    const folder = segments[0] ?? "";
+    const uiFolder = segments[1] ?? "";
+
+    if (segments.length === 1) {
+        return relativePath === `${moduleName}${SCHEMA_SUFFIX}.ts`;
+    }
+
+    if (folder === "ui") {
+        return segments.length > 2 && UI_FOLDERS.includes(uiFolder) === true;
+    }
+
+    return MODULE_FOLDERS.includes(folder) === true;
+}
+
+/** Every module file lives in the folder for its kind; only the table file sits at the root. */
+function findLayoutProblems(): Array<string> {
+    const files = listSourceFiles(MODULES_PREFIX.slice(0, -1));
+
+    return files.flatMap((file) => {
+        const moduleName = moduleOf(file) ?? "";
+        const relativePath = file.slice(`${MODULES_PREFIX}${moduleName}/`.length);
+
+        if (isAllowedModulePath(moduleName, relativePath) === true) {
+            return [];
+        }
+
+        return [`${file} is outside the module layout (${MODULE_LAYOUT_HINT})`];
+    });
+}
+
 function findUnusedExceptions(usedExceptions: Set<AllowedException>): Array<string> {
     return ALLOWED_EXCEPTIONS.filter((exception) => usedExceptions.has(exception) === false).map(
         (exception) => `unused exception ${exception.from} -> ${exception.to}; remove it`,
@@ -354,7 +400,11 @@ function reportViolation(violation: Violation): void {
 const usedExceptions = new Set<AllowedException>();
 const edges = listSourceFiles(SOURCE_DIRECTORY).flatMap(readImports);
 const violations = edges.flatMap((edge) => checkEdge(edge, usedExceptions));
-const problems = [...findMapProblems(), ...findUnusedExceptions(usedExceptions)];
+const problems = [
+    ...findMapProblems(),
+    ...findUnusedExceptions(usedExceptions),
+    ...findLayoutProblems(),
+];
 
 if (violations.length > 0 || problems.length > 0) {
     violations.forEach(reportViolation);

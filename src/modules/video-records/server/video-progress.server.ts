@@ -4,10 +4,10 @@ import { db } from "#/db/database.server";
 import {
     FINISHED_VIDEO_STATUSES,
     WORKING_VIDEO_STATUSES,
-} from "#/modules/video-records/video-status";
-import type { VideoStatus } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
-import type { Video } from "#/modules/video-records/videos.schema";
+} from "#/modules/video-records/model/video-status";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
+import type { Video } from "#/modules/video-records/video-records.schema";
 import { measureFileBytes } from "#/shared/server/directory-size.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
 

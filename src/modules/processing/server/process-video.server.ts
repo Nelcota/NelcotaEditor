@@ -6,7 +6,7 @@ import { renderPendingClips } from "#/modules/processing/server/render-pending-c
 import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
 import { ensureTranscript } from "#/modules/transcription/server/transcribe-video.server";
 import { prepareVideoSource } from "#/modules/processing/server/prepare-video-source.server";
-import { toOverallPercent } from "#/modules/processing/processing-stages";
+import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import {
     findVideoById,
     markVideoCancelled,
@@ -14,8 +14,8 @@ import {
     markVideoFailed,
     updateVideoStage,
 } from "#/modules/video-records/server/video-progress.server";
-import { isVideoFinished } from "#/modules/video-records/video-status";
-import type { VideoStatus } from "#/modules/video-records/video-status";
+import { isVideoFinished } from "#/modules/video-records/model/video-status";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { toUserMessage } from "#/shared/server/user-facing-error";
 

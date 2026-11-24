@@ -20,10 +20,11 @@ RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY tsconfig.json ./
 COPY src ./src
+COPY scripts/worker.ts ./scripts/worker.ts
 
 # The worker runs ffmpeg and yt-dlp on files from the internet; it gets no root rights. The `bun`
 # user (uid 1000) of the base image owns the storage folder, so a fresh volume is writable too.
 RUN mkdir -p /app/storage && chown bun:bun /app/storage
 USER bun
 
-CMD ["bun", "src/modules/processing/server/worker-main.server.ts"]
+CMD ["bun", "scripts/worker.ts"]

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 interface DownloadedSource {
     videoId: string;

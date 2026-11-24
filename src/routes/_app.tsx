@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AppLayout } from "#/modules/shell/ui/app-layout";
-import { currentUserQueryOptions } from "#/modules/auth/ui/current-user-query";
-import { usageQueryOptions } from "#/modules/videos/ui/library-queries";
-import { videosQueryOptions } from "#/modules/videos/ui/video-queries";
+import { AppLayout } from "#/modules/shell/ui/screens/app-layout";
+import { currentUserQueryOptions } from "#/modules/auth/ui/hooks/current-user-query";
+import { usageQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
+import { videosQueryOptions } from "#/modules/videos/ui/hooks/video-queries";
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: async ({ context }) => {

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { libraryClipsQueryOptions } from "#/modules/videos/ui/library-queries";
-import { ClipsScreen } from "#/modules/videos/ui/clips-screen";
+import { libraryClipsQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
+import { ClipsScreen } from "#/modules/videos/ui/screens/clips-screen";
 
 export const Route = createFileRoute("/_app/clips")({
     head: () => ({ meta: [{ title: "Cortes · Nelcota" }] }),

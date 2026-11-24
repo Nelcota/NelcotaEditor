@@ -1,9 +1,9 @@
 import type { Clip } from "#/modules/clips/clips.schema";
-import type { CaptionWord, StudioDraft } from "#/modules/clips/clip-studio.schema";
-import { TIME_TOLERANCE_SECONDS, studioDraftSchema } from "#/modules/clips/clip-studio.schema";
+import type { CaptionWord, StudioDraft } from "#/modules/clips/model/clip-studio";
+import { TIME_TOLERANCE_SECONDS, studioDraftSchema } from "#/modules/clips/model/clip-studio";
 import { findTranscriptWords as findSavedTranscriptWords } from "#/modules/transcription/server/find-transcript-words.server";
-import { isVideoFinished } from "#/modules/video-records/video-status";
-import type { Video } from "#/modules/video-records/videos.schema";
+import { isVideoFinished } from "#/modules/video-records/model/video-status";
+import type { Video } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 /** The Studio shows a video without a transcript as one without words. */

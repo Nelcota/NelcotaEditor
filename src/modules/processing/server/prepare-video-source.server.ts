@@ -1,7 +1,7 @@
 import { stat } from "node:fs/promises";
-import { toOverallPercent } from "#/modules/processing/processing-stages";
-import { MAX_UPLOAD_BYTES } from "#/modules/video-records/upload-limits";
-import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/video-status";
+import { toOverallPercent } from "#/modules/processing/model/processing-stages";
+import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
+import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/model/video-status";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { downloadYoutubeVideo } from "#/modules/processing/server/download-youtube-video.server";
 import {
@@ -12,8 +12,8 @@ import {
 import { ensureVideoThumbnail } from "#/modules/processing/server/video-thumbnail.server";
 import { saveDownloadedSource } from "#/modules/processing/server/save-downloaded-source.server";
 import { removeDownloadFiles } from "#/modules/processing/server/download-files.server";
-import { toStoredVideoTitle } from "#/modules/video-records/video-title";
-import type { Video } from "#/modules/video-records/videos.schema";
+import { toStoredVideoTitle } from "#/modules/video-records/model/video-title";
+import type { Video } from "#/modules/video-records/video-records.schema";
 import { probeMedia } from "#/shared/server/media-probe.server";
 import type { MediaInfo } from "#/shared/server/media-probe.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";

@@ -1,7 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { THEME_COLOR_META, THEME_HEAD_SCRIPT } from "#/modules/shell/theme-head";
+import { THEME_COLOR_META, THEME_HEAD_SCRIPT } from "#/modules/shell/model/theme-head";
 import appCss from "#/styles.css?url";
 
 interface RouterContext {

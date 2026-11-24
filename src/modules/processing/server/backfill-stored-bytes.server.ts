@@ -1,7 +1,7 @@
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { measureFileBytes } from "#/shared/server/directory-size.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
 

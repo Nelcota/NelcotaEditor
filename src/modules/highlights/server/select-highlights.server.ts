@@ -6,16 +6,16 @@ import type { Clip } from "#/modules/clips/clips.schema";
 import {
     buildTranscriptLines,
     formatTranscriptLines,
-} from "#/modules/transcription/build-transcript-lines";
-import { buildHighlightSystemPrompt } from "#/modules/highlights/highlight-prompt";
-import { normalizeHighlights } from "#/modules/highlights/normalize-highlights";
-import type { HighlightCandidate } from "#/modules/highlights/normalize-highlights";
+} from "#/modules/transcription/model/build-transcript-lines";
+import { buildHighlightSystemPrompt } from "#/modules/highlights/model/highlight-prompt";
+import { normalizeHighlights } from "#/modules/highlights/model/normalize-highlights";
+import type { HighlightCandidate } from "#/modules/highlights/model/normalize-highlights";
 import {
     BROKEN_ANSWER_MESSAGE,
     requestJsonCompletion,
 } from "#/modules/highlights/server/deepseek-client.server";
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
-import type { Video } from "#/modules/video-records/videos.schema";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
+import type { Video } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 // Used when the model leaves the score out: the middle of the 1–100 scale ranks it neutrally.

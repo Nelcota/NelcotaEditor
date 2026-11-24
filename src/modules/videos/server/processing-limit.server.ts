@@ -1,7 +1,7 @@
 import { and, count, eq, notInArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { FINISHED_VIDEO_STATUSES } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { FINISHED_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 /** One person (or a bot) must not fill the workers' queue for everyone else. */

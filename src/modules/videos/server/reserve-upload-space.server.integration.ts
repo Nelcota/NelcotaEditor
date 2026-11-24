@@ -8,7 +8,7 @@ import {
     TooManyVideosInProgressError,
 } from "#/modules/videos/server/processing-limit.server";
 import { reserveUploadSpace } from "#/modules/videos/server/reserve-upload-space.server";
-import { StorageQuotaExceededError } from "#/modules/videos/storage-quota-exceeded-error";
+import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part

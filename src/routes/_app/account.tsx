@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { preferencesQueryOptions } from "#/modules/preferences/ui/preferences-queries";
-import { AccountScreen } from "#/modules/shell/ui/account-screen";
-import { usageQueryOptions } from "#/modules/videos/ui/library-queries";
+import { preferencesQueryOptions } from "#/modules/preferences/ui/hooks/preferences-queries";
+import { AccountScreen } from "#/modules/shell/ui/screens/account-screen";
+import { usageQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
 
 export const Route = createFileRoute("/_app/account")({
     head: () => ({ meta: [{ title: "Conta · Nelcota" }] }),

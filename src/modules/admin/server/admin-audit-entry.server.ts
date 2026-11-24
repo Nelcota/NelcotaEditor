@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { AdminAuditAction, AdminAuditDetails } from "#/modules/admin/admin-audit.schema";
+import type { AdminAuditAction, AdminAuditDetails } from "#/modules/admin/admin.schema";
 
 export type AdminAuditEntry = {
     readonly action: AdminAuditAction;

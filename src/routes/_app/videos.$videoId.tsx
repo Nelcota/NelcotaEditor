@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { StudioTab } from "#/modules/studio/ui/studio-tab";
-import { loadVideoPageTitle } from "#/modules/videos/ui/load-video-page-title";
-import { VideoDetailsScreen } from "#/modules/videos/ui/video-details-screen";
-import { videoPageSearchSchema } from "#/modules/videos/ui/video-page-search";
+import { StudioTab } from "#/modules/studio/ui/screens/studio-tab";
+import { loadVideoPageTitle } from "#/modules/videos/ui/hooks/load-video-page-title";
+import { VideoDetailsScreen } from "#/modules/videos/ui/screens/video-details-screen";
+import { videoPageSearchSchema } from "#/modules/videos/model/video-page-search";
 
 export const Route = createFileRoute("/_app/videos/$videoId")({
     validateSearch: videoPageSearchSchema,

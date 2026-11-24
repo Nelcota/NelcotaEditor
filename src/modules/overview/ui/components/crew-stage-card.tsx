@@ -1,0 +1,73 @@
+import type { ReactNode } from "react";
+import { formatInteger } from "#/modules/overview/model/format-metric";
+import type {
+    OverviewFunnel,
+    OverviewMetrics,
+    OverviewStats,
+} from "#/modules/overview/model/overview-views";
+import { CompactMetric } from "#/modules/overview/ui/components/compact-metric";
+import { findMetricDefinition } from "#/modules/overview/model/metric-definitions";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
+import { CREW_NAMES } from "#/modules/videos/model/crew-lines";
+import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
+import { pluralize } from "#/shared/ui/pluralize";
+
+export interface CrewStage {
+    status: VideoStatus;
+    role: string;
+    metricKey: keyof OverviewMetrics;
+    funnelKey: keyof OverviewFunnel;
+}
+
+export const CREW_STAGES: ReadonlyArray<CrewStage> = [
+    { status: "downloading", role: "trouxe os vídeos", metricKey: "videosSent", funnelKey: "sent" },
+    {
+        status: "transcribing",
+        role: "escreveu cada palavra",
+        metricKey: "transcribedMinutes",
+        funnelKey: "transcribed",
+    },
+    {
+        status: "selecting",
+        role: "escolheu os momentos",
+        metricKey: "averageScore",
+        funnelKey: "selected",
+    },
+    { status: "rendering", role: "montou os cortes", metricKey: "clipsReady", funnelKey: "ready" },
+];
+
+interface CrewStageCardProps {
+    stage: CrewStage;
+    stats: OverviewStats;
+}
+
+/** One crew member, what they did in the period and how many videos reached their stage. */
+export function CrewStageCard({ stage, stats }: CrewStageCardProps): ReactNode {
+    const name = CREW_NAMES[stage.status];
+    const videoCount = stats.funnel[stage.funnelKey];
+
+    return (
+        <li className="grid content-start gap-3 rounded-2xl border bg-popover p-3 @lg:gap-4 @lg:p-5">
+            <div className="flex items-center gap-3">
+                <StageCrewMascot status={stage.status} className="size-9 @lg:size-11" />
+                <p className="leading-tight">
+                    <strong className="block font-semibold">{name}</strong>
+                    <span className="text-sm text-muted-foreground @max-lg:sr-only">
+                        {stage.role}
+                    </span>
+                </p>
+            </div>
+            <CompactMetric
+                definition={findMetricDefinition(stage.metricKey)}
+                metric={stats.metrics[stage.metricKey]}
+            />
+            {/* Faísca's own number already counts the videos that arrived. */}
+            {stage.funnelKey !== "sent" && (
+                <p className="border-t pt-3 text-xs text-muted-foreground tabular-nums">
+                    {formatInteger(videoCount)}{" "}
+                    {pluralize(videoCount, "vídeo passou", "vídeos passaram")} por aqui
+                </p>
+            )}
+        </li>
+    );
+}

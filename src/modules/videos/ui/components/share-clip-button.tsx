@@ -1,0 +1,63 @@
+import Link2Icon from "~icons/lucide/link-2";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { setClipSharing } from "#/modules/clips/server/clip-sharing-functions";
+import type { ClipView } from "#/modules/clips/model/clip-view";
+import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { Button } from "#/shared/ui/button";
+import { CopyTextButton } from "#/shared/ui/copy-text-button";
+import { FormAlert } from "#/shared/ui/form-alert";
+
+interface ShareClipButtonProps {
+    videoId: string;
+    clip: ClipView;
+}
+
+/** Without a link nobody but the owner can watch the clip; turning it off kills the old link. */
+export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
+    const queryClient = useQueryClient();
+    const sharePath = clip.sharePath;
+    const mutation = useMutation({
+        mutationFn: (isShared: boolean) =>
+            setClipSharing({ data: { videoId, clipId: clip.id, isShared } }),
+        onSuccess: async () => {
+            await invalidateVideoQueries(queryClient);
+        },
+    });
+
+    if (sharePath === null) {
+        return (
+            <div className="grid gap-2">
+                <Button
+                    variant="outline"
+                    onClick={() => mutation.mutate(true)}
+                    disabled={mutation.isPending}
+                    aria-busy={mutation.isPending}
+                    className="font-medium"
+                >
+                    <Link2Icon aria-hidden="true" />
+                    Criar link
+                </Button>
+                {mutation.isError === true && <FormAlert message={mutation.error.message} />}
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid gap-2">
+            <CopyTextButton
+                text={`${window.location.origin}${sharePath}`}
+                label="Copiar link"
+                className="min-w-36"
+            />
+            <Button
+                variant="ghost"
+                onClick={() => mutation.mutate(false)}
+                disabled={mutation.isPending}
+                aria-busy={mutation.isPending}
+            >
+                Desativar link
+            </Button>
+            {mutation.isError === true && <FormAlert message={mutation.error.message} />}
+        </div>
+    );
+}

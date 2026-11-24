@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
-import { overviewInputSchema } from "#/modules/overview/overview-period";
-import type { OverviewStats } from "#/modules/overview/overview-views";
+import { overviewInputSchema } from "#/modules/overview/model/overview-period";
+import type { OverviewStats } from "#/modules/overview/model/overview-views";
 import { summarizeOverview } from "#/modules/overview/server/overview-stats.server";
 
 export const getOverviewStats = createServerFn({ method: "GET" })

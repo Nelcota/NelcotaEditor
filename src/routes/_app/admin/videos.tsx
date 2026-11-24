@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { DEFAULT_ADMIN_VIDEO_FILTER, adminVideosSearchSchema } from "#/modules/admin/admin-search";
-import type { AdminVideosSearch } from "#/modules/admin/admin-search";
-import { adminVideosQueryOptions } from "#/modules/admin/ui/admin-queries";
-import { AdminVideosScreen } from "#/modules/admin/ui/admin-videos-screen";
+import {
+    DEFAULT_ADMIN_VIDEO_FILTER,
+    adminVideosSearchSchema,
+} from "#/modules/admin/model/admin-search";
+import type { AdminVideosSearch } from "#/modules/admin/model/admin-search";
+import { adminVideosQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { AdminVideosScreen } from "#/modules/admin/ui/screens/admin-videos-screen";
 
 export const Route = createFileRoute("/_app/admin/videos")({
     validateSearch: adminVideosSearchSchema,

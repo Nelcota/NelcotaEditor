@@ -1,4 +1,4 @@
-import { toAuthErrorMessage } from "#/modules/auth/auth-error-message";
+import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
 
 interface AuthResult {
     error: { code?: string; status?: number } | null;

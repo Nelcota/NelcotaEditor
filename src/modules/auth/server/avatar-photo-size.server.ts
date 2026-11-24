@@ -1,5 +1,5 @@
 import { imageSize } from "image-size";
-import type { AvatarPhotoExtension } from "#/modules/auth/avatar";
+import type { AvatarPhotoExtension } from "#/modules/auth/model/avatar";
 import { logger } from "#/shared/server/logger.server";
 
 /**

@@ -9,8 +9,8 @@ import { db } from "#/db/database.server";
 import {
     BANNED_USER_MESSAGE,
     VIDEOS_STILL_PROCESSING_CODE,
-} from "#/modules/auth/auth-error-message";
-import { MAX_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "#/modules/auth/auth-forms.schema";
+} from "#/modules/auth/model/auth-error-message";
+import { MAX_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "#/modules/auth/model/auth-forms";
 import {
     ADMIN_ROLE,
     USER_ROLE,

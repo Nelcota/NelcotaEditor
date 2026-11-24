@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { isFileNotFoundError } from "#/shared/server/fs-errors";
 import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 import { resolveStoragePath } from "#/shared/server/storage.server";

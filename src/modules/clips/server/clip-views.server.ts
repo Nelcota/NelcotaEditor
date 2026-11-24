@@ -1,9 +1,9 @@
 import { and, asc, eq, gte } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import type { ClipView } from "#/modules/clips/clip-view";
+import type { ClipView } from "#/modules/clips/model/clip-view";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 /**
  * The clip columns a ClipView needs. Lists are polled every few seconds, and a full row also

@@ -4,7 +4,7 @@ import { after, describe, test } from "node:test";
 import { eq, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { saveDownloadedSource } from "#/modules/processing/server/save-downloaded-source.server";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part

@@ -2,14 +2,14 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { z } from "zod";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
-import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/preferences";
+import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/model/preferences";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import {
     TooManyVideosInProgressError,
     assertCanStartAnotherVideo,
 } from "#/modules/videos/server/processing-limit.server";
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
-import { StorageQuotaExceededError } from "#/modules/videos/storage-quota-exceeded-error";
+import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
 import {
     EmptyUploadError,
     UploadTooLargeError,
@@ -23,11 +23,11 @@ import {
     ALLOWED_VIDEO_EXTENSIONS,
     MAX_TITLE_LENGTH,
     MAX_UPLOAD_BYTES,
-} from "#/modules/video-records/upload-limits";
-import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
-import { CLIP_LENGTHS } from "#/modules/video-records/clip-length";
-import { truncateText } from "#/modules/video-records/video-title";
+} from "#/modules/video-records/model/upload-limits";
+import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
+import { CLIP_LENGTHS } from "#/modules/video-records/model/clip-length";
+import { truncateText } from "#/modules/video-records/model/video-title";
 import {
     HTTP_BAD_REQUEST,
     HTTP_CREATED,

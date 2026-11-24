@@ -1,5 +1,5 @@
 import { ADMIN_ROLE } from "#/modules/auth/auth.schema";
-import type { SessionUser } from "#/modules/auth/session-user";
+import type { SessionUser } from "#/modules/auth/model/session-user";
 import { auth } from "#/modules/auth/server/auth.server";
 
 type AuthSession = Awaited<ReturnType<typeof auth.api.getSession>>;

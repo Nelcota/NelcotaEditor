@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
     DEFAULT_OVERVIEW_PERIOD_DAYS,
     overviewSearchSchema,
-} from "#/modules/overview/overview-period";
-import { overviewQueryOptions } from "#/modules/overview/ui/overview-queries";
-import { OverviewScreen } from "#/modules/overview/ui/overview-screen";
+} from "#/modules/overview/model/overview-period";
+import { overviewQueryOptions } from "#/modules/overview/ui/hooks/overview-queries";
+import { OverviewScreen } from "#/modules/overview/ui/screens/overview-screen";
 
 export const Route = createFileRoute("/_app/overview")({
     head: () => ({ meta: [{ title: "Painel · Nelcota" }] }),

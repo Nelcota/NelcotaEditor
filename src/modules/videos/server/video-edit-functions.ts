@@ -6,9 +6,12 @@ import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
 import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
 import { restartVideo } from "#/modules/videos/server/restart-video.server";
-import { FINISHED_VIDEO_STATUSES, isVideoFinished } from "#/modules/video-records/video-status";
-import { videoTitleSchema } from "#/modules/video-records/video-title";
-import { videos } from "#/modules/video-records/videos.schema";
+import {
+    FINISHED_VIDEO_STATUSES,
+    isVideoFinished,
+} from "#/modules/video-records/model/video-status";
+import { videoTitleSchema } from "#/modules/video-records/model/video-title";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const renameVideoInputSchema = z.object({ videoId: z.uuid(), title: videoTitleSchema });

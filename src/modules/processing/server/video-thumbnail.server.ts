@@ -1,8 +1,8 @@
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import type { Video } from "#/modules/video-records/videos.schema";
-import { videos } from "#/modules/video-records/videos.schema";
+import type { Video } from "#/modules/video-records/video-records.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";

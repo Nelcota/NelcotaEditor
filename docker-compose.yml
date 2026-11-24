@@ -59,6 +59,7 @@ services:
             - ./storage:/app/storage
             # Mounted so code changes only need `bun run worker:restart`, not a rebuild.
             - ./src:/app/src:ro
+            - ./scripts/worker.ts:/app/scripts/worker.ts:ro
         depends_on:
             postgres:
                 condition: service_healthy
