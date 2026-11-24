@@ -1,5 +1,6 @@
 import { inArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
+import { startAuthEmailWorker } from "#/modules/auth/server/auth-email-queue.server";
 import { backfillStoredBytes } from "#/modules/processing/server/backfill-stored-bytes.server";
 import { processVideo } from "#/modules/processing/server/process-video.server";
 import { removeAllVideoWorkspaces } from "#/modules/processing/server/video-workspace.server";
@@ -137,6 +138,7 @@ async function startWorker(): Promise<void> {
         },
     );
     await startExpiredUploadSweep();
+    await startAuthEmailWorker();
     logger.info({ workerConcurrency }, "Worker ready");
 
     process.once("SIGTERM", stopWorker);

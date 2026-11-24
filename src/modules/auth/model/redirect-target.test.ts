@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { signInSearchSchema, toRedirectTarget } from "#/modules/auth/model/redirect-target";
+import { toRedirectTarget } from "#/modules/auth/model/redirect-target";
+import { signInSearchSchema } from "#/modules/auth/model/sign-in-search";
 
 function parseTarget(redirect: unknown): string {
     return toRedirectTarget(signInSearchSchema.parse({ redirect }));

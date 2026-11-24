@@ -15,6 +15,7 @@ const STRICT_RULES = {
     "/delete-user": { window: 15 * SECONDS_PER_MINUTE, max: 5 },
     "/request-password-reset": { window: 15 * SECONDS_PER_MINUTE, max: 3 },
     "/reset-password": { window: 15 * SECONDS_PER_MINUTE, max: 5 },
+    "/send-verification-email": { window: 15 * SECONDS_PER_MINUTE, max: 3 },
 };
 
 /**

@@ -20,6 +20,9 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     MISSING_RESPONSE: "Aguarde a verificação de segurança terminar e tente de novo.",
     BANNED_USER: BANNED_USER_MESSAGE,
     VERIFICATION_FAILED: "A verificação de segurança falhou. Tente de novo.",
+    EMAIL_NOT_VERIFIED:
+        "Confirme seu email para entrar. Enviamos um novo link, confira sua caixa de entrada e o spam.",
+    INVALID_TOKEN: "Este link expirou ou já foi usado. Peça um novo.",
 };
 
 const HTTP_TOO_MANY_REQUESTS = 429;

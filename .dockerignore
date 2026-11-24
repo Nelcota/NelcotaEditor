@@ -3,5 +3,14 @@ node_modules
 .tanstack
 .nitro
 storage
+storage-test
 .env
+.env.*
 .git
+.agents
+.codex
+.claude
+design
+e2e
+playwright-report
+test-results

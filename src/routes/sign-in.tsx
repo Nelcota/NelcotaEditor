@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { getCaptchaSiteKey } from "#/modules/auth/server/captcha-functions";
-import { signInSearchSchema, toRedirectTarget } from "#/modules/auth/model/redirect-target";
+import { toRedirectTarget } from "#/modules/auth/model/redirect-target";
+import { signInSearchSchema } from "#/modules/auth/model/sign-in-search";
 import { getCurrentUser } from "#/modules/auth/server/get-current-user";
 import { SignInScreen } from "#/modules/auth/ui/screens/sign-in-screen";
 
@@ -25,6 +26,10 @@ function SignInPage(): ReactNode {
     const search = Route.useSearch();
 
     return (
-        <SignInScreen captchaSiteKey={captchaSiteKey} redirectTarget={toRedirectTarget(search)} />
+        <SignInScreen
+            captchaSiteKey={captchaSiteKey}
+            search={search}
+            redirectTarget={toRedirectTarget(search)}
+        />
     );
 }
