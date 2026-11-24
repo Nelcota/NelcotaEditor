@@ -1,8 +1,9 @@
-import { and, asc, eq, gte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import type { ClipView } from "#/modules/clips/model/clip-view";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
+import { FINISHED_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
 
 /**
@@ -80,7 +81,11 @@ export interface ReadyClipRow {
     videoTitle: string;
 }
 
-/** The user's ready clips created since `since`, with the video each one came from. */
+/**
+ * The user's ready clips created since `since`, with the video each one came from. Only videos
+ * that finished count, like the Painel's video numbers: a clip of a video still in progress (or
+ * re-rendering) joins once the video ends.
+ */
 export async function listReadyClipsSince(
     userId: string,
     since: Date,
@@ -90,6 +95,11 @@ export async function listReadyClipsSince(
         .from(clips)
         .innerJoin(videos, eq(videos.id, clips.videoId))
         .where(
-            and(eq(videos.userId, userId), eq(clips.status, "done"), gte(clips.createdAt, since)),
+            and(
+                eq(videos.userId, userId),
+                inArray(videos.status, FINISHED_VIDEO_STATUSES),
+                eq(clips.status, "done"),
+                gte(clips.createdAt, since),
+            ),
         );
 }
