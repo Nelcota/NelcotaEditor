@@ -1,14 +1,9 @@
-import path from "node:path";
-import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
-import { getVideoDirectory } from "#/shared/server/storage.server";
 
-const SOURCE_FILE_NAME = "source";
-
-export class UploadTooLargeError extends Error {
+export class UploadLargerThanDeclaredError extends Error {
     constructor(maxBytes: number) {
-        super(`Upload is larger than ${maxBytes} bytes`);
-        this.name = "UploadTooLargeError";
+        super(`Upload is larger than its declared ${maxBytes} bytes`);
+        this.name = "UploadLargerThanDeclaredError";
     }
 }
 
@@ -32,7 +27,7 @@ function capStreamBytes(
                 receivedBytes += chunk.byteLength;
 
                 if (receivedBytes > maxBytes) {
-                    throw new UploadTooLargeError(maxBytes);
+                    throw new UploadLargerThanDeclaredError(maxBytes);
                 }
 
                 controller.enqueue(chunk);
@@ -41,58 +36,31 @@ function capStreamBytes(
     );
 }
 
-export async function removeVideoDirectory(videoId: string): Promise<void> {
-    await getFileStorage().deleteFolder(getVideoDirectory(videoId));
-}
-
 interface UploadTarget {
-    videoId: string;
-    extension: string;
-    /** The upload's reserved size, at most MAX_UPLOAD_BYTES. */
+    /** The reserved upload's key. */
+    sourcePath: string;
+    /** The size the upload declared and reserved. */
     maxBytes: number;
 }
 
-export interface StoredUpload {
-    sourcePath: string;
-    sourceBytes: number;
-}
-
-async function storeCappedBody(
+/** Saves the body as the reserved upload's file and returns its size. */
+export async function storeVideoUpload(
     body: ReadableStream<Uint8Array>,
     target: UploadTarget,
-    sourcePath: string,
 ): Promise<number> {
-    const sourceBytes = await getFileStorage().storeStream(
-        sourcePath,
-        capStreamBytes(body, target.maxBytes),
-    );
+    const { sourcePath, maxBytes } = target;
+
+    if (Number.isSafeInteger(maxBytes) === false || maxBytes <= 0) {
+        throw new RangeError(`Invalid upload size limit: ${String(maxBytes)}`);
+    }
+
+    const storage = getFileStorage();
+    const sourceBytes = await storage.storeStream(sourcePath, capStreamBytes(body, maxBytes));
 
     if (sourceBytes === 0) {
+        await storage.deleteFile(sourcePath);
         throw new EmptyUploadError();
     }
 
     return sourceBytes;
-}
-
-/** Saves the upload as the video's source file and returns its relative path and size. */
-export async function storeVideoUpload(
-    body: ReadableStream<Uint8Array>,
-    target: UploadTarget,
-): Promise<StoredUpload> {
-    const maxBytes = target.maxBytes;
-
-    if (Number.isSafeInteger(maxBytes) === false || maxBytes <= 0 || maxBytes > MAX_UPLOAD_BYTES) {
-        throw new RangeError(`Invalid upload size limit: ${String(maxBytes)}`);
-    }
-
-    const videoDirectory = getVideoDirectory(target.videoId);
-    const sourcePath = path.posix.join(videoDirectory, `${SOURCE_FILE_NAME}${target.extension}`);
-
-    try {
-        const sourceBytes = await storeCappedBody(body, target, sourcePath);
-        return { sourcePath, sourceBytes };
-    } catch (error) {
-        await removeVideoDirectory(target.videoId);
-        throw error;
-    }
 }

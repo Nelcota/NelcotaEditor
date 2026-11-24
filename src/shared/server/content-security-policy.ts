@@ -15,7 +15,7 @@ interface PolicyOptions {
     nonce: string;
     /** Vite's dev server talks to the page over a websocket for hot reload. */
     isDevelopment: boolean;
-    /** Where videos, thumbnails and photos load from when the store is not the app (R2). */
+    /** Where videos, thumbnails and photos load from, and uploads go to, when the store is not the app (R2). */
     storageMediaOrigin: string | null;
 }
 
@@ -49,7 +49,8 @@ export function buildContentSecurityPolicy(options: PolicyOptions): string {
         `font-src 'self' data: ${GOOGLE_FONTS_FILE_ORIGIN}`,
         `img-src ${withStorageOrigin(`'self' data: blob: ${YOUTUBE_THUMBNAIL_ORIGIN}`, storageMediaOrigin)}`,
         `media-src ${withStorageOrigin("'self' blob:", storageMediaOrigin)}`,
-        `connect-src ${buildConnectSources(options.isDevelopment)}`,
+        // The browser PUTs uploads straight to the store.
+        `connect-src ${withStorageOrigin(buildConnectSources(options.isDevelopment), storageMediaOrigin)}`,
         `frame-src ${TURNSTILE_ORIGIN}`,
         "worker-src 'self' blob:",
         "manifest-src 'self'",

@@ -3,6 +3,7 @@ import { db } from "#/db/database.server";
 import { backfillStoredBytes } from "#/modules/processing/server/backfill-stored-bytes.server";
 import { processVideo } from "#/modules/processing/server/process-video.server";
 import { removeAllVideoWorkspaces } from "#/modules/processing/server/video-workspace.server";
+import { startExpiredUploadSweep } from "#/modules/videos/server/expired-upload-sweep.server";
 import {
     enqueueVideoProcessing,
     ensureProcessVideoQueue,
@@ -135,6 +136,7 @@ async function startWorker(): Promise<void> {
             }
         },
     );
+    await startExpiredUploadSweep();
     logger.info({ workerConcurrency }, "Worker ready");
 
     process.once("SIGTERM", stopWorker);

@@ -10,7 +10,7 @@ function findDirective(policy: string, name: string): string {
 }
 
 describe("buildContentSecurityPolicy", () => {
-    it("lets media and images load from the storage origin when files live in R2", () => {
+    it("lets media, images and uploads reach the storage origin when files live in R2", () => {
         const policy = buildContentSecurityPolicy({
             nonce: "abc",
             isDevelopment: false,
@@ -19,6 +19,7 @@ describe("buildContentSecurityPolicy", () => {
 
         expect(findDirective(policy, "media-src")).toContain(R2_ORIGIN);
         expect(findDirective(policy, "img-src")).toContain(R2_ORIGIN);
+        expect(findDirective(policy, "connect-src")).toContain(R2_ORIGIN);
     });
 
     it("keeps media on the app's own origin when files live on its disk", () => {

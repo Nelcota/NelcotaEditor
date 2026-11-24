@@ -14,7 +14,11 @@ import {
 import type { ListObjectsV2CommandOutput } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { contentTypeForKey } from "#/shared/server/file-storage/content-type-for-key";
-import type { FileStorage, ServedFile } from "#/shared/server/file-storage/file-storage";
+import type {
+    FileStorage,
+    ServedFile,
+    UploadSlot,
+} from "#/shared/server/file-storage/file-storage";
 
 const CONNECTION_TIMEOUT_MILLISECONDS = 10_000;
 // A socket with no bytes for this long is dead; long transfers that keep moving are not cut.
@@ -27,6 +31,7 @@ const DOWNLOADED_FILE_PREFIX = "stored-";
 const SPOOL_FOLDER_NAME = "spool";
 const KEY_SEGMENT_SEPARATOR = "/";
 const FORBIDDEN_KEY_SEGMENTS = new Set(["", ".", ".."]);
+const SIGNED_UPLOAD_HEADERS = new Set(["content-length"]);
 
 export interface R2Settings {
     accountId: string;
@@ -129,6 +134,24 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
             { abortSignal: AbortSignal.timeout(TRANSFER_TIMEOUT_MILLISECONDS) },
         );
         return fileStats.size;
+    }
+
+    /**
+     * Content-Length is signed, so R2 refuses a body of any other size: the browser cannot send
+     * more than the space it reserved.
+     */
+    function createUploadUrl(key: string, slot: UploadSlot): Promise<string | null> {
+        assertValidKey(key);
+
+        return getSignedUrl(
+            client,
+            new PutObjectCommand({
+                Bucket: bucket,
+                Key: key,
+                ContentLength: slot.sizeBytes,
+            }),
+            { expiresIn: slot.lifetimeSeconds, signableHeaders: SIGNED_UPLOAD_HEADERS },
+        );
     }
 
     /** The length of a stream is unknown until it ends, so it is written to disk first. */
@@ -258,6 +281,7 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
 
     return {
         storeLocalFile,
+        createUploadUrl,
         storeStream,
         getLocalFile,
         measureFile,

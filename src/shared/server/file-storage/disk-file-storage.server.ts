@@ -69,6 +69,11 @@ async function storeStream(key: string, stream: ReadableStream<Uint8Array>): Pro
     return writtenBytes;
 }
 
+/** Nothing outside the app can write to this disk, so uploads go through the app. */
+function createUploadUrl(): Promise<string | null> {
+    return Promise.resolve(null);
+}
+
 /** The file is already on this disk, so ffmpeg reads it in place; nothing is copied. */
 function getLocalFile(key: string): Promise<string> {
     return Promise.resolve(resolveStoragePath(key));
@@ -93,6 +98,7 @@ function respondWithFile(request: Request, file: ServedFile): Promise<Response> 
 /** Files under STORAGE_DIR on this machine: development, tests, and a single-server setup. */
 export const diskFileStorage: FileStorage = {
     storeLocalFile,
+    createUploadUrl,
     storeStream,
     getLocalFile,
     measureFile,

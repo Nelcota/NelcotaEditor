@@ -12,6 +12,12 @@ export interface ServedFile {
     linkLifetimeSeconds: number;
 }
 
+export interface UploadSlot {
+    /** The exact size the browser declared; the link accepts no other. */
+    sizeBytes: number;
+    lifetimeSeconds: number;
+}
+
 /**
  * Where stored files live. Keys are storage-relative paths with forward slashes
  * ("videos/<id>/source.mp4"), the same values the database keeps, so the app and the worker agree
@@ -20,6 +26,11 @@ export interface ServedFile {
 export interface FileStorage {
     /** Copies a finished local file in and returns its size; the caller keeps the local file. */
     storeLocalFile: (key: string, localPath: string) => Promise<number>;
+    /**
+     * A link the browser can PUT the file to directly, or null when the store cannot take it
+     * (the disk), and the file must go through the app.
+     */
+    createUploadUrl: (key: string, slot: UploadSlot) => Promise<string | null>;
     /** Writes the stream as the file and returns its size; a failed stream leaves nothing behind. */
     storeStream: (key: string, stream: ReadableStream<Uint8Array>) => Promise<number>;
     /**

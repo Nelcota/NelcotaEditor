@@ -10,10 +10,10 @@ process.env.STORAGE_DIR = storageDirectory;
 process.env.WHISPER_URL = "http://127.0.0.1:1";
 process.env.WHISPER_MODEL = "test-model";
 
-const { EmptyUploadError, UploadTooLargeError, storeVideoUpload } =
+const { EmptyUploadError, UploadLargerThanDeclaredError, storeVideoUpload } =
     await import("#/modules/videos/server/store-video-upload.server");
 
-const VIDEO_ID = "0190a4b2-7c1e-7a00-8000-000000000001";
+const SOURCE_PATH = "videos/0190a4b2-7c1e-7a00-8000-000000000001/source.mp4";
 
 afterAll(async () => {
     await rm(storageDirectory, { recursive: true, force: true });
@@ -41,34 +41,36 @@ function streamOfBytes(byteCount: number): ReadableStream<Uint8Array> {
 }
 
 describe("storeVideoUpload", () => {
-    it("stores the upload as the video's source and returns its key and size", async () => {
-        const stored = await storeVideoUpload(streamOfBytes(10), {
-            videoId: VIDEO_ID,
-            extension: ".mp4",
+    it("stores the body under the reserved key and returns its size", async () => {
+        const sourceBytes = await storeVideoUpload(streamOfBytes(10), {
+            sourcePath: SOURCE_PATH,
             maxBytes: 10,
         });
 
-        expect(stored).toEqual({ sourcePath: `videos/${VIDEO_ID}/source.mp4`, sourceBytes: 10 });
+        expect(sourceBytes).toBe(10);
     });
 
-    it("refuses a body larger than the reserved size and removes the video folder", async () => {
+    it("refuses a body larger than declared and keeps nothing of it", async () => {
         const run = storeVideoUpload(streamOfBytes(11), {
-            videoId: VIDEO_ID,
-            extension: ".mp4",
+            sourcePath: "videos/other/source.mp4",
             maxBytes: 10,
         });
 
-        await expect(run).rejects.toThrow(UploadTooLargeError);
-        expect(await fileExists(path.join(storageDirectory, "videos", VIDEO_ID))).toBe(false);
+        await expect(run).rejects.toThrow(UploadLargerThanDeclaredError);
+        expect(await fileExists(path.join(storageDirectory, "videos/other/source.mp4"))).toBe(
+            false,
+        );
     });
 
-    it("refuses an empty body", async () => {
+    it("refuses an empty body and keeps nothing of it", async () => {
         const run = storeVideoUpload(streamOfBytes(0), {
-            videoId: VIDEO_ID,
-            extension: ".mp4",
+            sourcePath: "videos/empty/source.mp4",
             maxBytes: 10,
         });
 
         await expect(run).rejects.toThrow(EmptyUploadError);
+        expect(await fileExists(path.join(storageDirectory, "videos/empty/source.mp4"))).toBe(
+            false,
+        );
     });
 });

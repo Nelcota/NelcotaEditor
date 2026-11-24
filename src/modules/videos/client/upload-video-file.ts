@@ -1,17 +1,21 @@
 import { z } from "zod";
 import type { TranscriptionLanguage } from "#/modules/preferences/model/preferences";
 import type { ClipLength } from "#/modules/video-records/model/clip-length";
+import {
+    cancelVideoUpload,
+    completeVideoUpload,
+    startVideoUpload,
+} from "#/modules/videos/server/video-upload-functions";
 
-const uploadSuccessSchema = z.object({ videoId: z.uuid() });
 const uploadFailureSchema = z.object({ error: z.string() });
 
-const HTTP_CREATED = 201;
+const MIN_SUCCESS_STATUS = 200;
+const MAX_SUCCESS_STATUS = 299;
 const PERCENT = 100;
 const NETWORK_ERROR_MESSAGE = "A conexão caiu durante o envio. Tente de novo.";
 const UNKNOWN_ERROR_MESSAGE = "Não foi possível enviar o vídeo. Tente de novo.";
 const ABORTED_MESSAGE = "O envio foi interrompido. Tente de novo.";
 const EMPTY_FILE_MESSAGE = "O arquivo escolhido está vazio. Escolha outro arquivo.";
-const UPLOAD_ENDPOINT = "/api/videos/upload";
 
 export interface UploadVideoInput {
     file: File;
@@ -28,7 +32,7 @@ export class UploadFailedError extends Error {
     }
 }
 
-/** A proxy error page is not JSON; null then falls through to the generic upload message. */
+/** Storage answers in XML and a proxy with an HTML page; only the app's JSON error is shown. */
 function parseJson(text: string): unknown {
     try {
         const parsed: unknown = JSON.parse(text);
@@ -38,60 +42,41 @@ function parseJson(text: string): unknown {
     }
 }
 
-function readUploadResult(request: XMLHttpRequest): string {
-    const body = parseJson(request.responseText);
-    const success = uploadSuccessSchema.safeParse(body);
-
-    if (request.status === HTTP_CREATED && success.success === true) {
-        return success.data.videoId;
-    }
-
-    const failure = uploadFailureSchema.safeParse(body);
+function readUploadFailure(request: XMLHttpRequest): UploadFailedError {
+    const failure = uploadFailureSchema.safeParse(parseJson(request.responseText));
 
     if (failure.success === true) {
-        throw new UploadFailedError(failure.data.error);
+        return new UploadFailedError(failure.data.error);
     }
 
-    throw new UploadFailedError(UNKNOWN_ERROR_MESSAGE);
+    return new UploadFailedError(UNKNOWN_ERROR_MESSAGE);
 }
 
 /**
- * Sends the raw file with XMLHttpRequest because fetch cannot report upload progress.
- * Resolves with the id of the created video.
+ * PUTs the raw file with XMLHttpRequest because fetch cannot report upload progress. The URL is
+ * either a signed storage link (no cookies needed) or the app's own route (same origin).
  */
-export function uploadVideoFile(
-    input: UploadVideoInput,
+function sendFile(
+    uploadUrl: string,
+    file: File,
     onProgress: (percent: number) => void,
-): Promise<string> {
-    const file = input.file;
-
-    if (file.size === 0) {
-        return Promise.reject(new UploadFailedError(EMPTY_FILE_MESSAGE));
-    }
-
-    const searchParams = new URLSearchParams({
-        fileName: file.name,
-        title: input.title,
-        clipCount: String(input.clipCount),
-        clipLength: input.clipLength,
-        language: input.language,
-    });
-
+): Promise<void> {
     return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
 
-        request.open("POST", `${UPLOAD_ENDPOINT}?${searchParams.toString()}`);
+        request.open("PUT", uploadUrl);
         request.upload.addEventListener("progress", (event) => {
             if (event.lengthComputable === true && event.total > 0) {
                 onProgress(Math.round((event.loaded / event.total) * PERCENT));
             }
         });
         request.addEventListener("load", () => {
-            try {
-                resolve(readUploadResult(request));
-            } catch (error) {
-                reject(error);
+            if (request.status >= MIN_SUCCESS_STATUS && request.status <= MAX_SUCCESS_STATUS) {
+                resolve();
+                return;
             }
+
+            reject(readUploadFailure(request));
         });
         request.addEventListener("error", () =>
             reject(new UploadFailedError(NETWORK_ERROR_MESSAGE)),
@@ -103,4 +88,49 @@ export function uploadVideoFile(
         );
         request.send(file);
     });
+}
+
+/**
+ * Frees the slot right away instead of when the reservation expires. Its own failure is not
+ * shown: the upload error is the one the person can act on, and the reservation expires anyway.
+ */
+async function releaseUpload(uploadId: string): Promise<void> {
+    await Promise.allSettled([cancelVideoUpload({ data: { uploadId } })]);
+}
+
+/**
+ * Reserves the upload, sends the file where the server says, then confirms it.
+ * Resolves with the id of the created video.
+ */
+export async function uploadVideoFile(
+    input: UploadVideoInput,
+    onProgress: (percent: number) => void,
+): Promise<string> {
+    const file = input.file;
+
+    if (file.size === 0) {
+        throw new UploadFailedError(EMPTY_FILE_MESSAGE);
+    }
+
+    const started = await startVideoUpload({
+        data: {
+            fileName: file.name,
+            title: input.title,
+            sizeBytes: file.size,
+            clipCount: input.clipCount,
+            clipLength: input.clipLength,
+            language: input.language,
+        },
+    });
+    const uploadId = started.uploadId;
+
+    try {
+        await sendFile(started.uploadUrl, file, onProgress);
+    } catch (error) {
+        await releaseUpload(uploadId);
+        throw error;
+    }
+
+    const completed = await completeVideoUpload({ data: { uploadId } });
+    return completed.videoId;
 }
