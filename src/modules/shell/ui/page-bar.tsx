@@ -35,7 +35,7 @@ export function PageBar({ children }: { children?: ReactNode }): ReactNode {
     const lastIndex = crumbs.length - 1;
 
     return (
-        <div className="flex h-14 shrink-0 items-center gap-3 px-4 md:px-6">
+        <div className="flex h-14 shrink-0 items-center gap-3 ps-4 pe-2 md:ps-8 md:pe-6">
             <Link
                 to="/"
                 aria-label="Nelcota, ir para o início"

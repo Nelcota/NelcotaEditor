@@ -1,4 +1,6 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
+import ChevronDownIcon from "~icons/lucide/chevron-down";
+import ChevronUpIcon from "~icons/lucide/chevron-up";
 import CircleHelpIcon from "~icons/lucide/circle-help";
 import EyeIcon from "~icons/lucide/eye";
 import EyeOffIcon from "~icons/lucide/eye-off";
@@ -16,8 +18,10 @@ import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { useStoredFlag } from "#/shared/ui/use-stored-flag";
 
 const NUMBERS_HIDDEN_KEY = "nelcota:storage-numbers-hidden";
+const COLLAPSED_KEY = "nelcota:storage-card-collapsed";
 const HIDDEN_VALUE = "•••";
 const PERCENT = 100;
+const DETAILS_ID = "storage-card-details";
 
 /** Whole percent of a total; an empty or broken total has no share to show. */
 function toPercent(bytes: number, totalBytes: number): number {
@@ -69,73 +73,23 @@ function StorageRow(props: StorageRowProps): ReactNode {
     );
 }
 
-/**
- * The foot card (the reference's balance): the disk in use out of the quota, split into the
- * originals and the clips, with the eye to hide the numbers and the way to the full usage.
- */
-export function StorageCard(): ReactNode {
-    const usageQuery = useQuery(usageQueryOptions());
-    const numbersHidden = useStoredFlag(NUMBERS_HIDDEN_KEY);
-    const isHidden = numbersHidden.isOn;
-    const usage = usageQuery.data;
+interface StorageDetailsProps {
+    sourceBytes: number;
+    clipBytes: number;
+    totalBytes: number;
+    isHidden: boolean;
+}
 
-    if (usage === undefined) {
-        return null;
-    }
-
-    const storage = usage.storage;
-    const totalBytes = storage.totalBytes;
-    let usedLabel = formatBytes(totalBytes);
-    let eyeLabel = "Esconder os números";
-
-    if (isHidden === true) {
-        usedLabel = HIDDEN_VALUE;
-        eyeLabel = "Mostrar os números";
-    }
+/** The split between originals and clips, and the ways to the full usage. */
+function StorageDetails(props: StorageDetailsProps): ReactNode {
+    const { sourceBytes, clipBytes, totalBytes, isHidden } = props;
 
     return (
-        <section
-            aria-label="Armazenamento"
-            className="grid gap-3 rounded-2xl border border-card-border bg-card p-3"
-        >
-            <div className="flex items-start gap-2">
-                <div className="min-w-0 flex-1">
-                    <h2 className="text-xs text-muted-foreground">Armazenamento</h2>
-                    <p className="truncate text-xl font-bold tracking-[-0.03em] tabular-nums">
-                        {usedLabel}{" "}
-                        <span className="text-xs font-semibold tracking-normal text-muted-foreground">
-                            de {formatBytes(usage.storageQuotaBytes)}
-                        </span>
-                    </p>
-                </div>
-                <HintTooltip label={eyeLabel}>
-                    <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label={eyeLabel}
-                        aria-pressed={isHidden}
-                        onClick={numbersHidden.toggle}
-                        className="text-muted-foreground"
-                    >
-                        {isHidden === true && <EyeOffIcon aria-hidden="true" className="size-4" />}
-                        {isHidden === false && <EyeIcon aria-hidden="true" className="size-4" />}
-                    </Button>
-                </HintTooltip>
-                <HintTooltip label="O espaço dos seus vídeos originais e dos cortes prontos">
-                    <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label="O que entra nesta conta"
-                        className="text-muted-foreground"
-                    >
-                        <CircleHelpIcon aria-hidden="true" className="size-4" />
-                    </Button>
-                </HintTooltip>
-            </div>
+        <>
             <StorageRow
                 icon={FilmIcon}
                 label="Originais"
-                bytes={storage.sourceBytes}
+                bytes={sourceBytes}
                 totalBytes={totalBytes}
                 barClass="bg-success"
                 isHidden={isHidden}
@@ -143,7 +97,7 @@ export function StorageCard(): ReactNode {
             <StorageRow
                 icon={ScissorsIcon}
                 label="Cortes"
-                bytes={storage.clipBytes}
+                bytes={clipBytes}
                 totalBytes={totalBytes}
                 barClass="bg-primary"
                 isHidden={isHidden}
@@ -159,6 +113,119 @@ export function StorageCard(): ReactNode {
                     </Link>
                 </Button>
             </div>
+        </>
+    );
+}
+
+interface CardToolProps {
+    label: string;
+    isPressed?: boolean;
+    isExpanded?: boolean;
+    onClick?: () => void;
+    children: ReactNode;
+}
+
+/** A small icon button in the card's header, with its name as a tooltip. */
+function CardTool(props: CardToolProps): ReactNode {
+    const { label, isPressed, isExpanded, onClick, children } = props;
+
+    return (
+        <HintTooltip label={label}>
+            <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label={label}
+                aria-pressed={isPressed}
+                aria-expanded={isExpanded}
+                aria-controls={DETAILS_ID}
+                onClick={onClick}
+                className="text-muted-foreground"
+            >
+                {children}
+            </Button>
+        </HintTooltip>
+    );
+}
+
+/**
+ * The foot card (the reference's balance): the disk in use out of the quota, split into the
+ * originals and the clips. The eye hides the numbers; the chevron folds the card down to its total,
+ * for people who would rather give the sections the room.
+ */
+export function StorageCard(): ReactNode {
+    const usageQuery = useQuery(usageQueryOptions());
+    const numbersHidden = useStoredFlag(NUMBERS_HIDDEN_KEY);
+    const collapsed = useStoredFlag(COLLAPSED_KEY);
+    const isHidden = numbersHidden.isOn;
+    const isCollapsed = collapsed.isOn;
+    const usage = usageQuery.data;
+
+    if (usage === undefined) {
+        return null;
+    }
+
+    const storage = usage.storage;
+    const totalBytes = storage.totalBytes;
+    let usedLabel = formatBytes(totalBytes);
+    let eyeLabel = "Esconder os números";
+    let foldLabel = "Recolher o armazenamento";
+
+    if (isHidden === true) {
+        usedLabel = HIDDEN_VALUE;
+        eyeLabel = "Mostrar os números";
+    }
+
+    if (isCollapsed === true) {
+        foldLabel = "Mostrar o armazenamento";
+    }
+
+    return (
+        <section
+            aria-label="Armazenamento"
+            className="grid gap-3 rounded-2xl border border-card-border bg-card p-[11px]"
+        >
+            <div className="flex items-start gap-1">
+                <div className="min-w-0 flex-1">
+                    <h2 className="text-xs text-muted-foreground">Armazenamento</h2>
+                    <p className="truncate text-xl font-bold tracking-[-0.03em] tabular-nums">
+                        {usedLabel}{" "}
+                        <span className="text-xs font-semibold tracking-normal text-muted-foreground">
+                            de {formatBytes(usage.storageQuotaBytes)}
+                        </span>
+                    </p>
+                </div>
+                <CardTool label={eyeLabel} isPressed={isHidden} onClick={numbersHidden.toggle}>
+                    {isHidden === true && <EyeOffIcon aria-hidden="true" className="size-4" />}
+                    {isHidden === false && <EyeIcon aria-hidden="true" className="size-4" />}
+                </CardTool>
+                {isCollapsed === false && (
+                    <CardTool label="O espaço dos seus vídeos originais e dos cortes prontos">
+                        <CircleHelpIcon aria-hidden="true" className="size-4" />
+                    </CardTool>
+                )}
+                <CardTool
+                    label={foldLabel}
+                    isExpanded={isCollapsed === false}
+                    onClick={collapsed.toggle}
+                >
+                    {isCollapsed === true && (
+                        <ChevronUpIcon aria-hidden="true" className="size-4" />
+                    )}
+                    {isCollapsed === false && (
+                        <ChevronDownIcon aria-hidden="true" className="size-4" />
+                    )}
+                </CardTool>
+            </div>
+            {isCollapsed === false && (
+                <div id={DETAILS_ID} className="grid gap-3">
+                    <StorageDetails
+                        sourceBytes={storage.sourceBytes}
+                        clipBytes={storage.clipBytes}
+                        totalBytes={totalBytes}
+                        isHidden={isHidden}
+                    />
+                </div>
+            )}
         </section>
     );
 }

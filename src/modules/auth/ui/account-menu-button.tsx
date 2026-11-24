@@ -23,7 +23,7 @@ export function AccountMenuButton(): ReactNode {
             <DropdownMenu>
                 <DropdownMenuTrigger
                     aria-label={`Menu da conta: ${user.name}`}
-                    className="flex h-11 w-full items-center gap-2.5 rounded-xl px-2 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
+                    className="flex h-11 w-full items-center gap-2 rounded-xl ps-2 pe-3 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
                 >
                     <UserAvatar name={user.name} image={user.image} className="size-7" />
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold">

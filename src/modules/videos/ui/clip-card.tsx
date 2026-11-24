@@ -12,7 +12,7 @@ import { formatClock } from "#/shared/ui/format";
 /** Grows to share a row, and drops to its own row when the card is too narrow for both words. */
 const SHARED_ROW_BUTTON_CLASS = "min-w-0 flex-auto";
 
-/** The actions under a card: the green download (the reference's invite button), then edit and copy. */
+/** The actions under a card: the blue download (the reference's invite button), then edit and copy. */
 function ClipCardActions({ item }: { item: LibraryClip }): ReactNode {
     const clip = item.clip;
 

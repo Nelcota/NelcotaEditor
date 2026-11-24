@@ -20,7 +20,7 @@ interface LibraryToolbarProps {
     action?: ReactNode;
 }
 
-/** The reference's "Filtros" and "Colunas" buttons: a filled box with green text and icon. */
+/** The reference's "Filtros" and "Colunas" buttons: a filled box with blue text and icon. */
 const TRIGGER_CLASS =
     "h-10 w-full rounded-xl border-transparent bg-card font-semibold text-primary-ink hover:border-input/40 hover:bg-accent sm:w-auto";
 

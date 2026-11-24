@@ -16,6 +16,10 @@ breadcrumb and stay for screen readers only. Light stays available through the t
 - **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
 - **Cortes** are cards with the green download button; a finished video's page opens with the summary
   bubble and its settings as tags.
+- **Entrar / Criar conta** (direction B, 2026-11-23): the form wears the public site (`.theme-site`:
+  lavender page, white fields, Geist, the bracketed eyebrow and the light/heavy title), so the step
+  from the site keeps its look; from lg the dark app sits beside it (`.theme-app`): the link box and
+  four finished clips, using the site's Pexels frames in `public/auth/`. Phones show the form only.
 
 ## Principles
 
@@ -147,15 +151,16 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Same piece, same size:** the search field is 288px wide from `sm` up and full width on phones.
 - **Phones:** nothing sits alone on a row that it does not need; actions go full width under the
   content they act on.
-- **Edge lines** (gridline pass, 2026-11-21, set by Claude at the person's request): measured on
-  ink, not boxes, within 1px.
-    - Top bar: every item centres on y = 28. The brand's ghost centres on the sidebar's icon column
-      (34) and its name starts on the label line (56). The inspector toggle centres on the inspector
-      cards' trailing line.
-    - Sidebar: boxes 12px in (search, rows, account), icon column centred at 34, labels at 56,
-      trailing 12px in. Section titles start on the icon column's leading edge (24). The search field
-      pads 11px to take back its 1px border. The photo's ring starts on the box line and the name on 56.
-      The current row gets a 4px bar on the window's edge.
+- **Edge lines** (gridline pass, 2026-11-21, redrawn 2026-11-23 after the creators redesign; set by
+  Claude at the person's request): measured on ink, not boxes, within 1px.
+    - Sidebar (256px): boxes 10px in (new video card, rows, storage card, account), icon column
+      centred at 32, labels at 54, trailing line 22px in (counts, the upload glyph, the account menu
+      glyph, the storage card's numbers). The two cards pad 11px to take back their 1px border, so
+      their content starts on the icons' leading edge (22). The brand's ghost centres on the icon
+      column and its name starts on the label line; the photo centres on the icon column too.
+    - Panel: the breadcrumb and every plain page's content share one text line, 32px in (16px on
+      phones). The page bar's trailing icon buttons sit 24px in, so their glyph ends on the page's
+      trailing line. The page bar and the sidebar's first row share one centre line.
     - Inspector: cards 24px in; rows 16px in on both sides with a 20px icon and the label 12px after
       it (56px rows); field labels and group titles 4px in from the cards, as in the reference.
     - Clip list: rows 16px in on both sides; the number badge is the icon column, the open row's

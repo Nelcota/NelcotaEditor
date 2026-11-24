@@ -1,3 +1,4 @@
+import ArrowRightIcon from "~icons/lucide/arrow-right";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
@@ -90,8 +91,9 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
 
     return (
         <AuthCard
-            title="Entrar"
-            description="Acesse seus vídeos e cortes."
+            eyebrow="Entrar"
+            title={{ lead: "Bem-vindo", emphasis: "de volta" }}
+            description="Seus vídeos e cortes estão te esperando."
             footer={{ text: "Ainda não tem conta?", linkLabel: "Criar conta", linkTo: "/sign-up" }}
         >
             <form
@@ -147,6 +149,7 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
                         >
                             {isSubmitting === true && "Entrando…"}
                             {isSubmitting === false && "Entrar"}
+                            {isSubmitting === false && <ArrowRightIcon aria-hidden="true" />}
                         </Button>
                     )}
                 </form.Subscribe>

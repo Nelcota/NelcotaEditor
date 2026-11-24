@@ -13,7 +13,7 @@ export function NewVideoCard(): ReactNode {
             to="/videos"
             search={{ newVideo: true }}
             preload="intent"
-            className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-card-border bg-card p-2.5 outline-none transition-[background-color,scale] hover:bg-accent focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
+            className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-card-border bg-card p-[11px] outline-none transition-[background-color,scale] hover:bg-accent focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
         >
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary-solid text-primary-foreground">
                 <SquarePlusIcon aria-hidden="true" className="size-5" />

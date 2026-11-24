@@ -19,13 +19,13 @@ const HIDE_LABEL = "Recolher a barra lateral";
 export function AppSidebar({ onCollapse }: { onCollapse: () => void }): ReactNode {
     return (
         <div className="flex h-full min-h-0 flex-col gap-2 px-2.5 pt-2 pb-2">
-            <div className="flex h-10 items-center gap-1 ps-1.5">
+            <div className="flex h-10 items-center gap-1 ps-2.5">
                 <Link
                     to="/"
                     aria-label="Nelcota, ir para o início"
                     className="me-auto flex h-9 items-center rounded-xl pe-2 outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
-                    <BrandLogo />
+                    <BrandLogo className="gap-2.5" />
                 </Link>
                 <ActivityBell />
                 <HintTooltip label={HIDE_LABEL}>
