@@ -28,6 +28,7 @@
         "check:boundaries": "bun scripts/check-module-boundaries.ts",
         "test": "vitest run --project unit",
         "test:integration": "vitest run --project integration",
+        "test:e2e": "playwright test",
         "check": "oxfmt --check && oxlint --type-aware && tsc --noEmit && bun scripts/check-copy-dashes.ts && bun scripts/check-module-boundaries.ts && vitest run --project unit"
     },
     "dependencies": {
@@ -62,8 +63,10 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
+        "@axe-core/playwright": "4.14.0",
         "@babel/core": "7.29.13",
         "@iconify-json/lucide": "^1.2.158",
+        "@playwright/test": "1.65.1",
         "@rolldown/plugin-babel": "0.3.1",
         "@svgr/core": "^8.1.0",
         "@svgr/plugin-jsx": "^8.1.0",

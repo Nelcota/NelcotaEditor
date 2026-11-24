@@ -820,7 +820,7 @@ Pull requests:
 - Integration tests (`*.integration.test.ts`, database included) run with
   `bun run test:integration` against `nelcota_test`; `bun run setup` and `bun run local` create
   `.env.test` and keep that database migrated. `bun run test` and `bun run check` run the unit
-  project only.
+  project only. `bun run test:e2e` starts its own app on port 3299 with `.env.test` (Turnstile
+  off, its own client address per test so the auth rate limits stay on).
 - Migration in progress (from npm/tsx/node:test): the rules above are the target. Until a stage
-  lands, code that predates it may not follow it yet (GlitchTip, Playwright, the format-on-edit
-  hook); new code follows the rules.
+  lands, code that predates it may not follow it yet (GlitchTip, the format-on-edit hook); new code follows the rules.

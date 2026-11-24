@@ -11,3 +11,5 @@ dist-ssr
 __unconfig*
 storage/
 storage-test/
+playwright-report/
+test-results/

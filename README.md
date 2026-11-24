@@ -34,18 +34,19 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 
 ## Everyday commands
 
-| Command                               | What it does                                                   |
-| ------------------------------------- | -------------------------------------------------------------- |
-| `bun run dev`                         | Starts the web app on port 3210                                |
-| `bun run services:up`                 | Starts PostgreSQL, Whisper and the worker                      |
-| `bun run services:down`               | Stops them                                                     |
-| `bun run worker:logs`                 | Follows what the worker is doing                               |
-| `bun run worker:restart`              | Recreates the worker so it reads `.env` and code changes again |
-| `bun run services:rebuild`            | Rebuilds the worker image (yt-dlp is pinned in it)             |
-| `bun run db:generate` / `db:migrate`  | Creates / applies database migrations                          |
-| `bun run typecheck`, `lint`, `format` | Code checks                                                    |
-| `bun run test`                        | Unit tests (Vitest)                                            |
-| `bun run test:integration`            | Tests against the `nelcota_test` database (`.env.test`)        |
+| Command                               | What it does                                                     |
+| ------------------------------------- | ---------------------------------------------------------------- |
+| `bun run dev`                         | Starts the web app on port 3210                                  |
+| `bun run services:up`                 | Starts PostgreSQL, Whisper and the worker                        |
+| `bun run services:down`               | Stops them                                                       |
+| `bun run worker:logs`                 | Follows what the worker is doing                                 |
+| `bun run worker:restart`              | Recreates the worker so it reads `.env` and code changes again   |
+| `bun run services:rebuild`            | Rebuilds the worker image (yt-dlp is pinned in it)               |
+| `bun run db:generate` / `db:migrate`  | Creates / applies database migrations                            |
+| `bun run typecheck`, `lint`, `format` | Code checks                                                      |
+| `bun run test`                        | Unit tests (Vitest)                                              |
+| `bun run test:integration`            | Tests against the `nelcota_test` database (`.env.test`)          |
+| `bun run test:e2e`                    | Playwright flows with an axe check, on their own app (port 3299) |
 
 ## Settings (`.env`)
 
