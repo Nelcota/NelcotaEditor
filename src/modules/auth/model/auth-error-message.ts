@@ -1,4 +1,5 @@
 import { MIN_PASSWORD_LENGTH } from "#/modules/auth/model/auth-forms";
+import { LAST_ADMIN_CODE, LAST_ADMIN_DELETE_MESSAGE } from "#/modules/auth/model/last-admin-error";
 
 export const VIDEOS_STILL_PROCESSING_CODE = "VIDEOS_STILL_PROCESSING";
 
@@ -15,6 +16,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     PASSWORD_TOO_LONG: "A senha nova é longa demais.",
     CREDENTIAL_ACCOUNT_NOT_FOUND: "Esta conta não tem senha para trocar.",
     [VIDEOS_STILL_PROCESSING_CODE]: "Cancele os vídeos em processamento antes de excluir a conta.",
+    [LAST_ADMIN_CODE]: LAST_ADMIN_DELETE_MESSAGE,
     MISSING_RESPONSE: "Aguarde a verificação de segurança terminar e tente de novo.",
     BANNED_USER: BANNED_USER_MESSAGE,
     VERIFICATION_FAILED: "A verificação de segurança falhou. Tente de novo.",
