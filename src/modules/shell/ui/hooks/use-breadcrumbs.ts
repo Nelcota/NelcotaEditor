@@ -22,6 +22,9 @@ const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
     "/clips": [HOME_CRUMB, { label: "Cortes" }],
     "/overview": [HOME_CRUMB, { label: "Painel" }],
     "/account": [HOME_CRUMB, { label: "Conta" }],
+    // Old addresses that redirect to Conta; the trail names where they lead while that happens.
+    "/preferences": [HOME_CRUMB, { label: "Conta" }],
+    "/usage": [HOME_CRUMB, { label: "Conta" }],
     "/admin": [ADMIN_CRUMB, { label: "Visão geral" }],
     "/admin/users": [ADMIN_CRUMB, { label: "Usuários" }],
     "/admin/videos": [ADMIN_CRUMB, { label: "Vídeos" }],
