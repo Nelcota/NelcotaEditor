@@ -2,7 +2,8 @@
 
 Nelcota turns long videos into vertical short clips with captions. Since 2026-11-23 the app follows the
 owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
-(the owner asked for nothing bluish) and the brand green as the one action colour. The frame holds the
+(the owner asked for nothing bluish) and blue as the one action colour (it was the brand green until
+2026-11-23). The frame holds the
 sidebar: the lowercase logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
 the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
 (used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
@@ -14,7 +15,7 @@ breadcrumb and stay for screen readers only. Light stays available through the t
 - **Vídeos** is a table (status pill, source, clips, progress with the stage, date), columns by a
   container query so a narrow panel falls back to compact rows.
 - **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
-- **Cortes** are cards with the green download button; a finished video's page opens with the summary
+- **Cortes** are cards with the primary download button; a finished video's page opens with the summary
   bubble and its settings as tags.
 - **Entrar / Criar conta** (direction B, 2026-11-23): the form wears the public site (`.theme-site`:
   lavender page, white fields, Geist, the bracketed eyebrow and the light/heavy title), so the step
@@ -37,8 +38,8 @@ breadcrumb and stay for screen readers only. Light stays available through the t
 | `background` (dark: charcoal)         | The rounded panel                                      |
 | `card` (a step above the panel)       | Filled boxes: search, table head, cards, sidebar cards |
 | `secondary` / `muted` / `accent`      | Pills, tracks, hover fills                             |
-| `primary` / `primary-solid` (green)   | Primary buttons, current section, progress, focus      |
-| `primary-ink`                         | Green text, links and the sidebar icons                |
+| `primary` / `primary-solid` (blue)    | Primary buttons, current section, progress, focus      |
+| `primary-ink`                         | Blue text, links and the sidebar icons                 |
 | `muted-foreground`                    | Secondary text                                         |
 | `success` (green) / `warning` (amber) | Finished videos, storage bars / warnings               |
 | `destructive` (red)                   | Failures and delete                                    |
@@ -244,7 +245,7 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 | 2026-11-21 | Interface review of Início, Cortes, Painel and Conta: loading skeletons take each screen's current shape (bordered lists, crew cards) and announce through `role="status"`; the best-clips arrows leave the scroll animation to CSS (`motion-safe:scroll-smooth`) so reduced motion jumps; an empty Painel metric says why under "Sem dados"; on phones a video row's title takes the menu's column and the meta line runs under the frame, and a clip row's Baixar and Copiar título become 40px icons so its actions share one row; the disk bar's clips slice uses `chart-current` (green stays the primary action); Brilho's score is the same pill everywhere; chart axes at 13px; Conta aligns to the same left edge as the other tabs, keeps the greeting with a screen-reader "Conta" heading, and says "Excluir conta" once less                                                  | Measured at 320 and 1280px: titles had 88px on phones, clip rows took a row per action, skeletons showed replaced layouts, and a JS smooth scroll ignored reduced motion |
 
 Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/studio/index.html`.
-| 2026-11-21 | Layout rebuilt from scratch, direction B "Topo" (board `design/explore/rebuild/index.html`): no sidebar; one top bar with the sections, "Novo vídeo" and the account; phone tab bar with a central "Novo vídeo"; 12-column page; videos as a 16:9 cover gallery with the state on the cover; Cortes as a 9:16 grid; video page 8 + 4 with the clips panel beside the original; neutral tokens replace the landing system (no lavender, eyebrows, grid backdrop or gradient button); "Início" is now "Vídeos" | The person asked to stop copying the landing and redo the whole layout; picked B from three directions |
+| 2026-11-21 | Layout rebuilt from scratch, direction B "Topo" (board removed 2026-11-24, kept in git history): no sidebar; one top bar with the sections, "Novo vídeo" and the account; phone tab bar with a central "Novo vídeo"; 12-column page; videos as a 16:9 cover gallery with the state on the cover; Cortes as a 9:16 grid; video page 8 + 4 with the clips panel beside the original; neutral tokens replace the landing system (no lavender, eyebrows, grid backdrop or gradient button); "Início" is now "Vídeos" | The person asked to stop copying the landing and redo the whole layout; picked B from three directions |
 | 2026-11-21 | Layout rebuilt again, direction A "Mesa" (same board): icon rail, video list pane fixed beside the open video, Cortes · Original · Studio tabs, ink primary button over a warm grey frame; replaces direction B's top bar and gallery | The person picked A from the three directions after seeing B shipped |
 | 2026-11-21 | The window design from the owner's reference replaces direction A's rail and list pane: grey frame with a top bar of open-video tabs and a sidebar (search, sections with counts, videos, person), one white rounded panel, and an inspector with grouped cards on the video page | The person sent the reference and asked to redo everything to match it |
 | 2026-11-24 | Primary fill (`primary`, `primary-solid`) darkened to `oklch(0.56 0.2 260)` light and `oklch(0.56 0.2 258)` dark | The axe check in the end-to-end tests measured white text on the blue at 4.39:1 and 4.03:1; AA needs 4.5:1 |

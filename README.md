@@ -72,17 +72,24 @@ To update yt-dlp, change its version and checksum in `Dockerfile.worker`.
 
 ```
 src/
-  routes/                  routing only
+  routes/                  routing only; composes screens from modules
   modules/
-    auth/                  accounts, sessions, app layout
-    videos/                upload, YouTube links, screens
-    transcription/         audio extraction + Whisper
+    shell/                 app layout, sidebar, home and account pages
+    overview/              the Painel numbers and charts
+    studio/                the clip editor (captions, trim, render)
+    admin/                 accounts, videos and audit for admins
+    videos/                the library, new videos, the video page
+    processing/            the video pipeline the worker runs
     highlights/            DeepSeek prompt and clip selection
     clips/                 captions (ASS) and rendering with FFmpeg
-    processing/            the video pipeline the worker runs
-  shared/                  UI kit and server infrastructure
+    transcription/         audio extraction, Whisper, WebVTT captions
+    preferences/           default clip count, length and language
+    video-records/         the video row, its statuses and transitions
+    auth/                  accounts and sessions (Better Auth)
+  shared/                  UI kit, server infrastructure, errors
   db/                      database client and schema index
 scripts/worker.ts          the worker entry point (runs in its container)
+e2e/                       Playwright flows with an axe check
 ```
 
 Long steps report progress and an estimated time left, and any video can be cancelled while it's processing. Each step of the pipeline saves its result, so **Retry** on a failed video continues where it

@@ -112,11 +112,11 @@ a {
 }
 
 .mascot[data-set="shapes"] {
-    background-image: url("../../assets/project-avatars-2x.webp");
+    background-image: url("../assets/project-avatars-2x.webp");
 }
 
 .mascot[data-set="objects"] {
-    background-image: url("../../assets/project-avatars-expanded-2x.webp");
+    background-image: url("../assets/project-avatars-expanded-2x.webp");
 }
 
 .mascot-lg {
