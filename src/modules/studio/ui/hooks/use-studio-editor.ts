@@ -4,7 +4,7 @@ import { studioDraftSchema } from "#/modules/clips/model/clip-studio";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
 import type { ClipStudioState, ClipStudioView } from "#/modules/studio/model/clip-studio-view";
 import { renderClipDraft } from "#/modules/studio/server/clip-studio-functions";
-import { getClipStudioSnapshot } from "#/modules/studio/server/clip-studio-snapshot-functions";
+import { clipStudioQueryOptions } from "#/modules/studio/model/studio-queries";
 import { replaceCueAt, resetAllCues } from "#/modules/studio/model/cue-editing";
 import { readDraftBackup } from "#/modules/studio/client/draft-backup";
 import { countDraftChanges } from "#/modules/studio/model/draft-changes";
@@ -104,8 +104,13 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         dispatch({ type: "apply", draft: next });
     };
 
+    // Through the cache, so the Studio's applied draft moves on with it: a direct call left the
+    // screen comparing against the old one, counting changes the other tab already rendered.
     const fetchLatest = async (): Promise<ClipStudioState> => {
-        const snapshot = await getClipStudioSnapshot({ data: { videoId, clipId } });
+        const snapshot = await queryClient.fetchQuery({
+            ...clipStudioQueryOptions(videoId, clipId),
+            staleTime: 0,
+        });
         return toClipStudioState(snapshot, studio.words);
     };
 
