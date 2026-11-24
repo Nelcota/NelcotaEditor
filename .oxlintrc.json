@@ -32,7 +32,9 @@
         // It asks for <output> instead of role="status", but screen readers announce role="status"
         // more reliably, and <progress> or <input type="range"> cannot draw the custom bars and
         // the two-handled trim the Studio needs.
-        "jsx-a11y/prefer-tag-over-role": "off"
+        "jsx-a11y/prefer-tag-over-role": "off",
+        // TanStack Router flags the match that shows the global 404 as `_notFound`; it has no other name.
+        "no-underscore-dangle": ["warn", { "allow": ["_notFound"] }]
     },
     "overrides": [
         {
