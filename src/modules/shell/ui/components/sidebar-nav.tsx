@@ -6,6 +6,7 @@ import {
     ADMIN_SECTION,
     ADMIN_SUB_SECTIONS,
     NAV_SECTIONS,
+    SECTION_LINK_ACTIVE_OPTIONS,
     VIDEOS_PATH,
     getSectionState,
     isAdminSubSectionCurrent,
@@ -40,6 +41,7 @@ function SectionLink({ section, pathname }: { section: NavSection; pathname: str
         <li>
             <Link
                 to={section.path}
+                activeOptions={SECTION_LINK_ACTIVE_OPTIONS}
                 aria-current={toAriaCurrent(state === "current")}
                 data-parent={state === "parent"}
                 className={SIDEBAR_ITEM_CLASS}
