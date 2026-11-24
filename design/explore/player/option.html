@@ -51,10 +51,11 @@
             };
 
             const table = view === "phone" ? PHONE : DESK;
-            // A Map holds only the options defined above (no inherited methods); anything else in the
-            // address shows the first one.
-            const options = new Map(Object.entries(table));
-            const render = options.get(option) ?? options.values().next().value;
+            // The render comes from the pair found by comparing names, never from indexing with the
+            // text from the address; anything unknown shows the first option.
+            const entries = Object.entries(table);
+            const entry = entries.find(([name]) => name === option) ?? entries[0];
+            const render = entry[1];
             document.getElementById("root").innerHTML = render();
             if (view === "phone") {
                 document.body.classList.add("is-phone");
