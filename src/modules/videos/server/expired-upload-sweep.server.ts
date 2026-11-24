@@ -16,8 +16,9 @@ async function sweepExpiredUploads(): Promise<void> {
 }
 
 /**
- * Runs the sweep once now, for what piled up while no worker ran, then every hour. The schedule
- * lives in the database, so replicas share one; any of them may take each run.
+ * Queues a sweep now, for what piled up while no worker ran, then every hour. The schedule lives
+ * in the database, so replicas share one; any of them may take each run. The first run is a job
+ * too: a store that is down at boot fails that job, not the worker's start.
  */
 export async function startExpiredUploadSweep(): Promise<void> {
     const jobQueue = await getJobQueue();
@@ -25,5 +26,5 @@ export async function startExpiredUploadSweep(): Promise<void> {
     await jobQueue.createQueue(EXPIRED_UPLOAD_SWEEP_QUEUE, { policy: "singleton", retryLimit: 0 });
     await jobQueue.schedule(EXPIRED_UPLOAD_SWEEP_QUEUE, EVERY_HOUR);
     await jobQueue.work(EXPIRED_UPLOAD_SWEEP_QUEUE, sweepExpiredUploads);
-    await sweepExpiredUploads();
+    await jobQueue.send(EXPIRED_UPLOAD_SWEEP_QUEUE);
 }
