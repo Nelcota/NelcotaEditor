@@ -56,6 +56,15 @@ describe("loadAdminUser", () => {
         expect(getAdminUserDetails).not.toHaveBeenCalled();
     });
 
+    it("asks only once for any failure while rendering on the server", async () => {
+        vi.mocked(getAdminUserDetails).mockRejectedValue(new Error("offline"));
+        const queryClient = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+
+        await captureFailure(() => loadAdminUser(queryClient, USER_ID));
+
+        expect(getAdminUserDetails).toHaveBeenCalledTimes(1);
+    });
+
     it("leaves any other failure to the screen", async () => {
         vi.mocked(getAdminUserDetails).mockRejectedValue(new Error("offline"));
         const queryClient = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });

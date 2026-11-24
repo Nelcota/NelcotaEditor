@@ -1,4 +1,4 @@
-import { keepPreviousData, queryOptions } from "@tanstack/react-query";
+import { environmentManager, keepPreviousData, queryOptions } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { isNotFound } from "@tanstack/react-router";
 import type { AdminUserListInput, AdminVideoListInput } from "#/modules/admin/model/admin-search";
@@ -10,9 +10,16 @@ const ADMIN_QUERY_KEY = "admin";
 
 const MAX_USER_LOAD_RETRIES = 3;
 
-/** A missing account stays missing; only other failures are worth another try. */
+/**
+ * A missing account stays missing; only other failures are worth another try, and only in the
+ * browser: on the server the page would wait for every retry before answering.
+ */
 function shouldRetryUserLoad(failureCount: number, error: Error): boolean {
     if (isNotFound(error) === true) {
+        return false;
+    }
+
+    if (environmentManager.isServer() === true) {
         return false;
     }
 
