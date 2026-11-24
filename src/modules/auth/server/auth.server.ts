@@ -183,9 +183,9 @@ export const auth = betterAuth({
         autoSignInAfterVerification: true,
     },
     session: {
-        // Every server function and every video range request reads the session; a signed cookie
-        // answers that for 5 minutes instead of the database. Trade-off (decided 2026-11-21): a
-        // session ended elsewhere keeps working here for up to 5 minutes.
+        // Every video range request reads the session; a signed cookie answers that for 5 minutes
+        // instead of the database. Trade-off (decided 2026-11-21): a session ended elsewhere keeps
+        // streaming media for up to 5 minutes. Server functions skip the cache (authMiddleware).
         cookieCache: { enabled: true, maxAge: SESSION_COOKIE_CACHE_SECONDS },
     },
     user: {
