@@ -15,6 +15,16 @@ interface PolicyOptions {
     nonce: string;
     /** Vite's dev server talks to the page over a websocket for hot reload. */
     isDevelopment: boolean;
+    /** Where videos, thumbnails and photos load from when the store is not the app (R2). */
+    storageMediaOrigin: string | null;
+}
+
+function withStorageOrigin(sources: string, storageMediaOrigin: string | null): string {
+    if (storageMediaOrigin === null) {
+        return sources;
+    }
+
+    return `${sources} ${storageMediaOrigin}`;
 }
 
 function buildConnectSources(isDevelopment: boolean): string {
@@ -31,13 +41,14 @@ function buildConnectSources(isDevelopment: boolean): string {
  * attributes (positions, sizes, colors in the Studio) and no nonce can cover an attribute.
  */
 export function buildContentSecurityPolicy(options: PolicyOptions): string {
+    const storageMediaOrigin = options.storageMediaOrigin;
     const directives = [
         "default-src 'self'",
         `script-src 'self' 'nonce-${options.nonce}' ${TURNSTILE_ORIGIN}`,
         `style-src 'self' 'unsafe-inline' ${GOOGLE_FONTS_STYLESHEET_ORIGIN}`,
         `font-src 'self' data: ${GOOGLE_FONTS_FILE_ORIGIN}`,
-        `img-src 'self' data: blob: ${YOUTUBE_THUMBNAIL_ORIGIN}`,
-        "media-src 'self' blob:",
+        `img-src ${withStorageOrigin(`'self' data: blob: ${YOUTUBE_THUMBNAIL_ORIGIN}`, storageMediaOrigin)}`,
+        `media-src ${withStorageOrigin("'self' blob:", storageMediaOrigin)}`,
         `connect-src ${buildConnectSources(options.isDevelopment)}`,
         `frame-src ${TURNSTILE_ORIGIN}`,
         "worker-src 'self' blob:",

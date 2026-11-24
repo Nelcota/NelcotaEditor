@@ -4,6 +4,7 @@ import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { clips } from "#/modules/clips/clips.schema";
 import { videos } from "#/modules/video-records/video-records.schema";
+import { OWNER_LINK_LIFETIME_SECONDS } from "#/shared/server/file-storage/file-storage";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 
@@ -77,7 +78,11 @@ async function respondWithClip(request: Request, clipFile: OwnedClipFile): Promi
     const isDownload = new URL(request.url).searchParams.get("download") === DOWNLOAD_FLAG_VALUE;
     const headers = buildHeaders(clipFile, isDownload);
 
-    return getFileStorage().respondWithFile(request, clipFile.outputPath, headers);
+    return getFileStorage().respondWithFile(request, {
+        key: clipFile.outputPath,
+        headers,
+        linkLifetimeSeconds: OWNER_LINK_LIFETIME_SECONDS,
+    });
 }
 
 /** GET /api/clips/:clipId/file — streams a rendered clip to its owner (add ?download=1 to save it). */

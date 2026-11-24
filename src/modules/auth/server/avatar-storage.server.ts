@@ -4,6 +4,7 @@ import { db } from "#/db/database.server";
 import { AVATAR_PHOTO_EXTENSIONS } from "#/modules/auth/model/avatar";
 import type { AvatarPhotoExtension } from "#/modules/auth/model/avatar";
 import { user } from "#/modules/auth/auth.schema";
+import { OWNER_LINK_LIFETIME_SECONDS } from "#/shared/server/file-storage/file-storage";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 
 const AVATAR_DIRECTORY = "avatars";
@@ -46,11 +47,11 @@ export function respondWithAvatarPhoto(
     photo: AvatarPhoto,
     headers: Headers,
 ): Promise<Response> {
-    return getFileStorage().respondWithFile(
-        request,
-        toAvatarKey(photo.userId, photo.extension),
+    return getFileStorage().respondWithFile(request, {
+        key: toAvatarKey(photo.userId, photo.extension),
         headers,
-    );
+        linkLifetimeSeconds: OWNER_LINK_LIFETIME_SECONDS,
+    });
 }
 
 export async function saveUserImage(userId: string, image: string | null): Promise<void> {

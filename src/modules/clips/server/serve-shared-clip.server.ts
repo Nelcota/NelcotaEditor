@@ -6,6 +6,9 @@ import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.se
 import { HTTP_NOT_FOUND } from "#/shared/server/http-response";
 
 // 24 random bytes in base64url are always 32 characters.
+// Turning the link off cuts a signed link already handed out only when it expires.
+const SHARED_LINK_LIFETIME_SECONDS = 10 * 60;
+
 const shareTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{32}$/);
 
 async function findSharedOutputPath(shareToken: string): Promise<string | null> {
@@ -39,5 +42,9 @@ export async function serveSharedClip(request: Request, token: string): Promise<
         "X-Content-Type-Options": "nosniff",
     });
 
-    return getFileStorage().respondWithFile(request, outputPath, headers);
+    return getFileStorage().respondWithFile(request, {
+        key: outputPath,
+        headers,
+        linkLifetimeSeconds: SHARED_LINK_LIFETIME_SECONDS,
+    });
 }

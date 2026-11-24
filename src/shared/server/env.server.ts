@@ -10,6 +10,15 @@ const PRODUCTION = "production";
 const SECURE_PROTOCOL = "https:";
 const HEADER_NAME_PATTERN = /^[a-z0-9-]+$/;
 const DEFAULT_WORK_DIRECTORY = path.join(os.tmpdir(), "nelcota-work");
+const STORAGE_DRIVERS = ["disk", "r2"] as const;
+// The account id goes into the endpoint host, so it must be exactly what Cloudflare issues.
+const R2_ACCOUNT_ID_PATTERN = /^[a-f0-9]{32}$/;
+const R2_VARIABLE_NAMES = [
+    "R2_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_BUCKET",
+] as const;
 
 function toUndefinedWhenEmpty(value: string | undefined): string | undefined {
     if (value === undefined || value.length === 0) {
@@ -31,6 +40,12 @@ const baseEnvironmentSchema = z.object({
     WORK_DIR: optionalTextSchema.transform(
         (workDirectory) => workDirectory ?? DEFAULT_WORK_DIRECTORY,
     ),
+    // "disk" keeps files under STORAGE_DIR; "r2" keeps them in a Cloudflare R2 bucket.
+    STORAGE_DRIVER: z.enum(STORAGE_DRIVERS).default("disk"),
+    R2_ACCOUNT_ID: optionalTextSchema.pipe(z.string().regex(R2_ACCOUNT_ID_PATTERN).optional()),
+    R2_ACCESS_KEY_ID: optionalTextSchema,
+    R2_SECRET_ACCESS_KEY: optionalTextSchema,
+    R2_BUCKET: optionalTextSchema,
     BETTER_AUTH_URL: z.url().optional(),
     BETTER_AUTH_SECRET: z.string().optional(),
     /**
@@ -93,9 +108,27 @@ function checkTurnstileKeys(environment: BaseEnvironment, context: z.RefinementC
     }
 }
 
+/** The R2 driver cannot start without every value it signs requests with. */
+function checkR2Settings(environment: BaseEnvironment, context: z.RefinementCtx): void {
+    if (environment.STORAGE_DRIVER !== "r2") {
+        return;
+    }
+
+    for (const variableName of R2_VARIABLE_NAMES) {
+        if (environment[variableName] === undefined) {
+            context.addIssue({
+                code: "custom",
+                path: [variableName],
+                message: "Required when STORAGE_DRIVER is r2",
+            });
+        }
+    }
+}
+
 const environmentSchema = baseEnvironmentSchema.superRefine((environment, context) => {
     checkAuthUrl(environment, context);
     checkTurnstileKeys(environment, context);
+    checkR2Settings(environment, context);
 });
 
 export type Environment = z.infer<typeof environmentSchema>;

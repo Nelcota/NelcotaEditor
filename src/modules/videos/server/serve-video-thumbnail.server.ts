@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { videos } from "#/modules/video-records/video-records.schema";
+import { OWNER_LINK_LIFETIME_SECONDS } from "#/shared/server/file-storage/file-storage";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 
@@ -49,5 +50,9 @@ export async function serveVideoThumbnail(request: Request, videoId: string): Pr
         "X-Content-Type-Options": "nosniff",
     });
 
-    return getFileStorage().respondWithFile(request, thumbnailPath, headers);
+    return getFileStorage().respondWithFile(request, {
+        key: thumbnailPath,
+        headers,
+        linkLifetimeSeconds: OWNER_LINK_LIFETIME_SECONDS,
+    });
 }

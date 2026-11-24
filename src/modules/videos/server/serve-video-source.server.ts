@@ -5,6 +5,7 @@ import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { isOriginalPlayable } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
+import { OWNER_LINK_LIFETIME_SECONDS } from "#/shared/server/file-storage/file-storage";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 
@@ -70,5 +71,9 @@ export async function serveVideoSource(request: Request, videoId: string): Promi
         "X-Content-Type-Options": "nosniff",
     });
 
-    return getFileStorage().respondWithFile(request, sourcePath, headers);
+    return getFileStorage().respondWithFile(request, {
+        key: sourcePath,
+        headers,
+        linkLifetimeSeconds: OWNER_LINK_LIFETIME_SECONDS,
+    });
 }

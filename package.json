@@ -32,6 +32,8 @@
         "check": "oxfmt --check && oxlint --type-aware && tsc --noEmit && bun scripts/check-copy-dashes.ts && bun scripts/check-module-boundaries.ts && vitest run --project unit"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "3.1176.0",
+        "@aws-sdk/s3-request-presigner": "3.1176.0",
         "@date-fns/tz": "^1.5.0",
         "@tailwindcss/vite": "^4.1.18",
         "@tanstack/react-form": "1.33.5",

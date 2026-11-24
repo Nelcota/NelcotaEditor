@@ -113,11 +113,11 @@ describe("diskFileStorage", () => {
     it("answers 404 for a file that is gone", async () => {
         const request = new Request("http://localhost/api/clips/x/file");
 
-        const response = await diskFileStorage.respondWithFile(
-            request,
-            "videos/gone/clip.mp4",
-            new Headers(),
-        );
+        const response = await diskFileStorage.respondWithFile(request, {
+            key: "videos/gone/clip.mp4",
+            headers: new Headers(),
+            linkLifetimeSeconds: 60,
+        });
 
         expect(response.status).toBe(404);
     });

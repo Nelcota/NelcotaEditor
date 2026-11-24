@@ -1,7 +1,7 @@
 import { copyFile, mkdir, open, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import { measureFileBytes } from "#/shared/server/directory-size.server";
-import type { FileStorage } from "#/shared/server/file-storage/file-storage";
+import type { FileStorage, ServedFile } from "#/shared/server/file-storage/file-storage";
 import { respondWithFileRange } from "#/shared/server/serve-file-range.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
 
@@ -86,8 +86,8 @@ async function deleteFolder(prefix: string): Promise<void> {
     await rm(resolveStoragePath(prefix), { recursive: true, force: true });
 }
 
-function respondWithFile(request: Request, key: string, headers: Headers): Promise<Response> {
-    return respondWithFileRange(request, resolveStoragePath(key), headers);
+function respondWithFile(request: Request, file: ServedFile): Promise<Response> {
+    return respondWithFileRange(request, resolveStoragePath(file.key), file.headers);
 }
 
 /** Files under STORAGE_DIR on this machine: development, tests, and a single-server setup. */

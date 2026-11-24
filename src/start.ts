@@ -2,6 +2,7 @@ import { isNotFound, isRedirect } from "@tanstack/react-router";
 import { createCsrfMiddleware, createMiddleware, createStart } from "@tanstack/react-start";
 import { setResponseHeader } from "@tanstack/react-start/server";
 import { buildContentSecurityPolicy } from "#/shared/server/content-security-policy";
+import { getStorageMediaOrigin } from "#/shared/server/file-storage/storage-media-origin.server";
 import { logger, withLogContext } from "#/shared/server/logger.server";
 import { SECURITY_HEADERS, withNoStoreByDefault } from "#/shared/server/security-headers";
 import { UserFacingError, toUserMessage } from "#/shared/server/user-facing-error";
@@ -40,6 +41,7 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(a
     const policy = buildContentSecurityPolicy({
         nonce: cspNonce,
         isDevelopment: import.meta.env.DEV,
+        storageMediaOrigin: getStorageMediaOrigin(),
     });
 
     for (const [name, value] of SECURITY_HEADERS) {
