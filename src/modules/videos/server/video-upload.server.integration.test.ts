@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import type { StartVideoUploadInput } from "#/modules/videos/model/video-upload-input";
@@ -12,6 +12,7 @@ import {
 } from "#/modules/videos/server/confirm-video-upload.server";
 import {
     discardPendingUpload,
+    findOwnedPendingUpload,
     removeExpiredUploads,
 } from "#/modules/videos/server/pending-uploads.server";
 import {
@@ -96,6 +97,10 @@ async function countReservations(uploadId: string): Promise<number> {
 describe("video uploads", () => {
     afterAll(async () => {
         await db.$client.end();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it("refuses an upload that does not fit next to one already reserved", async () => {
@@ -201,5 +206,32 @@ describe("video uploads", () => {
         expect(await countReservations(expired.id)).toBe(0);
         expect(await getFileStorage().measureFile(expired.sourcePath)).toBe(0);
         expect(await countReservations(current.id)).toBe(1);
+    });
+
+    it("keeps an expired upload for the next sweep when its files cannot be deleted", async () => {
+        const userId = await createTestUser();
+        const expired = await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
+        await sendFile(expired, SMALL_UPLOAD_BYTES);
+        await db
+            .update(videoUploads)
+            .set({ expiresAt: new Date(Date.now() - 1000) })
+            .where(eq(videoUploads.id, expired.id));
+        vi.spyOn(getFileStorage(), "deleteFolder").mockRejectedValue(new Error("store down"));
+
+        await expect(removeExpiredUploads()).rejects.toThrow("store down");
+
+        expect(await countReservations(expired.id)).toBe(1);
+    });
+
+    it("frees the slot of a discarded upload and leaves it to the sweep when its files cannot be deleted", async () => {
+        const userId = await createTestUser();
+        const upload = await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
+        await sendFile(upload, SMALL_UPLOAD_BYTES);
+        vi.spyOn(getFileStorage(), "deleteFolder").mockRejectedValue(new Error("store down"));
+
+        await expect(discardPendingUpload(upload.id)).rejects.toThrow("store down");
+
+        expect(await findOwnedPendingUpload(upload.id, userId)).toBeNull();
+        expect(await countReservations(upload.id)).toBe(1);
     });
 });

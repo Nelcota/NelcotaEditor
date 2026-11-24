@@ -67,13 +67,16 @@ export async function findOwnedPendingUpload(
 }
 
 /**
- * Deleting the row claims the upload. When nothing is claimed, a confirmation (whose folder is now
- * a video's) or a sweep got there first, so the files are left to it.
+ * Expiring the row claims the upload and frees its slot at once. The row is deleted only after
+ * its files, so a store that fails here leaves it for the sweep instead of orphaning the files.
+ * When nothing is claimed, a confirmation (whose folder is now a video's) or a sweep got there
+ * first, so the files are left to it.
  */
 export async function discardPendingUpload(uploadId: string): Promise<void> {
     const claimed = await db
-        .delete(videoUploads)
-        .where(eq(videoUploads.id, uploadId))
+        .update(videoUploads)
+        .set({ expiresAt: sql`now()` })
+        .where(and(eq(videoUploads.id, uploadId), isUnexpired()))
         .returning({ id: videoUploads.id });
 
     if (claimed.length === 0) {
@@ -81,22 +84,25 @@ export async function discardPendingUpload(uploadId: string): Promise<void> {
     }
 
     await getFileStorage().deleteFolder(getVideoDirectory(uploadId));
+    await db.delete(videoUploads).where(eq(videoUploads.id, uploadId));
 }
 
 /**
- * Frees what abandoned uploads held: their reservation and any file already sent. Deleting the
- * rows claims them, so two sweeps (or a sweep and a confirmation) never act on the same upload.
+ * Frees what abandoned uploads held: any file already sent, then the row. An expired upload can no
+ * longer be confirmed, so deleting its files first is safe, and a failure keeps the row for the
+ * next sweep. Both steps are idempotent, so two sweeps may overlap.
  */
 export async function removeExpiredUploads(): Promise<void> {
     const expired = await db
-        .delete(videoUploads)
-        .where(lte(videoUploads.expiresAt, sql`now()`))
-        .returning({ id: videoUploads.id });
+        .select({ id: videoUploads.id })
+        .from(videoUploads)
+        .where(lte(videoUploads.expiresAt, sql`now()`));
     const storage = getFileStorage();
 
     // One at a time: there can be many, and a remote store limits its requests.
     for (const upload of expired) {
         await storage.deleteFolder(getVideoDirectory(upload.id));
+        await db.delete(videoUploads).where(eq(videoUploads.id, upload.id));
     }
 
     if (expired.length > 0) {
