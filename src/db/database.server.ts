@@ -1,6 +1,6 @@
-import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "#/db/schema";
 import { getEnvironment } from "#/shared/server/env.server";
+import { drizzle } from "drizzle-orm/node-postgres";
 
 const environment = getEnvironment();
 
