@@ -12,8 +12,8 @@ describe("CommandFailedError", () => {
 
         const error = new CommandFailedError("yt-dlp", 1, stderr);
 
-        assert.equal(error.message.includes("dQw4w9WgXcQ"), false);
-        assert.equal(error.message.includes("youtube.com"), false);
+        assert.doesNotMatch(error.message, /dQw4w9WgXcQ/);
+        assert.doesNotMatch(error.message, /youtube\.com/);
         assert.equal(error.message.includes("Private video"), true);
         assert.equal(error.message.startsWith("yt-dlp exited with code 1"), true);
     });
