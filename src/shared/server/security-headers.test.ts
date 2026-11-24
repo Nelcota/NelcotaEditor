@@ -27,3 +27,20 @@ describe("SECURITY_HEADERS", () => {
         assert.equal(names.includes("Strict-Transport-Security"), true);
     });
 });
+
+describe("Permissions-Policy", () => {
+    const policy = new Map<string, string>(SECURITY_HEADERS).get("Permissions-Policy") ?? "";
+    const directives = policy.split(",").map((directive) => directive.trim());
+
+    it("turns off device and payment features the app never uses", () => {
+        for (const feature of ["camera", "microphone", "geolocation", "payment", "usb"]) {
+            assert.equal(directives.includes(`${feature}=()`), true, feature);
+        }
+    });
+
+    it("leaves fullscreen and the clipboard to the app's own pages", () => {
+        for (const feature of ["fullscreen", "clipboard-write"]) {
+            assert.equal(directives.includes(`${feature}=()`), false, feature);
+        }
+    });
+});
