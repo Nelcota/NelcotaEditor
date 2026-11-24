@@ -15,6 +15,15 @@ export interface StudioShortcutActions {
 const FOCUSED_CONTROL_SELECTOR =
     "button, a[href], summary, [role=slider], [role=radio], [role=combobox], [role=tab]";
 
+// Radix dialogs (and alert dialogs) mark their open content; a native one is open with [open].
+const OPEN_DIALOG_SELECTOR =
+    '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"], dialog[open]';
+
+/** Keys pressed while a dialog asks something belong to it, never to the editor behind it. */
+function isDialogOpen(): boolean {
+    return document.querySelector(OPEN_DIALOG_SELECTOR) !== null;
+}
+
 /** Typing in a field must never play the video or move the clip. */
 function isTypingTarget(target: EventTarget | null): boolean {
     if (target instanceof HTMLElement === false) {
@@ -74,7 +83,7 @@ function runShortcut(event: KeyboardEvent, actions: StudioShortcutActions): bool
     return true;
 }
 
-/** The Studio's keys, active anywhere on the page except while typing. */
+/** The Studio's keys, active anywhere on the page except while typing or in a dialog. */
 export function useStudioShortcuts(actions: StudioShortcutActions, isEnabled: boolean): void {
     const actionsRef = useRef(actions);
 
@@ -88,7 +97,7 @@ export function useStudioShortcuts(actions: StudioShortcutActions, isEnabled: bo
         }
 
         const onKeyDown = (event: KeyboardEvent): void => {
-            if (isTypingTarget(event.target) === true) {
+            if (isTypingTarget(event.target) === true || isDialogOpen() === true) {
                 return;
             }
 
