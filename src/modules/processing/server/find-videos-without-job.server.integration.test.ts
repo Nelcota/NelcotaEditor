@@ -4,7 +4,11 @@ import { afterAll, describe, test } from "vitest";
 import { inArray, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { findVideosWithoutJob } from "#/modules/processing/server/find-videos-without-job.server";
-import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
+import {
+    PROCESS_VIDEO_QUEUE,
+    enqueueVideoProcessing,
+    ensureProcessVideoQueue,
+} from "#/modules/processing/server/video-processing-queue.server";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { getJobQueue } from "#/shared/server/job-queue.server";
@@ -48,6 +52,16 @@ async function insertVideo(
     return { videoId, userId };
 }
 
+type JobState = "active" | "completed" | "failed";
+
+/** Written straight to pg-boss's table: a job only reaches these states through a worker. */
+async function insertJob(videoId: string, state: JobState): Promise<void> {
+    await ensureProcessVideoQueue();
+    await db.execute(
+        sql`insert into pgboss.job (name, state, singleton_key) values (${PROCESS_VIDEO_QUEUE}, ${state}::pgboss.job_state, ${videoId})`,
+    );
+}
+
 async function findStuckVideoIds(): Promise<Array<string>> {
     const stuckVideos = await findVideosWithoutJob();
 
@@ -58,6 +72,9 @@ describe("findVideosWithoutJob", () => {
     afterAll(async () => {
         // Gone, so the oldest-first limit of a later run never meets these.
         await db.delete(videos).where(inArray(videos.id, createdVideoIds));
+        await db.execute(
+            sql`delete from pgboss.job where name = ${PROCESS_VIDEO_QUEUE} and singleton_key in (${sql.join(createdVideoIds, sql`, `)})`,
+        );
         const jobQueue = await getJobQueue();
         await jobQueue.stop({ graceful: false });
         await db.$client.end();
@@ -74,6 +91,27 @@ describe("findVideosWithoutJob", () => {
         await enqueueVideoProcessing({ videoId, userId }, null);
 
         assert.equal((await findStuckVideoIds()).includes(videoId), false);
+    });
+
+    test("leaves a video that a job runs", async () => {
+        const { videoId } = await insertVideo("transcribing", LONG_AGO);
+        await insertJob(videoId, "active");
+
+        assert.equal((await findStuckVideoIds()).includes(videoId), false);
+    });
+
+    test("finds a video whose job failed", async () => {
+        const { videoId } = await insertVideo("transcribing", LONG_AGO);
+        await insertJob(videoId, "failed");
+
+        assert.ok((await findStuckVideoIds()).includes(videoId));
+    });
+
+    test("finds a video whose job completed", async () => {
+        const { videoId } = await insertVideo("transcribing", LONG_AGO);
+        await insertJob(videoId, "completed");
+
+        assert.ok((await findStuckVideoIds()).includes(videoId));
     });
 
     test("leaves a video updated within the grace period", async () => {
