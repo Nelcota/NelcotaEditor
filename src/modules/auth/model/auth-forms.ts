@@ -27,6 +27,17 @@ export const signUpSchema = z.object({
     password: newPasswordSchema,
 });
 
+export const forgotPasswordSchema = z.object({ email: emailSchema });
+
+export const resetPasswordSchema = z.object({ newPassword: newPasswordSchema });
+
+const MAX_RESET_TOKEN_LENGTH = 128;
+
+/** Better Auth forwards a valid link with ?token and an expired or used one with ?error only. */
+export const resetPasswordSearchSchema = z.object({
+    token: z.string().min(1).max(MAX_RESET_TOKEN_LENGTH).optional().catch(undefined),
+});
+
 export const profileNameSchema = z.object({ name: nameSchema });
 
 export const changePasswordSchema = z.object({

@@ -1,8 +1,11 @@
 import { captcha } from "better-auth/plugins";
 import { getEnvironment } from "#/shared/server/env.server";
 
-/** Bots create accounts and guess passwords through these; the browser sends a Turnstile token. */
-const CAPTCHA_ENDPOINTS = ["/sign-up/email", "/sign-in/email"];
+/**
+ * Bots create accounts, guess passwords and send email to strangers through these; the browser
+ * sends a Turnstile token.
+ */
+const CAPTCHA_ENDPOINTS = ["/sign-up/email", "/sign-in/email", "/request-password-reset"];
 
 /** Cloudflare Turnstile when its keys are configured; without them auth works with no check. */
 export function buildCaptchaPlugins(): Array<ReturnType<typeof captcha>> {
