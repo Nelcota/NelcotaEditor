@@ -1,11 +1,13 @@
 name: Check
 
 # Runs the same gate as the local pre-commit hook, plus the database and browser tests, on every
-# pull request. A push to main that passes all of them is deployed to production.
+# pull request. A push to main that passes all of them is deployed to production. A maintainer
+# can also run it by hand on main to test and deploy the current tip again (see the deploy job).
 on:
     pull_request:
     push:
         branches: [main]
+    workflow_dispatch:
 
 # The jobs only read the code; the token gets nothing more.
 permissions:
@@ -92,7 +94,9 @@ jobs:
 
     deploy:
         needs: [check, database-and-browser]
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: >-
+            (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+            github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         timeout-minutes: 5
         # One deploy at a time; a newer pending deploy replaces an older one that has not started.
@@ -100,8 +104,16 @@ jobs:
             group: deploy-production
             cancel-in-progress: false
         steps:
-            # Dokploy builds whatever main points to when it is called, not this run's commit. If main
+            # Dokploy builds whatever main points to when it clones it, not this run's commit. If main
             # moved on, that newer commit is untested here; its own run deploys it once it passes.
+            #
+            # Two gaps remain, since Dokploy's webhook cannot be pinned to a commit:
+            # - The check and the webhook are separate steps, and Dokploy clones main later still.
+            #   A commit that lands in that window is deployed untested. The window is seconds, but
+            #   it is not closed.
+            # - When the newer commit's run fails, this run has already skipped, so the last tested
+            #   commit is never deployed and production stays on an older one. Fix or revert main,
+            #   or run this workflow by hand on main (workflow_dispatch) to test and deploy its tip.
             - name: Check that the tested commit is still the tip of main
               id: tip
               env:
