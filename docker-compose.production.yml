@@ -1,0 +1,129 @@
+name: nelcota-production
+
+# Deployed by Dokploy as a Compose service; its environment settings fill the ${...} values and
+# its domain settings route the web service through Traefik. No database or Whisper port is
+# published: Docker would open it past the firewall.
+
+x-logging: &logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
+
+services:
+    postgres:
+        image: postgres:18.7-alpine
+        command: ["postgres", "-c", "log_min_duration_statement=500"]
+        environment:
+            POSTGRES_USER: nelcota
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+            POSTGRES_DB: nelcota
+        volumes:
+            - postgres-data:/var/lib/postgresql
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U nelcota -d nelcota"]
+            interval: 5s
+            timeout: 5s
+            retries: 30
+        logging: *logging
+        restart: unless-stopped
+
+    migrate:
+        build:
+            context: .
+            target: migrate
+        environment:
+            MIGRATION_DATABASE_URL: postgresql://nelcota:${POSTGRES_PASSWORD:?}@postgres:5432/nelcota
+            APP_DATABASE_USER: nelcota_app
+            APP_DATABASE_PASSWORD: ${APP_DATABASE_PASSWORD:?}
+        depends_on:
+            postgres:
+                condition: service_healthy
+        logging: *logging
+        restart: "no"
+
+    web:
+        build:
+            context: .
+            target: web
+        environment:
+            DATABASE_URL: postgresql://nelcota_app:${APP_DATABASE_PASSWORD:?}@postgres:5432/nelcota
+            BETTER_AUTH_URL: ${BETTER_AUTH_URL:?}
+            BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?}
+            # Cloudflare sits in front; without it every visitor would share Traefik's address and
+            # one sign-in rate limit.
+            TRUSTED_PROXY_IP_HEADER: cf-connecting-ip
+            TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+            TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+            STORAGE_DIR: /app/storage
+            STORAGE_DRIVER: r2
+            R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:?}
+            R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:?}
+            R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:?}
+            R2_BUCKET: ${R2_BUCKET:?}
+            # Required by the shared settings; only the worker calls Whisper.
+            WHISPER_URL: http://whisper:8000
+            WHISPER_MODEL: ${WHISPER_MODEL:-Systran/faster-whisper-small}
+            STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
+        expose:
+            - "3000"
+        depends_on:
+            migrate:
+                condition: service_completed_successfully
+        logging: *logging
+        restart: unless-stopped
+
+    worker:
+        build:
+            context: .
+            dockerfile: Dockerfile.worker
+        # Only what the worker reads: it handles files from the internet and must not hold the
+        # app's secrets (BETTER_AUTH_SECRET, Turnstile).
+        environment:
+            DATABASE_URL: postgresql://nelcota_app:${APP_DATABASE_PASSWORD:?}@postgres:5432/nelcota
+            STORAGE_DIR: /app/storage
+            WORK_DIR: /app/work
+            STORAGE_DRIVER: r2
+            R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:?}
+            R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:?}
+            R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:?}
+            R2_BUCKET: ${R2_BUCKET:?}
+            WHISPER_URL: http://whisper:8000
+            WHISPER_MODEL: ${WHISPER_MODEL:-Systran/faster-whisper-small}
+            WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-pt}
+            DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?}
+            DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+            STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
+            # One video at a time: ffmpeg and Whisper share the server's 6 cores.
+            WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-1}
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
+        volumes:
+            - worker-work:/app/work
+        depends_on:
+            migrate:
+                condition: service_completed_successfully
+            whisper:
+                condition: service_started
+        logging: *logging
+        restart: unless-stopped
+
+    whisper:
+        # Same pinned image as development.
+        image: ghcr.io/speaches-ai/speaches@sha256:21e3df06d842fb7802ab470dd77c25f0e8c0d22950e8d8c6ae886e851af53ef8
+        environment:
+            # 3 model workers x 2 threads match the server's 6 cores (see docker-compose.yml).
+            WHISPER__COMPUTE_TYPE: int8
+            WHISPER__NUM_WORKERS: "3"
+            WHISPER__CPU_THREADS: "2"
+        volumes:
+            - whisper-models:/home/ubuntu/.cache/huggingface/hub
+        logging: *logging
+        restart: unless-stopped
+
+volumes:
+    postgres-data:
+    whisper-models:
+    worker-work:
