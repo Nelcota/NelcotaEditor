@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import { BrandGaze } from "#/shared/ui/brand-gaze";
 import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
 import { cn } from "#/shared/ui/cn";
 
@@ -7,7 +9,7 @@ export function BrandMark({ className }: { className?: string }) {
 }
 
 /** Ghost plus the lowercase wordmark, set tight and bold like the reference's logo. */
-export function BrandLogo({ className }: { className?: string }) {
+export function BrandLogo({ className }: { className?: string }): ReactNode {
     return (
         <span
             className={cn(
@@ -15,7 +17,7 @@ export function BrandLogo({ className }: { className?: string }) {
                 className,
             )}
         >
-            <BrandMark />
+            <BrandGaze />
             nelcota
         </span>
     );

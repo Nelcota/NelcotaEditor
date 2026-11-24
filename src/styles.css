@@ -175,8 +175,11 @@
     --radius-xl: 0.625rem;
     --radius-2xl: 0.875rem;
 
-    /* The crew member of the running stage bobs while it works. Use with motion-safe:. */
     --animate-crew-work: crew-work 1.4s ease-in-out infinite;
+    --animate-crew-download: crew-download 780ms ease-in-out;
+    --animate-crew-transcribe: crew-transcribe 940ms ease-in-out;
+    --animate-crew-select: crew-select 1000ms ease-in-out;
+    --animate-crew-render: crew-render 1180ms ease-in-out;
 
     @keyframes crew-work {
         0%,
@@ -190,6 +193,67 @@
 
         75% {
             transform: translateY(-1px) rotate(6deg);
+        }
+    }
+
+    @keyframes crew-download {
+        18% {
+            transform: translate(-3%, -5%) rotate(-6deg);
+        }
+
+        40% {
+            transform: translate(7%, 9%) rotate(8deg) scale(0.98, 1.07);
+        }
+
+        66% {
+            transform: translateY(-2%) rotate(-3deg);
+        }
+    }
+
+    @keyframes crew-transcribe {
+        18% {
+            transform: translateX(-3%) rotate(-5deg) scale(1.06, 0.9);
+        }
+
+        35%,
+        72% {
+            transform: translateY(-3%) scale(0.98, 1.02);
+        }
+
+        54% {
+            transform: translateX(3%) rotate(5deg) scale(1.06, 0.9);
+        }
+    }
+
+    @keyframes crew-select {
+        24% {
+            transform: rotate(-8deg) scale(0.96);
+        }
+
+        48% {
+            transform: rotate(10deg) scale(1.13);
+        }
+
+        76% {
+            transform: rotate(-2deg) scale(1.03);
+        }
+    }
+
+    @keyframes crew-render {
+        20% {
+            transform: skewX(-8deg) scale(0.96, 1.12);
+        }
+
+        42% {
+            transform: skewX(5deg) scale(1.05, 0.96);
+        }
+
+        65% {
+            transform: skewX(-5deg) scale(0.98, 1.09);
+        }
+
+        84% {
+            transform: skewX(3deg) scale(1.02, 0.99);
         }
     }
 }
@@ -358,6 +422,44 @@
 @keyframes navigation-fade-in {
     to {
         opacity: 1;
+    }
+}
+
+.brand-gaze {
+    visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .brand-gaze {
+        transition: visibility 150ms step-end;
+    }
+
+    .brand-gaze:is([data-has-gaze], [data-is-blinking]) {
+        visibility: visible;
+        transition: none;
+    }
+
+    .brand-gaze-eyes {
+        transform-box: view-box;
+        translate: var(--brand-look-x, 0%) var(--brand-look-y, 0%);
+        transition: translate 150ms ease-out;
+    }
+
+    .brand-gaze-lids {
+        transform-box: fill-box;
+        transform-origin: center;
+        scale: 1;
+    }
+
+    .brand-gaze[data-is-blinking] .brand-gaze-lids {
+        animation: brand-blink 170ms ease-in-out;
+    }
+}
+
+@keyframes brand-blink {
+    42%,
+    53% {
+        scale: 1 0.12;
     }
 }
 

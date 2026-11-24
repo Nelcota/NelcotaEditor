@@ -4,7 +4,9 @@ import ScissorsIcon from "~icons/lucide/scissors";
 import YoutubeIcon from "~icons/lucide/youtube";
 import type { ReactNode } from "react";
 import { CLIP_LENGTH_LABELS } from "#/modules/preferences/model/preferences";
+import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { VideoMascot } from "#/modules/videos/ui/components/video-mascot";
+import { useVideoResultGesture } from "#/modules/videos/ui/hooks/use-video-result-gesture";
 import { VIDEO_SOURCE_LABELS } from "#/modules/videos/model/video-status-labels";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { formatClock } from "#/shared/ui/format";
@@ -52,6 +54,7 @@ function VideoBubble({ video }: { video: VideoSummary }): ReactNode {
  */
 export function VideoResultSummary({ video }: { video: VideoSummary }): ReactNode {
     const readyClipCount = video.readyClipCount;
+    const completionMascot = useVideoResultGesture(video, "done");
 
     if (video.status !== "done") {
         return null;
@@ -60,10 +63,16 @@ export function VideoResultSummary({ video }: { video: VideoSummary }): ReactNod
     return (
         <section aria-label="Resumo do vídeo" className="grid gap-3">
             <VideoBubble video={video} />
-            <p className="text-sm">
-                Separei {readyClipCount} {pluralize(readyClipCount, "momento", "melhores momentos")}{" "}
-                do vídeo, já em 9:16 e com legenda.
-            </p>
+            <div className="flex items-center gap-2">
+                <span ref={completionMascot} className="inline-flex shrink-0">
+                    <StageCrewMascot status="done" className="size-8" />
+                </span>
+                <p className="text-sm">
+                    Separei {readyClipCount}{" "}
+                    {pluralize(readyClipCount, "momento", "melhores momentos")} do vídeo, já em 9:16
+                    e com legenda.
+                </p>
+            </div>
             <ul aria-label="Como foi cortado" className="flex flex-wrap gap-1.5">
                 <li className={TAG_CLASS}>
                     <ScissorsIcon aria-hidden="true" />
