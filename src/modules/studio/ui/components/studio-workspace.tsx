@@ -76,7 +76,7 @@ export function StudioWorkspace({
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [tab, setTab] = useState<StudioToolTab>("captions");
     const isRendering = isVideoFinished(video.status) === false;
-    const renderRequest = useRenderRequest(editor, clip.sharePath);
+    const renderRequest = useRenderRequest(editor, clip.isShared);
     const durationSeconds = studio.videoDurationSeconds ?? draft.endSeconds;
     const marks = useTrimMarks({
         editor,

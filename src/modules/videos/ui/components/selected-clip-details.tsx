@@ -35,10 +35,12 @@ function ClipActions({ videoId, clip, canRetry }: SelectedClipDetailsProps) {
             <>
                 <RetryClipButton videoId={videoId} clipId={clip.id} isDisabled={isBusy} />
                 <OpenInStudioLink videoId={videoId} clipId={clip.id} />
+                <ShareClipButton videoId={videoId} clip={clip} />
             </>
         );
     }
 
+    // Pending and rendering clips have no downloadUrl yet, so the link stays out until it is done.
     return (
         <>
             <DownloadLink href={clip.downloadUrl} label="Baixar corte" />

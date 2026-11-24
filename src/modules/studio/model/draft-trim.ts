@@ -6,16 +6,30 @@ interface TimeRange {
     endSeconds: number;
 }
 
+/**
+ * Where a cue starts once the range may cut it. A cut cue starts at its first remaining word, not at
+ * the clip start: the dropped word before it comes back as its own cue when the start moves back,
+ * and must not overlap this one.
+ */
+function cutCueStart(cue: CaptionCue, firstWord: CaptionWord, range: TimeRange): number {
+    if (cue.startSeconds >= range.startSeconds) {
+        return cue.startSeconds;
+    }
+
+    return firstWord.startSeconds;
+}
+
 /** A cue cut to the range; null when nothing of it is left inside. */
 function clipCueToRange(cue: CaptionCue, range: TimeRange): CaptionCue | null {
     const words = wordsInsideRange(cue.words, range);
+    const firstWord = words[0];
 
-    if (words.length === 0) {
+    if (firstWord === undefined) {
         return null;
     }
 
     return {
-        startSeconds: Math.max(cue.startSeconds, range.startSeconds),
+        startSeconds: cutCueStart(cue, firstWord, range),
         endSeconds: Math.min(cue.endSeconds, range.endSeconds),
         words,
     };

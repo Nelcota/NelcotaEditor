@@ -50,6 +50,7 @@ export function toClipView(clip: ClipViewRow): ClipView {
         fileUrl: null,
         downloadUrl: null,
         sharePath: null,
+        isShared: clip.shareToken !== null,
     };
 
     if (clip.status !== "done" || clip.outputPath === null) {

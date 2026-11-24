@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { ClipView } from "#/modules/clips/model/clip-view";
-import { findClipAt } from "#/modules/videos/model/clip-ranking";
+import { pickClipToFollow } from "#/modules/videos/model/clip-to-follow";
 
 interface ClipStudio {
     playerRef: RefObject<HTMLVideoElement | null>;
@@ -32,15 +32,18 @@ export function useClipStudio(rankedClips: Array<ClipView>): ClipStudio {
     };
 
     // Playing the original into a clip's stretch makes that clip the one shown beside it.
+    // Read from the updater: the seek that selectClip starts lands after the choice is stored.
     const followPlayback = (seconds: number): void => {
-        const clipHere = findClipAt(rankedClips, seconds);
         setCurrentSeconds(seconds);
+        setChosenClipId((currentClipId) => {
+            const clipHere = pickClipToFollow(rankedClips, currentClipId, seconds);
 
-        if (clipHere === undefined) {
-            return;
-        }
+            if (clipHere === undefined) {
+                return currentClipId;
+            }
 
-        setChosenClipId(clipHere.id);
+            return clipHere.id;
+        });
     };
 
     const selectClip = (clip: ClipView): void => {

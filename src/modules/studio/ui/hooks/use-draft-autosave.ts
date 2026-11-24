@@ -4,7 +4,10 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type { StudioDraft } from "#/modules/clips/model/clip-studio";
 import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
 import { clearDraftBackup, writeDraftBackup } from "#/modules/studio/client/draft-backup";
-import { clipStudioQueryKey } from "#/modules/studio/model/studio-queries";
+import {
+    clipDraftLeaveSaveKey,
+    clipStudioQueryOptions,
+} from "#/modules/studio/model/studio-queries";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { useIsOnline } from "#/shared/ui/use-is-online";
 import { reportClientProblem } from "#/shared/errors/report-client-problem";
@@ -12,8 +15,16 @@ import { reportClientProblem } from "#/shared/errors/report-client-problem";
 // Long enough to group a burst of typing into one request, short enough to feel instant.
 const SAVE_DELAY_MILLISECONDS = 800;
 const SAVE_SCOPE_PREFIX = "studio-draft-save:";
+// Each round saves what was typed during the one before; a person cannot outtype this many.
+const MAX_FLUSH_ROUNDS = 5;
 
 export type SaveStatus = "saved" | "saving" | "failed" | "offline" | "conflict";
+
+/** How a flush ended: the server holds the current draft, or why it does not. */
+export type FlushOutcome = "saved" | "conflict" | "failed";
+
+/** One save; "changed" means it landed but the draft moved on while it was on its way. */
+type SaveOutcome = FlushOutcome | "changed";
 
 interface AutosaveInput {
     videoId: string;
@@ -28,8 +39,8 @@ export interface DraftAutosave {
     status: SaveStatus;
     /** The server version the next save builds on. */
     readVersion: () => number;
-    /** Saves right away; resolves to whether the server now holds the current draft. */
-    flush: () => Promise<boolean>;
+    /** Saves right away, again while edits keep arriving, until the server holds the draft. */
+    flush: () => Promise<FlushOutcome>;
     /** Takes the server's latest version as the base; a draft that differs is saved over it next. */
     resync: (version: number, serverDraft: StudioDraft) => void;
 }
@@ -43,19 +54,27 @@ function resolveStatus(status: SaveStatus, isOnline: boolean): SaveStatus {
     return status;
 }
 
+interface SavedDraft {
+    videoId: string;
+    clipId: string;
+    draft: StudioDraft;
+    draftVersion: number;
+}
+
 /**
- * The snapshot never refetches on its own, so after the Studio closes it would reopen on the
- * draft and version it first loaded, hiding the saved edits and turning the next save into a
- * conflict. A Studio still showing the clip keeps it.
+ * The snapshot never refetches on its own, so a Studio reopened on it would start from the draft
+ * and version it first loaded, hiding the saved edits and turning the next save into a conflict.
  */
-function forgetUnusedSnapshot(queryClient: QueryClient, queryKey: Array<string>): void {
-    const query = queryClient.getQueryCache().find({ queryKey, exact: true });
+function storeSavedDraft(queryClient: QueryClient, saved: SavedDraft): void {
+    const queryKey = clipStudioQueryOptions(saved.videoId, saved.clipId).queryKey;
 
-    if (query === undefined || query.getObserversCount() > 0) {
-        return;
-    }
+    queryClient.setQueryData(queryKey, (snapshot) => {
+        if (snapshot === undefined) {
+            return undefined;
+        }
 
-    queryClient.removeQueries({ queryKey, exact: true });
+        return { ...snapshot, draft: saved.draft, draftVersion: saved.draftVersion };
+    });
 }
 
 /** Keeps the server's copy of the draft in step with the screen, quietly and in order. */
@@ -73,12 +92,12 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
         draftRef.current = draft;
     }, [draft]);
 
-    const saveOnce = async (): Promise<boolean> => {
+    const saveOnce = async (): Promise<SaveOutcome> => {
         const current = draftRef.current;
 
         if (current === savedDraftRef.current) {
             setStatus("saved");
-            return true;
+            return "saved";
         }
 
         setStatus("saving");
@@ -90,20 +109,31 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
 
             if (result.kind === "conflict") {
                 setStatus("conflict");
-                return false;
+                return "conflict";
             }
 
             versionRef.current = result.draftVersion;
             savedDraftRef.current = current;
+            storeSavedDraft(queryClient, {
+                videoId,
+                clipId,
+                draft: current,
+                draftVersion: result.draftVersion,
+            });
             clearDraftBackup(clipId);
             setStatus("saved");
-            return draftRef.current === current;
+
+            if (draftRef.current !== current) {
+                return "changed";
+            }
+
+            return "saved";
         } catch (error) {
             // The edits stay on screen and in this browser; the person can try again.
             reportClientProblem("Could not save the Studio draft", error);
             writeDraftBackup(clipId, { baseVersion: versionRef.current, draft: current });
             setStatus("failed");
-            return false;
+            return "failed";
         }
     };
 
@@ -116,8 +146,26 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
         scope: { id: `${SAVE_SCOPE_PREFIX}${clipId}` },
         networkMode: "always",
     });
+    // The same save under a key the Studio tab watches: reopening the clip before it lands would
+    // start from the version it replaces.
+    const leaveSaveMutation = useMutation({
+        mutationKey: clipDraftLeaveSaveKey(videoId, clipId),
+        mutationFn: saveOnce,
+        scope: { id: `${SAVE_SCOPE_PREFIX}${clipId}` },
+        networkMode: "always",
+    });
 
-    const flush = (): Promise<boolean> => saveMutation.mutateAsync();
+    const flush = async (): Promise<FlushOutcome> => {
+        for (let round = 0; round < MAX_FLUSH_ROUNDS; round += 1) {
+            const outcome = await saveMutation.mutateAsync();
+
+            if (outcome !== "changed") {
+                return outcome;
+            }
+        }
+
+        return "failed";
+    };
 
     const saveLater = useEffectEvent((): void => {
         saveMutation.mutate();
@@ -148,8 +196,7 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
             writeDraftBackup(clipId, { baseVersion: versionRef.current, draft: current });
         }
 
-        await saveMutation.mutateAsync();
-        forgetUnusedSnapshot(queryClient, clipStudioQueryKey(videoId, clipId));
+        await leaveSaveMutation.mutateAsync();
     });
 
     useEffect(() => {
