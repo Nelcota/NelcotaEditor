@@ -12,9 +12,13 @@ import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
+import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+
+/** In page order; each field's input id matches its name. */
+const FIELD_NAMES = ["name", "email", "password"] as const;
 
 interface SignUpScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
@@ -30,6 +34,7 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
     const form = useForm({
         defaultValues: { name: "", email: "", password: "" },
         validators: { onSubmit: signUpSchema },
+        onSubmitInvalid: ({ formApi }) => focusFirstInvalidField(FIELD_NAMES, formApi),
         onSubmit: async ({ value }) => {
             setErrorMessage(null);
 
