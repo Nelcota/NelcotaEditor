@@ -1,13 +1,13 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
 import UserRoundIcon from "~icons/lucide/user-round";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useIsMutating } from "@tanstack/react-query";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { profileNameSchema } from "#/modules/auth/model/auth-forms";
 import { renameUser } from "#/modules/auth/server/profile-functions";
-import { AvatarStep } from "#/modules/auth/ui/components/avatar-step";
+import { AVATAR_CHANGE_MUTATION_KEY, AvatarStep } from "#/modules/auth/ui/components/avatar-step";
 import { forgetCurrentUser } from "#/modules/auth/model/current-user-query";
 import { ReadOnlyEmail } from "#/modules/auth/ui/components/read-only-email";
 import { Button } from "#/shared/ui/button";
@@ -98,9 +98,20 @@ function ProfileSteps({ initialStep, onDone }: ProfileStepsProps): ReactNode {
     const step = steps.current;
     const { form, errorMessage, email } = useProfileNameForm(onDone);
     const isNameStep = steps.index === NAME_STEP_INDEX;
+    // A photo still uploading would fail out of sight once its step is gone, so the step stays put.
+    const isAvatarChanging = useIsMutating({ mutationKey: AVATAR_CHANGE_MUTATION_KEY }) > 0;
+    let reachableIndex = STEPS.length - 1;
+
+    if (isAvatarChanging === true) {
+        reachableIndex = steps.index;
+    }
 
     const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
+
+        if (isAvatarChanging === true) {
+            return;
+        }
 
         if (isNameStep === false) {
             steps.goNext();
@@ -121,7 +132,7 @@ function ProfileSteps({ initialStep, onDone }: ProfileStepsProps): ReactNode {
                         tone="default"
                         steps={STEPS}
                         currentIndex={steps.index}
-                        reachableIndex={STEPS.length - 1}
+                        reachableIndex={reachableIndex}
                         onStepSelect={steps.goTo}
                     />
                 }
@@ -133,7 +144,7 @@ function ProfileSteps({ initialStep, onDone }: ProfileStepsProps): ReactNode {
                         {(isSubmitting) => (
                             <ProfileFooter
                                 isNameStep={isNameStep}
-                                isSubmitting={isSubmitting}
+                                isSubmitting={isSubmitting || isAvatarChanging}
                                 onBack={steps.goBack}
                             />
                         )}
@@ -173,7 +184,13 @@ interface ProfileFooterProps {
 function ProfileFooter({ isNameStep, isSubmitting, onBack }: ProfileFooterProps): ReactNode {
     if (isNameStep === false) {
         return (
-            <Button type="submit" size="lg" className="ms-auto font-medium max-sm:flex-1">
+            <Button
+                type="submit"
+                size="lg"
+                className="ms-auto font-medium max-sm:flex-1"
+                disabled={isSubmitting}
+                aria-busy={isSubmitting}
+            >
                 Continuar
                 <ArrowRightIcon aria-hidden="true" />
             </Button>
