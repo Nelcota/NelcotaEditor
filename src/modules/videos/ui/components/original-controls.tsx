@@ -61,7 +61,8 @@ function SkipSecondsText(): ReactNode {
 /** The original and its clips, as the studio hands them over. */
 export interface StudioLink {
     rankedClips: Array<ClipView>;
-    selectedClip: ClipView;
+    /** Null until the first clip exists; the original still plays without one. */
+    selectedClip: ClipView | null;
     onSelectClip: (clip: ClipView) => void;
     onSeek: (seconds: number) => void;
 }
@@ -93,7 +94,7 @@ export function OriginalControls({
 }: OriginalControlsProps): ReactNode {
     const media = player.media;
     const rankedClips = studio.rankedClips;
-    const selectedClipId = studio.selectedClip.id;
+    const selectedClipId = studio.selectedClip?.id ?? null;
 
     const renderPreview = (seconds: number): ReactNode => (
         <SeekThumbnail
@@ -112,11 +113,13 @@ export function OriginalControls({
                 bufferedSeconds={media.bufferedSeconds}
                 onSeek={studio.onSeek}
                 marks={
-                    <ClipMarks
-                        clips={rankedClips}
-                        selectedClipId={selectedClipId}
-                        durationSeconds={durationSeconds}
-                    />
+                    selectedClipId !== null && (
+                        <ClipMarks
+                            clips={rankedClips}
+                            selectedClipId={selectedClipId}
+                            durationSeconds={durationSeconds}
+                        />
+                    )
                 }
                 renderPreview={renderPreview}
             />
@@ -141,11 +144,13 @@ export function OriginalControls({
                     durationSeconds={durationSeconds}
                 />
                 <span className="flex-1" />
-                <ClipSwitcher
-                    rankedClips={rankedClips}
-                    selectedClipId={selectedClipId}
-                    onSelectClip={studio.onSelectClip}
-                />
+                {selectedClipId !== null && (
+                    <ClipSwitcher
+                        rankedClips={rankedClips}
+                        selectedClipId={selectedClipId}
+                        onSelectClip={studio.onSelectClip}
+                    />
+                )}
                 <PlaybackRateButton player={player} />
                 <FullscreenButton player={player} />
             </div>

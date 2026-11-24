@@ -11,13 +11,15 @@ export interface OverviewVideoRow {
     id: string;
     status: VideoStatus;
     createdAt: Date;
-    finishedAt: Date | null;
-    processingStartedAt: Date | null;
+    firstFinishedAt: Date | null;
     durationSeconds: number | null;
     hasTranscript: boolean;
 }
 
-/** Finished videos created or finished since `since`; in-progress ones stay out of the numbers. */
+/**
+ * Finished videos created or first finished since `since`; in-progress ones stay out of the
+ * numbers.
+ */
 export async function listFinishedVideos(
     userId: string,
     since: Date,
@@ -27,8 +29,7 @@ export async function listFinishedVideos(
             id: videos.id,
             status: videos.status,
             createdAt: videos.createdAt,
-            finishedAt: videos.finishedAt,
-            processingStartedAt: videos.processingStartedAt,
+            firstFinishedAt: videos.firstFinishedAt,
             durationSeconds: videos.durationSeconds,
             transcriptVideoId: transcripts.videoId,
         })
@@ -38,7 +39,7 @@ export async function listFinishedVideos(
             and(
                 eq(videos.userId, userId),
                 inArray(videos.status, FINISHED_VIDEO_STATUSES),
-                or(gte(videos.createdAt, since), gte(videos.finishedAt, since)),
+                or(gte(videos.createdAt, since), gte(videos.firstFinishedAt, since)),
             ),
         );
 

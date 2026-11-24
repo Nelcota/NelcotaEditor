@@ -73,3 +73,20 @@ test("sends a signed-out visitor to sign in", async ({ page }) => {
 
     await expect(page).toHaveURL(/\/sign-in/);
 });
+
+test("returns to the page asked for after signing in", async ({ page, browser }) => {
+    const account = createTestAccount();
+    await signUp(page, account);
+    const freshContext = await browser.newContext();
+    const freshPage = await freshContext.newPage();
+    await useOwnClientAddress(freshPage);
+
+    await openPage(freshPage, "/videos");
+    await expect(freshPage).toHaveURL(/\/sign-in\?redirect=/);
+    await freshPage.getByLabel("Email").fill(account.email);
+    await freshPage.getByLabel("Senha", { exact: true }).fill(account.password);
+    await freshPage.getByRole("button", { name: "Entrar" }).click();
+
+    await expect(freshPage).toHaveURL("/videos");
+    await freshContext.close();
+});

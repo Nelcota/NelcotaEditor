@@ -27,7 +27,7 @@ export interface OverviewFunnel {
 
 export interface OverviewStats {
     periodDays: number;
-    /** ISO date (YYYY-MM-DD, UTC) of each day of the period, oldest first. */
+    /** Calendar day (YYYY-MM-DD, São Paulo time) of each day of the period, oldest first. */
     days: Array<string>;
     hasAnyVideo: boolean;
     inProgressCount: number;

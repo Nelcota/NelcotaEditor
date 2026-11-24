@@ -202,8 +202,17 @@ export function DeleteVideoDialog({ video, isOpen, onOpenChange }: DeleteVideoDi
         errorMessage = toErrorMessage(deletion.error, FALLBACK_ERROR_MESSAGE);
     }
 
+    // A failure belongs to the attempt the person just closed; reopening starts clean.
+    const changeOpen = (nextIsOpen: boolean): void => {
+        if (nextIsOpen === false && deletion.isPending === false) {
+            deletion.reset();
+        }
+
+        onOpenChange(nextIsOpen);
+    };
+
     return (
-        <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+        <AlertDialog open={isOpen} onOpenChange={changeOpen}>
             <AlertDialogContent
                 className={cn(STEP_DIALOG_CONTENT_CLASS, STEP_ALERT_WIDE_CLASS)}
                 onCloseAutoFocus={(event) => {

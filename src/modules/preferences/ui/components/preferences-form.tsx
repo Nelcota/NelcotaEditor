@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useId } from "react";
 import type { ReactNode } from "react";
 import {
     CLIP_LENGTH_HINTS,
@@ -9,8 +8,7 @@ import {
     TRANSCRIPTION_LANGUAGE_LABELS,
 } from "#/modules/preferences/model/preferences";
 import type { Preferences, TranscriptionLanguage } from "#/modules/preferences/model/preferences";
-import { savePreferences } from "#/modules/preferences/server/preferences-functions";
-import { PREFERENCES_QUERY_KEY } from "#/modules/preferences/model/preferences-queries";
+import { useSavePreferences } from "#/modules/preferences/ui/hooks/use-save-preferences";
 import { SaveStatus } from "#/modules/preferences/ui/components/save-status";
 import ScissorsIcon from "~icons/lucide/scissors";
 import { CLIP_COUNT_STEPPER } from "#/modules/preferences/model/preferences";
@@ -66,23 +64,20 @@ function LanguageSelect({ labelId, value, onValueChange }: LanguageSelectProps):
 }
 
 /**
- * The Seus cortes group's rows. Each change saves on its own; the last line says whether it
- * reached the server.
+ * The Seus cortes group's rows, showing the cached preferences. Each change saves on its own;
+ * the last line says whether it reached the server.
  */
-export function PreferencesForm({ initial }: { initial: Preferences }): ReactNode {
-    const queryClient = useQueryClient();
+export function PreferencesForm({ preferences }: { preferences: Preferences }): ReactNode {
     const languageLabelId = useId();
-    const [preferences, setPreferences] = useState<Preferences>(initial);
-    const save = useMutation({
-        mutationFn: (next: Preferences) => savePreferences({ data: next }),
-        onSuccess: (saved) => {
-            queryClient.setQueryData(PREFERENCES_QUERY_KEY, saved);
-        },
-    });
+    const save = useSavePreferences();
+    const lastChange = save.variables;
 
-    const change = (next: Preferences): void => {
-        setPreferences(next);
-        save.mutate(next);
+    const retry = (): void => {
+        if (lastChange === undefined) {
+            return;
+        }
+
+        save.mutate(lastChange);
     };
 
     return (
@@ -104,9 +99,7 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
                         label="Cortes por vídeo"
                         labelClassName="sr-only"
                         value={preferences.defaultClipCount}
-                        onValueChange={(defaultClipCount) =>
-                            change({ ...preferences, defaultClipCount })
-                        }
+                        onValueChange={(defaultClipCount) => save.mutate({ defaultClipCount })}
                     />
                 </div>
             </SettingsRow>
@@ -123,9 +116,7 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
                     options={CLIP_LENGTH_OPTIONS}
                     className="flex-nowrap [&>button]:whitespace-nowrap"
                     value={preferences.defaultClipLength}
-                    onValueChange={(defaultClipLength) =>
-                        change({ ...preferences, defaultClipLength })
-                    }
+                    onValueChange={(defaultClipLength) => save.mutate({ defaultClipLength })}
                 />
             </SettingsRow>
             <SettingsRow
@@ -137,12 +128,12 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
                     labelId={languageLabelId}
                     value={preferences.transcriptionLanguage}
                     onValueChange={(transcriptionLanguage) =>
-                        change({ ...preferences, transcriptionLanguage })
+                        save.mutate({ transcriptionLanguage })
                     }
                 />
             </SettingsRow>
             <div className="px-4 py-1 sm:px-5">
-                <SaveStatus status={save.status} onRetry={() => save.mutate(preferences)} />
+                <SaveStatus status={save.status} onRetry={retry} />
             </div>
         </>
     );

@@ -15,6 +15,8 @@ export interface ClipView {
     captionStyle: CaptionStyle;
     fileUrl: string | null;
     downloadUrl: string | null;
-    /** Where anyone with the link can watch it; null while the clip is not shared. */
+    /** Where anyone with the link can watch it; null while the clip is not shared or not ready. */
     sharePath: string | null;
+    /** The link stays on while the clip renders again, even though it only opens a ready clip. */
+    isShared: boolean;
 }

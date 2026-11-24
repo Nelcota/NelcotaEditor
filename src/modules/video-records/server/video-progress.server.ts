@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import {
@@ -42,6 +42,8 @@ export const VIDEO_ALREADY_PROCESSING_MESSAGE = "Este vídeo já está sendo pro
 
 const MIN_PERCENT = 0;
 const MAX_PERCENT = 100;
+// A video's first run starts as it is created; a retry or a Studio render starts later.
+const FIRST_RUN_START_WINDOW = sql`interval '1 minute'`;
 
 export class InvalidVideoProgressError extends Error {
     constructor(videoId: string, field: string, value: number) {
@@ -121,6 +123,7 @@ export async function markVideoFailed(videoId: string, errorMessage: string): Pr
  * cancel right as the last step ended. The caller then records the cancel instead.
  */
 export async function markVideoDone(videoId: string): Promise<boolean> {
+    const finishedAt = new Date();
     const doneRows = await db
         .update(videos)
         .set({
@@ -128,7 +131,11 @@ export async function markVideoDone(videoId: string): Promise<boolean> {
             progressPercent: MAX_PERCENT,
             errorMessage: null,
             cancelRequested: false,
-            finishedAt: new Date(),
+            finishedAt,
+            // Only the first run: a later retry or Studio render must not move it. A run that did not
+            // start with the video is not the first one (a video from before this column, or one
+            // whose first run failed), so it stays out, as in the backfill of migration 0016.
+            firstFinishedAt: sql`coalesce(${videos.firstFinishedAt}, case when ${videos.processingStartedAt} < ${videos.createdAt} + ${FIRST_RUN_START_WINDOW} then ${finishedAt.toISOString()}::timestamptz end)`,
         })
         .where(
             and(eq(videos.id, videoId), eq(videos.cancelRequested, false), canMoveVideoTo("done")),

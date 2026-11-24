@@ -3,7 +3,7 @@ import SquarePlusIcon from "~icons/lucide/square-plus";
 import { Link, useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ActivityBell } from "#/modules/shell/ui/components/activity-bell";
-import { getSectionState } from "#/modules/shell/model/nav-sections";
+import { SECTION_LINK_ACTIVE_OPTIONS, getSectionState } from "#/modules/shell/model/nav-sections";
 import type { NavSection } from "#/modules/shell/model/nav-sections";
 import { useNavSections } from "#/modules/shell/ui/hooks/use-nav-sections";
 import { BrandMark } from "#/shared/ui/brand-logo";
@@ -23,6 +23,7 @@ function RailLink({ section, pathname }: { section: NavSection; pathname: string
         <HintTooltip label={section.label}>
             <Link
                 to={section.path}
+                activeOptions={SECTION_LINK_ACTIVE_OPTIONS}
                 aria-label={section.label}
                 aria-current={toAriaCurrent(state === "current")}
                 data-parent={state === "parent"}

@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { signInSchema } from "#/modules/auth/model/auth-forms";
 import { toSignInNotice } from "#/modules/auth/model/sign-in-notice";
-import type { SignInSearch } from "#/modules/auth/model/sign-in-notice";
+import type { SignInSearch } from "#/modules/auth/model/sign-in-search";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
@@ -26,11 +26,17 @@ const FIELD_NAMES = ["email", "password"] as const;
 interface SignInScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
     captchaSiteKey: string | null;
+    /** A path inside the app, already checked; the page that sent the user here, or home. */
+    redirectTarget: string;
     /** Set by the link that brought the person here (email confirmation, password reset). */
     search: SignInSearch;
 }
 
-export function SignInScreen({ captchaSiteKey, search }: SignInScreenProps): ReactNode {
+export function SignInScreen({
+    captchaSiteKey,
+    search,
+    redirectTarget,
+}: SignInScreenProps): ReactNode {
     const notice = toSignInNotice(search);
     const track = useTrackPromise();
     const router = useRouter();
@@ -62,7 +68,7 @@ export function SignInScreen({ captchaSiteKey, search }: SignInScreenProps): Rea
 
             // A session that expired in this tab may have left another account's videos cached.
             queryClient.clear();
-            await router.navigate({ to: "/" });
+            await router.navigate({ href: redirectTarget });
         },
     });
 

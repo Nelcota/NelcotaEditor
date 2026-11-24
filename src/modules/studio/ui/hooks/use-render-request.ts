@@ -14,7 +14,7 @@ export interface RenderRequest {
 }
 
 /** Sending the draft to Brasa, with the share confirmation and the conflict it can run into. */
-export function useRenderRequest(editor: StudioEditor, sharePath: string | null): RenderRequest {
+export function useRenderRequest(editor: StudioEditor, isShared: boolean): RenderRequest {
     const [isConfirmingShare, setIsConfirmingShare] = useState(false);
     const [hasConflict, setHasConflict] = useState(false);
     const track = useTrackPromise();
@@ -28,7 +28,7 @@ export function useRenderRequest(editor: StudioEditor, sharePath: string | null)
     };
 
     const request = (): void => {
-        if (sharePath !== null) {
+        if (isShared === true) {
             setIsConfirmingShare(true);
             return;
         }

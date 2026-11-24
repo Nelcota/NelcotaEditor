@@ -76,6 +76,17 @@ describe("findDayIndex", () => {
         assert.equal(findDayIndex(window, new Date("2026-11-07T23:59:59-03:00")), null);
         assert.equal(findDayIndex(window, new Date("2026-11-22T00:00:00-03:00")), null);
     });
+
+    it("cuts the previous period at the same time of day as now, like the partial today", () => {
+        assert.equal(findDayIndex(window, new Date("2026-11-14T11:59:59-03:00")), 6);
+        assert.equal(findDayIndex(window, new Date("2026-11-14T12:00:00-03:00")), null);
+        assert.equal(findDayIndex(window, new Date("2026-11-14T23:00:00-03:00")), null);
+    });
+
+    it("keeps the whole of every earlier previous day and of the current days", () => {
+        assert.equal(findDayIndex(window, new Date("2026-11-13T23:00:00-03:00")), 5);
+        assert.equal(findDayIndex(window, new Date("2026-11-15T23:00:00-03:00")), 7);
+    });
 });
 
 describe("bucketByDay", () => {

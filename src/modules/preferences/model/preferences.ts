@@ -48,6 +48,18 @@ export const preferencesSchema = z.object({
 
 export type Preferences = z.infer<typeof preferencesSchema>;
 
+/**
+ * One save carries only the fields the user changed, so it never writes back a stale copy of a
+ * field another device changed in the meantime.
+ */
+export const preferencesChangeSchema = preferencesSchema
+    .partial()
+    .refine((change) => Object.keys(change).length > 0, {
+        message: "Informe ao menos uma preferência.",
+    });
+
+export type PreferencesChange = z.infer<typeof preferencesChangeSchema>;
+
 export const DEFAULT_PREFERENCES: Preferences = {
     defaultClipCount: DEFAULT_CLIP_COUNT,
     defaultClipLength: DEFAULT_CLIP_LENGTH,

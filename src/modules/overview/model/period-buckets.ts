@@ -6,12 +6,14 @@ import {
 } from "#/shared/server/business-time-zone";
 
 /**
- * The current period and the one before it, as 2 × periodDays whole days ending today, counted
- * in the business time zone (São Paulo), not UTC.
+ * The current period and the one before it, as 2 × periodDays days ending today, counted in the
+ * business time zone (São Paulo), not UTC. Today is only partly over, so the previous period
+ * stops at the same time of day (`previousEnd`) and sums compare like for like.
  */
 export interface PeriodWindow {
     periodDays: number;
     previousStart: Date;
+    previousEnd: Date;
 }
 
 export class InvalidPeriodError extends Error {
@@ -28,15 +30,21 @@ export function createPeriodWindow(periodDays: number, now: Date): PeriodWindow 
 
     const today = startOfBusinessDay(now);
     const previousStart = addBusinessDays(today, -(periodDays * 2 - 1));
+    const previousEnd = addBusinessDays(now, -periodDays);
 
-    return { periodDays, previousStart };
+    return { periodDays, previousStart, previousEnd };
 }
 
 /** Day index in the window (0 … 2 × periodDays − 1), or null when the date is outside it. */
 export function findDayIndex(window: PeriodWindow, date: Date): number | null {
+    const periodDays = window.periodDays;
     const index = countBusinessDaysBetween(date, window.previousStart);
 
-    if (index < 0 || index >= window.periodDays * 2) {
+    if (index < 0 || index >= periodDays * 2) {
+        return null;
+    }
+
+    if (index < periodDays && date.getTime() >= window.previousEnd.getTime()) {
         return null;
     }
 

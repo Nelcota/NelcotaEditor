@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "vitest";
-import { signInSearchSchema, toSignInNotice } from "#/modules/auth/model/sign-in-notice";
+import { toSignInNotice } from "#/modules/auth/model/sign-in-notice";
+import { signInSearchSchema } from "#/modules/auth/model/sign-in-search";
 
 describe("toSignInNotice", () => {
     it("says nothing on a plain visit", () => {

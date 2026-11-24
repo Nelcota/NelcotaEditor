@@ -55,9 +55,12 @@ export const videos = pgTable(
         errorMessage: text("error_message"),
         // When the worker last stopped touching the video (done, failed or cancelled).
         finishedAt: timestamp("finished_at", { withTimezone: true }),
-        // When the current run was asked for (creation, retry or a Studio render). Processing time
-        // is measured from here: createdAt would count the days between a video and its re-render.
-        // Null for videos from before this column, which the averages leave out.
+        // When the video first reached done, kept through every later retry or Studio render
+        // (which reset finishedAt). The Painel's time per video runs from createdAt to here.
+        firstFinishedAt: timestamp("first_finished_at", { withTimezone: true }),
+        // When the current run was asked for (creation, retry or a Studio render). The running
+        // run's time left is measured from here: createdAt would count the days between a video
+        // and its re-render. Null for videos from before this column.
         processingStartedAt: timestamp("processing_started_at", { withTimezone: true }),
         createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
         updatedAt: timestamp("updated_at", { withTimezone: true })

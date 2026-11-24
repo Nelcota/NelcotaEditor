@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
+import { resolveUploadTitle } from "#/modules/videos/model/resolve-upload-title";
 import type { StartVideoUploadInput } from "#/modules/videos/model/video-upload-input";
 import { summarizePendingUploads } from "#/modules/videos/server/pending-uploads.server";
 import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
@@ -9,15 +10,12 @@ import { videoUploads } from "#/modules/videos/videos.schema";
 import type { VideoUpload } from "#/modules/videos/videos.schema";
 import {
     ALLOWED_VIDEO_EXTENSIONS,
-    MAX_TITLE_LENGTH,
     MAX_UPLOAD_BYTES,
 } from "#/modules/video-records/model/upload-limits";
-import { truncateText } from "#/modules/video-records/model/video-title";
 import { getVideoDirectory } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const SOURCE_FILE_NAME = "source";
-const UPLOAD_PLACEHOLDER_TITLE = "Vídeo enviado";
 // Long enough for 5 GB on a slow connection; an abandoned upload holds its slot no longer.
 const RESERVATION_MILLISECONDS = 6 * 60 * 60 * 1000;
 
@@ -40,20 +38,6 @@ class UploadNotReservedError extends Error {
         super(`Insert of upload ${uploadId} returned no row`);
         this.name = "UploadNotReservedError";
     }
-}
-
-function resolveTitle(input: StartVideoUploadInput): string {
-    if (input.title.length > 0) {
-        return input.title;
-    }
-
-    const baseName = truncateText(path.parse(input.fileName).name.trim(), MAX_TITLE_LENGTH);
-
-    if (baseName.length === 0) {
-        return UPLOAD_PLACEHOLDER_TITLE;
-    }
-
-    return baseName;
 }
 
 function readExtension(fileName: string): string {
@@ -103,7 +87,7 @@ export async function reserveVideoUpload(
                 userId,
                 sourcePath,
                 declaredBytes: sizeBytes,
-                title: resolveTitle(input),
+                title: resolveUploadTitle(input.fileName, input.title),
                 requestedClipCount: input.clipCount,
                 clipLength: input.clipLength,
                 transcriptionLanguage: input.language,

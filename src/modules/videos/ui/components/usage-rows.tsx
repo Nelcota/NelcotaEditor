@@ -1,6 +1,7 @@
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import TriangleAlertIcon from "~icons/lucide/triangle-alert";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { CREW_NAMES, HOST_NAME } from "#/modules/videos/model/crew-lines";
 import { toCrewStats } from "#/modules/videos/model/crew-stats";
@@ -43,7 +44,10 @@ function capitalize(text: string): string {
     return `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
 }
 
-/** Nothing is blocked at the quota; the line only says what to do before the disk fills. */
+/**
+ * From the warning level on, the line says what happens at the quota (new videos are refused) and
+ * how to get space back: deleting a video frees its original and its clips.
+ */
 function describeStorage(usedPercent: number, usedLabel: string): ReactNode {
     if (usedPercent < WARNING_PERCENT) {
         return usedLabel;
@@ -52,7 +56,16 @@ function describeStorage(usedPercent: number, usedLabel: string): ReactNode {
     return (
         <span role="status" className="inline-flex items-center gap-1.5 text-destructive">
             <TriangleAlertIcon aria-hidden="true" className="size-3.5 shrink-0" />
-            {`${usedLabel}. Exclua vídeos antigos ou apague originais para liberar espaço.`}
+            <span>
+                {`${usedLabel}. Com o espaço cheio, novos vídeos são recusados. `}
+                <Link
+                    to="/videos"
+                    className="rounded font-medium underline underline-offset-4 hover:decoration-2 focus-visible:ring-4 focus-visible:ring-ring focus-visible:outline-none"
+                >
+                    Exclua vídeos
+                </Link>
+                {" para liberar espaço."}
+            </span>
         </span>
     );
 }

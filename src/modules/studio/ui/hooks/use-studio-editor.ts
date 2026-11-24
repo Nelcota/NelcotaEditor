@@ -8,6 +8,7 @@ import { getClipStudioSnapshot } from "#/modules/studio/server/clip-studio-snaps
 import { replaceCueAt, resetAllCues } from "#/modules/studio/model/cue-editing";
 import { readDraftBackup } from "#/modules/studio/client/draft-backup";
 import { countDraftChanges } from "#/modules/studio/model/draft-changes";
+import { DraftNotSavedError } from "#/modules/studio/model/draft-not-saved-error";
 import { trimDraft } from "#/modules/studio/model/draft-trim";
 import { toClipStudioState } from "#/modules/studio/model/to-clip-studio-state";
 import { createHistory, studioHistoryReducer } from "#/modules/studio/model/studio-history";
@@ -109,10 +110,15 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
     };
 
     const sendRender = async (): Promise<RenderOutcome> => {
-        const isSaved = await autosave.flush();
+        const saveOutcome = await autosave.flush();
 
-        if (isSaved === false) {
-            return "failed";
+        if (saveOutcome === "conflict") {
+            return "conflict";
+        }
+
+        // Rendering an older draft than the screen shows would surprise; say why nothing was sent.
+        if (saveOutcome === "failed") {
+            throw new DraftNotSavedError();
         }
 
         const result = await renderClipDraft({

@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { DEFAULT_ADMIN_VIDEO_FILTER } from "#/modules/admin/model/admin-search";
 import { AdminPager } from "#/modules/admin/ui/components/admin-pager";
+import { AdminPagePastEnd } from "#/modules/admin/ui/components/admin-page-past-end";
 import { adminVideosQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
 import { AdminVideoList } from "#/modules/admin/ui/components/admin-video-list";
@@ -34,6 +35,10 @@ export function AdminUserVideos({ userId }: { userId: string }): ReactNode {
 
     if (result === undefined) {
         return <AdminLoading label="Carregando vídeos da conta" />;
+    }
+
+    if (result.videos.length === 0 && result.totalCount > 0) {
+        return <AdminPagePastEnd totalCount={result.totalCount} onPageChange={setPage} />;
     }
 
     if (result.videos.length === 0) {

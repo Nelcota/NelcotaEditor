@@ -4,7 +4,8 @@ import { afterAll, describe, test } from "vitest";
 import { eq } from "drizzle-orm";
 import { Client } from "pg";
 import { db } from "#/db/database.server";
-import { user } from "#/modules/auth/auth.schema";
+import { ADMIN_ROLE, USER_ROLE, user } from "#/modules/auth/auth.schema";
+import { LastAdminError } from "#/modules/auth/model/last-admin-error";
 import {
     AccountHasWorkingVideosError,
     deleteUserAccountRecords,
@@ -26,6 +27,26 @@ async function createTestUser(): Promise<string> {
     });
 
     return userId;
+}
+
+async function createOnlyAdmins(count: number): Promise<Array<string>> {
+    // The rule counts every admin in the database; the admins of other test files would hide it.
+    await db.update(user).set({ role: USER_ROLE }).where(eq(user.role, ADMIN_ROLE));
+    const adminIds: Array<string> = [];
+
+    for (let index = 0; index < count; index += 1) {
+        const adminId = await createTestUser();
+        await db.update(user).set({ role: ADMIN_ROLE }).where(eq(user.id, adminId));
+        adminIds.push(adminId);
+    }
+
+    return adminIds;
+}
+
+async function countAdmins(): Promise<number> {
+    const admins = await db.select({ id: user.id }).from(user).where(eq(user.role, ADMIN_ROLE));
+
+    return admins.length;
 }
 
 async function insertVideoInOpenTransaction(client: Client, userId: string): Promise<string> {
@@ -80,5 +101,25 @@ describe("deleteUserAccountRecords", () => {
         const deletedVideoIds = await deleteUserAccountRecords(randomUUID());
 
         assert.equal(deletedVideoIds, null);
+    });
+
+    test("refuses to delete the last admin and keeps the account", async () => {
+        const [lastAdminId] = await createOnlyAdmins(1);
+        assert.ok(lastAdminId !== undefined);
+
+        await assert.rejects(deleteUserAccountRecords(lastAdminId), LastAdminError);
+
+        assert.equal(await countAdmins(), 1);
+    });
+
+    test("keeps one admin when the last two delete their accounts at the same time", async () => {
+        const adminIds = await createOnlyAdmins(2);
+
+        const results = await Promise.allSettled(
+            adminIds.map((adminId) => deleteUserAccountRecords(adminId)),
+        );
+
+        assert.equal(results.filter((result) => result.status === "rejected").length, 1);
+        assert.equal(await countAdmins(), 1);
     });
 });

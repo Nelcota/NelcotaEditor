@@ -10,6 +10,11 @@ import {
     BANNED_USER_MESSAGE,
     VIDEOS_STILL_PROCESSING_CODE,
 } from "#/modules/auth/model/auth-error-message";
+import {
+    LAST_ADMIN_CODE,
+    LAST_ADMIN_DELETE_MESSAGE,
+    LastAdminError,
+} from "#/modules/auth/model/last-admin-error";
 import { MAX_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "#/modules/auth/model/auth-forms";
 import {
     ADMIN_ROLE,
@@ -61,6 +66,15 @@ async function deleteAccountBeforeBetterAuth(deletedUser: User): Promise<void> {
     try {
         await deleteAccountWithFiles(deletedUser.id);
     } catch (error) {
+        // Nobody could open the admin panel again. Admins cannot delete each other from the panel,
+        // so this is the only way the last one could go.
+        if (error instanceof LastAdminError) {
+            throw new APIError("BAD_REQUEST", {
+                message: LAST_ADMIN_DELETE_MESSAGE,
+                code: LAST_ADMIN_CODE,
+            });
+        }
+
         if (error instanceof AccountHasWorkingVideosError) {
             throw new APIError("BAD_REQUEST", {
                 message: "Cancele os vídeos em processamento antes de excluir a conta.",

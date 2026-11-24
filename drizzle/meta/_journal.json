@@ -113,6 +113,13 @@
       "when": 1795552002694,
       "tag": "0015_mark_existing_users_verified",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795554411950,
+      "tag": "0016_video_first_finished_at",
+      "breakpoints": true
     }
   ]
 }
