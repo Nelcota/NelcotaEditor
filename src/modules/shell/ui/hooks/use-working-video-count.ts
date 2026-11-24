@@ -1,9 +1,10 @@
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
-import { useVideosQuery } from "#/modules/videos/ui/hooks/use-videos-query";
+import { useQuery } from "@tanstack/react-query";
+import { videosQueryOptions } from "#/modules/videos/model/video-queries";
 
 /** How many videos are still being cut (queued or at work); the sidebar bell's badge. */
 export function useWorkingVideoCount(): number {
-    const videosQuery = useVideosQuery();
+    const videosQuery = useQuery(videosQueryOptions());
     const videos = videosQuery.data;
 
     if (videos === undefined) {

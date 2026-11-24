@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CLIP_LENGTHS, DEFAULT_CLIP_LENGTH } from "#/modules/video-records/model/clip-length";
 import type { ClipLength } from "#/modules/video-records/model/clip-length";
+import { pluralize } from "#/shared/ui/pluralize";
 import {
     DEFAULT_CLIP_COUNT,
     MAX_CLIP_COUNT,
@@ -31,6 +32,14 @@ export const CLIP_LENGTH_HINTS: Record<ClipLength, string> = {
     free: "Do tamanho que cada trecho pedir",
 };
 
+/** The clip lengths as segmented-control options, in order. */
+export const CLIP_LENGTH_OPTIONS = CLIP_LENGTHS.map((clipLength) => ({
+    value: clipLength,
+    label: CLIP_LENGTH_LABELS[clipLength],
+}));
+
+export const CLIP_LENGTH_LABEL = "Duração dos cortes";
+
 export const preferencesSchema = z.object({
     defaultClipCount: z.number().int().min(MIN_CLIP_COUNT).max(MAX_CLIP_COUNT),
     defaultClipLength: z.enum(CLIP_LENGTHS),
@@ -43,4 +52,17 @@ export const DEFAULT_PREFERENCES: Preferences = {
     defaultClipCount: DEFAULT_CLIP_COUNT,
     defaultClipLength: DEFAULT_CLIP_LENGTH,
     transcriptionLanguage: "",
+};
+
+function describeClipCount(count: number): string {
+    return `${count} ${pluralize(count, "corte", "cortes")}`;
+}
+
+/** What a CountStepper needs to pick a number of clips. */
+export const CLIP_COUNT_STEPPER = {
+    min: MIN_CLIP_COUNT,
+    max: MAX_CLIP_COUNT,
+    formatValue: describeClipCount,
+    decreaseLabel: "Menos um corte",
+    increaseLabel: "Mais um corte",
 };

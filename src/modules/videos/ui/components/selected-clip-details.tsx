@@ -1,5 +1,5 @@
 import type { ClipView } from "#/modules/clips/model/clip-view";
-import { ClipDownloadLink } from "#/modules/videos/ui/components/clip-download-link";
+import { DownloadLink } from "#/shared/ui/download-link";
 import { SCORE_SCALE } from "#/modules/videos/model/clip-score";
 import { CopyTitleButton } from "#/modules/videos/ui/components/copy-title-button";
 import { RetryClipButton } from "#/modules/videos/ui/components/retry-clip-button";
@@ -41,7 +41,7 @@ function ClipActions({ videoId, clip, canRetry }: SelectedClipDetailsProps) {
 
     return (
         <>
-            <ClipDownloadLink clip={clip} label="Baixar corte" />
+            <DownloadLink href={clip.downloadUrl} label="Baixar corte" />
             <OpenInStudioLink videoId={videoId} clipId={clip.id} />
             <ShareClipButton videoId={videoId} clip={clip} />
             <CopyTitleButton title={clip.title} />

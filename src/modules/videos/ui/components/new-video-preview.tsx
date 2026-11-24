@@ -7,7 +7,7 @@ import { describeNewVideoSource } from "#/modules/videos/model/describe-new-vide
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { toLinkVideoId } from "#/modules/videos/model/video-source";
 import type { VideoSource } from "#/modules/videos/model/video-source";
-import { youtubePreviewQueryOptions } from "#/modules/videos/ui/hooks/youtube-preview-queries";
+import { youtubePreviewQueryOptions } from "#/modules/videos/model/youtube-preview-queries";
 
 const FRAME_CLASS =
     "aspect-video w-full rounded-lg bg-black object-cover outline-1 -outline-offset-1 outline-solid outline-white/10";

@@ -15,11 +15,11 @@ import {
 import type { AdminVideoFilter, AdminVideosSearch } from "#/modules/admin/model/admin-search";
 import { toPageSearch, toQuerySearch } from "#/modules/admin/model/admin-search-params";
 import { AdminPager } from "#/modules/admin/ui/components/admin-pager";
-import { adminVideosQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminVideosQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
 import { AdminVideoList } from "#/modules/admin/ui/components/admin-video-list";
 import { useSearchDraft } from "#/modules/admin/ui/hooks/use-search-draft";
-import { SearchField } from "#/modules/videos/ui/components/search-field";
+import { SearchField } from "#/shared/ui/search-field";
 import { EmptyState } from "#/shared/ui/empty-state";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { Mascot } from "#/shared/ui/mascot";

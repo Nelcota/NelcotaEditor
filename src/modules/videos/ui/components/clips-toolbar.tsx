@@ -3,7 +3,7 @@ import StarIcon from "~icons/lucide/star";
 import type { ComponentType, SVGProps } from "react";
 import { CLIP_ORDERS, CLIP_ORDER_LABELS, isClipOrder } from "#/modules/videos/model/clip-order";
 import type { ClipOrder } from "#/modules/videos/model/clip-order";
-import { SearchField } from "#/modules/videos/ui/components/search-field";
+import { SearchField } from "#/shared/ui/search-field";
 import { SegmentedControl } from "#/shared/ui/segmented-control";
 
 const ORDER_ICONS: Record<ClipOrder, ComponentType<SVGProps<SVGSVGElement>>> = {

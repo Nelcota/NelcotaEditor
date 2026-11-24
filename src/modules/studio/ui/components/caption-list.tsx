@@ -10,11 +10,12 @@ import type { CaptionReset } from "#/modules/studio/model/caption-reset";
 import { CueEditor } from "#/modules/studio/ui/components/cue-editor";
 import { cueText, resetCue, transcriptWordsOf } from "#/modules/studio/model/cue-editing";
 import type { StudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
-import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { cn } from "#/shared/ui/cn";
 import { formatClock } from "#/shared/ui/format";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { Mascot } from "#/shared/ui/mascot";
 
 interface CaptionListProps {
     editor: StudioEditor;
@@ -31,7 +32,7 @@ interface CaptionListProps {
 function NoSpeech(): ReactNode {
     return (
         <div className="grid justify-items-center gap-2 px-5 py-10 text-center">
-            <StageCrewMascot status="transcribing" className="size-10" />
+            <Mascot index={STAGE_CREW.transcribing} className="size-10" />
             <p className="font-semibold">Nenhuma fala neste trecho</p>
             <p className="max-w-xs text-sm text-muted-foreground">
                 Tinta não ouviu ninguém falando aqui. Mude o trecho para incluir fala, ou deixe o

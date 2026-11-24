@@ -3,15 +3,19 @@ import { useId, useState } from "react";
 import type { ReactNode } from "react";
 import {
     CLIP_LENGTH_HINTS,
+    CLIP_LENGTH_LABEL,
+    CLIP_LENGTH_OPTIONS,
     TRANSCRIPTION_LANGUAGES,
     TRANSCRIPTION_LANGUAGE_LABELS,
 } from "#/modules/preferences/model/preferences";
 import type { Preferences, TranscriptionLanguage } from "#/modules/preferences/model/preferences";
 import { savePreferences } from "#/modules/preferences/server/preferences-functions";
-import { PREFERENCES_QUERY_KEY } from "#/modules/preferences/ui/hooks/preferences-queries";
+import { PREFERENCES_QUERY_KEY } from "#/modules/preferences/model/preferences-queries";
 import { SaveStatus } from "#/modules/preferences/ui/components/save-status";
-import { ClipCountStepper } from "#/modules/preferences/ui/components/clip-count-stepper";
-import { ClipLengthPicker } from "#/modules/preferences/ui/components/clip-length-picker";
+import ScissorsIcon from "~icons/lucide/scissors";
+import { CLIP_COUNT_STEPPER } from "#/modules/preferences/model/preferences";
+import { CountStepper } from "#/shared/ui/count-stepper";
+import { SegmentedControl } from "#/shared/ui/segmented-control";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
 import { SettingsRow } from "#/shared/ui/settings-row";
 
@@ -88,7 +92,14 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
                 description="Já vem escolhido em cada vídeo novo; dá para mudar ao enviar."
             >
                 <div className="w-48">
-                    <ClipCountStepper
+                    <CountStepper
+                        {...CLIP_COUNT_STEPPER}
+                        icon={
+                            <ScissorsIcon
+                                aria-hidden="true"
+                                className="size-5 text-muted-foreground"
+                            />
+                        }
                         id="default-clip-count"
                         label="Cortes por vídeo"
                         labelClassName="sr-only"
@@ -100,15 +111,17 @@ export function PreferencesForm({ initial }: { initial: Preferences }): ReactNod
                 </div>
             </SettingsRow>
             <SettingsRow
-                label="Duração dos cortes"
+                label={CLIP_LENGTH_LABEL}
                 description={
                     <span aria-live="polite">
                         {CLIP_LENGTH_HINTS[preferences.defaultClipLength]}
                     </span>
                 }
             >
-                <ClipLengthPicker
-                    isInline
+                <SegmentedControl
+                    label={CLIP_LENGTH_LABEL}
+                    options={CLIP_LENGTH_OPTIONS}
+                    className="flex-nowrap [&>button]:whitespace-nowrap"
                     value={preferences.defaultClipLength}
                     onValueChange={(defaultClipLength) =>
                         change({ ...preferences, defaultClipLength })

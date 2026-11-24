@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
-import { ClipDownloadLink } from "#/modules/videos/ui/components/clip-download-link";
+import { DownloadLink } from "#/shared/ui/download-link";
 import { ClipPreview } from "#/modules/videos/ui/components/clip-preview";
 import { ClipReasonDisclosure } from "#/modules/videos/ui/components/clip-reason-disclosure";
 import { CopyTitleButton } from "#/modules/videos/ui/components/copy-title-button";
 import { OpenInStudioLink } from "#/modules/videos/ui/components/open-in-studio-link";
-import { ScoreChip } from "#/modules/videos/ui/components/score-chip";
+import { SCORE_LABEL, SCORE_SCALE } from "#/modules/videos/model/clip-score";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { ScoreChip } from "#/shared/ui/score-chip";
 import { SourceVideoLink } from "#/modules/videos/ui/components/source-video-link";
 import type { LibraryClip } from "#/modules/videos/model/video-views";
 import { formatClock } from "#/shared/ui/format";
@@ -22,8 +24,8 @@ function ClipCardActions({ item }: { item: LibraryClip }): ReactNode {
 
     return (
         <div className="flex flex-wrap gap-2">
-            <ClipDownloadLink
-                clip={clip}
+            <DownloadLink
+                href={clip.downloadUrl}
                 label="Baixar"
                 emphasis="primary"
                 className="min-w-0 basis-full"
@@ -55,7 +57,12 @@ export function ClipCard({ item }: { item: LibraryClip }): ReactNode {
                     {clip.title}
                 </h2>
                 <p className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-muted-foreground tabular-nums">
-                    <ScoreChip score={clip.score} />
+                    <ScoreChip
+                        score={clip.score}
+                        scale={SCORE_SCALE}
+                        label={SCORE_LABEL}
+                        mascotIndex={STAGE_CREW.selecting}
+                    />
                     <span className="whitespace-nowrap">{formatClock(durationSeconds)}</span>
                 </p>
                 <p className="min-w-0 text-xs text-muted-foreground">

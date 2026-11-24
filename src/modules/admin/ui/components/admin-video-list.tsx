@@ -10,7 +10,9 @@ import { AdminConfirmDialog } from "#/modules/admin/ui/components/admin-confirm-
 import type { AdminConfirmation } from "#/modules/admin/ui/components/admin-confirm-dialog";
 import { cancelAnyVideo, deleteAnyVideo } from "#/modules/admin/server/admin-video-functions";
 import { isVideoCancellable, isVideoWorking } from "#/modules/video-records/model/video-status";
-import { VideoStatusBadge } from "#/modules/videos/ui/components/video-status-badge";
+import { VIDEO_STATUS_LABELS } from "#/modules/videos/model/video-status-labels";
+import { toVideoStatusTone } from "#/modules/videos/model/video-status-tone";
+import { StatusBadge } from "#/shared/ui/status-badge";
 import { VIDEO_SOURCE_LABELS } from "#/modules/videos/model/video-status-labels";
 import { Button } from "#/shared/ui/button";
 import {
@@ -135,7 +137,10 @@ function VideoItem({ video, showOwner, onConfirm }: VideoMenuProps): ReactNode {
                 )}
             </div>
             <div className="flex items-center gap-2">
-                <VideoStatusBadge status={video.status} />
+                <StatusBadge
+                    tone={toVideoStatusTone(video.status)}
+                    label={VIDEO_STATUS_LABELS[video.status]}
+                />
                 <VideoMenu video={video} showOwner={showOwner} onConfirm={onConfirm} />
             </div>
         </li>

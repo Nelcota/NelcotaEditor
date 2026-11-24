@@ -2,7 +2,7 @@ import CircleStopIcon from "~icons/lucide/circle-stop";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cancelVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 

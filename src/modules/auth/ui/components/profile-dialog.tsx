@@ -8,7 +8,7 @@ import type { FormEvent, ReactNode } from "react";
 import { profileNameSchema } from "#/modules/auth/model/auth-forms";
 import { renameUser } from "#/modules/auth/server/profile-functions";
 import { AvatarStep } from "#/modules/auth/ui/components/avatar-step";
-import { forgetCurrentUser } from "#/modules/auth/ui/hooks/current-user-query";
+import { forgetCurrentUser } from "#/modules/auth/model/current-user-query";
 import { ReadOnlyEmail } from "#/modules/auth/ui/components/read-only-email";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";

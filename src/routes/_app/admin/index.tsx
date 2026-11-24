@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { adminOverviewQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminOverviewQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminOverviewScreen } from "#/modules/admin/ui/screens/admin-overview-screen";
 
 export const Route = createFileRoute("/_app/admin/")({

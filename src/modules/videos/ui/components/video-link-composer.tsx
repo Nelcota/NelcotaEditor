@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { DEFAULT_PREFERENCES } from "#/modules/preferences/model/preferences";
-import { preferencesQueryOptions } from "#/modules/preferences/ui/hooks/preferences-queries";
+import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
 import { useIsLinkBlocked } from "#/modules/videos/ui/hooks/use-is-link-blocked";
 import { useVideoSubmission } from "#/modules/videos/ui/hooks/use-video-submission";
 import { hasUsableSource } from "#/modules/videos/model/video-source";

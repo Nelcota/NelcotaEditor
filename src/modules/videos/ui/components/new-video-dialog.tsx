@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { DEFAULT_PREFERENCES } from "#/modules/preferences/model/preferences";
-import { preferencesQueryOptions } from "#/modules/preferences/ui/hooks/preferences-queries";
+import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
 import { NewVideoWizard } from "#/modules/videos/ui/components/new-video-wizard";
 import { cn } from "#/shared/ui/cn";
 import { Dialog, DialogContent } from "#/shared/ui/dialog";

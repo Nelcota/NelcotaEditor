@@ -1,7 +1,7 @@
 import BellIcon from "~icons/lucide/bell";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { useWorkingVideoCount } from "#/modules/videos/ui/hooks/use-working-video-count";
+import { useWorkingVideoCount } from "#/modules/shell/ui/hooks/use-working-video-count";
 import { Button } from "#/shared/ui/button";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { pluralize } from "#/shared/ui/pluralize";

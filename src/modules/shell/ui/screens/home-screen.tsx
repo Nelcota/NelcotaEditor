@@ -1,8 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { useFirstName } from "#/modules/auth/ui/hooks/use-first-name";
+import { useFirstName } from "#/modules/shell/ui/hooks/use-first-name";
 import { HomeShortcuts } from "#/modules/shell/ui/components/home-shortcuts";
-import { VideoLinkComposer } from "#/modules/videos/ui/components/video-link-composer";
 import { BrandMark } from "#/shared/ui/brand-logo";
 
 const MORNING_START_HOUR = 5;
@@ -49,7 +48,7 @@ function useGreeting(): string {
  * Início, as plain as the reference's assistant home: a greeting from Nel, the link box that
  * starts a video and three shortcuts under it. Nothing else competes with the box.
  */
-export function HomeScreen(): ReactNode {
+export function HomeScreen({ linkComposer }: { linkComposer: ReactNode }): ReactNode {
     const firstName = useFirstName();
     const greeting = useGreeting();
 
@@ -65,9 +64,7 @@ export function HomeScreen(): ReactNode {
                     postar.
                 </p>
             </div>
-            <div className="grid w-full max-w-3xl">
-                <VideoLinkComposer />
-            </div>
+            <div className="grid w-full max-w-3xl">{linkComposer}</div>
             <HomeShortcuts />
         </div>
     );

@@ -1,7 +1,7 @@
 import ArrowUpDownIcon from "~icons/lucide/arrow-up-down";
 import ListFilterIcon from "~icons/lucide/list-filter";
 import type { ReactNode } from "react";
-import { SearchField } from "#/modules/videos/ui/components/search-field";
+import { SearchField } from "#/shared/ui/search-field";
 import { VIDEO_FILTERS, VIDEO_FILTER_LABELS } from "#/modules/videos/model/video-list-filter";
 import type { VideoFilter } from "#/modules/videos/model/video-list-filter";
 import { VIDEO_SORTS, VIDEO_SORT_LABELS, toVideoSort } from "#/modules/videos/model/video-sort";

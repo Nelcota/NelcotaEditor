@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getUsageSummary, listLibraryClips } from "#/modules/videos/server/library-functions";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/hooks/video-queries";
+import { VIDEOS_QUERY_KEY } from "#/modules/videos/model/video-queries";
 
 const LIBRARY_CLIPS_KEY = "library-clips";
 const USAGE_KEY = "usage";

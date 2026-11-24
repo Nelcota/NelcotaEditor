@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { retryVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { FormAlert } from "#/shared/ui/form-alert";

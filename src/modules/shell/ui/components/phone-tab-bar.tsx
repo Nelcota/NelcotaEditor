@@ -2,7 +2,7 @@ import { useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { PHONE_SECTIONS, VIDEOS_PATH, getSectionState } from "#/modules/shell/model/nav-sections";
 import { SectionTabLink } from "#/modules/shell/ui/components/section-tab-link";
-import { useHasWorkingVideo } from "#/modules/videos/ui/hooks/use-has-working-video";
+import { useHasWorkingVideo } from "#/modules/shell/ui/hooks/use-has-working-video";
 
 /** Phones only: the main sections at the bottom of the screen, where thumbs reach. */
 export function PhoneTabBar(): ReactNode {

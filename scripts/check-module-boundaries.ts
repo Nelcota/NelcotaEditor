@@ -30,7 +30,7 @@ const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>
     videos: ["auth", "video-records", "preferences", "transcription", "clips", "processing"],
     studio: ["auth", "video-records", "transcription", "clips", "processing", "videos"],
     overview: ["auth", "video-records", "transcription", "clips", "videos"],
-    shell: ["auth", "preferences", "videos"],
+    shell: ["auth", "video-records", "preferences", "videos"],
     admin: ["auth", "video-records", "clips", "videos"],
 };
 
@@ -234,6 +234,23 @@ function checkModuleImport(edge: ImportEdge, usedExceptions: Set<AllowedExceptio
     return `"${sourceModule}" may not import from "${targetModule}"`;
 }
 
+/** Another module's server functions, model/, client/ and tables are open; its ui/ is not. */
+function checkForeignUiImport(edge: ImportEdge): string | null {
+    const sourceModule = moduleOf(edge.file);
+    const target = edge.target ?? "";
+    const targetModule = moduleOf(target);
+
+    if (sourceModule === null || targetModule === null || sourceModule === targetModule) {
+        return null;
+    }
+
+    if (target.startsWith(`${MODULES_PREFIX}${targetModule}/ui/`) === false) {
+        return null;
+    }
+
+    return `"${sourceModule}" may not import the ui/ of "${targetModule}"; let the route compose them`;
+}
+
 function checkSharedImport(edge: ImportEdge): string | null {
     const target = edge.target ?? "";
 
@@ -287,6 +304,7 @@ function checkRouteImport(edge: ImportEdge): string | null {
 function checkEdge(edge: ImportEdge, usedExceptions: Set<AllowedException>): Array<Violation> {
     const reasons = [
         checkModuleImport(edge, usedExceptions),
+        checkForeignUiImport(edge),
         checkSharedImport(edge),
         checkDatabaseImport(edge),
         checkSchemaIndexImport(edge),

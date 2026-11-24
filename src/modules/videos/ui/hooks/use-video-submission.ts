@@ -9,7 +9,7 @@ import { createYoutubeVideo } from "#/modules/videos/server/video-functions";
 import { NoSourceError } from "#/modules/videos/model/no-source-error";
 import { toLinkVideoId } from "#/modules/videos/model/video-source";
 import type { VideoSource } from "#/modules/videos/model/video-source";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 
 export interface Submission {
     source: VideoSource;

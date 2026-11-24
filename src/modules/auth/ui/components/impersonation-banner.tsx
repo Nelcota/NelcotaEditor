@@ -1,15 +1,15 @@
 import SpeechIcon from "~icons/lucide/speech";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { currentUserQueryOptions } from "#/modules/auth/ui/hooks/current-user-query";
-import { useStopImpersonation } from "#/modules/auth/ui/hooks/use-impersonation";
+import { currentUserQueryOptions } from "#/modules/auth/model/current-user-query";
+import { stopImpersonation } from "#/modules/auth/client/account-switch";
 import { Button } from "#/shared/ui/button";
 
 /** While an admin is signed in as someone else, every page says so and offers the way back. */
 export function ImpersonationBanner(): ReactNode {
     const currentUserQuery = useQuery(currentUserQueryOptions());
     const currentUser = currentUserQuery.data;
-    const stop = useStopImpersonation();
+    const stop = useMutation({ mutationFn: stopImpersonation });
 
     if (currentUser === null || currentUser === undefined || currentUser.isImpersonated === false) {
         return null;
@@ -24,18 +24,18 @@ export function ImpersonationBanner(): ReactNode {
             <p className="min-w-0 flex-[1_1_16rem]">
                 Você está vendo o Nelcota como <strong>{currentUser.name}</strong> (
                 {currentUser.email}). O que fizer aqui vale para a conta dessa pessoa.
-                {stop.errorMessage !== null && (
+                {stop.isError === true && (
                     <span role="alert" className="block text-destructive">
-                        {stop.errorMessage}
+                        {stop.error.message}
                     </span>
                 )}
             </p>
             <Button
                 size="sm"
                 variant="secondary"
-                disabled={stop.isRunning}
-                aria-busy={stop.isRunning}
-                onClick={stop.run}
+                disabled={stop.isPending}
+                aria-busy={stop.isPending}
+                onClick={() => stop.mutate()}
             >
                 Voltar para minha conta
             </Button>

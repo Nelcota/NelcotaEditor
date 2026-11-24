@@ -10,7 +10,8 @@ import {
 import type { ReactNode } from "react";
 import { formatDayLabel, formatInteger } from "#/modules/overview/model/format-metric";
 import type { OverviewStats } from "#/modules/overview/model/overview-views";
-import { VideoMascot } from "#/modules/videos/ui/components/video-mascot";
+import { toVideoMascotIndex } from "#/modules/videos/model/video-mascot";
+import { Mascot } from "#/shared/ui/mascot";
 import type { LibraryClip } from "#/modules/videos/model/video-views";
 import { pluralize } from "#/shared/ui/pluralize";
 
@@ -114,7 +115,10 @@ function ClipRanking({ clips }: { clips: Array<LibraryClip> }): ReactNode {
                         className="grid grid-cols-[1.75rem_minmax(0,1fr)_minmax(3rem,7rem)_2.5rem] items-center gap-3 text-sm"
                     >
                         <span className="grid size-7 place-items-center rounded-full bg-secondary">
-                            <VideoMascot videoId={libraryClip.videoId} className="size-5" />
+                            <Mascot
+                                index={toVideoMascotIndex(libraryClip.videoId)}
+                                className="size-5"
+                            />
                         </span>
                         <span className="truncate font-medium" title={clip.title}>
                             {clip.title}

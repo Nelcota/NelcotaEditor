@@ -1,12 +1,11 @@
 import { Outlet, useMatchRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ImpersonationBanner } from "#/modules/auth/ui/components/impersonation-banner";
 import { AppSidebar } from "#/modules/shell/ui/components/app-sidebar";
 import { PageBar } from "#/modules/shell/ui/components/page-bar";
 import { PhoneTabBar } from "#/modules/shell/ui/components/phone-tab-bar";
 import { SectionRail } from "#/modules/shell/ui/components/section-rail";
 import { useFocusMainOnNavigate } from "#/modules/shell/ui/hooks/use-focus-main-on-navigate";
-import { InspectorToggle } from "#/modules/videos/ui/components/inspector-toggle";
+import { InspectorToggle } from "#/shared/ui/inspector-toggle";
 import { cn } from "#/shared/ui/cn";
 import { NavigationProgress } from "#/shared/ui/navigation-progress";
 import { OfflineBanner } from "#/shared/ui/offline-banner";
@@ -28,7 +27,22 @@ function useIsVideoPage(): boolean {
  * collapsed; one rounded panel holds the breadcrumb bar and the page. Phones drop the sidebar for a
  * tab bar and let the panel run edge to edge.
  */
-export function AppLayout(): ReactNode {
+interface AppLayoutProps {
+    /**
+     * Other modules build on the shell, so the route hands in their parts instead of the shell
+     * importing them: the account menu at the sidebar's foot, the banner shown while an admin acts
+     * as someone else, and the watcher that keeps processing videos current on every page.
+     */
+    accountMenu: ReactNode;
+    impersonationBanner: ReactNode;
+    videoProgressWatcher: ReactNode;
+}
+
+export function AppLayout({
+    accountMenu,
+    impersonationBanner,
+    videoProgressWatcher,
+}: AppLayoutProps): ReactNode {
     const sidebar = useStoredFlag(SIDEBAR_HIDDEN_KEY);
     const isSidebarHidden = sidebar.isOn;
     const isVideoPage = useIsVideoPage();
@@ -37,6 +51,7 @@ export function AppLayout(): ReactNode {
     return (
         <TooltipProvider>
             <NavigationProgress />
+            {videoProgressWatcher}
             <a
                 href="#main"
                 className="sr-only rounded-xl bg-primary-solid px-4 py-2 font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-50 focus-visible:ring-4 focus-visible:ring-ring"
@@ -56,7 +71,7 @@ export function AppLayout(): ReactNode {
                 )}
                 {isSidebarHidden === false && (
                     <aside aria-label="Barra lateral" className="hidden min-h-0 md:block">
-                        <AppSidebar onCollapse={sidebar.toggle} />
+                        <AppSidebar onCollapse={sidebar.toggle} accountMenu={accountMenu} />
                     </aside>
                 )}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:rounded-[1.125rem] md:border">
@@ -66,7 +81,7 @@ export function AppLayout(): ReactNode {
                     </PageBar>
                     {/* Hidden while every banner is absent or an empty status region. */}
                     <div className="grid gap-2 px-2 pb-2 [&:not(:has(>:not([data-empty=true])))]:hidden">
-                        <ImpersonationBanner />
+                        {impersonationBanner}
                         <OfflineBanner />
                     </div>
                     <main

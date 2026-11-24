@@ -1,7 +1,6 @@
 import PanelLeftIcon from "~icons/lucide/panel-left";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { AccountMenuButton } from "#/modules/auth/ui/components/account-menu-button";
 import { ActivityBell } from "#/modules/shell/ui/components/activity-bell";
 import { NewVideoCard } from "#/modules/shell/ui/components/new-video-card";
 import { SidebarNav } from "#/modules/shell/ui/components/sidebar-nav";
@@ -16,7 +15,12 @@ const HIDE_LABEL = "Recolher a barra lateral";
  * The sidebar on the window frame, in the reference's order: logo, bell and collapse; the new
  * video card; the sections; then, at the foot, the storage card and the person.
  */
-export function AppSidebar({ onCollapse }: { onCollapse: () => void }): ReactNode {
+interface AppSidebarProps {
+    onCollapse: () => void;
+    accountMenu: ReactNode;
+}
+
+export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactNode {
     return (
         <div className="flex h-full min-h-0 flex-col gap-2 px-2.5 pt-2 pb-2">
             <div className="flex h-12 items-center gap-1 ps-2.5">
@@ -45,7 +49,7 @@ export function AppSidebar({ onCollapse }: { onCollapse: () => void }): ReactNod
                 <SidebarNav />
             </div>
             <StorageCard />
-            <AccountMenuButton />
+            {accountMenu}
         </div>
     );
 }

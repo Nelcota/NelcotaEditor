@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getVideoTranscript } from "#/modules/transcription/server/transcript-functions";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/hooks/video-queries";
+import { VIDEOS_QUERY_KEY } from "#/modules/videos/model/video-queries";
 
 const TRANSCRIPT_KEY = "transcript";
 

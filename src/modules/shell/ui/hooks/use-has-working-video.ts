@@ -1,9 +1,10 @@
 import { isVideoWorking } from "#/modules/video-records/model/video-status";
-import { useVideosQuery } from "#/modules/videos/ui/hooks/use-videos-query";
+import { useQuery } from "@tanstack/react-query";
+import { videosQueryOptions } from "#/modules/videos/model/video-queries";
 
 /** True while any video is still being processed; the Vídeos tab then shows a small dot. */
 export function useHasWorkingVideo(): boolean {
-    const videosQuery = useVideosQuery();
+    const videosQuery = useQuery(videosQueryOptions());
     const videos = videosQuery.data;
 
     if (videos === undefined) {

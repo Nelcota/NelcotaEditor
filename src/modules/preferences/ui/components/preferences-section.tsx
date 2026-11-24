@@ -2,7 +2,7 @@ import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { PreferencesForm } from "#/modules/preferences/ui/components/preferences-form";
-import { preferencesQueryOptions } from "#/modules/preferences/ui/hooks/preferences-queries";
+import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { Skeleton } from "#/shared/ui/skeleton";

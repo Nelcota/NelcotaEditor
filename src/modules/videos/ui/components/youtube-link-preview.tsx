@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import type { ReactNode, RefObject } from "react";
 import type { YoutubePreview } from "#/modules/videos/model/youtube-preview";
 import { toYoutubeThumbnailUrl } from "#/modules/videos/model/youtube-preview";
-import { youtubePreviewQueryOptions } from "#/modules/videos/ui/hooks/youtube-preview-queries";
+import { youtubePreviewQueryOptions } from "#/modules/videos/model/youtube-preview-queries";
 import { Button } from "#/shared/ui/button";
 import { Skeleton } from "#/shared/ui/skeleton";
 

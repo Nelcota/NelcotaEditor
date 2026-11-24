@@ -4,7 +4,7 @@ import { DEFAULT_ADMIN_VIDEO_FILTER } from "#/modules/admin/model/admin-search";
 import {
     adminUserQueryOptions,
     adminVideosQueryOptions,
-} from "#/modules/admin/ui/hooks/admin-queries";
+} from "#/modules/admin/model/admin-queries";
 import { AdminUserScreen } from "#/modules/admin/ui/screens/admin-user-screen";
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({

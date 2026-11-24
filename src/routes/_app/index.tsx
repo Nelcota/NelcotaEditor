@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { HomeScreen } from "#/modules/shell/ui/screens/home-screen";
+import { VideoLinkComposer } from "#/modules/videos/ui/components/video-link-composer";
 
 export const Route = createFileRoute("/_app/")({
     head: () => ({ meta: [{ title: "Início · Nelcota" }] }),
-    component: HomeScreen,
+    component: HomeRoute,
 });
+
+function HomeRoute(): ReactNode {
+    return <HomeScreen linkComposer={<VideoLinkComposer />} />;
+}

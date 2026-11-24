@@ -6,7 +6,7 @@ import type { Avatar } from "#/modules/auth/model/avatar";
 import { applyAvatarChange } from "#/modules/auth/client/apply-avatar-change";
 import { AvatarMascotPicker } from "#/modules/auth/ui/components/avatar-mascot-picker";
 import { AvatarPhotoPanel } from "#/modules/auth/ui/components/avatar-photo-panel";
-import { forgetCurrentUser } from "#/modules/auth/ui/hooks/current-user-query";
+import { forgetCurrentUser } from "#/modules/auth/model/current-user-query";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 
 const appRoute = getRouteApi("/_app");

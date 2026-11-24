@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
-import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { Mascot } from "#/shared/ui/mascot";
 
 const CREW_CARD_COUNT = 4;
 
@@ -32,7 +33,7 @@ export function OverviewLoading(): ReactNode {
 export function OverviewLoadError({ onRetry }: { onRetry: () => void }) {
     return (
         <EmptyState
-            art={<StageCrewMascot status="failed" className="size-14" />}
+            art={<Mascot index={STAGE_CREW.failed} className="size-14" />}
             title="Não foi possível carregar o painel"
             description="Seus vídeos e cortes continuam salvos; só os números não vieram. Tente de novo."
             action={

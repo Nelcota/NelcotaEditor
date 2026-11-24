@@ -1,18 +1,37 @@
 import { Link } from "@tanstack/react-router";
-import { ClipPreview } from "#/modules/videos/ui/components/clip-preview";
-import { ScoreChip } from "#/modules/videos/ui/components/score-chip";
+import { SCORE_LABEL, SCORE_SCALE } from "#/modules/videos/model/clip-score";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { ScoreChip } from "#/shared/ui/score-chip";
+import {
+    CLIP_FRAME_CLASS,
+    VerticalClipPlayer,
+} from "#/shared/ui/media-player/vertical-clip-player";
 import type { LibraryClip } from "#/modules/videos/model/video-views";
 import { formatClock } from "#/shared/ui/format";
+
+/** Best clips are rendered ones, so the file is there; the empty frame only guards the type. */
+function BestClipMedia({ title, fileUrl }: { title: string; fileUrl: string | null }) {
+    if (fileUrl === null) {
+        return <div className={CLIP_FRAME_CLASS} />;
+    }
+
+    return <VerticalClipPlayer label={`Corte: ${title}`} fileUrl={fileUrl} />;
+}
 
 export function BestClipCard({ item }: { item: LibraryClip }) {
     const clip = item.clip;
 
     return (
         <li className="grid snap-start content-start gap-2">
-            <ClipPreview clip={clip} />
+            <BestClipMedia title={clip.title} fileUrl={clip.fileUrl} />
             <div className="grid gap-1">
                 <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground tabular-nums">
-                    <ScoreChip score={clip.score} />
+                    <ScoreChip
+                        score={clip.score}
+                        scale={SCORE_SCALE}
+                        label={SCORE_LABEL}
+                        mascotIndex={STAGE_CREW.selecting}
+                    />
                     {formatClock(clip.endSeconds - clip.startSeconds)}
                 </p>
                 <p title={clip.title} className="line-clamp-2 text-sm leading-snug font-medium">

@@ -12,7 +12,7 @@ import {
     VIDEOS_QUERY_KEY,
     pollWhileProcessing,
     videosQueryOptions,
-} from "#/modules/videos/ui/hooks/video-queries";
+} from "#/modules/videos/model/video-queries";
 
 const PROGRESS_KEY_SEGMENT = "progress";
 

@@ -1,9 +1,10 @@
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { ReactNode } from "react";
-import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { Mascot } from "#/shared/ui/mascot";
 
 const SKELETON_ROW_COUNT = 6;
 
@@ -27,7 +28,7 @@ interface AdminLoadErrorProps {
 export function AdminLoadError({ title, message, onRetry }: AdminLoadErrorProps): ReactNode {
     return (
         <EmptyState
-            art={<StageCrewMascot status="failed" className="size-14" />}
+            art={<Mascot index={STAGE_CREW.failed} className="size-14" />}
             title={title}
             description={message}
             action={

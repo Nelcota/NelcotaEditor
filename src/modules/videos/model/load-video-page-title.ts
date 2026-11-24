@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { videoDetailsQueryOptions } from "#/modules/videos/ui/hooks/video-queries";
+import { videoDetailsQueryOptions } from "#/modules/videos/model/video-queries";
 
 const FALLBACK_TITLE = "Vídeo";
 

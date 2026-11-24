@@ -5,6 +5,7 @@ import ShieldXIcon from "~icons/lucide/shield-x";
 import TrashIcon from "~icons/lucide/trash";
 import UserXIcon from "~icons/lucide/user-x";
 import UserCheckIcon from "~icons/lucide/user-check";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -13,7 +14,7 @@ import { AdminConfirmDialog } from "#/modules/admin/ui/components/admin-confirm-
 import type { AdminConfirmation } from "#/modules/admin/ui/components/admin-confirm-dialog";
 import { toUserConfirmation } from "#/modules/admin/model/admin-user-confirmations";
 import type { AdminUserAction } from "#/modules/admin/model/admin-user-confirmations";
-import { useStartImpersonation } from "#/modules/auth/ui/hooks/use-impersonation";
+import { startImpersonation } from "#/modules/auth/client/account-switch";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { Input } from "#/shared/ui/input";
@@ -54,7 +55,7 @@ interface ActionButtonsProps {
 /** Another admin is protected: remove the role first, then the account can be acted on. */
 function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
     const user = details.user;
-    const impersonation = useStartImpersonation(user.id);
+    const impersonation = useMutation({ mutationFn: () => startImpersonation(user.id) });
     const isProtected = user.isAdmin;
 
     return (
@@ -62,9 +63,9 @@ function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
             <div className="flex flex-wrap gap-2">
                 <Button
                     variant="outline"
-                    disabled={isProtected || user.isBanned || impersonation.isRunning}
-                    aria-busy={impersonation.isRunning}
-                    onClick={impersonation.run}
+                    disabled={isProtected || user.isBanned || impersonation.isPending}
+                    aria-busy={impersonation.isPending}
+                    onClick={() => impersonation.mutate()}
                 >
                     <LogInIcon aria-hidden="true" />
                     Entrar como esta pessoa
@@ -115,7 +116,7 @@ function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
                     Para bloquear, excluir ou entrar nesta conta, remova o acesso de admin primeiro.
                 </p>
             )}
-            <FormAlert message={impersonation.errorMessage} />
+            {impersonation.isError === true && <FormAlert message={impersonation.error.message} />}
         </div>
     );
 }

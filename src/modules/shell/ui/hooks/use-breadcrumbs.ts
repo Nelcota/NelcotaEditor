@@ -1,5 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
-import { useVideosQuery } from "#/modules/videos/ui/hooks/use-videos-query";
+import { useQuery } from "@tanstack/react-query";
+import { videosQueryOptions } from "#/modules/videos/model/video-queries";
 
 export type CrumbPath = "/" | "/videos" | "/admin" | "/admin/users";
 
@@ -38,7 +39,7 @@ function trimTrailingSlash(pathname: string): string {
 /** The trail at the top of the panel, from the address; a video's crumb is its title. */
 export function useBreadcrumbs(): ReadonlyArray<Crumb> {
     const pathname = trimTrailingSlash(useLocation({ select: (location) => location.pathname }));
-    const videosQuery = useVideosQuery();
+    const videosQuery = useQuery(videosQueryOptions());
     const fixed = FIXED_CRUMBS[pathname];
 
     if (fixed !== undefined) {

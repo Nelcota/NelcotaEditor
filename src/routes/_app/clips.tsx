@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { libraryClipsQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
+import { libraryClipsQueryOptions } from "#/modules/videos/model/library-queries";
 import { ClipsScreen } from "#/modules/videos/ui/screens/clips-screen";
 
 export const Route = createFileRoute("/_app/clips")({

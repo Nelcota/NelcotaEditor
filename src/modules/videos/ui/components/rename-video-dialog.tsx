@@ -5,7 +5,7 @@ import { updateVideoTitle } from "#/modules/videos/server/video-edit-functions";
 import { renameVideoFormSchema } from "#/modules/video-records/model/video-title";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { Dialog, DialogClose, DialogContent } from "#/shared/ui/dialog";

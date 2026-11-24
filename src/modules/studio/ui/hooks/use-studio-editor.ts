@@ -14,7 +14,7 @@ import { createHistory, studioHistoryReducer } from "#/modules/studio/model/stud
 import { useDraftAutosave } from "#/modules/studio/ui/hooks/use-draft-autosave";
 import type { DraftAutosave } from "#/modules/studio/ui/hooks/use-draft-autosave";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 
 const HUNDREDTHS = 100;
 

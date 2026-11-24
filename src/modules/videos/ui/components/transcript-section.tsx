@@ -3,7 +3,7 @@ import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { TranscriptBody } from "#/modules/videos/ui/components/transcript-body";
-import { transcriptQueryOptions } from "#/modules/videos/ui/hooks/transcript-queries";
+import { transcriptQueryOptions } from "#/modules/videos/model/transcript-queries";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { FormAlert } from "#/shared/ui/form-alert";

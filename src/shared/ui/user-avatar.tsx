@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
-import { toAvatar } from "#/modules/auth/model/avatar";
 import { cn } from "#/shared/ui/cn";
 import { Mascot } from "#/shared/ui/mascot";
+
+/** A photo, one of the mascots, or no picture (the initials stand in). */
+export type AvatarPicture =
+    | { kind: "initials" }
+    | { kind: "mascot"; index: number }
+    | { kind: "photo"; url: string };
 
 const MAX_INITIALS = 2;
 const FRAME_CLASS =
@@ -24,13 +29,12 @@ function toInitials(name: string): string {
 
 interface UserAvatarProps {
     name: string;
-    image: string | null;
+    avatar: AvatarPicture;
     className?: string;
 }
 
 /** Photo, chosen mascot or initials, always in the same round frame. Decorative: the name is nearby. */
-export function UserAvatar({ name, image, className }: UserAvatarProps): ReactNode {
-    const avatar = toAvatar(image);
+export function UserAvatar({ name, avatar, className }: UserAvatarProps): ReactNode {
     const frameClass = cn(FRAME_CLASS, className);
 
     if (avatar.kind === "photo") {

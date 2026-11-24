@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import {
@@ -6,13 +7,12 @@ import {
 } from "#/modules/overview/model/overview-period";
 import type { OverviewPeriodDays } from "#/modules/overview/model/overview-period";
 import { OverviewBoard } from "#/modules/overview/ui/components/overview-board";
-import { overviewQueryOptions } from "#/modules/overview/ui/hooks/overview-queries";
+import { overviewQueryOptions } from "#/modules/overview/model/overview-queries";
 import {
     OverviewLoadError,
     OverviewLoading,
 } from "#/modules/overview/ui/components/overview-states";
 import { PeriodPicker } from "#/modules/overview/ui/components/period-picker";
-import { FirstVideoEmptyState } from "#/modules/videos/ui/components/video-list-states";
 import { PageHeader } from "#/shared/ui/page-header";
 
 const overviewRoute = getRouteApi("/_app/overview");
@@ -43,9 +43,14 @@ function toPeriodSearch(periodDays: OverviewPeriodDays): OverviewPeriodDays | un
 interface OverviewContentProps {
     periodDays: OverviewPeriodDays;
     onPeriodChange: (periodDays: OverviewPeriodDays) => void;
+    firstVideoEmptyState: ReactNode;
 }
 
-function OverviewContent({ periodDays, onPeriodChange }: OverviewContentProps) {
+function OverviewContent({
+    periodDays,
+    onPeriodChange,
+    firstVideoEmptyState,
+}: OverviewContentProps) {
     const overviewQuery = useQuery(overviewQueryOptions(periodDays));
     const stats = overviewQuery.data;
 
@@ -64,7 +69,7 @@ function OverviewContent({ periodDays, onPeriodChange }: OverviewContentProps) {
     }
 
     if (stats.hasAnyVideo === false) {
-        return <FirstVideoEmptyState />;
+        return firstVideoEmptyState;
     }
 
     return (
@@ -76,7 +81,8 @@ function OverviewContent({ periodDays, onPeriodChange }: OverviewContentProps) {
     );
 }
 
-export function OverviewScreen() {
+/** The Vídeos module owns the first-video welcome, so the route hands it in. */
+export function OverviewScreen({ firstVideoEmptyState }: { firstVideoEmptyState: ReactNode }) {
     const search = overviewRoute.useSearch();
     const navigate = useNavigate();
     const periodDays = search.period ?? DEFAULT_OVERVIEW_PERIOD_DAYS;
@@ -91,7 +97,11 @@ export function OverviewScreen() {
                 description="Quanto você enviou, quantos cortes saíram e como foi cada etapa."
                 action={<PeriodPicker value={periodDays} onChange={changePeriod} />}
             />
-            <OverviewContent periodDays={periodDays} onPeriodChange={changePeriod} />
+            <OverviewContent
+                periodDays={periodDays}
+                onPeriodChange={changePeriod}
+                firstVideoEmptyState={firstVideoEmptyState}
+            />
         </div>
     );
 }

@@ -1,10 +1,11 @@
 import WifiOffIcon from "~icons/lucide/wifi-off";
 import type { ReactNode } from "react";
 import type { ClipView } from "#/modules/clips/model/clip-view";
-import { ClipDownloadLink } from "#/modules/videos/ui/components/clip-download-link";
-import { RetryClipButton } from "#/modules/videos/ui/components/retry-clip-button";
-import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
+import { DownloadLink } from "#/shared/ui/download-link";
+import { RetryRenderButton } from "#/modules/studio/ui/components/retry-render-button";
 import { Progress } from "#/shared/ui/progress";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { Mascot } from "#/shared/ui/mascot";
 
 /** Covers the preview while Brasa renders the clip again. */
 export function RenderingOverlay({ progressPercent }: { progressPercent: number }): ReactNode {
@@ -13,7 +14,10 @@ export function RenderingOverlay({ progressPercent }: { progressPercent: number 
             role="status"
             className="absolute inset-0 z-30 grid content-center justify-items-center gap-2.5 bg-background/95 p-6 text-center"
         >
-            <StageCrewMascot status="rendering" isWorking className="size-12" />
+            <Mascot
+                index={STAGE_CREW.rendering}
+                className="size-12 motion-safe:animate-crew-work"
+            />
             <p className="font-semibold">Brasa está refazendo o corte</p>
             <Progress value={progressPercent} className="w-4/5" />
             <p className="text-xs text-muted-foreground tabular-nums">
@@ -35,19 +39,14 @@ export function RenderFailedBanner({ videoId, clip }: RenderFailedBannerProps): 
             role="alert"
             className="flex flex-wrap items-center gap-3 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3"
         >
-            <StageCrewMascot status="failed" className="size-8" />
+            <Mascot index={STAGE_CREW.failed} className="size-8" />
             <p className="min-w-0 flex-1 text-sm">
                 <span className="font-semibold">Não foi possível refazer o corte.</span>{" "}
                 <span className="text-muted-foreground">
                     Guarda barrou a renderização. Suas alterações continuam aqui.
                 </span>
             </p>
-            <RetryClipButton
-                videoId={videoId}
-                clipId={clip.id}
-                isDisabled={false}
-                variant="outline"
-            />
+            <RetryRenderButton videoId={videoId} clipId={clip.id} />
         </div>
     );
 }
@@ -58,12 +57,12 @@ export function RenderedNotice({ clip }: { clip: ClipView }): ReactNode {
             role="status"
             className="flex flex-wrap items-center gap-3 rounded-xl border bg-popover px-4 py-3 text-sm"
         >
-            <StageCrewMascot status="done" className="size-7" />
+            <Mascot index={STAGE_CREW.done} className="size-7" />
             <p className="flex-1">
                 <span className="font-semibold">Corte refeito.</span>{" "}
                 <span className="text-muted-foreground">O arquivo para baixar já é o novo.</span>
             </p>
-            <ClipDownloadLink clip={clip} label="Baixar corte" emphasis="secondary" />
+            <DownloadLink href={clip.downloadUrl} label="Baixar corte" emphasis="secondary" />
         </div>
     );
 }

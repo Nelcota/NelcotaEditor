@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { invalidateAdminQueries } from "#/modules/admin/ui/hooks/admin-queries";
+import { invalidateAdminQueries } from "#/modules/admin/model/admin-queries";
 import {
     AlertDialog,
     AlertDialogAction,

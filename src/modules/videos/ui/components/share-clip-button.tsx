@@ -2,7 +2,7 @@ import Link2Icon from "~icons/lucide/link-2";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { setClipSharing } from "#/modules/clips/server/clip-sharing-functions";
 import type { ClipView } from "#/modules/clips/model/clip-view";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 import { Button } from "#/shared/ui/button";
 import { CopyTextButton } from "#/shared/ui/copy-text-button";
 import { FormAlert } from "#/shared/ui/form-alert";

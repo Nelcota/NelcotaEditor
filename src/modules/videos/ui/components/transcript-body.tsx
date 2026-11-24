@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { TranscriptLineView } from "#/modules/transcription/model/transcript-view";
-import { SearchField } from "#/modules/videos/ui/components/search-field";
+import { SearchField } from "#/shared/ui/search-field";
 import { TranscriptLines } from "#/modules/videos/ui/components/transcript-lines";
 import { CopyTextButton } from "#/shared/ui/copy-text-button";
 import { normalizeForSearch } from "#/shared/ui/normalize-for-search";

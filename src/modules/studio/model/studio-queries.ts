@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getStudioWords } from "#/modules/studio/server/clip-studio-functions";
 import { getClipStudioSnapshot } from "#/modules/studio/server/clip-studio-snapshot-functions";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/hooks/video-queries";
+import { VIDEOS_QUERY_KEY } from "#/modules/videos/model/video-queries";
 
 export function clipStudioQueryKey(videoId: string, clipId: string): Array<string> {
     return [...VIDEOS_QUERY_KEY, videoId, "studio", clipId];

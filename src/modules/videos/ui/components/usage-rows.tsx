@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { CREW_NAMES, HOST_NAME } from "#/modules/videos/model/crew-lines";
 import { toCrewStats } from "#/modules/videos/model/crew-stats";
 import type { CrewStat } from "#/modules/videos/model/crew-stats";
-import { usageQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
+import { usageQueryOptions } from "#/modules/videos/model/library-queries";
 import { NewVideoLink } from "#/modules/videos/ui/components/new-video-link";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import type { UsageSummary } from "#/modules/videos/model/video-views";

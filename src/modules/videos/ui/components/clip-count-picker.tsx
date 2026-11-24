@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { ClipCountStepper } from "#/modules/preferences/ui/components/clip-count-stepper";
+import ScissorsIcon from "~icons/lucide/scissors";
+import { CLIP_COUNT_STEPPER } from "#/modules/preferences/model/preferences";
+import { CountStepper } from "#/shared/ui/count-stepper";
 import { cn } from "#/shared/ui/cn";
 
 /** The counts people pick most; anything else from 1 to 10 is under "Outro". */
@@ -45,7 +47,11 @@ export function ClipCountPicker({ value, onValueChange, disabled }: ClipCountPic
                 </button>
             </div>
             {isOtherOpen === true && (
-                <ClipCountStepper
+                <CountStepper
+                    {...CLIP_COUNT_STEPPER}
+                    icon={
+                        <ScissorsIcon aria-hidden="true" className="size-5 text-muted-foreground" />
+                    }
                     id="new-video-clip-count"
                     label="Quantidade de cortes"
                     value={value}

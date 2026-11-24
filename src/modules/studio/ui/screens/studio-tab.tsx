@@ -4,19 +4,20 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
-import type { StudioTabProps } from "#/modules/videos/ui/components/video-page-tabs";
+import type { StudioTabProps } from "#/modules/videos/model/studio-tab-props";
 import { rankClips } from "#/modules/videos/model/clip-ranking";
-import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import {
     clipStudioQueryKey,
     clipStudioQueryOptions,
     studioWordsQueryOptions,
-} from "#/modules/studio/ui/hooks/studio-queries";
+} from "#/modules/studio/model/studio-queries";
 import { StudioWorkspace } from "#/modules/studio/ui/components/studio-workspace";
 import { toClipStudioState } from "#/modules/studio/model/to-clip-studio-state";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { Mascot } from "#/shared/ui/mascot";
 
 function StudioLoading(): ReactNode {
     return (
@@ -41,7 +42,7 @@ function StudioLoading(): ReactNode {
 function NotReady({ details, onShowClips }: Pick<StudioTabProps, "details" | "onShowClips">) {
     return (
         <EmptyState
-            art={<StageCrewMascot status={details.video.status} className="size-14" />}
+            art={<Mascot index={STAGE_CREW[details.video.status]} className="size-14" />}
             title="O Studio abre quando os cortes ficarem prontos"
             description="Sem a transcrição e os cortes ainda não dá para editar trecho nem legendas. Acompanhe o andamento em Cortes."
             action={
@@ -102,7 +103,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
     if (loadError !== null && (studio === undefined || words === undefined)) {
         return (
             <EmptyState
-                art={<StageCrewMascot status="failed" className="size-14" />}
+                art={<Mascot index={STAGE_CREW.failed} className="size-14" />}
                 title="Não foi possível abrir o Studio"
                 description={loadError.message}
                 action={

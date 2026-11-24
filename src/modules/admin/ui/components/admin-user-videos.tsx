@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { DEFAULT_ADMIN_VIDEO_FILTER } from "#/modules/admin/model/admin-search";
 import { AdminPager } from "#/modules/admin/ui/components/admin-pager";
-import { adminVideosQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminVideosQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
 import { AdminVideoList } from "#/modules/admin/ui/components/admin-video-list";
 

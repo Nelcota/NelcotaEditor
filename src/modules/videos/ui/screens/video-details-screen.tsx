@@ -7,9 +7,9 @@ import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-masco
 import { VideoHeader } from "#/modules/videos/ui/components/video-header";
 import type { VideoPageSearch } from "#/modules/videos/model/video-page-search";
 import { VideoPageTabs } from "#/modules/videos/ui/components/video-page-tabs";
-import type { StudioTabProps } from "#/modules/videos/ui/components/video-page-tabs";
-import { videoDetailsQueryOptions } from "#/modules/videos/ui/hooks/video-queries";
-import { useIsInspectorHidden } from "#/modules/videos/ui/components/inspector-toggle";
+import type { StudioTabProps } from "#/modules/videos/model/studio-tab-props";
+import { videoDetailsQueryOptions } from "#/modules/videos/model/video-queries";
+import { useIsInspectorHidden } from "#/shared/ui/inspector-toggle";
 import { VideoResultSummary } from "#/modules/videos/ui/components/video-result-summary";
 import { VideoInspector } from "#/modules/videos/ui/components/video-inspector";
 import type { VideoDetails } from "#/modules/videos/model/video-views";

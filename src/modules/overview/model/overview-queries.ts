@@ -1,7 +1,7 @@
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import type { OverviewPeriodDays } from "#/modules/overview/model/overview-period";
 import { getOverviewStats } from "#/modules/overview/server/overview-functions";
-import { VIDEOS_QUERY_KEY } from "#/modules/videos/ui/hooks/video-queries";
+import { VIDEOS_QUERY_KEY } from "#/modules/videos/model/video-queries";
 
 const OVERVIEW_KEY = "overview";
 const POLL_INTERVAL_MILLISECONDS = 5_000;

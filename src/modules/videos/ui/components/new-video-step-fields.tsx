@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ClipLengthPicker } from "#/modules/preferences/ui/components/clip-length-picker";
+import { ClipLengthPicker } from "#/modules/videos/ui/components/clip-length-picker";
 import type { ClipLength } from "#/modules/video-records/model/clip-length";
 import { MAX_TITLE_LENGTH } from "#/modules/video-records/model/upload-limits";
 import { ClipCountPicker } from "#/modules/videos/ui/components/clip-count-picker";

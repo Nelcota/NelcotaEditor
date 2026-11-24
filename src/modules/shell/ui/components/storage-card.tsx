@@ -9,7 +9,7 @@ import ScissorsIcon from "~icons/lucide/scissors";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { usageQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
+import { usageQueryOptions } from "#/modules/videos/model/library-queries";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";

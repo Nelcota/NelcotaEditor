@@ -5,7 +5,7 @@ import {
     ClipsLoading,
     NoClipsYet,
 } from "#/modules/videos/ui/components/clips-screen-states";
-import { libraryClipsQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
+import { libraryClipsQueryOptions } from "#/modules/videos/model/library-queries";
 import { PageHeader } from "#/shared/ui/page-header";
 
 function ClipsContent() {

@@ -1,13 +1,11 @@
+import type { AvatarPicture } from "#/shared/ui/user-avatar";
 /**
  * What `user.image` holds, decoded for the UI:
  * - "mascot:<index>"           → one of the video "shapes" mascots;
  * - "photo:<extension>:<time>" → an uploaded photo, served by /api/account/avatar;
  * - anything else (or null)    → the user's initials.
  */
-export type Avatar =
-    | { kind: "initials" }
-    | { kind: "mascot"; index: number }
-    | { kind: "photo"; url: string };
+export type Avatar = AvatarPicture;
 
 export const AVATAR_MASCOT_COUNT = 15;
 const BYTES_PER_MEGABYTE = 1024 * 1024;

@@ -9,8 +9,9 @@ import { CompactMetric } from "#/modules/overview/ui/components/compact-metric";
 import { findMetricDefinition } from "#/modules/overview/model/metric-definitions";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { CREW_NAMES } from "#/modules/videos/model/crew-lines";
-import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { pluralize } from "#/shared/ui/pluralize";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { Mascot } from "#/shared/ui/mascot";
 
 export interface CrewStage {
     status: VideoStatus;
@@ -49,7 +50,7 @@ export function CrewStageCard({ stage, stats }: CrewStageCardProps): ReactNode {
     return (
         <li className="grid content-start gap-3 rounded-2xl border bg-popover p-3 @lg:gap-4 @lg:p-5">
             <div className="flex items-center gap-3">
-                <StageCrewMascot status={stage.status} className="size-9 @lg:size-11" />
+                <Mascot index={STAGE_CREW[stage.status]} className="size-9 @lg:size-11" />
                 <p className="leading-tight">
                     <strong className="block font-semibold">{name}</strong>
                     <span className="text-sm text-muted-foreground @max-lg:sr-only">

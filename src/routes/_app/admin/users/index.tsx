@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { adminUsersSearchSchema } from "#/modules/admin/model/admin-search";
 import type { AdminUsersSearch } from "#/modules/admin/model/admin-search";
-import { adminUsersQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminUsersQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminUsersScreen } from "#/modules/admin/ui/screens/admin-users-screen";
 
 export const Route = createFileRoute("/_app/admin/users/")({

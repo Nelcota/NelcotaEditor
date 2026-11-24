@@ -4,7 +4,8 @@ import { useEffect, useId, useRef } from "react";
 import type { ChangeEvent, ReactNode, RefObject } from "react";
 import { MAX_AVATAR_MEGABYTES } from "#/modules/auth/model/avatar";
 import type { SessionUser } from "#/modules/auth/model/session-user";
-import { UserAvatar } from "#/modules/auth/ui/components/user-avatar";
+import { toAvatar } from "#/modules/auth/model/avatar";
+import { UserAvatar } from "#/shared/ui/user-avatar";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { Spinner } from "#/shared/ui/spinner";
@@ -121,7 +122,11 @@ export function AvatarPhotoPanel(props: AvatarPhotoPanelProps): ReactNode {
     return (
         <div className="grid content-start gap-4 sm:border-r sm:pr-8">
             <p className="text-sm font-medium">Sua foto</p>
-            <UserAvatar name={user.name} image={user.image} className="size-32 text-2xl" />
+            <UserAvatar
+                name={user.name}
+                avatar={toAvatar(user.image)}
+                className="size-32 text-2xl"
+            />
             <div className="grid gap-2">
                 <div className="grid gap-2">
                     {/* The input comes first so the label (a <label>, where `disabled` does

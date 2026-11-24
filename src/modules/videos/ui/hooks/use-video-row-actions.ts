@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cancelVideo, retryVideo } from "#/modules/videos/server/video-functions";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 
 const RESUME_FALLBACK_MESSAGE =
     "Não foi possível retomar o vídeo. Confira sua conexão e tente de novo.";

@@ -9,7 +9,8 @@ import type { ReactNode } from "react";
 import { AvatarDialog } from "#/modules/auth/ui/components/avatar-dialog";
 import { ChangePasswordDialog } from "#/modules/auth/ui/components/change-password-dialog";
 import { EditProfileDialog } from "#/modules/auth/ui/components/edit-profile-dialog";
-import { UserAvatar } from "#/modules/auth/ui/components/user-avatar";
+import { toAvatar } from "#/modules/auth/model/avatar";
+import { UserAvatar } from "#/shared/ui/user-avatar";
 import { useSignOut } from "#/modules/auth/ui/hooks/use-sign-out";
 import { Button } from "#/shared/ui/button";
 import { SettingsRow } from "#/shared/ui/settings-row";
@@ -31,7 +32,7 @@ function AvatarButton({ onClick }: { onClick: () => void }): ReactNode {
         >
             <UserAvatar
                 name={user.name}
-                image={user.image}
+                avatar={toAvatar(user.image)}
                 className="size-14 text-base transition-opacity group-hover:opacity-85"
             />
             <span className="absolute -end-0.5 -bottom-0.5 grid size-6 place-items-center rounded-full bg-foreground text-background ring-2 ring-background">

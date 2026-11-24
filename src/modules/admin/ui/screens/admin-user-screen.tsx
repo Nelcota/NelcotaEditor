@@ -4,13 +4,14 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { AdminUserDetails } from "#/modules/admin/model/admin-views";
 import { formatCount } from "#/modules/admin/model/admin-format";
-import { adminUserQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminUserQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
 import { AdminUserActions } from "#/modules/admin/ui/components/admin-user-actions";
 import { AdminUserBadges } from "#/modules/admin/ui/components/admin-user-badges";
 import { AdminUserSessions } from "#/modules/admin/ui/components/admin-user-sessions";
 import { AdminUserVideos } from "#/modules/admin/ui/components/admin-user-videos";
-import { UserAvatar } from "#/modules/auth/ui/components/user-avatar";
+import { toAvatar } from "#/modules/auth/model/avatar";
+import { UserAvatar } from "#/shared/ui/user-avatar";
 import { formatBytes, formatDate, formatDateTime } from "#/shared/ui/format";
 
 function BanNotice({ details }: { details: AdminUserDetails }): ReactNode {
@@ -40,7 +41,11 @@ function ProfileHeader({ details }: { details: AdminUserDetails }): ReactNode {
 
     return (
         <div className="flex flex-wrap items-center gap-4">
-            <UserAvatar name={user.name} image={user.image} className="size-16 text-xl" />
+            <UserAvatar
+                name={user.name}
+                avatar={toAvatar(user.image)}
+                className="size-16 text-xl"
+            />
             <div className="grid min-w-0 flex-[1_1_16rem] gap-1">
                 <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-2xl font-semibold tracking-tight [overflow-wrap:anywhere]">

@@ -4,7 +4,8 @@ import ShieldIcon from "~icons/lucide/shield";
 import UserIcon from "~icons/lucide/user";
 import { Link, getRouteApi } from "@tanstack/react-router";
 import type { ComponentProps, ReactNode } from "react";
-import { UserAvatar } from "#/modules/auth/ui/components/user-avatar";
+import { toAvatar } from "#/modules/auth/model/avatar";
+import { UserAvatar } from "#/shared/ui/user-avatar";
 import { useSignOut } from "#/modules/auth/ui/hooks/use-sign-out";
 import {
     DropdownMenuContent,
@@ -48,7 +49,7 @@ export function AccountMenuContent({
     return (
         <DropdownMenuContent {...contentProps}>
             <div className="flex items-center gap-2.5 px-2.5 py-2">
-                <UserAvatar name={user.name} image={user.image} />
+                <UserAvatar name={user.name} avatar={toAvatar(user.image)} />
                 <div className="min-w-0">
                     <p title={user.name} className="text-sm font-semibold [overflow-wrap:anywhere]">
                         {user.name}

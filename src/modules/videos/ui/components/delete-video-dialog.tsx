@@ -5,7 +5,7 @@ import { useRef } from "react";
 import type { ReactNode } from "react";
 import { deleteVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
-import { invalidateVideoQueries } from "#/modules/videos/ui/hooks/video-queries";
+import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 import {
     AlertDialog,
     AlertDialogAction,

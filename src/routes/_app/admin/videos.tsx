@@ -5,7 +5,7 @@ import {
     adminVideosSearchSchema,
 } from "#/modules/admin/model/admin-search";
 import type { AdminVideosSearch } from "#/modules/admin/model/admin-search";
-import { adminVideosQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminVideosQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminVideosScreen } from "#/modules/admin/ui/screens/admin-videos-screen";
 
 export const Route = createFileRoute("/_app/admin/videos")({

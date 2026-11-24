@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { AdminOverview } from "#/modules/admin/model/admin-views";
 import { formatCount, formatHours } from "#/modules/admin/model/admin-format";
-import { adminOverviewQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminOverviewQueryOptions } from "#/modules/admin/model/admin-queries";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
 import { AdminUserList } from "#/modules/admin/ui/components/admin-user-list";
 import { AdminVideoList } from "#/modules/admin/ui/components/admin-video-list";

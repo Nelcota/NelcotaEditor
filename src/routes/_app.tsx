@@ -1,8 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+import { AccountMenuButton } from "#/modules/auth/ui/components/account-menu-button";
+import { ImpersonationBanner } from "#/modules/auth/ui/components/impersonation-banner";
 import { AppLayout } from "#/modules/shell/ui/screens/app-layout";
-import { currentUserQueryOptions } from "#/modules/auth/ui/hooks/current-user-query";
-import { usageQueryOptions } from "#/modules/videos/ui/hooks/library-queries";
-import { videosQueryOptions } from "#/modules/videos/ui/hooks/video-queries";
+import { currentUserQueryOptions } from "#/modules/auth/model/current-user-query";
+import { usageQueryOptions } from "#/modules/videos/model/library-queries";
+import { videosQueryOptions } from "#/modules/videos/model/video-queries";
+import { VideoProgressWatcher } from "#/modules/videos/ui/components/video-progress-watcher";
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: async ({ context }) => {
@@ -24,5 +28,15 @@ export const Route = createFileRoute("/_app")({
             context.queryClient.prefetchQuery({ ...usageQueryOptions(), staleTime: "static" }),
         ]);
     },
-    component: AppLayout,
+    component: AppLayoutRoute,
 });
+
+function AppLayoutRoute(): ReactNode {
+    return (
+        <AppLayout
+            accountMenu={<AccountMenuButton />}
+            impersonationBanner={<ImpersonationBanner />}
+            videoProgressWatcher={<VideoProgressWatcher />}
+        />
+    );
+}

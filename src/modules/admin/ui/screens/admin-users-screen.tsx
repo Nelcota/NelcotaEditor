@@ -3,12 +3,12 @@ import { useCallback } from "react";
 import type { ReactNode } from "react";
 import type { AdminUsersSearch } from "#/modules/admin/model/admin-search";
 import { AdminPager } from "#/modules/admin/ui/components/admin-pager";
-import { adminUsersQueryOptions } from "#/modules/admin/ui/hooks/admin-queries";
+import { adminUsersQueryOptions } from "#/modules/admin/model/admin-queries";
 import { toPageSearch, toQuerySearch } from "#/modules/admin/model/admin-search-params";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
 import { AdminUserList } from "#/modules/admin/ui/components/admin-user-list";
 import { useSearchDraft } from "#/modules/admin/ui/hooks/use-search-draft";
-import { SearchField } from "#/modules/videos/ui/components/search-field";
+import { SearchField } from "#/shared/ui/search-field";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
 

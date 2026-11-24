@@ -9,18 +9,10 @@ import { ProcessingPanel } from "#/modules/videos/ui/components/processing-panel
 import { ResumePanel } from "#/modules/videos/ui/components/resume-panel";
 import { VideoClipsSection } from "#/modules/videos/ui/components/video-clips-section";
 import { VideoOriginalSection } from "#/modules/videos/ui/components/video-original-section";
+import type { StudioTabProps } from "#/modules/videos/model/studio-tab-props";
 import type { VideoPageSearch, VideoPageTab } from "#/modules/videos/model/video-page-search";
 import { VIDEO_PAGE_TABS } from "#/modules/videos/model/video-page-search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/tabs";
-
-/** What the page gives the Studio tab. */
-export interface StudioTabProps {
-    details: VideoDetails;
-    /** The clip asked for in the address; the best clip when absent or unknown. */
-    clipId: string | undefined;
-    onSelectClip: (clipId: string) => void;
-    onShowClips: () => void;
-}
 
 interface VideoPageTabsProps {
     details: VideoDetails;

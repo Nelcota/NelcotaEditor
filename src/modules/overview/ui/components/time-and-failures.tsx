@@ -9,9 +9,10 @@ import type { MetricView, OverviewStats } from "#/modules/overview/model/overvie
 import { MetricChangeBadge } from "#/modules/overview/ui/components/metric-change-badge";
 import { findMetricDefinition } from "#/modules/overview/model/metric-definitions";
 import type { MetricDefinition } from "#/modules/overview/model/metric-definitions";
-import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
+import { Mascot } from "#/shared/ui/mascot";
 
 const ICON_TILE_CLASS = "grid size-11 shrink-0 place-items-center rounded-xl [&>svg]:size-5";
 
@@ -123,7 +124,7 @@ function FailuresTile({ metric }: { metric: MetricView }): ReactNode {
         <MetricTile
             definition={definition}
             metric={metric}
-            icon={<StageCrewMascot status="failed" className="size-11" />}
+            icon={<Mascot index={STAGE_CREW.failed} className="size-11" />}
             action={<FailedVideosLink />}
             isAlert={true}
         />
