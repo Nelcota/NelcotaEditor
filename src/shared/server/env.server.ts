@@ -67,7 +67,7 @@ const baseEnvironmentSchema = z.object({
     // Unset: auth emails fail and stay queued for retries, so sign-up cannot finish. Only the
     // worker sends email; the web server queues it.
     RESEND_API_KEY: optionalTextSchema,
-    EMAIL_FROM: z.string().trim().min(1).default("Nelcota <nao-responda@nelcota.com>"),
+    EMAIL_FROM: z.string().trim().min(1).default("Nelcota <nao-responda@tela.nelcota.com>"),
     // Soft limit per user: the usage screen warns as it fills, nothing is blocked.
     STORAGE_QUOTA_GIGABYTES: z.coerce.number().positive().default(20),
     // Videos one worker processes at once (each from a different person). Size it by the CPU and

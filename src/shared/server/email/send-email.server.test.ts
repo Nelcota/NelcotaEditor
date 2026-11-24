@@ -6,7 +6,7 @@ process.env.STORAGE_DIR = "storage-test";
 process.env.WHISPER_URL = "http://127.0.0.1:9";
 process.env.WHISPER_MODEL = "test-model";
 process.env.RESEND_API_KEY = "re_test_key";
-process.env.EMAIL_FROM = "Nelcota <nao-responda@nelcota.com>";
+process.env.EMAIL_FROM = "Nelcota <nao-responda@tela.nelcota.com>";
 
 const { EmailRejectedError, sendEmail } = await import("#/shared/server/email/send-email.server");
 
@@ -66,7 +66,7 @@ describe("sendEmail", () => {
         assert.equal(headers.get("authorization"), "Bearer re_test_key");
         assert.equal(headers.get("idempotency-key"), "auth-email/job-1");
         assert.deepEqual(JSON.parse(body), {
-            from: "Nelcota <nao-responda@nelcota.com>",
+            from: "Nelcota <nao-responda@tela.nelcota.com>",
             to: ["ana@example.com"],
             subject: EMAIL.subject,
             html: EMAIL.html,
