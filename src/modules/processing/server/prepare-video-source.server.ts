@@ -38,9 +38,21 @@ interface SourceContext {
     workDirectory: string;
 }
 
+/**
+ * Bringing the source in, from YouTube or from the store, is the "downloading" step; without it
+ * the video sits on "queued" while gigabytes move.
+ */
+function saveDownloadProgress(videoId: string, downloadPercent: number): Promise<void> {
+    return updateVideoStage(
+        videoId,
+        "downloading",
+        toOverallPercent("downloading", downloadPercent),
+    );
+}
+
 async function downloadSource(video: Video, context: SourceContext): Promise<DownloadedVideo> {
     const saveProgress = (downloadPercent: number): Promise<void> =>
-        updateVideoStage(video.id, "downloading", toOverallPercent("downloading", downloadPercent));
+        saveDownloadProgress(video.id, downloadPercent);
 
     await saveProgress(0);
     const downloaded = await runWithProgress(
@@ -121,15 +133,33 @@ async function inspectSource(localPath: string, signal: AbortSignal): Promise<Ch
     return { durationSeconds, sourceBytes: fileStats.size };
 }
 
+/** The disk store reads the file in place and reports nothing; R2 reports as bytes arrive. */
+async function fetchStoredSource(
+    video: Video,
+    sourcePath: string,
+    context: SourceContext,
+): Promise<string> {
+    const saveProgress = (downloadPercent: number): Promise<void> =>
+        saveDownloadProgress(video.id, downloadPercent);
+
+    await saveProgress(0);
+    return runWithProgress(
+        (onProgress) =>
+            getFileStorage().getLocalFile(sourcePath, context.workDirectory, {
+                signal: context.signal,
+                onProgress,
+            }),
+        saveProgress,
+    );
+}
+
 /** An upload, or a download a previous run already saved. */
 async function prepareStoredSource(
     video: Video,
     sourcePath: string,
     context: SourceContext,
 ): Promise<VideoSource> {
-    const localSourcePath = await getFileStorage().getLocalFile(sourcePath, context.workDirectory, {
-        signal: context.signal,
-    });
+    const localSourcePath = await fetchStoredSource(video, sourcePath, context);
     const checkedSource = await inspectSource(localSourcePath, context.signal);
     await saveVideoSource(video.id, { sourcePath, ...checkedSource });
     return { sourcePath, localSourcePath, durationSeconds: checkedSource.durationSeconds };

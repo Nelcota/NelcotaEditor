@@ -14,8 +14,10 @@ import {
 import type { ListObjectsV2CommandOutput } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { contentTypeForKey } from "#/shared/server/file-storage/content-type-for-key";
+import { trackTransferProgress } from "#/shared/server/file-storage/track-transfer-progress";
 import type {
     FileStorage,
+    LocalFileOptions,
     ServedFile,
     TransferOptions,
     UploadSlot,
@@ -113,6 +115,18 @@ function transferSignal(options: TransferOptions): AbortSignal {
     return AbortSignal.any([deadline, runSignal]);
 }
 
+function withProgress(
+    stream: ReadableStream<Uint8Array>,
+    totalBytes: number,
+    onProgress: ((percent: number) => void) | undefined,
+): ReadableStream<Uint8Array> {
+    if (onProgress === undefined) {
+        return stream;
+    }
+
+    return stream.pipeThrough(trackTransferProgress(totalBytes, onProgress));
+}
+
 function listedKeys(page: ListObjectsV2CommandOutput): Array<string> {
     const objects = page.Contents ?? [];
 
@@ -189,7 +203,7 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
     async function getLocalFile(
         key: string,
         workDirectory: string,
-        options: TransferOptions = {},
+        options: LocalFileOptions = {},
     ): Promise<string> {
         assertValidKey(key);
         const localPath = path.join(
@@ -206,7 +220,12 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
             throw new StoredFileUnreadableError(key);
         }
 
-        await writeFile(localPath, body.transformToWebStream(), { signal: abortSignal });
+        const download = withProgress(
+            body.transformToWebStream(),
+            response.ContentLength ?? 0,
+            options.onProgress,
+        );
+        await writeFile(localPath, download, { signal: abortSignal });
         return localPath;
     }
 

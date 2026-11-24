@@ -23,6 +23,11 @@ export interface TransferOptions {
     signal?: AbortSignal;
 }
 
+export interface LocalFileOptions extends TransferOptions {
+    /** How much of the file has arrived (0 to 100); only a store that downloads reports it. */
+    onProgress?: (percent: number) => void;
+}
+
 /**
  * Where stored files live. Keys are storage-relative paths with forward slashes
  * ("videos/<id>/source.mp4"), the same values the database keeps, so the app and the worker agree
@@ -45,7 +50,7 @@ export interface FileStorage {
     getLocalFile: (
         key: string,
         workDirectory: string,
-        options?: TransferOptions,
+        options?: LocalFileOptions,
     ) => Promise<string>;
     /** The file's size; 0 when it is gone, which is the space it takes. */
     measureFile: (key: string) => Promise<number>;
