@@ -81,12 +81,14 @@ export function VideoSourceField({
         return <FileDropZone onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} />;
     }
 
+    // This view accepts the drag too, so it must take the drop: otherwise the browser opens the file.
     return (
         <div
             onDragOver={(event) => {
                 event.preventDefault();
                 setIsDragging(true);
             }}
+            onDrop={handleDrop}
             className="grid min-h-52 content-center gap-4 rounded-2xl border border-dashed border-input p-4 sm:p-6"
         >
             <YoutubeLinkInput
