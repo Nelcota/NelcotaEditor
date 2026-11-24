@@ -47,7 +47,8 @@ export interface StudioEditor {
     redo: () => void;
     updateSettings: (settings: Partial<DraftSettings>) => void;
     trim: (startSeconds: number, endSeconds: number) => void;
-    replaceCue: (index: number, replacement: Array<CaptionCue>) => void;
+    /** False when the edit was refused; editError says why. */
+    replaceCue: (index: number, replacement: Array<CaptionCue>) => boolean;
     resetAllCaptions: () => void;
     render: () => Promise<RenderOutcome>;
     keepMine: () => Promise<void>;
@@ -82,9 +83,9 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
     // A step that changes nothing (a click on the option already picked) must not fill the undo list.
     // A step the server would reject (a word too long, too many cues) is refused here with the
     // reason, instead of failing every autosave later with a generic message.
-    const apply = (next: StudioDraft): void => {
+    const apply = (next: StudioDraft): boolean => {
         if (JSON.stringify(next) === JSON.stringify(draft)) {
-            return;
+            return true;
         }
 
         const validation = studioDraftSchema.safeParse(next);
@@ -92,11 +93,12 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         if (validation.success === false) {
             const firstIssue = validation.error.issues[0];
             setEditError(firstIssue?.message ?? INVALID_EDIT_MESSAGE);
-            return;
+            return false;
         }
 
         setEditError(null);
         dispatch({ type: "apply", draft: next });
+        return true;
     };
 
     // Through the cache, so the Studio's applied draft moves on with it: a direct call left the
