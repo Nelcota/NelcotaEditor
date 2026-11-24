@@ -10,7 +10,11 @@ import {
     BANNED_USER_MESSAGE,
     VIDEOS_STILL_PROCESSING_CODE,
 } from "#/modules/auth/model/auth-error-message";
-import { LAST_ADMIN_CODE, LAST_ADMIN_DELETE_MESSAGE } from "#/modules/auth/model/last-admin-error";
+import {
+    LAST_ADMIN_CODE,
+    LAST_ADMIN_DELETE_MESSAGE,
+    LastAdminError,
+} from "#/modules/auth/model/last-admin-error";
 import { MAX_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "#/modules/auth/model/auth-forms";
 import {
     ADMIN_ROLE,
@@ -24,7 +28,6 @@ import {
     recordImpersonationStart,
     recordImpersonationStop,
 } from "#/modules/admin/server/record-admin-action.server";
-import { isLastAdmin } from "#/modules/auth/server/admin-role.server";
 import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
 import {
     queueExistingAccountEmail,
@@ -60,18 +63,18 @@ function readAuthSecret(): string {
  * leave files behind. Better Auth's own delete, which runs next, then finds nothing left to remove.
  */
 async function deleteAccountBeforeBetterAuth(deletedUser: User): Promise<void> {
-    // Nobody could open the admin panel again. Admins cannot delete each other from the panel, so
-    // this is the only way the last one could go.
-    if ((await isLastAdmin(deletedUser.id)) === true) {
-        throw new APIError("BAD_REQUEST", {
-            message: LAST_ADMIN_DELETE_MESSAGE,
-            code: LAST_ADMIN_CODE,
-        });
-    }
-
     try {
         await deleteAccountWithFiles(deletedUser.id);
     } catch (error) {
+        // Nobody could open the admin panel again. Admins cannot delete each other from the panel,
+        // so this is the only way the last one could go.
+        if (error instanceof LastAdminError) {
+            throw new APIError("BAD_REQUEST", {
+                message: LAST_ADMIN_DELETE_MESSAGE,
+                code: LAST_ADMIN_CODE,
+            });
+        }
+
         if (error instanceof AccountHasWorkingVideosError) {
             throw new APIError("BAD_REQUEST", {
                 message: "Cancele os vídeos em processamento antes de excluir a conta.",

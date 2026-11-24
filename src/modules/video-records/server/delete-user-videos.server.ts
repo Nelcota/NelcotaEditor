@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { user } from "#/modules/auth/auth.schema";
+import { ADMIN_ROLE, user } from "#/modules/auth/auth.schema";
+import { LastAdminError } from "#/modules/auth/model/last-admin-error";
 import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
 import { isVideoWorking } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
@@ -23,11 +24,25 @@ export class AccountHasWorkingVideosError extends Error {
  * video rows waits for a resume already in progress. So the returned ids are every video the
  * delete removed, and none of them is still being processed.
  *
+ * The admin rows are locked before anything else, in the same order the role removal locks them,
+ * so two last admins leaving at once run one after the other and the second one is refused.
+ *
  * @returns The deleted video ids, or null when the account does not exist.
  * @throws {AccountHasWorkingVideosError} When a video is being processed; nothing is deleted.
+ * @throws {LastAdminError} When the account is the only admin left; nothing is deleted.
  */
 export async function deleteUserAccountRecords(userId: string): Promise<Array<string> | null> {
     return db.transaction(async (transaction) => {
+        const admins = await transaction
+            .select({ id: user.id })
+            .from(user)
+            .where(eq(user.role, ADMIN_ROLE))
+            .for("update");
+
+        if (admins.length <= 1 && admins.some((admin) => admin.id === userId) === true) {
+            throw new LastAdminError();
+        }
+
         const lockedUsers = await transaction
             .select({ id: user.id })
             .from(user)
@@ -69,6 +84,7 @@ async function deleteVideoFiles(videoIds: Array<string>): Promise<void> {
  *
  * @returns False when the account does not exist.
  * @throws {AccountHasWorkingVideosError} When a video is being processed; nothing is deleted.
+ * @throws {LastAdminError} When the account is the only admin left; nothing is deleted.
  */
 export async function deleteAccountWithFiles(userId: string): Promise<boolean> {
     const videoIds = await deleteUserAccountRecords(userId);

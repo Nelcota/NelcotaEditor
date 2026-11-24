@@ -34,21 +34,3 @@ export async function removeAdminRole(userId: string): Promise<void> {
         await transaction.update(user).set({ role: USER_ROLE }).where(eq(user.id, userId));
     });
 }
-
-const ADMINS_TO_TELL_ONE_FROM_MANY = 2;
-
-/** Whether this account is the only admin, so deleting it would leave nobody to run the panel. */
-export async function isLastAdmin(userId: string): Promise<boolean> {
-    if (userId.trim().length === 0) {
-        throw new RangeError("Cannot check the admin role without a user id");
-    }
-
-    const admins = await db
-        .select({ id: user.id })
-        .from(user)
-        .where(eq(user.role, ADMIN_ROLE))
-        .limit(ADMINS_TO_TELL_ONE_FROM_MANY);
-    const onlyAdmin = admins[0];
-
-    return admins.length === 1 && onlyAdmin !== undefined && onlyAdmin.id === userId;
-}

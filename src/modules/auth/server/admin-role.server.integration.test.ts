@@ -4,7 +4,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { db } from "#/db/database.server";
 import { ADMIN_ROLE, USER_ROLE, user } from "#/modules/auth/auth.schema";
 import { LastAdminError } from "#/modules/auth/model/last-admin-error";
-import { isLastAdmin, removeAdminRole } from "#/modules/auth/server/admin-role.server";
+import { removeAdminRole } from "#/modules/auth/server/admin-role.server";
 
 // Runs against the test database from .env.test: bun run test:integration
 
@@ -64,13 +64,5 @@ describe("removeAdminRole", () => {
 
         expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
         expect(await countAdmins()).toBe(1);
-    });
-
-    it("tells the last admin apart from one of many", async () => {
-        const firstAdminId = await createAdmin();
-
-        expect(await isLastAdmin(firstAdminId)).toBe(true);
-        await createAdmin();
-        expect(await isLastAdmin(firstAdminId)).toBe(false);
     });
 });
