@@ -1,64 +1,24 @@
-import { inArray } from "drizzle-orm";
-import { db } from "#/db/database.server";
 import { startAuthEmailWorker } from "#/modules/auth/server/auth-email-queue.server";
 import { backfillStoredBytes } from "#/modules/processing/server/backfill-stored-bytes.server";
 import { processVideo } from "#/modules/processing/server/process-video.server";
+import {
+    requeueInterruptedVideos,
+    startStuckVideoRecovery,
+} from "#/modules/processing/server/stuck-video-recovery.server";
 import { removeAllVideoWorkspaces } from "#/modules/processing/server/video-workspace.server";
 import { startExpiredUploadSweep } from "#/modules/videos/server/expired-upload-sweep.server";
 import {
-    enqueueVideoProcessing,
     ensureProcessVideoQueue,
     PROCESS_VIDEO_QUEUE,
     processVideoJobSchema,
 } from "#/modules/processing/server/video-processing-queue.server";
-import {
-    findVideoById,
-    markVideoCancelled,
-    toVideoRun,
-} from "#/modules/video-records/server/video-progress.server";
-import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
-import type { VideoStatus } from "#/modules/video-records/model/video-status";
-import { videos } from "#/modules/video-records/video-records.schema";
+import { findVideoById } from "#/modules/video-records/server/video-progress.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { getJobQueue, setJobQueueRole } from "#/shared/server/job-queue.server";
 import { logger, withLogContext } from "#/shared/server/logger.server";
 
 /** One person's videos run one after the other, so nobody waits behind someone else's batch. */
 const VIDEOS_PER_USER_AT_ONCE = 1;
-
-/**
- * Videos left half-done by a previous worker (restart, crash) are queued again,
- * unless the user had asked to cancel them.
- */
-// "queued" too: a job can die before the first stage update. A video another replica is still
-// processing gets at most one extra queued job (stately queue), which its processing lock or its
-// finished status turns into a no-op.
-const RESUMABLE_ON_START_STATUSES: Array<VideoStatus> = ["queued", ...WORKING_VIDEO_STATUSES];
-
-async function requeueInterruptedVideos(): Promise<void> {
-    const interrupted = await db
-        .select({
-            id: videos.id,
-            userId: videos.userId,
-            cancelRequested: videos.cancelRequested,
-            processingStartedAt: videos.processingStartedAt,
-        })
-        .from(videos)
-        .where(inArray(videos.status, RESUMABLE_ON_START_STATUSES));
-
-    for (const video of interrupted) {
-        if (video.cancelRequested === true) {
-            await markVideoCancelled(toVideoRun(video));
-            continue;
-        }
-
-        await enqueueVideoProcessing({ videoId: video.id, userId: video.userId }, null);
-    }
-
-    if (interrupted.length > 0) {
-        logger.info({ videoCount: interrupted.length }, "Interrupted videos requeued");
-    }
-}
 
 class InvalidJobPayloadError extends Error {
     constructor(issueCount: number) {
@@ -143,6 +103,7 @@ async function startWorker(): Promise<void> {
             }
         },
     );
+    await startStuckVideoRecovery();
     await startExpiredUploadSweep();
     await startAuthEmailWorker();
     logger.info({ workerConcurrency }, "Worker ready");
