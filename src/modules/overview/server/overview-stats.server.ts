@@ -10,6 +10,7 @@ import {
     listCurrentDays,
 } from "#/modules/overview/model/period-buckets";
 import type { PeriodWindow } from "#/modules/overview/model/period-buckets";
+import { measureFirstRun } from "#/modules/overview/model/first-run-duration";
 import { accumulate, summarizeMetric } from "#/modules/overview/model/summarize-metric";
 import {
     countVideos,
@@ -23,7 +24,6 @@ import type { LibraryClip } from "#/modules/videos/model/video-views";
 
 const BEST_CLIP_COUNT = 10;
 const SECONDS_PER_MINUTE = 60;
-const MILLISECONDS_PER_SECOND = 1000;
 
 function isInCurrentPeriod(window: PeriodWindow, date: Date): boolean {
     const index = findDayIndex(window, date);
@@ -63,20 +63,7 @@ function summarizeVideoMetrics(window: PeriodWindow, rows: Array<OverviewVideoRo
             "sum",
         ),
         averageProcessingSeconds: summarizeMetric(
-            bucketByDay(window, rows, (row) => {
-                const finishedAt = row.finishedAt;
-                const processingStartedAt = row.processingStartedAt;
-
-                // Measured from the run's start, not createdAt: a re-render weeks later would
-                // count weeks. Videos from before the start was recorded stay out of the average.
-                if (row.status !== "done" || finishedAt === null || processingStartedAt === null) {
-                    return null;
-                }
-
-                const elapsed = finishedAt.getTime() - processingStartedAt.getTime();
-
-                return { date: finishedAt, value: elapsed / MILLISECONDS_PER_SECOND };
-            }),
+            bucketByDay(window, rows, measureFirstRun),
             "average",
         ),
     };

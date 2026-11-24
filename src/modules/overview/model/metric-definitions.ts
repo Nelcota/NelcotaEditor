@@ -47,12 +47,12 @@ export const METRIC_DEFINITIONS: ReadonlyArray<MetricDefinition> = [
     {
         key: "averageProcessingSeconds",
         label: "Tempo médio por vídeo",
-        help: "Do envio até os cortes ficarem prontos, nos vídeos concluídos.",
+        help: "Do envio até os cortes ficarem prontos pela primeira vez, nos vídeos concluídos.",
         format: formatDuration,
         unit: null,
         betterWhen: "down",
         isAbsolute: false,
-        emptyNote: "Conta só vídeos com início e fim registrados",
+        emptyNote: "Nenhum vídeo concluído no período",
     },
     {
         key: "averageScore",
@@ -67,7 +67,7 @@ export const METRIC_DEFINITIONS: ReadonlyArray<MetricDefinition> = [
     {
         key: "failures",
         label: "Falhas",
-        help: "Vídeos do período que não chegaram ao fim.",
+        help: "Vídeos do período que pararam com erro. Os que você cancelou não contam.",
         format: formatInteger,
         unit: null,
         betterWhen: "down",
