@@ -14,7 +14,11 @@ interface AuthCardProps {
     eyebrow: string;
     title: AuthTitle;
     description: string;
-    footer: { text: string; linkLabel: string; linkTo: "/sign-in" | "/sign-up" };
+    footer: {
+        text: string;
+        linkLabel: string;
+        linkTo: "/sign-in" | "/sign-up" | "/forgot-password";
+    };
     children: ReactNode;
 }
 

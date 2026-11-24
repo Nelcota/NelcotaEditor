@@ -1,7 +1,5 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { NEW_PASSWORD_HINT, signUpSchema } from "#/modules/auth/model/auth-forms";
@@ -9,6 +7,7 @@ import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
 import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
+import { CheckEmailCard } from "#/modules/auth/ui/components/check-email-card";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -19,6 +18,7 @@ import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 /** In page order; each field's input id matches its name. */
 const FIELD_NAMES = ["name", "email", "password"] as const;
+const SIGN_IN_PATH = "/sign-in";
 
 interface SignUpScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
@@ -27,10 +27,9 @@ interface SignUpScreenProps {
 
 export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
     const track = useTrackPromise();
-    const router = useRouter();
     const captcha = useCaptcha(captchaSiteKey);
-    const queryClient = useQueryClient();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [sentToEmail, setSentToEmail] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { name: "", email: "", password: "" },
         validators: { onSubmit: signUpSchema },
@@ -44,8 +43,10 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
             }
 
             const fetchOptions = { headers: captcha.buildHeaders() };
+            // The link signs the person in and lands on /sign-in, which forwards a session to the
+            // app; a failed link lands there with ?error.
             const failure = await runAuthRequest(() =>
-                authClient.signUp.email({ ...value, fetchOptions }),
+                authClient.signUp.email({ ...value, callbackURL: SIGN_IN_PATH, fetchOptions }),
             );
 
             if (failure !== null) {
@@ -54,11 +55,13 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
                 return;
             }
 
-            // A session that expired in this tab may have left another account's videos cached.
-            queryClient.clear();
-            await router.navigate({ to: "/" });
+            setSentToEmail(value.email);
         },
     });
+
+    if (sentToEmail !== null) {
+        return <CheckEmailCard email={sentToEmail} />;
+    }
 
     return (
         <AuthCard

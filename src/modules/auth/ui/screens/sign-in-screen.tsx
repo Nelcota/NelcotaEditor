@@ -1,15 +1,18 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { signInSchema } from "#/modules/auth/model/auth-forms";
+import { toSignInNotice } from "#/modules/auth/model/sign-in-notice";
+import type { SignInSearch } from "#/modules/auth/model/sign-in-notice";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
 import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
+import { Alert } from "#/shared/ui/alert";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
@@ -23,9 +26,12 @@ const FIELD_NAMES = ["email", "password"] as const;
 interface SignInScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
     captchaSiteKey: string | null;
+    /** Set by the link that brought the person here (email confirmation, password reset). */
+    search: SignInSearch;
 }
 
-export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
+export function SignInScreen({ captchaSiteKey, search }: SignInScreenProps): ReactNode {
+    const notice = toSignInNotice(search);
     const track = useTrackPromise();
     const router = useRouter();
     const captcha = useCaptcha(captchaSiteKey);
@@ -75,6 +81,7 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
                     track(form.handleSubmit());
                 }}
             >
+                {notice !== null && <Alert tone="info">{notice}</Alert>}
                 <form.Field name="email">
                     {(field) => (
                         <TextField
@@ -107,6 +114,12 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
                         />
                     )}
                 </form.Field>
+                <Link
+                    to="/forgot-password"
+                    className="justify-self-start rounded text-sm font-semibold text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-99"
+                >
+                    Esqueci minha senha
+                </Link>
                 <CaptchaField captcha={captcha} />
                 <FormAlert message={errorMessage} />
                 <form.Subscribe selector={(state) => state.isSubmitting}>

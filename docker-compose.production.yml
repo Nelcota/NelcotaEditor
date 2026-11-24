@@ -93,6 +93,9 @@ services:
             WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-pt}
             DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?}
             DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+            # Only the worker sends email; the web server queues it.
+            RESEND_API_KEY: ${RESEND_API_KEY:?}
+            EMAIL_FROM: ${EMAIL_FROM:-Nelcota <nao-responda@nelcota.com>}
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
             # One video at a time: ffmpeg and Whisper share the server's 6 cores.
             WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-1}
