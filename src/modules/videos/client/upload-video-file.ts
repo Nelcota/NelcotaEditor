@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { TranscriptionLanguage } from "#/modules/preferences/model/preferences";
 import type { ClipLength } from "#/modules/video-records/model/clip-length";
+import { UploadCancelledError } from "#/modules/videos/model/upload-cancelled-error";
 import {
     cancelVideoUpload,
     completeVideoUpload,
@@ -52,18 +53,27 @@ function readUploadFailure(request: XMLHttpRequest): UploadFailedError {
     return new UploadFailedError(UNKNOWN_ERROR_MESSAGE);
 }
 
+interface FileTarget {
+    uploadUrl: string;
+    file: File;
+    signal: AbortSignal;
+}
+
 /**
  * PUTs the raw file with XMLHttpRequest because fetch cannot report upload progress. The URL is
  * either a signed storage link (no cookies needed) or the app's own route (same origin).
  */
-function sendFile(
-    uploadUrl: string,
-    file: File,
-    onProgress: (percent: number) => void,
-): Promise<void> {
+function sendFile(target: FileTarget, onProgress: (percent: number) => void): Promise<void> {
+    const { uploadUrl, file, signal } = target;
+
     return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
+        const abortRequest = (): void => request.abort();
 
+        signal.addEventListener("abort", abortRequest, { once: true });
+        request.addEventListener("loadend", () =>
+            signal.removeEventListener("abort", abortRequest),
+        );
         request.open("PUT", uploadUrl);
         request.upload.addEventListener("progress", (event) => {
             if (event.lengthComputable === true && event.total > 0) {
@@ -82,7 +92,14 @@ function sendFile(
             reject(new UploadFailedError(NETWORK_ERROR_MESSAGE)),
         );
         // Without these the promise would never settle if the browser aborts or times out.
-        request.addEventListener("abort", () => reject(new UploadFailedError(ABORTED_MESSAGE)));
+        request.addEventListener("abort", () => {
+            if (signal.aborted === true) {
+                reject(new UploadCancelledError());
+                return;
+            }
+
+            reject(new UploadFailedError(ABORTED_MESSAGE));
+        });
         request.addEventListener("timeout", () =>
             reject(new UploadFailedError(NETWORK_ERROR_MESSAGE)),
         );
@@ -98,13 +115,22 @@ async function releaseUpload(uploadId: string): Promise<void> {
     await Promise.allSettled([cancelVideoUpload({ data: { uploadId } })]);
 }
 
+function assertNotCancelled(signal: AbortSignal): void {
+    if (signal.aborted === true) {
+        throw new UploadCancelledError();
+    }
+}
+
 /**
- * Reserves the upload, sends the file where the server says, then confirms it.
+ * Reserves the upload, sends the file where the server says, then confirms it. Cancelling through
+ * the signal stops the transfer and frees the reservation, up to the confirmation, which is
+ * left to finish since the video may already exist.
  * Resolves with the id of the created video.
  */
 export async function uploadVideoFile(
     input: UploadVideoInput,
     onProgress: (percent: number) => void,
+    signal: AbortSignal,
 ): Promise<string> {
     const file = input.file;
 
@@ -112,6 +138,7 @@ export async function uploadVideoFile(
         throw new UploadFailedError(EMPTY_FILE_MESSAGE);
     }
 
+    assertNotCancelled(signal);
     const started = await startVideoUpload({
         data: {
             fileName: file.name,
@@ -125,7 +152,9 @@ export async function uploadVideoFile(
     const uploadId = started.uploadId;
 
     try {
-        await sendFile(started.uploadUrl, file, onProgress);
+        assertNotCancelled(signal);
+        await sendFile({ uploadUrl: started.uploadUrl, file, signal }, onProgress);
+        assertNotCancelled(signal);
     } catch (error) {
         await releaseUpload(uploadId);
         throw error;
