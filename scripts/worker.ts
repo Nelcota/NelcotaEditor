@@ -5,7 +5,7 @@ import {
     requeueInterruptedVideos,
     startStuckVideoRecovery,
 } from "#/modules/processing/server/stuck-video-recovery.server";
-import { removeAllVideoWorkspaces } from "#/modules/processing/server/video-workspace.server";
+import { removeAbandonedVideoWorkspaces } from "#/modules/processing/server/video-workspace.server";
 import { startExpiredUploadSweep } from "#/modules/videos/server/expired-upload-sweep.server";
 import {
     ensureProcessVideoQueue,
@@ -88,9 +88,9 @@ async function startWorker(): Promise<void> {
 
     const workerConcurrency = getEnvironment().WORKER_CONCURRENCY;
 
-    // Jobs a dead worker held are failed by their heartbeat, so a start never touches the active
-    // jobs of other replicas.
-    await removeAllVideoWorkspaces();
+    // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
+    // their video's lock is free, so a start never touches the active runs of other replicas.
+    await removeAbandonedVideoWorkspaces();
     await backfillStoredBytes();
     await requeueInterruptedVideos();
     // groupConcurrency is tracked in the database, so "one video per person" holds across replicas.
