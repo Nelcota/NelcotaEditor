@@ -21,7 +21,10 @@ import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import { Mascot } from "#/shared/ui/mascot";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+
+const LOAD_FALLBACK_MESSAGE = "Confira sua conexão e tente de novo.";
 
 function StudioLoading(): ReactNode {
     return (
@@ -115,7 +118,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
                 <EmptyState
                     art={<Mascot index={STAGE_CREW.failed} className="size-14" />}
                     title="Não foi possível abrir o Studio"
-                    description={loadError.message}
+                    description={toErrorMessage(loadError, LOAD_FALLBACK_MESSAGE)}
                     action={
                         <Button
                             variant="secondary"
