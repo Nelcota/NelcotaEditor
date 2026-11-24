@@ -13,8 +13,10 @@ import {
 import { reserveVideoUpload } from "#/modules/videos/server/reserve-video-upload.server";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 
-// Only the start of the PUT must happen within it; a slow upload already under way goes on.
-const UPLOAD_LINK_LIFETIME_SECONDS = 60 * 60;
+// Only the start of the PUT must happen within it; a slow upload already under way goes on. The
+// browser starts it right away, so the link stays short: a cancelled or deleted upload could
+// otherwise be sent again through it, leaving a file no row points to.
+const UPLOAD_LINK_LIFETIME_SECONDS = 10 * 60;
 
 function appUploadUrl(uploadId: string): string {
     return `/api/videos/uploads/${uploadId}/file`;
