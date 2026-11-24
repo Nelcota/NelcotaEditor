@@ -11,11 +11,11 @@ export function BrandLogo({ className }: { className?: string }) {
     return (
         <span
             className={cn(
-                "inline-flex items-center gap-2 text-[1.1875rem] leading-none font-bold tracking-[-0.04em] text-foreground",
+                "inline-flex items-center gap-2 text-2xl leading-none font-bold tracking-[-0.04em] text-foreground",
                 className,
             )}
         >
-            <BrandMark className="size-6" />
+            <BrandMark />
             nelcota
         </span>
     );

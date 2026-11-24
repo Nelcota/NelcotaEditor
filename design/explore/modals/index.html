@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Modais em passos · 3 direções</title>
+        <link rel="stylesheet" href="modals.css" />
+    </head>
+    <body>
+        <main class="board">
+            <header class="board-head">
+                <h1>Modais em passos, com sidebar</h1>
+                <p>
+                    Exemplo principal: Novo vídeo, no passo 2. Embaixo de cada direção, o mesmo
+                    sistema num modal curto (Excluir vídeo) e no celular. Para quem vai usar:
+                    criador de conteúdo, sem paciência para formulário. Cada passo pergunta uma
+                    coisa só, tudo já vem preenchido e dá para voltar em qualquer passo pela
+                    sidebar.
+                </p>
+            </header>
+
+            <section class="legend">
+                <article>
+                    <span class="tag">A</span>
+                    <h2>Trilha</h2>
+                    <p>
+                        Passos numerados ligados por uma linha. Cada passo mostra o título e uma
+                        dica curta. Escolhas em cartões grandes. O mais familiar dos três.
+                    </p>
+                </article>
+                <article>
+                    <span class="tag">B</span>
+                    <h2>Resumo vivo</h2>
+                    <p>
+                        A sidebar é o resumo: cada passo mostra o que já foi escolhido e um clique
+                        volta nele. Não precisa de passo de revisão no fim.
+                    </p>
+                </article>
+                <article>
+                    <span class="tag">C</span>
+                    <h2>Com o Nel</h2>
+                    <p>
+                        Passos na sidebar e o mascote explicando o passo atual num balão, em uma
+                        frase. O mais amigável para quem chega agora.
+                    </p>
+                </article>
+            </section>
+
+            <section class="direction" id="current">
+                <h2 class="direction-title">
+                    <span class="tag tag-muted">Hoje</span> Tudo numa tela
+                </h2>
+                <div class="row" data-render="current"></div>
+            </section>
+            <section class="direction">
+                <h2 class="direction-title"><span class="tag">A</span> Trilha</h2>
+                <div class="row" data-render="a"></div>
+            </section>
+            <section class="direction">
+                <h2 class="direction-title"><span class="tag">B</span> Resumo vivo</h2>
+                <div class="row" data-render="b"></div>
+            </section>
+            <section class="direction">
+                <h2 class="direction-title"><span class="tag">C</span> Com o Nel</h2>
+                <div class="row" data-render="c"></div>
+            </section>
+
+            <section class="map">
+                <h2>Como cada modal vira passos</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Modal</th>
+                            <th>Passos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Novo vídeo</td>
+                            <td>Vídeo · Cortes · Idioma · Revisar</td>
+                        </tr>
+                        <tr>
+                            <td>Editar perfil (junta a foto)</td>
+                            <td>Foto · Nome</td>
+                        </tr>
+                        <tr>
+                            <td>Trocar senha</td>
+                            <td>Senha atual · Senha nova · Pronto</td>
+                        </tr>
+                        <tr>
+                            <td>Excluir conta</td>
+                            <td>O que some · Confirmar</td>
+                        </tr>
+                        <tr>
+                            <td>Excluir vídeo</td>
+                            <td>O que some · Confirmar</td>
+                        </tr>
+                        <tr>
+                            <td>Renomear vídeo, avisos do Studio, confirmações do admin</td>
+                            <td>Um passo só: mesma moldura, sem sidebar</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+        <script src="modals.js"></script>
+    </body>
+</html>

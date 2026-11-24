@@ -46,7 +46,7 @@ function SectionLink({ section, pathname }: { section: NavSection; pathname: str
                 <Icon aria-hidden="true" />
                 <span className="flex-1 truncate">{section.label}</span>
                 {count !== null && (
-                    <span className="text-xs font-normal text-muted-foreground tabular-nums">
+                    <span className="text-sm font-normal text-muted-foreground tabular-nums">
                         {count}
                     </span>
                 )}
@@ -82,15 +82,22 @@ function AdminGroup({ pathname }: { pathname: string }): ReactNode {
                 />
             </button>
             {isOpen === true && (
-                <ul id={listId} className="mt-0.5 grid gap-0.5 ps-8">
+                // The line runs down the icon column (33px), so the pages read as Admin's own.
+                <ul
+                    id={listId}
+                    className="relative mt-0.5 grid gap-0.5 ps-8 before:absolute before:inset-y-1 before:start-[1.375rem] before:w-px before:bg-foreground/15 before:content-['']"
+                >
                     {ADMIN_SUB_SECTIONS.map((subSection) => (
                         <li key={subSection.path}>
                             <Link
                                 to={subSection.path}
+                                // Exact: by default the router marks /admin current on every
+                                // admin page, which lit Visão geral next to the real one.
+                                activeOptions={{ exact: true }}
                                 aria-current={toAriaCurrent(
                                     isAdminSubSectionCurrent(subSection, pathname),
                                 )}
-                                className={cn(SIDEBAR_ITEM_CLASS, "h-9 font-normal")}
+                                className={cn(SIDEBAR_ITEM_CLASS, "h-10 ps-3.5 font-normal")}
                             >
                                 {subSection.label}
                             </Link>

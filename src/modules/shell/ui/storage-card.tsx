@@ -121,13 +121,14 @@ interface CardToolProps {
     label: string;
     isPressed?: boolean;
     isExpanded?: boolean;
+    controls?: string;
     onClick?: () => void;
     children: ReactNode;
 }
 
 /** A small icon button in the card's header, with its name as a tooltip. */
 function CardTool(props: CardToolProps): ReactNode {
-    const { label, isPressed, isExpanded, onClick, children } = props;
+    const { label, isPressed, isExpanded, controls, onClick, children } = props;
 
     return (
         <HintTooltip label={label}>
@@ -137,7 +138,7 @@ function CardTool(props: CardToolProps): ReactNode {
                 aria-label={label}
                 aria-pressed={isPressed}
                 aria-expanded={isExpanded}
-                aria-controls={DETAILS_ID}
+                aria-controls={controls}
                 onClick={onClick}
                 className="text-muted-foreground"
             >
@@ -206,6 +207,7 @@ export function StorageCard(): ReactNode {
                 <CardTool
                     label={foldLabel}
                     isExpanded={isCollapsed === false}
+                    controls={DETAILS_ID}
                     onClick={collapsed.toggle}
                 >
                     {isCollapsed === true && (

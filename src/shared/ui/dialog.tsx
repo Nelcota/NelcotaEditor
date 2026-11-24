@@ -85,4 +85,9 @@ function DialogDescription({
     );
 }
 
-export { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle };
+/** A button that closes the dialog it sits in, for a footer's Cancelar. */
+function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
+    return <DialogPrimitive.Close data-slot="dialog-close-action" {...props} />;
+}
+
+export { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle };

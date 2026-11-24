@@ -16,7 +16,7 @@ const VIDEO_PAGE_PATTERN = /^\/videos\/([^/]+)\/?$/;
 const ADMIN_USER_PATTERN = /^\/admin\/users\/[^/]+\/?$/;
 
 const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
-    "/": [HOME_CRUMB, { label: "Novo vídeo" }],
+    "/": [{ label: "Início" }],
     "/videos": [HOME_CRUMB, { label: "Vídeos" }],
     "/clips": [HOME_CRUMB, { label: "Cortes" }],
     "/overview": [HOME_CRUMB, { label: "Painel" }],

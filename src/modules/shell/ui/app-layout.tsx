@@ -45,7 +45,7 @@ export function AppLayout(): ReactNode {
             </a>
             <div
                 className={cn(
-                    "flex min-h-dvh flex-col bg-frame md:grid md:h-dvh md:grid-cols-[256px_minmax(0,1fr)] md:py-2 md:pe-2",
+                    "flex min-h-dvh flex-col bg-frame md:grid md:h-dvh md:grid-cols-[288px_minmax(0,1fr)] md:py-2 md:pe-2",
                     isSidebarHidden === true && "md:grid-cols-[68px_minmax(0,1fr)]",
                 )}
             >
@@ -73,7 +73,7 @@ export function AppLayout(): ReactNode {
                         id="main"
                         tabIndex={-1}
                         className={cn(
-                            "grid min-h-0 min-w-0 flex-1 content-start grid-cols-[minmax(0,1fr)] outline-none md:overflow-y-auto",
+                            "relative grid min-h-0 min-w-0 flex-1 content-start grid-cols-[minmax(0,1fr)] outline-none md:overflow-y-auto",
                             isVideoPage === false && "gap-6 px-4 pt-2 pb-28 md:px-8 md:pb-10",
                             isVideoPage === true && "pb-24 md:overflow-hidden md:pb-0",
                         )}

@@ -4,7 +4,9 @@ import type { ReactNode } from "react";
 import { DEFAULT_PREFERENCES } from "#/modules/preferences/preferences";
 import { preferencesQueryOptions } from "#/modules/preferences/ui/preferences-queries";
 import { NewVideoWizard } from "#/modules/videos/ui/new-video-wizard";
+import { cn } from "#/shared/ui/cn";
 import { Dialog, DialogContent } from "#/shared/ui/dialog";
+import { STEP_DIALOG_CONTENT_CLASS, STEP_DIALOG_WIDE_CLASS } from "#/shared/ui/step-dialog-frame";
 
 interface NewVideoDialogProps {
     isOpen: boolean;
@@ -70,10 +72,10 @@ export function NewVideoDialog({ isOpen, onOpenChange }: NewVideoDialogProps): R
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            {/* A fixed height, so the dialog never jumps while the preview loads. */}
+            {/* A fixed height, so the dialog never jumps from one step to the next. */}
             <DialogContent
                 onCloseAutoFocus={returnFocus}
-                className="h-[min(680px,calc(100dvh-2rem))] grid-rows-1 gap-0 overflow-hidden p-0 [@media(max-height:560px)]:h-auto [@media(max-height:560px)]:overflow-y-auto [--dialog-padding:--spacing(5)] sm:max-w-[min(1080px,calc(100%-4rem))] sm:[--dialog-padding:--spacing(7)]"
+                className={cn(STEP_DIALOG_CONTENT_CLASS, STEP_DIALOG_WIDE_CLASS)}
             >
                 <NewVideoWizard
                     key={`${defaultClipCount}-${defaultClipLength}-${defaultLanguage}`}

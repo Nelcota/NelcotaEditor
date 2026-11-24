@@ -18,17 +18,16 @@ export function CancelVideoButton({ video }: { video: VideoSummary }) {
     const isCancelling = video.isCancelling || cancellation.isPending;
 
     return (
-        <div className="grid justify-items-start gap-2">
+        <div className="grid shrink-0 justify-items-start gap-2 sm:justify-items-end">
             <Button
-                variant="outline"
-                size="sm"
+                variant="destructive"
+                className="h-9 bg-red-600 px-4 font-semibold text-white has-[>svg]:pl-3 has-[>svg]:pr-4 [&_svg:not([class*='size-'])]:size-4.5 not-disabled:hover:bg-red-500"
                 onClick={() => cancellation.mutate()}
-                disabled={isCancelling}
-                aria-busy={isCancelling}
+                isLoading={isCancelling}
+                loadingLabel="Cancelando…"
             >
                 <CircleStopIcon aria-hidden="true" />
-                {isCancelling === true && "Cancelando…"}
-                {isCancelling === false && "Cancelar"}
+                Cancelar
             </Button>
             {cancellation.isError === true && <FormAlert message={cancellation.error.message} />}
         </div>

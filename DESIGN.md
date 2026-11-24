@@ -139,7 +139,7 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Page rhythm:** sections of a page are 32px apart (`gap-8`); a section's title and its content 16px
   (`gap-4`); items in a list or grid 12–20px; parts of one card 8–12px. Card padding 16px on phones, 20–24px
   from `sm` up.
-- **Shell:** top bar 56px; sidebar 280px on the frame; the panel fills the rest with 8px of frame on
+- **Shell:** top bar 56px; sidebar 288px on the frame; the panel fills the rest with 8px of frame on
   its trailing and bottom sides, 14px corners. Plain pages pad 32px inside the panel (16px on phones);
   the video page pads its column 32px and its inspector 24px.
 - **Reading width:** paragraphs (page descriptions, clip reasons, empty states) stop at about 65
@@ -153,11 +153,12 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
   content they act on.
 - **Edge lines** (gridline pass, 2026-11-21, redrawn 2026-11-23 after the creators redesign; set by
   Claude at the person's request): measured on ink, not boxes, within 1px.
-    - Sidebar (256px): boxes 10px in (new video card, rows, storage card, account), icon column
-      centred at 32, labels at 54, trailing line 22px in (counts, the upload glyph, the account menu
-      glyph, the storage card's numbers). The two cards pad 11px to take back their 1px border, so
-      their content starts on the icons' leading edge (22). The brand's ghost centres on the icon
-      column and its name starts on the label line; the photo centres on the icon column too.
+    - Sidebar (288px, enlarged 2026-11-23 at the owner's request): 44px rows with 15px labels and
+      22px icons. Boxes 10px in (new video card, rows, storage card, account), icon column centred
+      at 33, labels at 56, trailing line 22px in (counts, the upload glyph, the account menu glyph,
+      the storage card's numbers). The two cards pad 11px to take back their 1px border, so their
+      content starts on the icons' leading edge (22). The brand's 26px ghost centres on the icon
+      column and its name starts on the label line; the 30px photo centres on the icon column too.
     - Panel: the breadcrumb and every plain page's content share one text line, 32px in (16px on
       phones). The page bar's trailing icon buttons sit 24px in, so their glyph ends on the page's
       trailing line. The page bar and the sidebar's first row share one centre line.
@@ -167,6 +168,14 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
       details start on the title line after it (56px).
     - Tabs (video page, admin) have no side padding: the first label's icon sits on the text line.
     - Dialogs: the close glyph ends on `--dialog-padding` and centres on the title.
+- **Dialogs are stepped** (2026-11-23, the owner's pick "A, Trilha" from `design/explore/modals/`):
+  every dialog uses `StepDialogFrame`. A flow with more than one question gets the `StepRail`
+  sidebar: the dialog's name, numbered steps joined by a line (done in green, current in blue,
+  each with a one-line hint, the ones reached can be reopened) and "Passo X de N" with a bar.
+  Phones hide the rail and show segments above the title. Each step asks one thing, starts filled
+  in, and has Voltar on the leading side of the footer with the step's action trailing. A
+  permanent action lists what goes away (`LossList`) before the step that does it. A single
+  question (rename, Studio warnings, admin confirmations) uses the same frame without the rail.
 
 ## Decisions log
 

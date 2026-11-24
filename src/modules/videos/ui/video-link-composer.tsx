@@ -1,13 +1,11 @@
 import ArrowUpIcon from "~icons/lucide/arrow-up";
-import ClockIcon from "~icons/lucide/clock";
-import ScissorsIcon from "~icons/lucide/scissors";
 import SquarePlusIcon from "~icons/lucide/square-plus";
 import UploadIcon from "~icons/lucide/upload";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { CLIP_LENGTH_LABELS, DEFAULT_PREFERENCES } from "#/modules/preferences/preferences";
+import { DEFAULT_PREFERENCES } from "#/modules/preferences/preferences";
 import { preferencesQueryOptions } from "#/modules/preferences/ui/preferences-queries";
 import { useIsLinkBlocked } from "#/modules/videos/ui/use-is-link-blocked";
 import { useVideoSubmission } from "#/modules/videos/ui/use-video-submission";
@@ -17,14 +15,11 @@ import { describeYoutubeLinkProblem } from "#/modules/videos/youtube-url";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
-import { pluralize } from "#/shared/ui/pluralize";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 
 const MISSING_LINK_MESSAGE = "Cole o link de um vídeo do YouTube.";
 const BLOCKED_LINK_MESSAGE = "O YouTube não deixa usar esse vídeo. Tente outro link.";
 const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente de novo.";
-const PILL_CLASS =
-    "inline-flex h-8 items-center gap-1.5 rounded-full bg-secondary px-3 text-xs font-semibold text-muted-foreground outline-none transition-[color,background-color,scale] hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] [&>svg]:size-3.5";
 
 interface ProblemInput {
     text: string;
@@ -50,9 +45,9 @@ function describeProblem({ text, isSubmitAttempted, isLinkBlocked }: ProblemInpu
 }
 
 /**
- * The Início's prompt box (the reference's Copilot field): paste a YouTube link and send, and the
- * video starts with the saved preferences, shown as pills. The plus opens the full form, for a file
- * or other settings.
+ * The Início's prompt box (the reference's assistant field): paste a YouTube link and send, and the
+ * video starts with the saved preferences. The plus opens the full form, for a file or other
+ * settings.
  */
 export function VideoLinkComposer(): ReactNode {
     const problemId = useId();
@@ -91,8 +86,8 @@ export function VideoLinkComposer(): ReactNode {
     };
 
     return (
-        <form noValidate onSubmit={submit} className="grid w-full max-w-2xl gap-2">
-            <div className="grid gap-5 rounded-2xl border border-input/40 bg-card px-4 pt-4 pb-3 transition-[border-color,box-shadow] focus-within:border-primary/60 focus-within:ring-4 focus-within:ring-ring/40">
+        <form noValidate onSubmit={submit} className="grid w-full gap-2">
+            <div className="grid gap-10 rounded-3xl border border-input/40 bg-card px-5 pt-5 pb-4 transition-[border-color,box-shadow] focus-within:border-primary/60 focus-within:ring-4 focus-within:ring-ring/40">
                 <label htmlFor={`${problemId}-input`} className="sr-only">
                     Link do vídeo no YouTube
                 </label>
@@ -114,7 +109,7 @@ export function VideoLinkComposer(): ReactNode {
                         submission.reset();
                         setText(event.target.value);
                     }}
-                    className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+                    className="w-full min-w-0 bg-transparent text-base outline-none sm:text-lg placeholder:text-muted-foreground"
                 />
                 <div className="flex items-center gap-1.5">
                     <HintTooltip label="Enviar um arquivo ou mudar as opções">
@@ -133,14 +128,6 @@ export function VideoLinkComposer(): ReactNode {
                             </Link>
                         </Button>
                     </HintTooltip>
-                    <Link to="/account" className={PILL_CLASS}>
-                        <ScissorsIcon aria-hidden="true" />
-                        {clipCount} {pluralize(clipCount, "corte", "cortes")}
-                    </Link>
-                    <Link to="/account" className={cn(PILL_CLASS, "max-sm:hidden")}>
-                        <ClockIcon aria-hidden="true" />
-                        {CLIP_LENGTH_LABELS[clipLength]}
-                    </Link>
                     <span className="flex-1" />
                     <HintTooltip label="Enviar um arquivo do computador">
                         <Button
