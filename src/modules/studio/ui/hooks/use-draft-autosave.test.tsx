@@ -6,7 +6,8 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { StudioDraft } from "#/modules/clips/model/clip-studio";
 import { readDraftBackup } from "#/modules/studio/client/draft-backup";
-import { clipStudioQueryKey } from "#/modules/studio/model/studio-queries";
+import type { SaveDraftResult } from "#/modules/studio/model/clip-studio-view";
+import { clipDraftLeaveSaveKey, clipStudioQueryKey } from "#/modules/studio/model/studio-queries";
 import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
 import { useDraftAutosave } from "#/modules/studio/ui/hooks/use-draft-autosave";
 import type { DraftAutosave } from "#/modules/studio/ui/hooks/use-draft-autosave";
@@ -90,7 +91,7 @@ describe("useDraftAutosave", () => {
         });
     });
 
-    it("drops the clip's cached snapshot after closing, so reopening reads the saved draft", async () => {
+    it("moves the cached snapshot to the saved draft and version, so reopening builds on them", async () => {
         const queryClient = new QueryClient();
         const queryKey = clipStudioQueryKey(VIDEO_ID, CLIP_ID);
         queryClient.setQueryData(queryKey, { draft: SAVED_DRAFT, draftVersion: 3 });
@@ -100,7 +101,32 @@ describe("useDraftAutosave", () => {
         rendered.unmount();
 
         await waitFor(() => {
-            expect(queryClient.getQueryData(queryKey)).toBeUndefined();
+            expect(queryClient.getQueryData(queryKey)).toEqual({
+                draft: EDITED_DRAFT,
+                draftVersion: 4,
+            });
+        });
+    });
+
+    it("marks the closing save as pending until it lands, so the Studio waits to reopen", async () => {
+        const save: { finish: ((result: SaveDraftResult) => void) | null } = { finish: null };
+        const pendingSave = new Promise<SaveDraftResult>((resolve) => {
+            save.finish = resolve;
+        });
+        vi.mocked(saveClipDraft).mockReturnValue(pendingSave);
+        const queryClient = new QueryClient();
+        const mutationKey = clipDraftLeaveSaveKey(VIDEO_ID, CLIP_ID);
+        const rendered = renderAutosave(queryClient);
+        rendered.rerender({ draft: EDITED_DRAFT });
+
+        rendered.unmount();
+
+        await waitFor(() => {
+            expect(queryClient.isMutating({ mutationKey })).toBe(1);
+        });
+        save.finish?.({ kind: "saved", draftVersion: 4 });
+        await waitFor(() => {
+            expect(queryClient.isMutating({ mutationKey })).toBe(0);
         });
     });
 

@@ -7,6 +7,11 @@ export function clipStudioQueryKey(videoId: string, clipId: string): Array<strin
     return [...VIDEOS_QUERY_KEY, videoId, "studio", clipId];
 }
 
+/** The save a Studio sends as it closes; reopening the clip waits for it to land. */
+export function clipDraftLeaveSaveKey(videoId: string, clipId: string): Array<string> {
+    return ["studio-draft-leave-save", videoId, clipId];
+}
+
 /**
  * The transcript words, loaded once per video and shared by every clip: they never change once
  * written. The "studio" segment keeps everyday invalidations from downloading them again.

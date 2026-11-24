@@ -1,12 +1,13 @@
 import ClapperboardIcon from "~icons/lucide/clapperboard";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { StudioTabProps } from "#/modules/videos/model/studio-tab-props";
 import { rankClips } from "#/modules/videos/model/clip-ranking";
 import {
+    clipDraftLeaveSaveKey,
     clipStudioQueryKey,
     clipStudioQueryOptions,
     studioWordsQueryOptions,
@@ -69,6 +70,11 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
         ...studioWordsQueryOptions(video.id),
         enabled: selectedClipId !== null,
     });
+    // The clip's last Studio may still be saving on its way out; opening before that lands would
+    // start from the version the save replaces.
+    const pendingLeaveSaves = useIsMutating({
+        mutationKey: clipDraftLeaveSaveKey(video.id, selectedClipId ?? ""),
+    });
     const isFinished = isVideoFinished(video.status);
     const snapshot = studioQuery.data;
     const words = wordsQuery.data;
@@ -127,7 +133,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
         );
     }
 
-    if (studio === undefined || words === undefined) {
+    if (studio === undefined || words === undefined || pendingLeaveSaves > 0) {
         return (
             <StudioFrame videoId={video.id} clipId={selectedClip.id} isFilling={true}>
                 <StudioLoading />
