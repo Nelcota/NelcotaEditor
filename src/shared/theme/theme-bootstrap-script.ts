@@ -56,7 +56,7 @@ export const THEME_BOOTSTRAP_SCRIPT = `(function installThemeAdapter() {
         try {
             window.localStorage.setItem(storageKey, nextTheme);
         } catch (error) {
-            console.warn("nelcota-theme: could not save the theme");
+            reportError(new Error("nelcota-theme: could not save the theme", { cause: error }));
         }
     }
 
