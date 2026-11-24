@@ -15,7 +15,6 @@ import { clips } from "#/modules/clips/clips.schema";
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
 import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
-import { UserFacingError } from "#/shared/server/user-facing-error";
 
 function toUserSearchCondition(query: string): SQL | undefined {
     if (query.length === 0) {
@@ -97,7 +96,10 @@ interface UserDetailsRequest {
     adminId: string;
 }
 
-export async function findAdminUserDetails(request: UserDetailsRequest): Promise<AdminUserDetails> {
+/** The account's details, or null when no account has this id. */
+export async function findAdminUserDetails(
+    request: UserDetailsRequest,
+): Promise<AdminUserDetails | null> {
     const userId = request.userId;
     const [rows, banDetails, activity, sessions] = await Promise.all([
         selectAdminUserRows({ where: eq(user.id, userId), orderBy: "newest", limit: 1, offset: 0 }),
@@ -108,7 +110,7 @@ export async function findAdminUserDetails(request: UserDetailsRequest): Promise
     const userRow = rows[0];
 
     if (userRow === undefined || banDetails === undefined) {
-        throw new UserFacingError("Conta não encontrada. Ela pode ter sido excluída.");
+        return null;
     }
 
     return {

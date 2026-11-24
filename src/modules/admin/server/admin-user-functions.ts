@@ -1,3 +1,4 @@
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import {
     adminBanInputSchema,
@@ -31,9 +32,19 @@ export const getAdminUsers = createServerFn({ method: "GET" })
 export const getAdminUserDetails = createServerFn({ method: "GET" })
     .middleware([adminMiddleware])
     .validator(adminUserIdInputSchema)
-    .handler(async ({ context, data }): Promise<AdminUserDetails> =>
-        findAdminUserDetails({ userId: data.userId, adminId: context.admin.id }),
-    );
+    .handler(async ({ context, data }): Promise<AdminUserDetails> => {
+        const details = await findAdminUserDetails({
+            userId: data.userId,
+            adminId: context.admin.id,
+        });
+
+        // The account page answers 404 for an account that is gone.
+        if (details === null) {
+            throw notFound();
+        }
+
+        return details;
+    });
 
 /** Blocking ends every session of the account at once (Better Auth's admin plugin does it). */
 export const banUser = createServerFn({ method: "POST" })
