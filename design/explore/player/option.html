@@ -51,7 +51,9 @@
             };
 
             const table = view === "phone" ? PHONE : DESK;
-            document.getElementById("root").innerHTML = table[option]();
+            // Only the options defined above; anything else in the address shows the first one.
+            const optionName = Object.hasOwn(table, option) ? option : Object.keys(table)[0];
+            document.getElementById("root").innerHTML = table[optionName]();
             if (view === "phone") {
                 document.body.classList.add("is-phone");
             }

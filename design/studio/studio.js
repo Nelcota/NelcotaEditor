@@ -586,4 +586,6 @@ function phone({ rendering = false, tab = "captions" } = {}) {
     </div>`;
 }
 
-document.body.innerHTML = BOARDS[BOARD]();
+// Only the board names defined above; anything else in the address falls back to the default.
+const boardName = Object.hasOwn(BOARDS, BOARD) ? BOARD : "default";
+document.body.innerHTML = BOARDS[boardName]();

@@ -23,8 +23,36 @@
     <body>
         <iframe id="frame" title="Prévia em 390px"></iframe>
         <script>
-            document.getElementById("frame").src =
-                new URLSearchParams(location.search).get("board") + ".html";
+            // Only the boards in this folder: the address must never choose what the frame loads.
+            const BOARDS = new Set([
+                "1.0-shell-states",
+                "2.1-list-couldnt-load",
+                "2.1-list-default",
+                "2.1-list-deleted",
+                "2.1-list-empty-first-time",
+                "2.1-list-filtered-empty",
+                "2.1-list-loading",
+                "2.1-list-new-video-dialog",
+                "2.1-list-offline",
+                "2.1-list-one-video",
+                "2.1-list-row-states",
+                "2.2-video-done",
+                "2.2-video-failed",
+                "2.2-video-loading",
+                "2.2-video-not-found",
+                "2.2-video-panel-states",
+                "2.2-video-processing",
+                "3.1-sign-in-default",
+                "3.1-sign-in-error",
+                "3.1-sign-in-submitting",
+                "3.2-sign-up-default",
+                "3.2-sign-up-field-errors",
+            ]);
+            const board = new URLSearchParams(location.search).get("board");
+
+            if (BOARDS.has(board)) {
+                document.getElementById("frame").src = board + ".html";
+            }
         </script>
     </body>
 </html>
