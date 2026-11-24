@@ -17,12 +17,14 @@ import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { NotFoundScreen } from "#/shared/ui/not-found-screen";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { useVideoTabNavigation } from "#/modules/videos/ui/hooks/use-video-tab-navigation";
 
 const SKELETON_CLIP_COUNT = 4;
+const LOAD_FALLBACK_MESSAGE = "Confira sua conexão e tente de novo.";
 
 // One shrinkable track: without it the grid sizes to its widest child (the tab list) and pushes
 // the menu and the last tab past a 320px screen.
@@ -162,7 +164,7 @@ export function VideoDetailsScreen({ videoId, search, StudioTab }: VideoDetailsS
     if (detailsQuery.isError === true && details === undefined) {
         return (
             <LoadErrorState
-                message={detailsQuery.error.message}
+                message={toErrorMessage(detailsQuery.error, LOAD_FALLBACK_MESSAGE)}
                 onRetry={async () => {
                     await detailsQuery.refetch();
                 }}

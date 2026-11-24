@@ -5,6 +5,8 @@ import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
+import { CANCEL_FALLBACK_MESSAGE } from "#/modules/videos/model/video-action-messages";
 
 /** Cancelling keeps every finished step, so it never needs a confirmation: "Retomar" continues. */
 export function CancelVideoButton({ video }: { video: VideoSummary }) {
@@ -29,7 +31,9 @@ export function CancelVideoButton({ video }: { video: VideoSummary }) {
                 <CircleStopIcon aria-hidden="true" />
                 Cancelar
             </Button>
-            {cancellation.isError === true && <FormAlert message={cancellation.error.message} />}
+            {cancellation.isError === true && (
+                <FormAlert message={toErrorMessage(cancellation.error, CANCEL_FALLBACK_MESSAGE)} />
+            )}
         </div>
     );
 }
