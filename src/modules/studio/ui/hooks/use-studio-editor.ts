@@ -129,7 +129,9 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         return "queued";
     };
 
-    const renderMutation = useMutation({ mutationFn: sendRender });
+    // "always": offline, the request fails at once with a message instead of waiting paused and
+    // sending later, perhaps after the person left the Studio.
+    const renderMutation = useMutation({ mutationFn: sendRender, networkMode: "always" });
 
     // A thrown error stays in the mutation and shows as renderError; the caller only needs the outcome.
     const render = async (): Promise<RenderOutcome> => {

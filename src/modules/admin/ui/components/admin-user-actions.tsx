@@ -55,7 +55,12 @@ interface ActionButtonsProps {
 /** Another admin is protected: remove the role first, then the account can be acted on. */
 function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
     const user = details.user;
-    const impersonation = useMutation({ mutationFn: () => startImpersonation(user.id) });
+    const impersonation = useMutation({
+        mutationFn: () => startImpersonation(user.id),
+        networkMode: "always",
+    });
+    // On success the page is already leaving; a second click would start another switch.
+    const isSwitching = impersonation.isPending || impersonation.isSuccess;
     const isProtected = user.isAdmin;
 
     return (
@@ -63,8 +68,8 @@ function ActionButtons({ details, onPick }: ActionButtonsProps): ReactNode {
             <div className="flex flex-wrap gap-2">
                 <Button
                     variant="outline"
-                    disabled={isProtected || user.isBanned || impersonation.isPending}
-                    aria-busy={impersonation.isPending}
+                    disabled={isProtected || user.isBanned || isSwitching}
+                    aria-busy={isSwitching}
                     onClick={() => impersonation.mutate()}
                 >
                     <LogInIcon aria-hidden="true" />

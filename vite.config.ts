@@ -99,6 +99,7 @@ export default defineConfig({
                     include: ["src/**/*.integration.test.ts"],
                     environment: "node",
                     env: TEST_ENVIRONMENT,
+                    setupFiles: ["scripts/assert-test-database.ts"],
                     // The files share one database; one at a time keeps their rows apart.
                     fileParallelism: false,
                 },

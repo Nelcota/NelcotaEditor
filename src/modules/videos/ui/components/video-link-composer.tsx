@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { DEFAULT_PREFERENCES } from "#/modules/preferences/model/preferences";
 import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
 import { useIsLinkBlocked } from "#/modules/videos/ui/hooks/use-is-link-blocked";
 import { useVideoSubmission } from "#/modules/videos/ui/hooks/use-video-submission";
@@ -20,6 +19,8 @@ import { toErrorMessage } from "#/shared/ui/to-error-message";
 const MISSING_LINK_MESSAGE = "Cole o link de um vídeo do YouTube.";
 const BLOCKED_LINK_MESSAGE = "O YouTube não deixa usar esse vídeo. Tente outro link.";
 const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente de novo.";
+const PREFERENCES_FAILED_MESSAGE =
+    "Não foi possível carregar suas preferências de corte. Recarregue a página e tente de novo.";
 
 interface ProblemInput {
     text: string;
@@ -52,9 +53,9 @@ function describeProblem({ text, isSubmitAttempted, isLinkBlocked }: ProblemInpu
 export function VideoLinkComposer(): ReactNode {
     const problemId = useId();
     const preferencesQuery = useQuery(preferencesQueryOptions());
-    const preferences = preferencesQuery.data ?? DEFAULT_PREFERENCES;
-    const clipCount = preferences.defaultClipCount;
-    const clipLength = preferences.defaultClipLength;
+    // No fallback to the defaults: the box sends without a review step, so a video must never go
+    // out with other settings than the ones the person saved.
+    const preferences = preferencesQuery.data;
     const [text, setText] = useState("");
     const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
     const source: VideoSource = { kind: "link", text };
@@ -68,18 +69,22 @@ export function VideoLinkComposer(): ReactNode {
         problem = toErrorMessage(submission.error, FALLBACK_ERROR_MESSAGE);
     }
 
+    if (preferencesQuery.isError === true) {
+        problem = PREFERENCES_FAILED_MESSAGE;
+    }
+
     const submit = (event: FormEvent<HTMLFormElement>): void => {
         event.preventDefault();
         setIsSubmitAttempted(true);
 
-        if (isReady === false || isBusy === true) {
+        if (isReady === false || isBusy === true || preferences === undefined) {
             return;
         }
 
         submission.mutate({
             source,
-            clipCount,
-            clipLength,
+            clipCount: preferences.defaultClipCount,
+            clipLength: preferences.defaultClipLength,
             title: "",
             language: preferences.transcriptionLanguage,
         });

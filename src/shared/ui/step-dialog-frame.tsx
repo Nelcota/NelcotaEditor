@@ -1,5 +1,5 @@
-import { Children } from "react";
-import type { ComponentType, ReactNode } from "react";
+import { Children, useEffect, useRef } from "react";
+import type { ComponentType, ReactNode, RefObject } from "react";
 import { AlertDialogDescription, AlertDialogTitle } from "#/shared/ui/alert-dialog";
 import { cn } from "#/shared/ui/cn";
 import { DialogDescription, DialogTitle } from "#/shared/ui/dialog";
@@ -58,17 +58,55 @@ interface StepDialogFrameProps {
 
 interface FrameHeaderProps extends Omit<StepDialogFrameProps, "rail" | "children" | "footer"> {
     hasContent: boolean;
+    headerRef: RefObject<HTMLElement | null>;
 }
 
-function FrameHeader(props: FrameHeaderProps) {
-    const { kind, progress, title, description, hasContent } = props;
+const FIELD_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
+
+/**
+ * A new step replaces the buttons and fields of the last one, so the control that had focus is
+ * often gone. The header takes focus then, and a screen reader reads the step number, title and
+ * description. A step that focused one of its own fields keeps that.
+ */
+function useFocusHeaderOnStepChange(
+    headerRef: RefObject<HTMLElement | null>,
+    step: number | null,
+): void {
+    const shownStep = useRef(step);
+
+    useEffect(() => {
+        const header = headerRef.current;
+
+        if (shownStep.current === step || header === null) {
+            return;
+        }
+
+        shownStep.current = step;
+        const active = document.activeElement;
+
+        if (
+            active !== null &&
+            FIELD_TAGS.has(active.tagName) === true &&
+            header.closest("[role]")?.contains(active) === true
+        ) {
+            return;
+        }
+
+        header.focus();
+    }, [headerRef, step]);
+}
+
+function FrameHeader(props: FrameHeaderProps): ReactNode {
+    const { kind, progress, title, description, hasContent, headerRef } = props;
     const Title = TITLES[kind];
     const Description = DESCRIPTIONS[kind];
 
     return (
         <header
+            ref={headerRef}
+            tabIndex={-1}
             className={cn(
-                "grid gap-1 px-5 pt-5 pe-16 sm:px-7 sm:pt-6 sm:pe-16",
+                "grid gap-1 px-5 pt-5 pe-16 outline-none sm:px-7 sm:pt-6 sm:pe-16",
                 hasContent === false && "pb-5 sm:pb-6",
             )}
         >
@@ -94,7 +132,9 @@ function FrameHeader(props: FrameHeaderProps) {
  * the step's main action trailing.
  */
 export function StepDialogFrame(props: StepDialogFrameProps): ReactNode {
-    const { rail, children, footer } = props;
+    const { rail, children, footer, progress } = props;
+    const headerRef = useRef<HTMLElement>(null);
+    useFocusHeaderOnStepChange(headerRef, progress?.current ?? null);
     // toArray drops null, undefined and false, so conditional fields that are all off count as none.
     const hasContent = Children.toArray(children).length > 0;
 
@@ -104,7 +144,7 @@ export function StepDialogFrame(props: StepDialogFrameProps): ReactNode {
         >
             {rail}
             <div className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)_auto]">
-                <FrameHeader {...props} hasContent={hasContent} />
+                <FrameHeader {...props} hasContent={hasContent} headerRef={headerRef} />
                 {hasContent === true && (
                     <div className="grid min-h-0 content-start gap-5 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
                         {children}

@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { changePasswordSchema, NEW_PASSWORD_HINT } from "#/modules/auth/model/auth-forms";
 import { authClient } from "#/modules/auth/client/auth-client";
+import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
@@ -49,8 +50,17 @@ const NEW_PASSWORD_INDEX = 1;
 const DONE_INDEX = 2;
 const CURRENT_PASSWORD_MISSING = "Digite a senha que você usa hoje.";
 
+const CURRENT_PASSWORD_REJECTED = toAuthErrorMessage("INVALID_PASSWORD");
+
+interface ChangePasswordCallbacks {
+    onChanged: () => void;
+    /** The current password was wrong: its own step has the field to fix. */
+    onCurrentPasswordRejected: () => void;
+}
+
 /** Better Auth checks the current password and the new one's length again on the server. */
-function useChangePasswordForm(onChanged: () => void) {
+function useChangePasswordForm(callbacks: ChangePasswordCallbacks) {
+    const { onChanged, onCurrentPasswordRejected } = callbacks;
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { currentPassword: "", newPassword: "" },
@@ -60,6 +70,12 @@ function useChangePasswordForm(onChanged: () => void) {
             const failure = await runAuthRequest(() =>
                 authClient.changePassword({ ...value, revokeOtherSessions: true }),
             );
+
+            if (failure === CURRENT_PASSWORD_REJECTED) {
+                setErrorMessage(failure);
+                onCurrentPasswordRejected();
+                return;
+            }
 
             if (failure !== null) {
                 setErrorMessage(failure);
@@ -128,9 +144,12 @@ function ChangePasswordSteps({ onChanged }: { onChanged: () => void }): ReactNod
     const track = useTrackPromise();
     const steps = useSteps(STEPS);
     const step = steps.current;
-    const { form, errorMessage, setErrorMessage } = useChangePasswordForm(() => {
-        onChanged();
-        steps.goTo(DONE_INDEX);
+    const { form, errorMessage, setErrorMessage } = useChangePasswordForm({
+        onChanged: () => {
+            onChanged();
+            steps.goTo(DONE_INDEX);
+        },
+        onCurrentPasswordRejected: () => steps.goTo(0),
     });
 
     const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {

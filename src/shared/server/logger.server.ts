@@ -7,11 +7,20 @@ export type LogContext = Readonly<Record<string, string>>;
 
 const logContextStorage = new AsyncLocalStorage<LogContext>();
 
-const SECRET_FIELDS = ["authorization", "cookie", '"set-cookie"', "password", "token", "secret"];
-const SECRET_FIELD_PATHS = [...SECRET_FIELDS, "apiKey"].flatMap((field) => [
-    field,
-    `*.${field}`,
-    `*.*.${field}`,
+// Bracket notation, which redact paths need for a name with a dash such as set-cookie.
+const SECRET_FIELDS = [
+    "authorization",
+    "cookie",
+    "set-cookie",
+    "password",
+    "token",
+    "secret",
+    "apiKey",
+];
+const SECRET_FIELD_PATHS = SECRET_FIELDS.flatMap((field) => [
+    `["${field}"]`,
+    `*["${field}"]`,
+    `*.*["${field}"]`,
 ]);
 
 const DEFAULT_LEVEL = "info";
