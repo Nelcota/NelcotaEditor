@@ -11,6 +11,13 @@ import { UserFacingError } from "#/shared/server/user-facing-error";
 // speaches implements the OpenAI audio API and ignores the key, but the SDK requires one.
 const LOCAL_API_KEY = "speaches";
 const MAX_RETRIES = 2;
+const MILLISECONDS_PER_SECOND = 1_000;
+// A 2-minute chunk takes about 30s with 3 in parallel (see TRANSCRIPTION_CONCURRENCY). Allowing
+// 1.5 times the chunk's own length (180s, like DeepSeek) covers a slow or busy server; the SDK
+// default (600s, retried twice) let one stuck chunk hold the video for half an hour.
+const CHUNK_TIMEOUT_TO_LENGTH_RATIO = 1.5;
+const CHUNK_REQUEST_TIMEOUT_MILLISECONDS =
+    AUDIO_CHUNK_SECONDS * CHUNK_TIMEOUT_TO_LENGTH_RATIO * MILLISECONDS_PER_SECOND;
 
 const TRANSCRIPTION_UNAVAILABLE_MESSAGE =
     "A transcrição está indisponível agora. Tente de novo em alguns minutos.";
@@ -171,7 +178,7 @@ export async function transcribeAudioChunk(
                 timestamp_granularities: ["word"],
                 ...toLanguageOption(resolveLanguage(videoLanguage)),
             },
-            { signal },
+            { signal, timeout: CHUNK_REQUEST_TIMEOUT_MILLISECONDS },
         );
     } catch (error) {
         throw toUserFacingError(error);
