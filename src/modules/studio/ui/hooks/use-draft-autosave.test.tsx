@@ -40,6 +40,8 @@ const EDITED_DRAFT: StudioDraft = { ...SAVED_DRAFT, captionColor: "green" };
 
 interface AutosaveProps {
     draft: StudioDraft;
+    serverVersion?: number;
+    savedDraft?: StudioDraft;
 }
 
 function renderAutosave(queryClient: QueryClient): RenderHookResult<DraftAutosave, AutosaveProps> {
@@ -48,13 +50,14 @@ function renderAutosave(queryClient: QueryClient): RenderHookResult<DraftAutosav
     );
 
     return renderHook(
-        ({ draft }: AutosaveProps) =>
+        ({ draft, serverVersion, savedDraft }: AutosaveProps) =>
             useDraftAutosave({
                 videoId: VIDEO_ID,
                 clipId: CLIP_ID,
                 draft,
                 initialVersion: 3,
-                savedDraft: SAVED_DRAFT,
+                serverVersion: serverVersion ?? 3,
+                savedDraft: savedDraft ?? SAVED_DRAFT,
             }),
         { wrapper, initialProps: { draft: SAVED_DRAFT } },
     );
@@ -162,6 +165,21 @@ describe("useDraftAutosave", () => {
 
         await waitFor(() => {
             expect(readDraftBackup(CLIP_ID)?.draft).toEqual(EDITED_DRAFT);
+        });
+    });
+
+    it("builds on the server's newer version once it holds the draft on screen", async () => {
+        const queryClient = new QueryClient();
+        const rendered = renderAutosave(queryClient);
+        // A render moved the version on; the refetched snapshot carries an equal, new draft.
+        rendered.rerender({ draft: SAVED_DRAFT, serverVersion: 5, savedDraft: { ...SAVED_DRAFT } });
+
+        rendered.rerender({ draft: EDITED_DRAFT, serverVersion: 5 });
+        const outcome = await rendered.result.current.flush();
+
+        expect(outcome).toBe("saved");
+        expect(saveClipDraft).toHaveBeenLastCalledWith({
+            data: { videoId: VIDEO_ID, clipId: CLIP_ID, expectedVersion: 5, draft: EDITED_DRAFT },
         });
     });
 });

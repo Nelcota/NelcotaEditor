@@ -8,6 +8,7 @@ import {
     clipDraftLeaveSaveKey,
     clipStudioQueryOptions,
 } from "#/modules/studio/model/studio-queries";
+import { countDraftChanges } from "#/modules/studio/model/draft-changes";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { useIsOnline } from "#/shared/ui/use-is-online";
 import { reportClientProblem } from "#/shared/errors/report-client-problem";
@@ -31,6 +32,8 @@ interface AutosaveInput {
     clipId: string;
     draft: StudioDraft;
     initialVersion: number;
+    /** The version in the cached snapshot; it moves on when the snapshot is fetched again. */
+    serverVersion: number;
     /** The draft the server already holds, so loading the Studio does not save it again. */
     savedDraft: StudioDraft;
 }
@@ -91,6 +94,25 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
     useEffect(() => {
         draftRef.current = draft;
     }, [draft]);
+
+    // A refetch after a render (or after another tab saved what this one shows) brings a newer
+    // version. Without unsaved edits here, the next save builds on it instead of meeting a
+    // conflict the person never caused.
+    const followServer = useEffectEvent((serverVersion: number, serverDraft: StudioDraft): void => {
+        const current = draftRef.current;
+
+        if (current !== savedDraftRef.current || serverVersion <= versionRef.current) {
+            return;
+        }
+
+        if (countDraftChanges(current, serverDraft) === 0) {
+            versionRef.current = serverVersion;
+        }
+    });
+
+    useEffect(() => {
+        followServer(input.serverVersion, input.savedDraft);
+    }, [input.serverVersion, input.savedDraft]);
 
     const saveOnce = async (): Promise<SaveOutcome> => {
         const current = draftRef.current;

@@ -4,7 +4,7 @@ import { studioDraftSchema } from "#/modules/clips/model/clip-studio";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
 import type { ClipStudioState, ClipStudioView } from "#/modules/studio/model/clip-studio-view";
 import { renderClipDraft } from "#/modules/studio/server/clip-studio-functions";
-import { clipStudioQueryOptions } from "#/modules/studio/model/studio-queries";
+import { clipStudioQueryKey, clipStudioQueryOptions } from "#/modules/studio/model/studio-queries";
 import { replaceCueAt, resetAllCues } from "#/modules/studio/model/cue-editing";
 import { readDraftBackup } from "#/modules/studio/client/draft-backup";
 import { countDraftChanges } from "#/modules/studio/model/draft-changes";
@@ -81,6 +81,7 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         clipId,
         draft,
         initialVersion: studio.draftVersion,
+        serverVersion: studio.draftVersion,
         savedDraft,
     });
 
@@ -134,9 +135,13 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
             return "conflict";
         }
 
-        // Rendering moved the version on and made this draft the applied one.
+        // Rendering moved the version on and made this draft the applied one. The cached snapshot
+        // must follow, or reopening the clip would start from the old version and conflict.
         autosave.resync(autosave.readVersion() + 1, draft);
-        await invalidateVideoQueries(queryClient);
+        await Promise.all([
+            invalidateVideoQueries(queryClient),
+            queryClient.invalidateQueries({ queryKey: clipStudioQueryKey(videoId, clipId) }),
+        ]);
         return "queued";
     };
 
