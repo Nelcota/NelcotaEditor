@@ -28,6 +28,18 @@ describe("toYoutubeVideoId", () => {
         }
     });
 
+    it("reads the id from a link pasted without the scheme", () => {
+        const links = [
+            `youtube.com/watch?v=${VIDEO_ID}`,
+            `www.youtube.com/watch?v=${VIDEO_ID}`,
+            `youtu.be/${VIDEO_ID}`,
+        ];
+
+        for (const link of links) {
+            assert.equal(toYoutubeVideoId(link), VIDEO_ID, link);
+        }
+    });
+
     it("rejects hosts that only look like YouTube", () => {
         const links = [
             `https://youtube.com.evil.com/watch?v=${VIDEO_ID}`,
@@ -83,6 +95,13 @@ describe("toCanonicalYoutubeUrl", () => {
         const link = `https://youtu.be/${VIDEO_ID}?t=10&si=abc&list=PL1`;
 
         assert.equal(toCanonicalYoutubeUrl(link), `https://www.youtube.com/watch?v=${VIDEO_ID}`);
+    });
+
+    it("adds the scheme to a link pasted without it", () => {
+        assert.equal(
+            toCanonicalYoutubeUrl(`youtu.be/${VIDEO_ID}`),
+            `https://www.youtube.com/watch?v=${VIDEO_ID}`,
+        );
     });
 
     it("throws for a link that is not a video", () => {

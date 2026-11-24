@@ -8,8 +8,19 @@ const YOUTUBE_HOSTS: ReadonlyArray<string> = [
     "youtu.be",
 ];
 
+const SCHEME_PATTERN = /^[a-z][a-z\d+.-]*:\/\//i;
+
+/** People paste "youtube.com/watch?v=…" without the scheme, which URL alone cannot parse. */
+function parseLink(value: string): URL | null {
+    if (SCHEME_PATTERN.test(value) === true) {
+        return URL.parse(value);
+    }
+
+    return URL.parse(`https://${value}`);
+}
+
 function isYoutubeUrl(value: string): boolean {
-    const url = URL.parse(value);
+    const url = parseLink(value);
 
     if (url === null) {
         return false;
@@ -66,7 +77,7 @@ export function toCanonicalYoutubeUrl(value: string): string {
 
 /** The 11-character id of a YouTube link (watch, youtu.be, shorts, live, embed), or null. */
 export function toYoutubeVideoId(value: string): string | null {
-    const url = URL.parse(value);
+    const url = parseLink(value);
 
     if (url === null || isYoutubeUrl(value) === false) {
         return null;
@@ -93,7 +104,7 @@ export function describeYoutubeLinkProblem(value: string): string | null {
         return "Use um link do YouTube (youtube.com ou youtu.be) ou envie um arquivo.";
     }
 
-    const url = URL.parse(trimmed);
+    const url = parseLink(trimmed);
 
     if (url !== null && url.searchParams.has("list") === true) {
         return "Isso é uma playlist. Abra um vídeo dela e cole o link dele.";
