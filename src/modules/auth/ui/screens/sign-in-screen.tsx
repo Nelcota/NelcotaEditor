@@ -63,7 +63,7 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
     return (
         <AuthCard
             eyebrow="Entrar"
-            title={{ lead: "Bem-vindo", emphasis: "de volta" }}
+            title={{ lead: "Que bom", emphasis: "te ver de novo" }}
             description="Seus vídeos e cortes estão te esperando."
             footer={{ text: "Ainda não tem conta?", linkLabel: "Criar conta", linkTo: "/sign-up" }}
         >

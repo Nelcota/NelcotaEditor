@@ -58,8 +58,16 @@ export function UserAvatar({ name, avatar, className }: UserAvatarProps): ReactN
     }
 
     return (
-        <span className={cn(FRAME_CLASS, "text-xs font-semibold", className)} aria-hidden="true">
-            {toInitials(name)}
-        </span>
+        // Drawn by CSS, not DOM text: buttons around the avatar name their action ("Trocar foto de
+        // perfil"), and visible text in them would have to start that name (WCAG 2.5.3).
+        <span
+            className={cn(
+                FRAME_CLASS,
+                "text-xs font-semibold before:content-[attr(data-initials)]",
+                className,
+            )}
+            data-initials={toInitials(name)}
+            aria-hidden="true"
+        />
     );
 }

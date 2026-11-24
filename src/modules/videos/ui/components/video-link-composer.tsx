@@ -99,7 +99,7 @@ export function VideoLinkComposer(): ReactNode {
                     spellCheck={false}
                     autoCapitalize="none"
                     enterKeyHint="send"
-                    placeholder="Cole um link do YouTube para cortar..."
+                    placeholder="youtube.com/watch?v=…"
                     value={text}
                     disabled={isBusy}
                     aria-invalid={problem !== null}
