@@ -12,7 +12,7 @@ import { StorageQuotaExceededError } from "#/modules/videos/storage-quota-exceed
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
-// of `npm run check`. Run: npx tsx --test --test-force-exit src/modules/videos/server/reserve-upload-space.server.integration.ts
+// of `bun run check`. Run: bun test ./src/modules/videos/server/reserve-upload-space.server.integration.ts
 
 const SMALL_UPLOAD_BYTES = 1024;
 const OVER_HALF_RATIO = 0.6;

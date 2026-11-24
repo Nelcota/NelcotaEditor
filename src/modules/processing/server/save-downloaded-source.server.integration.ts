@@ -8,7 +8,7 @@ import { videos } from "#/modules/video-records/videos.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
-// of `npm run check`. Run: npx tsx --test --test-force-exit src/modules/processing/server/save-downloaded-source.server.integration.ts
+// of `bun run check`. Run: bun test ./src/modules/processing/server/save-downloaded-source.server.integration.ts
 
 const BYTES_PER_GIGABYTE = 1024 * 1024 * 1024;
 const REQUESTED_CLIP_COUNT = 3;

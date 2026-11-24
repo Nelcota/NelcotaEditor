@@ -67,7 +67,7 @@ export default defineConfig({
     server: { port: 3210, strictPort: true },
     plugins: [
         apiRequestsAreNeverAssets(),
-        nitro(),
+        nitro({ preset: "bun" }),
         tailwindcss(),
         tanstackStart(),
         viteReact(),

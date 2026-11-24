@@ -13,7 +13,7 @@ import { videos } from "#/modules/video-records/videos.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
-// of `npm run check`. Run: npx tsx --test src/modules/video-records/server/delete-user-videos.server.integration.ts
+// of `bun run check`. Run: bun test ./src/modules/video-records/server/delete-user-videos.server.integration.ts
 
 const WAIT_FOR_LOCK_MILLISECONDS = 300;
 

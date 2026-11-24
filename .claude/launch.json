@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "nelcota",
-            "runtimeExecutable": "npm",
+            "runtimeExecutable": "bun",
             "runtimeArgs": ["run", "local"],
             "port": 3210,
             "autoPort": false

@@ -95,7 +95,7 @@ export type Environment = z.infer<typeof environmentSchema>;
 export class InvalidEnvironmentError extends Error {
     constructor(variableNames: Array<string>) {
         super(
-            `Invalid or missing environment variables: ${variableNames.join(", ")}. Run "npm run setup".`,
+            `Invalid or missing environment variables: ${variableNames.join(", ")}. Run "bun run setup".`,
         );
         this.name = "InvalidEnvironmentError";
     }

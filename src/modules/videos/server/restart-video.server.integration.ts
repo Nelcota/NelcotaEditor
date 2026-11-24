@@ -12,7 +12,7 @@ import { videos } from "#/modules/video-records/videos.schema";
 import type { VideoStatus } from "#/modules/video-records/video-status";
 
 // Needs a disposable database with the migrations applied (DATABASE_URL in .env); it is not part
-// of `npm run check`. Run: npx tsx --test --test-force-exit src/modules/videos/server/restart-video.server.integration.ts
+// of `bun run check`. Run: bun test ./src/modules/videos/server/restart-video.server.integration.ts
 
 const REQUESTED_CLIP_COUNT = 3;
 
