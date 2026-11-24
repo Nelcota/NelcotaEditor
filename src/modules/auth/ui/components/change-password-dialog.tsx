@@ -21,6 +21,8 @@ import {
 import { StepRail } from "#/shared/ui/step-rail";
 import { TextField } from "#/shared/ui/text-field";
 import { useSteps } from "#/shared/ui/use-steps";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { focusWhenShown } from "#/shared/ui/focus-when-shown";
 
 const STEPS = [
     {
@@ -123,8 +125,9 @@ function DoneNote(): ReactNode {
 }
 
 function ChangePasswordSteps({ onChanged }: { onChanged: () => void }): ReactNode {
-    const steps = useSteps(STEPS.length);
-    const step = STEPS[steps.index];
+    const track = useTrackPromise();
+    const steps = useSteps(STEPS);
+    const step = steps.current;
     const { form, errorMessage, setErrorMessage } = useChangePasswordForm(() => {
         onChanged();
         steps.goTo(DONE_INDEX);
@@ -148,7 +151,7 @@ function ChangePasswordSteps({ onChanged }: { onChanged: () => void }): ReactNod
     };
 
     return (
-        <form noValidate onSubmit={submit} className="grid min-h-0">
+        <form noValidate onSubmit={(event) => track(submit(event))} className="grid min-h-0">
             <StepDialogFrame
                 kind="dialog"
                 rail={
@@ -190,7 +193,7 @@ function ChangePasswordSteps({ onChanged }: { onChanged: () => void }): ReactNod
                                 label="Senha atual"
                                 type="password"
                                 autoComplete="current-password"
-                                autoFocus
+                                ref={focusWhenShown}
                                 value={field.state.value}
                                 onBlur={field.handleBlur}
                                 onValueChange={field.handleChange}
@@ -207,7 +210,7 @@ function ChangePasswordSteps({ onChanged }: { onChanged: () => void }): ReactNod
                                 label="Senha nova"
                                 type="password"
                                 autoComplete="new-password"
-                                autoFocus
+                                ref={focusWhenShown}
                                 hint={NEW_PASSWORD_HINT}
                                 value={field.state.value}
                                 onBlur={field.handleBlur}

@@ -6,8 +6,10 @@ import { preferencesQueryOptions } from "#/modules/preferences/model/preferences
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 export function PreferencesSection(): ReactNode {
+    const track = useTrackPromise();
     const preferencesQuery = useQuery(preferencesQueryOptions());
     const preferences = preferencesQuery.data;
 
@@ -15,12 +17,7 @@ export function PreferencesSection(): ReactNode {
         return (
             <div className="grid justify-items-start gap-3 p-4 sm:p-5">
                 <FormAlert message="Não foi possível carregar suas preferências." />
-                <Button
-                    variant="secondary"
-                    onClick={async () => {
-                        await preferencesQuery.refetch();
-                    }}
-                >
+                <Button variant="secondary" onClick={() => track(preferencesQuery.refetch())}>
                     <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>

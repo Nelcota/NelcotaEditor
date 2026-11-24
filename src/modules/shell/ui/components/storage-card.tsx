@@ -48,7 +48,7 @@ interface StorageRowProps {
 function StorageRow(props: StorageRowProps): ReactNode {
     const { icon: Icon, label, bytes, totalBytes, barClass, isHidden } = props;
     const percent = toPercent(bytes, totalBytes);
-    let value = `${formatBytes(bytes)}`;
+    let value = formatBytes(bytes);
 
     if (isHidden === true) {
         value = HIDDEN_VALUE;

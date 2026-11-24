@@ -1,10 +1,10 @@
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import type { ReactNode } from "react";
-import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import { Mascot } from "#/shared/ui/mascot";
+import { AsyncButton } from "#/shared/ui/async-button";
 
 const SKELETON_ROW_COUNT = 6;
 
@@ -22,7 +22,7 @@ export function AdminLoading({ label }: { label: string }): ReactNode {
 interface AdminLoadErrorProps {
     title: string;
     message: string;
-    onRetry: () => void;
+    onRetry: () => Promise<unknown>;
 }
 
 export function AdminLoadError({ title, message, onRetry }: AdminLoadErrorProps): ReactNode {
@@ -32,10 +32,10 @@ export function AdminLoadError({ title, message, onRetry }: AdminLoadErrorProps)
             title={title}
             description={message}
             action={
-                <Button variant="outline" onClick={onRetry}>
+                <AsyncButton variant="outline" onAction={onRetry}>
                     <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
-                </Button>
+                </AsyncButton>
             }
         />
     );

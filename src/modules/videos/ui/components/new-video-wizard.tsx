@@ -30,6 +30,7 @@ import { StepDialogFrame } from "#/shared/ui/step-dialog-frame";
 import { StepRail } from "#/shared/ui/step-rail";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { useSteps } from "#/shared/ui/use-steps";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente de novo.";
 
@@ -114,6 +115,7 @@ export function NewVideoWizard({
     defaultClipLength,
     defaultLanguage,
 }: NewVideoWizardProps): ReactNode {
+    const track = useTrackPromise();
     const defaultValues: Submission = {
         source: EMPTY_SOURCE,
         clipCount: defaultClipCount,
@@ -123,8 +125,8 @@ export function NewVideoWizard({
     };
     const { submission, uploadPercent } = useVideoSubmission();
     const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
-    const steps = useSteps(STEPS.length);
-    const step = STEPS[steps.index];
+    const steps = useSteps(STEPS);
+    const step = steps.current;
     const isReview = steps.index === REVIEW_INDEX;
     const isBusy = submission.isPending;
     const form = useForm({
@@ -209,7 +211,7 @@ export function NewVideoWizard({
     ];
 
     return (
-        <form noValidate onSubmit={submit} className="grid min-h-0">
+        <form noValidate onSubmit={(event) => track(submit(event))} className="grid min-h-0">
             <StepDialogFrame
                 kind="dialog"
                 rail={

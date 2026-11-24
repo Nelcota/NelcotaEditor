@@ -4,10 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { TranscriptBody } from "#/modules/videos/ui/components/transcript-body";
 import { transcriptQueryOptions } from "#/modules/videos/model/transcript-queries";
-import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { AsyncButton } from "#/shared/ui/async-button";
 
 const TRANSCRIPT_PANEL_ID = "transcript-panel";
 const TRANSCRIPT_HINT_ID = "transcript-hint";
@@ -23,14 +23,20 @@ interface TranscriptSectionProps extends TranscriptContentProps {
     isInitiallyOpen?: boolean;
 }
 
-function TranscriptLoadError({ message, onRetry }: { message: string; onRetry: () => void }) {
+function TranscriptLoadError({
+    message,
+    onRetry,
+}: {
+    message: string;
+    onRetry: () => Promise<unknown>;
+}) {
     return (
         <div className="grid justify-items-start gap-3">
             <FormAlert message={message} />
-            <Button variant="secondary" onClick={onRetry}>
+            <AsyncButton variant="secondary" onAction={onRetry}>
                 <RotateCwIcon aria-hidden="true" />
                 Tentar de novo
-            </Button>
+            </AsyncButton>
         </div>
     );
 }

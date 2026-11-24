@@ -25,6 +25,7 @@ import type { IconComponent } from "#/shared/ui/icon-component";
 import { Mascot } from "#/shared/ui/mascot";
 import { BRAND_MASCOT_INDEX } from "#/shared/ui/mascot";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const CHIP_CLASS =
     "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background aria-[current=page]:hover:bg-foreground/90 [&>svg]:size-5";
@@ -94,12 +95,18 @@ function FilterChips({ filter, query }: FilterChipsProps): ReactNode {
     );
 }
 
-interface AdminVideosScreenProps {
+interface ResultsProps {
     search: AdminVideosSearch;
     onSearchChange: (search: AdminVideosSearch) => void;
 }
 
-function VideoResults({ search, onSearchChange }: AdminVideosScreenProps): ReactNode {
+interface AdminVideosScreenProps {
+    search: AdminVideosSearch;
+    /** Navigates to the new search; the screen keeps the promise and any failure. */
+    onSearchChange: (search: AdminVideosSearch) => Promise<unknown>;
+}
+
+function VideoResults({ search, onSearchChange }: ResultsProps): ReactNode {
     const page = search.page ?? 1;
     const videosQuery = useQuery(
         adminVideosQueryOptions({
@@ -151,11 +158,15 @@ function VideoResults({ search, onSearchChange }: AdminVideosScreenProps): React
     );
 }
 
-export function AdminVideosScreen({ search, onSearchChange }: AdminVideosScreenProps): ReactNode {
+export function AdminVideosScreen(props: AdminVideosScreenProps): ReactNode {
+    const { search, onSearchChange: navigateToSearch } = props;
+    const track = useTrackPromise();
+    const onSearchChange = (next: AdminVideosSearch): void => track(navigateToSearch(next));
     const query = search.q ?? "";
     const handleSearch = useCallback(
-        (next: string) => onSearchChange(toAdminVideosSearch({ ...search, q: next, page: 1 })),
-        [search, onSearchChange],
+        (next: string) =>
+            track(navigateToSearch(toAdminVideosSearch({ ...search, q: next, page: 1 }))),
+        [search, navigateToSearch, track],
     );
     const searchDraft = useSearchDraft(query, handleSearch);
 

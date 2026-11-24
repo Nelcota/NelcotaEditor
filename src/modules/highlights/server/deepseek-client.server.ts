@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getEnvironment } from "#/shared/server/env.server";
 import { HTTP_PAYMENT_REQUIRED, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
 import { UserFacingError } from "#/shared/server/user-facing-error";
+import { logger } from "#/shared/server/logger.server";
 
 // DeepSeek speaks the OpenAI chat API, so the official SDK brings retries, timeouts and typed errors.
 const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
@@ -94,9 +95,11 @@ function logCompletion(
     const usage = completion.usage;
     const durationMs = Math.round(performance.now() - startedAt);
 
-    console.info(
-        `DeepSeek answered in ${durationMs} ms (${usage?.prompt_tokens ?? "?"} prompt tokens, ${usage?.completion_tokens ?? "?"} completion tokens).`,
-    );
+    logger.info("DeepSeek answered", {
+        durationMs,
+        promptTokens: usage?.prompt_tokens ?? null,
+        completionTokens: usage?.completion_tokens ?? null,
+    });
 }
 
 async function createCompletion(

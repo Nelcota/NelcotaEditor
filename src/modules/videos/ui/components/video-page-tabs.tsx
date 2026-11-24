@@ -13,6 +13,7 @@ import type { StudioTabProps } from "#/modules/videos/model/studio-tab-props";
 import type { VideoPageSearch, VideoPageTab } from "#/modules/videos/model/video-page-search";
 import { VIDEO_PAGE_TABS } from "#/modules/videos/model/video-page-search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/tabs";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 interface VideoPageTabsProps {
     details: VideoDetails;
@@ -30,6 +31,7 @@ interface VideoPageTabsProps {
  * icon sits on the surface's text line.
  */
 export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps): ReactNode {
+    const track = useTrackPromise();
     const navigate = useNavigate();
     const video = details.video;
     const tab = search.tab ?? "clips";
@@ -46,14 +48,14 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
     return (
         <Tabs
             value={tab}
-            onValueChange={async (value) => {
+            onValueChange={(value) => {
                 const nextTab = VIDEO_PAGE_TABS.find((candidate) => candidate === value);
 
                 if (nextTab === undefined) {
                     return;
                 }
 
-                await goTo(nextTab);
+                track(goTo(nextTab));
             }}
             className="gap-6"
         >
@@ -93,12 +95,8 @@ export function VideoPageTabs({ details, search, StudioTab }: VideoPageTabsProps
                 <StudioTab
                     details={details}
                     clipId={search.clip}
-                    onSelectClip={async (clipId) => {
-                        await goTo("studio", clipId);
-                    }}
-                    onShowClips={async () => {
-                        await goTo("clips");
-                    }}
+                    onSelectClip={(clipId) => track(goTo("studio", clipId))}
+                    onShowClips={() => track(goTo("clips"))}
                 />
             </TabsContent>
         </Tabs>

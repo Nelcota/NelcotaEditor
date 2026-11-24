@@ -64,12 +64,19 @@ export function isCueChangedFromOriginal(cue: CaptionCue, words: Array<CaptionWo
  * Whether the draft is still exactly what the reset made of `before`, so one undo step brings the
  * person's edits back. Any later edit hides the offer; undoing that edit shows it again.
  */
+export interface AppliedReset {
+    /** The draft as it was right before the reset. */
+    before: StudioDraft;
+    reset: CaptionReset;
+}
+
 export function canUndoReset(
     draft: StudioDraft,
-    before: StudioDraft,
+    applied: AppliedReset,
     words: Array<CaptionWord>,
-    reset: CaptionReset,
 ): boolean {
+    const { before, reset } = applied;
+
     if (isSameDraft(draft, before) === true) {
         return false;
     }

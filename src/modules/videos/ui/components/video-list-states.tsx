@@ -11,6 +11,7 @@ import { BrandMark } from "#/shared/ui/brand-logo";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Mascot } from "#/shared/ui/mascot";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { AsyncButton } from "#/shared/ui/async-button";
 
 const SKELETON_ROW_COUNT = 5;
 
@@ -66,17 +67,17 @@ export function FirstVideoEmptyState() {
     );
 }
 
-export function VideoListLoadError({ onRetry }: { onRetry: () => void }) {
+export function VideoListLoadError({ onRetry }: { onRetry: () => Promise<unknown> }) {
     return (
         <EmptyState
             art={<StageCrewMascot status="failed" className="size-14" />}
             title="Não foi possível carregar seus vídeos"
             description="Seus vídeos e cortes continuam salvos. Tente de novo; se continuar, recarregue a página."
             action={
-                <Button variant="secondary" onClick={onRetry}>
+                <AsyncButton variant="secondary" onAction={onRetry}>
                     <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
-                </Button>
+                </AsyncButton>
             }
         />
     );

@@ -12,51 +12,65 @@ export interface CaptionPreset {
 }
 
 function preset(
-    id: string,
-    label: string,
-    description: string,
+    naming: Omit<CaptionPreset, "settings">,
     look: { style: CaptionStyle; font: CaptionFont; color: CaptionColor },
 ): CaptionPreset {
     return {
-        id,
-        label,
-        description,
+        ...naming,
         settings: { captionStyle: look.style, captionFont: look.font, captionColor: look.color },
     };
 }
 
 /** Ready looks, so a first edit is one click; size, position and frame stay as they are. */
 export const CAPTION_PRESETS: ReadonlyArray<CaptionPreset> = [
-    preset("karaoke", "Karaokê", "Montserrat · amarelo", {
-        style: "karaoke",
-        font: "montserrat",
-        color: "yellow",
-    }),
-    preset("impact", "Impacto", "Bebas Neue · verde", {
-        style: "karaoke",
-        font: "bebas-neue",
-        color: "green",
-    }),
-    preset("block", "Bloco", "League Spartan · roxo", {
-        style: "karaoke",
-        font: "league-spartan",
-        color: "purple",
-    }),
-    preset("classic", "Clássica", "Inter · branca", {
-        style: "classic",
-        font: "inter",
-        color: "white",
-    }),
-    preset("blue", "Destaque azul", "Montserrat · azul", {
-        style: "karaoke",
-        font: "montserrat",
-        color: "blue",
-    }),
-    preset("none", "Sem legenda", "Só o vídeo", {
-        style: "none",
-        font: "montserrat",
-        color: "yellow",
-    }),
+    preset(
+        { id: "karaoke", label: "Karaokê", description: "Montserrat · amarelo" },
+        {
+            style: "karaoke",
+            font: "montserrat",
+            color: "yellow",
+        },
+    ),
+    preset(
+        { id: "impact", label: "Impacto", description: "Bebas Neue · verde" },
+        {
+            style: "karaoke",
+            font: "bebas-neue",
+            color: "green",
+        },
+    ),
+    preset(
+        { id: "block", label: "Bloco", description: "League Spartan · roxo" },
+        {
+            style: "karaoke",
+            font: "league-spartan",
+            color: "purple",
+        },
+    ),
+    preset(
+        { id: "classic", label: "Clássica", description: "Inter · branca" },
+        {
+            style: "classic",
+            font: "inter",
+            color: "white",
+        },
+    ),
+    preset(
+        { id: "blue", label: "Destaque azul", description: "Montserrat · azul" },
+        {
+            style: "karaoke",
+            font: "montserrat",
+            color: "blue",
+        },
+    ),
+    preset(
+        { id: "none", label: "Sem legenda", description: "Só o vídeo" },
+        {
+            style: "none",
+            font: "montserrat",
+            color: "yellow",
+        },
+    ),
 ];
 
 /**

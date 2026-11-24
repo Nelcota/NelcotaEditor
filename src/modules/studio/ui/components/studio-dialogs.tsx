@@ -11,6 +11,7 @@ import {
     STEP_DIALOG_SINGLE_CLASS,
     StepDialogFrame,
 } from "#/shared/ui/step-dialog-frame";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const CONTENT_CLASS = cn(STEP_DIALOG_CONTENT_CLASS, STEP_DIALOG_SINGLE_CLASS);
 const ACTION_CLASS = "ms-auto font-medium max-sm:flex-1";
@@ -23,6 +24,7 @@ interface ConflictDialogProps {
 
 /** Another tab saved this clip first; nothing is overwritten until the person chooses. */
 export function ConflictDialog({ isOpen, onTakeTheirs, onKeepMine }: ConflictDialogProps) {
+    const track = useTrackPromise();
     return (
         <AlertDialog open={isOpen}>
             <AlertDialogContent className={CONTENT_CLASS}>
@@ -36,18 +38,14 @@ export function ConflictDialog({ isOpen, onTakeTheirs, onKeepMine }: ConflictDia
                         <>
                             <AlertDialogCancel
                                 variant="ghost"
-                                onClick={async () => {
-                                    await onTakeTheirs();
-                                }}
+                                onClick={() => track(onTakeTheirs())}
                             >
                                 Ver a outra versão
                             </AlertDialogCancel>
                             <AlertDialogAction
                                 size="lg"
                                 className={ACTION_CLASS}
-                                onClick={async () => {
-                                    await onKeepMine();
-                                }}
+                                onClick={() => track(onKeepMine())}
                             >
                                 Manter as minhas
                             </AlertDialogAction>
@@ -67,6 +65,7 @@ interface SharedRenderDialogProps {
 
 /** Only a shared clip asks first: someone else is watching the file that will change. */
 export function SharedRenderDialog(props: SharedRenderDialogProps): ReactNode {
+    const track = useTrackPromise();
     return (
         <AlertDialog open={props.isOpen} onOpenChange={props.onOpenChange}>
             <AlertDialogContent className={CONTENT_CLASS}>
@@ -84,9 +83,7 @@ export function SharedRenderDialog(props: SharedRenderDialogProps): ReactNode {
                             <AlertDialogAction
                                 size="lg"
                                 className={ACTION_CLASS}
-                                onClick={async () => {
-                                    await props.onConfirm();
-                                }}
+                                onClick={() => track(props.onConfirm())}
                             >
                                 Renderizar
                             </AlertDialogAction>

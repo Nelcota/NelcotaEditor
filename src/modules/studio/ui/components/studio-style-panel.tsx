@@ -181,7 +181,7 @@ function PresetGrid({ editor, isLocked, thumbnailUrl }: StudioStylePanelProps): 
     const words = readSampleWords(draft);
 
     return (
-        <div role="group" aria-label="Estilos prontos" className="grid grid-cols-3 gap-3">
+        <fieldset aria-label="Estilos prontos" className="grid min-w-0 grid-cols-3 gap-3">
             {CAPTION_PRESETS.map((preset) => (
                 <PresetCard
                     key={preset.id}
@@ -193,7 +193,7 @@ function PresetGrid({ editor, isLocked, thumbnailUrl }: StudioStylePanelProps): 
                     onPick={() => editor.updateSettings(preset.settings)}
                 />
             ))}
-        </div>
+        </fieldset>
     );
 }
 

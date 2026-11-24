@@ -111,7 +111,7 @@ export function CaptionOverlay({ draft, clock }: CaptionOverlayProps): ReactNode
         >
             {cue.words.map((word, index) => (
                 <span
-                    key={`${word.startSeconds}-${index}`}
+                    key={`${word.startSeconds}-${word.endSeconds}`}
                     style={wordStyle(draft, index === spokenIndex)}
                 >
                     {index > 0 && " "}

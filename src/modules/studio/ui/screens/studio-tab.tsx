@@ -18,6 +18,7 @@ import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import { Mascot } from "#/shared/ui/mascot";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 function StudioLoading(): ReactNode {
     return (
@@ -57,6 +58,7 @@ function NotReady({ details, onShowClips }: Pick<StudioTabProps, "details" | "on
 
 /** The Studio tab: picks the clip, loads what it needs and hands it to the workspace. */
 export function StudioTab({ details, clipId, onSelectClip, onShowClips }: StudioTabProps) {
+    const track = useTrackPromise();
     const video = details.video;
     const rankedClips = rankClips(details.clips);
     const selectedClip = rankedClips.find((clip) => clip.id === clipId) ?? rankedClips[0];
@@ -89,10 +91,12 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
             return;
         }
 
-        void queryClient.invalidateQueries({
-            queryKey: clipStudioQueryKey(video.id, selectedClipId),
-        });
-    }, [isFinished, queryClient, video.id, selectedClipId]);
+        track(
+            queryClient.invalidateQueries({
+                queryKey: clipStudioQueryKey(video.id, selectedClipId),
+            }),
+        );
+    }, [isFinished, queryClient, track, video.id, selectedClipId]);
 
     if (selectedClip === undefined) {
         return <NotReady details={details} onShowClips={onShowClips} />;
@@ -110,9 +114,9 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
                     <Button
                         variant="secondary"
 
-                        onClick={async () => {
-                            await Promise.all([studioQuery.refetch(), wordsQuery.refetch()]);
-                        }}
+                        onClick={() =>
+                            track(Promise.all([studioQuery.refetch(), wordsQuery.refetch()]))
+                        }
                     >
                         <RotateCwIcon aria-hidden="true" />
                         Tentar de novo

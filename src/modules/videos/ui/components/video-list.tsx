@@ -26,7 +26,15 @@ function describeTotal(shownCount: number, totalCount: number): string {
     return `${shownCount} de ${totalCount} vídeos`;
 }
 
-const TABLE_HEADINGS = ["Vídeo", "Status", "Origem", "Cortes", "Progresso", "Enviado", ""];
+const TABLE_HEADINGS = [
+    { id: "video", label: "Vídeo" },
+    { id: "status", label: "Status" },
+    { id: "source", label: "Origem" },
+    { id: "clips", label: "Cortes" },
+    { id: "progress", label: "Progresso" },
+    { id: "created", label: "Enviado" },
+    { id: "actions", label: "" },
+];
 
 /** The column names over the rows; the rows say the same to screen readers, so it is hidden. */
 function TableHead(): ReactNode {
@@ -38,8 +46,8 @@ function TableHead(): ReactNode {
                 VIDEO_TABLE_COLUMNS,
             )}
         >
-            {TABLE_HEADINGS.map((heading, index) => (
-                <span key={`${heading}-${index}`}>{heading}</span>
+            {TABLE_HEADINGS.map((heading) => (
+                <span key={heading.id}>{heading.label}</span>
             ))}
         </div>
     );

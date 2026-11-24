@@ -14,6 +14,7 @@ import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 /** In page order; each field's input id matches its name. */
 const FIELD_NAMES = ["email", "password"] as const;
@@ -46,6 +47,7 @@ interface SignInScreenProps {
 }
 
 export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
+    const track = useTrackPromise();
     const router = useRouter();
     const captcha = useCaptcha(captchaSiteKey);
     const queryClient = useQueryClient();
@@ -99,9 +101,9 @@ export function SignInScreen({ captchaSiteKey }: SignInScreenProps): ReactNode {
             <form
                 noValidate
                 className="grid gap-4"
-                onSubmit={async (event) => {
+                onSubmit={(event) => {
                     event.preventDefault();
-                    await form.handleSubmit();
+                    track(form.handleSubmit());
                 }}
             >
                 <form.Field name="email">

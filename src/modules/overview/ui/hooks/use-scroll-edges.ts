@@ -35,7 +35,7 @@ export function useScrollEdges(scrollerRef: RefObject<HTMLElement | null>): Scro
         const scroller = scrollerRef.current;
 
         if (scroller === null) {
-            return;
+            return undefined;
         }
 
         measure();

@@ -24,6 +24,7 @@ import {
 import { StepRail } from "#/shared/ui/step-rail";
 import { TextField } from "#/shared/ui/text-field";
 import { useSteps } from "#/shared/ui/use-steps";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const appRoute = getRouteApi("/_app");
 const SAVE_FAILED_MESSAGE = "Não foi possível salvar o nome. Tente novamente.";
@@ -92,8 +93,9 @@ interface ProfileStepsProps {
 }
 
 function ProfileSteps({ initialStep, onDone }: ProfileStepsProps): ReactNode {
-    const steps = useSteps(STEPS.length, STEP_INDEXES[initialStep]);
-    const step = STEPS[steps.index];
+    const track = useTrackPromise();
+    const steps = useSteps(STEPS, STEP_INDEXES[initialStep]);
+    const step = steps.current;
     const { form, errorMessage, email } = useProfileNameForm(onDone);
     const isNameStep = steps.index === NAME_STEP_INDEX;
 
@@ -109,7 +111,7 @@ function ProfileSteps({ initialStep, onDone }: ProfileStepsProps): ReactNode {
     };
 
     return (
-        <form noValidate onSubmit={submit} className="grid min-h-0">
+        <form noValidate onSubmit={(event) => track(submit(event))} className="grid min-h-0">
             <StepDialogFrame
                 kind="dialog"
                 rail={

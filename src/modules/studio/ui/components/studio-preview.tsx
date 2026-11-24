@@ -27,6 +27,8 @@ interface StudioPreviewProps {
     playback: StudioPlayback;
     /** Null until the original is on disk. */
     sourceUrl: string | null;
+    /** The original's transcript as closed captions; the overlay shows the clip's own captions. */
+    captionsUrl: string;
     /** Covers the picture while Brasa works on this clip. */
     overlay?: ReactNode;
 }
@@ -62,9 +64,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
             <button
                 type="button"
                 aria-label={label}
-                onClick={async () => {
-                    await playback.togglePlay();
-                }}
+                onClick={playback.togglePlay}
                 className="grid size-9 pointer-coarse:size-11 place-items-center rounded-full outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
             >
                 <Icon className="size-5" aria-hidden="true" />
@@ -88,7 +88,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
 
 /** The original cropped to the clip's shape with the caption drawn over it: the clip, live. */
 export function StudioPreview(props: StudioPreviewProps): ReactNode {
-    const { draft, videoRef, playback, sourceUrl, overlay } = props;
+    const { draft, videoRef, playback, sourceUrl, captionsUrl, overlay } = props;
     const [hasPlaybackError, setHasPlaybackError] = useState(false);
     // Only the first start goes in the media fragment: a changing src reloads the whole video
     // (new requests, a black flash, lost position) on every trim. Later trims seek instead.
@@ -125,11 +125,11 @@ export function StudioPreview(props: StudioPreviewProps): ReactNode {
                     preload="auto"
                     playsInline
                     onError={() => setHasPlaybackError(true)}
-                    onClick={async () => {
-                        await playback.togglePlay();
-                    }}
+                    onClick={playback.togglePlay}
                     className="absolute inset-0 size-full cursor-pointer object-cover"
-                />
+                >
+                    <track kind="captions" src={captionsUrl} label="Legendas da transcrição" />
+                </video>
             )}
             <CaptionOverlay draft={draft} clock={playback.clock} />
             {sourceUrl === null && (

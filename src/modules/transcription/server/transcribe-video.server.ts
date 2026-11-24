@@ -15,6 +15,7 @@ import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server"
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
+import { logger } from "#/shared/server/logger.server";
 
 /**
  * Chunks sent to Whisper at once. Measured on 8 CPU cores with speaches running 4 workers of
@@ -88,9 +89,13 @@ async function transcribeAudio(request: TranscriptRequest): Promise<Transcriptio
             saveProgress,
         );
         const durationMs = Math.round(performance.now() - startedAt);
-        console.info(
-            `Transcribed video ${videoId}: ${chunks.length} chunk(s), ${transcription.words.length} word(s), language ${transcription.language ?? "unknown"}, ${durationMs} ms.`,
-        );
+        logger.info("Video transcribed", {
+            videoId,
+            chunkCount: chunks.length,
+            wordCount: transcription.words.length,
+            language: transcription.language ?? null,
+            durationMs,
+        });
         return transcription;
     } finally {
         await rm(audioDirectory, { recursive: true, force: true });

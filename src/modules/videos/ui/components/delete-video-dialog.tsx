@@ -133,8 +133,8 @@ interface DeleteVideoStepsProps {
 /** First what goes away, then the last word; the delete button only exists on the second step. */
 function DeleteVideoSteps(props: DeleteVideoStepsProps): ReactNode {
     const { video, isDeleting, errorMessage, onDelete } = props;
-    const steps = useSteps(STEPS.length);
-    const step = STEPS[steps.index];
+    const steps = useSteps(STEPS);
+    const step = steps.current;
     const isConfirmStep = steps.index === CONFIRM_INDEX;
 
     return (

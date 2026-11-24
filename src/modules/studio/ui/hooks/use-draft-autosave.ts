@@ -4,6 +4,7 @@ import type { StudioDraft } from "#/modules/clips/model/clip-studio";
 import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
 import { clearDraftBackup, writeDraftBackup } from "#/modules/studio/client/draft-backup";
 import { useIsOnline } from "#/shared/ui/use-is-online";
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
 
 // Long enough to group a burst of typing into one request, short enough to feel instant.
 const SAVE_DELAY_MILLISECONDS = 800;
@@ -79,7 +80,7 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
             return draftRef.current === current;
         } catch (error) {
             // The edits stay on screen and in this browser; the person can try again.
-            console.warn("Could not save the Studio draft", error);
+            reportClientProblem("Could not save the Studio draft", error);
             writeDraftBackup(clipId, { baseVersion: versionRef.current, draft: current });
             setStatus("failed");
             return false;
@@ -99,18 +100,18 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
     const flush = (): Promise<boolean> => saveMutation.mutateAsync();
 
     const saveLater = useEffectEvent((): void => {
-        void flush();
+        saveMutation.mutate();
     });
 
     useEffect(() => {
         if (draft === savedDraftRef.current) {
-            return;
+            return undefined;
         }
 
         // Offline, the edits wait in this browser; reconnecting runs this again and saves them.
         if (isOnline === false) {
             writeDraftBackup(clipId, { baseVersion: versionRef.current, draft });
-            return;
+            return undefined;
         }
 
         const timer = window.setTimeout(saveLater, SAVE_DELAY_MILLISECONDS);

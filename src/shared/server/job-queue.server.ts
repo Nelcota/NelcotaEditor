@@ -1,5 +1,6 @@
 import { PgBoss } from "pg-boss";
 import { getEnvironment } from "#/shared/server/env.server";
+import { logger } from "#/shared/server/logger.server";
 
 /**
  * "web" only sends jobs; "worker" also runs pg-boss's maintenance (expiring jobs, the scheduler).
@@ -29,7 +30,7 @@ async function startJobQueue(): Promise<PgBoss> {
     });
 
     jobQueue.on("error", (error: unknown) => {
-        console.error("Job queue error", error);
+        logger.error("Job queue error", { error });
     });
     await jobQueue.start();
     return jobQueue;

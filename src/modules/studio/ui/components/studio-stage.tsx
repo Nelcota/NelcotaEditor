@@ -5,6 +5,7 @@ import { RenderingOverlay } from "#/modules/studio/ui/components/studio-notices"
 import { StudioPreview } from "#/modules/studio/ui/components/studio-preview";
 import type { StudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
 import type { StudioPlayback } from "#/modules/studio/ui/hooks/use-studio-playback";
+import { toCaptionsUrl } from "#/modules/transcription/model/captions-url";
 
 interface StudioStageProps {
     video: VideoSummary;
@@ -40,6 +41,7 @@ export function StudioStage({
                     videoRef={props.videoRef}
                     playback={playback}
                     sourceUrl={video.originalFileUrl}
+                    captionsUrl={toCaptionsUrl(video.id)}
                     overlay={
                         isRendering === true && (
                             <RenderingOverlay progressPercent={video.progressPercent} />

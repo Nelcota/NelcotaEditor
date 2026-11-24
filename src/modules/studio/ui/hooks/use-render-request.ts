@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import type { StudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
 
 export interface RenderRequest {
@@ -16,6 +17,7 @@ export interface RenderRequest {
 export function useRenderRequest(editor: StudioEditor, sharePath: string | null): RenderRequest {
     const [isConfirmingShare, setIsConfirmingShare] = useState(false);
     const [hasConflict, setHasConflict] = useState(false);
+    const track = useTrackPromise();
 
     const send = async (): Promise<void> => {
         const outcome = await editor.render();
@@ -31,7 +33,7 @@ export function useRenderRequest(editor: StudioEditor, sharePath: string | null)
             return;
         }
 
-        void send();
+        track(send());
     };
 
     return {

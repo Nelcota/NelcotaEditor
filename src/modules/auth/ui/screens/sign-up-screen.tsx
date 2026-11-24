@@ -14,6 +14,7 @@ import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 interface SignUpScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
@@ -21,6 +22,7 @@ interface SignUpScreenProps {
 }
 
 export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
+    const track = useTrackPromise();
     const router = useRouter();
     const captcha = useCaptcha(captchaSiteKey);
     const queryClient = useQueryClient();
@@ -63,9 +65,9 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
             <form
                 noValidate
                 className="grid gap-4"
-                onSubmit={async (event) => {
+                onSubmit={(event) => {
                     event.preventDefault();
-                    await form.handleSubmit();
+                    track(form.handleSubmit());
                 }}
             >
                 <form.Field name="name">

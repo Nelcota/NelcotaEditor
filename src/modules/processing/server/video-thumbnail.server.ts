@@ -6,6 +6,7 @@ import { videos } from "#/modules/video-records/video-records.schema";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
+import { logger } from "#/shared/server/logger.server";
 
 const THUMBNAIL_FILE_NAME = "thumbnail.jpg";
 const THUMBNAIL_WIDTH = 640;
@@ -57,6 +58,6 @@ export async function ensureVideoThumbnail(input: ThumbnailSource): Promise<void
         ]);
         await db.update(videos).set({ thumbnailPath }).where(eq(videos.id, video.id));
     } catch (error) {
-        console.warn(`Could not create the thumbnail of video ${video.id}`, error);
+        logger.warn("Could not create the video thumbnail", { videoId: video.id, error });
     }
 }

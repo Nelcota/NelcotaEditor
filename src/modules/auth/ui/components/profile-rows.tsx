@@ -14,6 +14,7 @@ import { UserAvatar } from "#/shared/ui/user-avatar";
 import { useSignOut } from "#/modules/auth/ui/hooks/use-sign-out";
 import { Button } from "#/shared/ui/button";
 import { SettingsRow } from "#/shared/ui/settings-row";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const appRoute = getRouteApi("/_app");
 
@@ -57,6 +58,7 @@ function PasswordLine({ hasChanged }: { hasChanged: boolean }): ReactNode {
 
 /** The Perfil group's rows: who is signed in (photo, name, email), the password and the session. */
 export function ProfileRows(): ReactNode {
+    const track = useTrackPromise();
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
     const [openDialog, setOpenDialog] = useState<OpenDialog>(null);
@@ -117,9 +119,7 @@ export function ProfileRows(): ReactNode {
                 <Button
                     variant="secondary"
                     size="sm"
-                    onClick={async () => {
-                        await signOut();
-                    }}
+                    onClick={() => track(signOut())}
                     disabled={isSigningOut}
                     aria-busy={isSigningOut}
                 >

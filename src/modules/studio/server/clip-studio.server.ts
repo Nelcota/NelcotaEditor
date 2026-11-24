@@ -5,6 +5,7 @@ import { findTranscriptWords as findSavedTranscriptWords } from "#/modules/trans
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { Video } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
+import { logger } from "#/shared/server/logger.server";
 
 /** The Studio shows a video without a transcript as one without words. */
 export async function findStudioWords(videoId: string): Promise<Array<CaptionWord>> {
@@ -31,7 +32,7 @@ export function readStoredDraft(clip: Clip): StudioDraft | null {
     const result = studioDraftSchema.safeParse(stored);
 
     if (result.success === false) {
-        console.warn(`Ignoring an invalid Studio draft for clip ${clip.id}`);
+        logger.warn("Ignoring an invalid Studio draft", { clipId: clip.id });
         return null;
     }
 

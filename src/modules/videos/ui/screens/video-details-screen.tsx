@@ -17,6 +17,7 @@ import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { AsyncButton } from "#/shared/ui/async-button";
 
 const SKELETON_CLIP_COUNT = 4;
 
@@ -48,7 +49,13 @@ function LoadingState() {
     );
 }
 
-function LoadErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+function LoadErrorState({
+    message,
+    onRetry,
+}: {
+    message: string;
+    onRetry: () => Promise<unknown>;
+}) {
     return (
         <div className={PAGE_COLUMN_CLASS}>
             <EmptyState
@@ -57,10 +64,10 @@ function LoadErrorState({ message, onRetry }: { message: string; onRetry: () => 
                 description={`${message} Ele pode ter sido excluído em outra aba ou o link está incompleto.`}
                 action={
                     <div className="flex flex-wrap justify-center gap-2">
-                        <Button variant="secondary" onClick={onRetry}>
+                        <AsyncButton variant="secondary" onAction={onRetry}>
                             <RotateCwIcon aria-hidden="true" />
                             Tentar de novo
-                        </Button>
+                        </AsyncButton>
                         <Button asChild variant="ghost">
                             <Link to="/videos">
                                 <ArrowLeftIcon aria-hidden="true" />

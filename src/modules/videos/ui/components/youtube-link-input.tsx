@@ -2,6 +2,7 @@ import LinkIcon from "~icons/lucide/link";
 import { useState } from "react";
 import { SourceProblem } from "#/modules/videos/ui/components/source-problem";
 import { describeYoutubeLinkProblem } from "#/modules/videos/model/youtube-url";
+import { focusWhenShown } from "#/shared/ui/focus-when-shown";
 
 export const YOUTUBE_LINK_INPUT_ID = "new-video-link";
 const LINK_PROBLEM_ID = "new-video-link-problem";
@@ -54,7 +55,7 @@ export function YoutubeLinkInput({
                     autoCapitalize="none"
                     enterKeyHint="go"
                     // The person opened this dialog to paste; the field is ready for it.
-                    autoFocus
+                    ref={focusWhenShown}
                     placeholder="Cole o link do YouTube"
                     value={value}
                     disabled={disabled}

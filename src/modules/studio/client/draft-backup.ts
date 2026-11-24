@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { studioDraftSchema } from "#/modules/clips/model/clip-studio";
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
 
 const STORAGE_KEY_PREFIX = "nelcota:studio-draft:";
 // A backup this old is of a clip long since saved, deleted or abandoned; without pruning they
@@ -42,7 +43,7 @@ export function readDraftBackup(clipId: string): DraftBackup | null {
 
         return result.data;
     } catch (error) {
-        console.warn("Could not read the Studio backup", error);
+        reportClientProblem("Could not read the Studio backup", error);
         return null;
     }
 }
@@ -98,7 +99,7 @@ export function writeDraftBackup(clipId: string, backup: DraftBackup): void {
             JSON.stringify({ ...backup, savedAt: now }),
         );
     } catch (error) {
-        console.warn("Could not keep the Studio backup", error);
+        reportClientProblem("Could not keep the Studio backup", error);
     }
 }
 
@@ -106,6 +107,6 @@ export function clearDraftBackup(clipId: string): void {
     try {
         window.localStorage.removeItem(storageKey(clipId));
     } catch (error) {
-        console.warn("Could not clear the Studio backup", error);
+        reportClientProblem("Could not clear the Studio backup", error);
     }
 }

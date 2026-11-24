@@ -15,6 +15,7 @@ import { formatBytes } from "#/shared/ui/format";
 import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
 import { SettingsRow } from "#/shared/ui/settings-row";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const PERCENT = 100;
 const WARNING_PERCENT = 80;
@@ -94,6 +95,7 @@ function CrewRow({ stat }: { stat: CrewStat }): ReactNode {
 
 /** The Uso group's rows: the disk out of the quota, then what each crew member already did. */
 export function UsageRows(): ReactNode {
+    const track = useTrackPromise();
     const usageQuery = useQuery(usageQueryOptions());
     const usage = usageQuery.data;
 
@@ -104,13 +106,7 @@ export function UsageRows(): ReactNode {
                 label="Não foi possível carregar o uso"
                 description="Tente de novo; se continuar, recarregue a página."
             >
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={async () => {
-                        await usageQuery.refetch();
-                    }}
-                >
+                <Button variant="secondary" size="sm" onClick={() => track(usageQuery.refetch())}>
                     <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>

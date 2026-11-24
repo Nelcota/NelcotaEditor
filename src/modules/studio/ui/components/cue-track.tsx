@@ -52,7 +52,7 @@ export function CueTrack(props: CueTrackProps): ReactNode {
 
     return (
         <div ref={laneRef} className="relative h-9">
-            {draft.cues.map((_, index) => {
+            {draft.cues.map((draftCue, index) => {
                 const cue = shownCue(draft, index, dragged);
 
                 if (cue === undefined) {
@@ -64,7 +64,8 @@ export function CueTrack(props: CueTrackProps): ReactNode {
 
                 return (
                     <div
-                        key={`${draft.cues[index]?.startSeconds}-${index}`}
+                        // The saved times, not the dragged ones: the block keeps its element while it moves.
+                        key={`${draftCue.startSeconds}-${draftCue.endSeconds}`}
                         className={cn(
                             "absolute inset-y-0.5 overflow-hidden rounded-md border bg-secondary text-xs font-semibold text-muted-foreground",
                             index === playingIndex &&

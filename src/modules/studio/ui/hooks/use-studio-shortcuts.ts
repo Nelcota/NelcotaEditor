@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 const SKIP_SECONDS = 5;
 
 export interface StudioShortcutActions {
-    togglePlay: () => Promise<void>;
+    togglePlay: () => void;
     skip: (deltaSeconds: number) => void;
     markStart: () => void;
     markEnd: () => void;
@@ -62,9 +62,7 @@ function runShortcut(event: KeyboardEvent, actions: StudioShortcutActions): bool
         l: () => actions.skip(SKIP_SECONDS),
         "[": actions.markStart,
         "]": actions.markEnd,
-        " ": () => {
-            void actions.togglePlay();
-        },
+        " ": actions.togglePlay,
     };
     const action = plainKeys[key];
 
@@ -86,7 +84,7 @@ export function useStudioShortcuts(actions: StudioShortcutActions, isEnabled: bo
 
     useEffect(() => {
         if (isEnabled === false) {
-            return;
+            return undefined;
         }
 
         const onKeyDown = (event: KeyboardEvent): void => {

@@ -1,6 +1,6 @@
 import RotateCcwIcon from "~icons/lucide/rotate-ccw";
 import ScissorsLineDashedIcon from "~icons/lucide/scissors-line-dashed";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { formatPreciseClock, parseClockInput } from "#/modules/clips/model/clip-time";
 import { TIME_TOLERANCE_SECONDS } from "#/modules/clips/model/clip-studio";
@@ -100,6 +100,17 @@ function TimeField({
 export function CueEditor(props: CueEditorProps): ReactNode {
     const { draft, index, cue, words, onReplace, onResetToOriginal, onClose } = props;
     const textRef = useRef<HTMLInputElement>(null);
+
+    // The editor opens because the person picked this caption, so its text is ready to type.
+    useEffect(() => {
+        const input = textRef.current;
+
+        if (input === null) {
+            return;
+        }
+
+        input.focus();
+    }, []);
     const currentText = cueText(cue);
     const [text, setText] = useState(currentText);
     const [shownCueText, setShownCueText] = useState(currentText);
@@ -204,7 +215,6 @@ export function CueEditor(props: CueEditorProps): ReactNode {
         <div className="grid gap-2.5 border-b bg-popover px-4 py-3 shadow-[inset_3px_0_0_var(--primary)]">
             <Input
                 ref={textRef}
-                autoFocus
                 value={text}
                 aria-label="Texto do bloco"
                 onChange={(event) => setText(event.target.value)}

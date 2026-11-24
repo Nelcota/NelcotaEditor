@@ -88,7 +88,7 @@ function useCaptionReset(editor: StudioEditor, words: Array<CaptionWord>): Capti
             return null;
         }
 
-        if (canUndoReset(draft, lastReset.before, words, lastReset.reset) === false) {
+        if (canUndoReset(draft, lastReset, words) === false) {
             return null;
         }
 

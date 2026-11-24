@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
+import { toCaptionsUrl } from "#/modules/transcription/model/captions-url";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { OriginalControls } from "#/modules/videos/ui/components/original-controls";
 import type { StudioLink } from "#/modules/videos/ui/components/original-controls";
@@ -59,7 +60,13 @@ function PlayableOriginal({
                 onSeeked={(event) => onTimeChange(event.currentTarget.currentTime)}
                 onError={onFailure}
                 className="object-contain"
-            />
+            >
+                <track
+                    kind="captions"
+                    src={toCaptionsUrl(video.id)}
+                    label="Legendas da transcrição"
+                />
+            </video>
         </MediaSurface>
     );
 }

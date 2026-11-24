@@ -11,10 +11,17 @@ import { useSearchDraft } from "#/modules/admin/ui/hooks/use-search-draft";
 import { SearchField } from "#/shared/ui/search-field";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
+
+interface ResultsProps {
+    search: AdminUsersSearch;
+    onSearchChange: (search: AdminUsersSearch) => void;
+}
 
 interface AdminUsersScreenProps {
     search: AdminUsersSearch;
-    onSearchChange: (search: AdminUsersSearch) => void;
+    /** Navigates to the new search; the screen keeps the promise and any failure. */
+    onSearchChange: (search: AdminUsersSearch) => Promise<unknown>;
 }
 
 /** Defaults stay out of the URL, so the plain link and the first page look the same. */
@@ -22,7 +29,7 @@ function toAdminUsersSearch(search: AdminUsersSearch): AdminUsersSearch {
     return { q: toQuerySearch(search.q), page: toPageSearch(search.page) };
 }
 
-function UserResults({ search, onSearchChange }: AdminUsersScreenProps): ReactNode {
+function UserResults({ search, onSearchChange }: ResultsProps): ReactNode {
     const page = search.page ?? 1;
     const usersQuery = useQuery(adminUsersQueryOptions({ query: search.q ?? "", page }));
     const result = usersQuery.data;
@@ -67,10 +74,13 @@ function UserResults({ search, onSearchChange }: AdminUsersScreenProps): ReactNo
     );
 }
 
-export function AdminUsersScreen({ search, onSearchChange }: AdminUsersScreenProps): ReactNode {
+export function AdminUsersScreen(props: AdminUsersScreenProps): ReactNode {
+    const { search, onSearchChange: navigateToSearch } = props;
+    const track = useTrackPromise();
+    const onSearchChange = (next: AdminUsersSearch): void => track(navigateToSearch(next));
     const handleSearch = useCallback(
-        (next: string) => onSearchChange(toAdminUsersSearch({ q: next, page: 1 })),
-        [onSearchChange],
+        (next: string) => track(navigateToSearch(toAdminUsersSearch({ q: next, page: 1 }))),
+        [navigateToSearch, track],
     );
     const searchDraft = useSearchDraft(search.q ?? "", handleSearch);
 

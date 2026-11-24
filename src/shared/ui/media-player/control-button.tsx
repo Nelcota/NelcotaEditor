@@ -13,7 +13,7 @@ const SIZE_CLASSES: Record<ControlSize, string> = {
 interface ControlButtonProps {
     label: string;
     icon: IconComponent;
-    onClick: () => Promise<void> | void;
+    onClick: () => void;
     size?: ControlSize;
     isDisabled?: boolean;
     className?: string;
@@ -37,9 +37,7 @@ export function ControlButton({
                 type="button"
                 aria-label={label}
                 disabled={isDisabled}
-                onClick={async () => {
-                    await onClick();
-                }}
+                onClick={onClick}
                 className={cn(
                     "grid shrink-0 place-items-center rounded-lg text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-4 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent motion-safe:active:scale-[0.99]",
                     SIZE_CLASSES[size],

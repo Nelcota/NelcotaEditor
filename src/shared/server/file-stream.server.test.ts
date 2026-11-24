@@ -1,3 +1,4 @@
+import { z } from "zod";
 import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import fileSystem from "node:fs/promises";
@@ -6,6 +7,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, afterEach, before, describe, it, mock } from "node:test";
 import { createFileStream } from "#/shared/server/file-stream.server";
+
+const logEntrySchema = z.object({ message: z.string(), file: z.string() });
 
 const FILE_CONTENT = "hello, stream";
 
@@ -152,9 +155,10 @@ describe("createFileStream", () => {
 
     it("logs a read that fails mid-way without the server's directories, then closes the file", async () => {
         const openedFiles = spyOnOpenedFiles();
-        const warnings: Array<string> = [];
-        mock.method(console, "warn", (message: string) => {
-            warnings.push(message);
+        const logLines: Array<string> = [];
+        mock.method(process.stderr, "write", (chunk: unknown) => {
+            logLines.push(String(chunk));
+            return true;
         });
         const stream = createFileStream(filePath, 0, FILE_CONTENT.length - 1);
         await waitForOpen(openedFiles);
@@ -171,7 +175,8 @@ describe("createFileStream", () => {
         await assert.rejects(new Response(stream).text(), /disk read failed/);
 
         const expectedFile = `${path.basename(directory)}/source.mp4`;
-        assert.deepEqual(warnings, [`File stream failed mid-way: ${expectedFile}`]);
+        const entries = logLines.map((line) => logEntrySchema.parse(JSON.parse(line)));
+        assert.deepEqual(entries, [{ message: "File stream failed mid-way", file: expectedFile }]);
         assert.equal(openedFiles.closeCount(), 1);
     });
 });

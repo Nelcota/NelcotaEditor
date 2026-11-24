@@ -1,16 +1,20 @@
-import type { KeyboardEvent } from "react";
+/** The parts of a key press the shortcuts read; React and DOM keyboard events both have them. */
+export type ShortcutKeyEvent = Pick<
+    KeyboardEvent,
+    "key" | "target" | "altKey" | "ctrlKey" | "metaKey" | "preventDefault"
+>;
 
 const SHORT_SKIP_SECONDS = 5;
 const LONG_SKIP_SECONDS = 10;
 
 export interface ShortcutActions {
-    togglePlay: () => Promise<void>;
+    togglePlay: () => void;
     seekBy: (deltaSeconds: number) => void;
     toggleMute: () => void;
-    toggleFullscreen: () => Promise<void>;
+    toggleFullscreen: () => void;
 }
 
-type ShortcutAction = (actions: ShortcutActions) => Promise<void> | void;
+type ShortcutAction = (actions: ShortcutActions) => void;
 
 /** The same keys as the big video sites, so nobody has to learn new ones. */
 const KEY_ACTIONS = new Map<string, ShortcutAction>([
@@ -27,10 +31,7 @@ const KEY_ACTIONS = new Map<string, ShortcutAction>([
 /** Buttons and sliders already use these keys themselves (press, move the slider). */
 const KEYS_OWNED_BY_CONTROLS = new Set([" ", "arrowleft", "arrowright"]);
 
-export async function handleMediaShortcut(
-    event: KeyboardEvent<HTMLElement>,
-    actions: ShortcutActions,
-): Promise<void> {
+export function handleMediaShortcut(event: ShortcutKeyEvent, actions: ShortcutActions): void {
     const key = event.key.toLowerCase();
     const target = event.target;
     const action = KEY_ACTIONS.get(key);
@@ -51,5 +52,5 @@ export async function handleMediaShortcut(
     }
 
     event.preventDefault();
-    await action(actions);
+    action(actions);
 }

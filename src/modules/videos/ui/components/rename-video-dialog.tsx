@@ -17,6 +17,7 @@ import {
     StepDialogFrame,
 } from "#/shared/ui/step-dialog-frame";
 import { TextField } from "#/shared/ui/text-field";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const FALLBACK_ERROR_MESSAGE =
     "Não foi possível renomear o vídeo. Confira sua conexão e tente de novo.";
@@ -40,6 +41,7 @@ interface RenameVideoFormProps {
 }
 
 function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
+    const track = useTrackPromise();
     const queryClient = useQueryClient();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
@@ -67,9 +69,9 @@ function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
         <form
             noValidate
             className="grid min-h-0"
-            onSubmit={async (event) => {
+            onSubmit={(event) => {
                 event.preventDefault();
-                await form.handleSubmit();
+                track(form.handleSubmit());
             }}
         >
             <StepDialogFrame

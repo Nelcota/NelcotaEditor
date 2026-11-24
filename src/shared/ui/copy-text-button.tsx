@@ -4,6 +4,8 @@ import CircleAlertIcon from "~icons/lucide/circle-alert";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Button } from "#/shared/ui/button";
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 type CopyState = "idle" | "copied" | "failed";
 
@@ -44,6 +46,7 @@ export function CopyTextButton({
     className,
     labelClassName,
 }: CopyTextButtonProps): ReactNode {
+    const track = useTrackPromise();
     const [state, setState] = useState<CopyState>("idle");
 
     useEffect(() => {
@@ -60,13 +63,18 @@ export function CopyTextButton({
             await navigator.clipboard.writeText(text);
             setState("copied");
         } catch (error) {
-            console.warn("Could not copy to the clipboard", error);
+            reportClientProblem("Could not copy to the clipboard", error);
             setState("failed");
         }
     };
 
     return (
-        <Button variant="outline" onClick={copy} aria-live="polite" className={className}>
+        <Button
+            variant="outline"
+            onClick={() => track(copy())}
+            aria-live="polite"
+            className={className}
+        >
             {STATE_ICONS[state]}
             <span className={labelClassName}>{toLabel(state, label)}</span>
         </Button>

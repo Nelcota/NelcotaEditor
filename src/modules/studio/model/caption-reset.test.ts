@@ -110,7 +110,7 @@ describe("canUndoReset", () => {
         const before = editFirstCue(transcriptDraft());
         const after = resetCaptions(before, WORDS, { scope: "all" });
 
-        assert.equal(canUndoReset(after, before, WORDS, { scope: "all" }), true);
+        assert.equal(canUndoReset(after, { before, reset: { scope: "all" } }, WORDS), true);
     });
 
     it("stops offering undo once something else changed", () => {
@@ -118,12 +118,12 @@ describe("canUndoReset", () => {
         const after = resetCaptions(before, WORDS, { scope: "all" });
         const laterEdit: StudioDraft = { ...after, captionColor: "green" };
 
-        assert.equal(canUndoReset(laterEdit, before, WORDS, { scope: "all" }), false);
+        assert.equal(canUndoReset(laterEdit, { before, reset: { scope: "all" } }, WORDS), false);
     });
 
     it("stops offering undo once the edits are back", () => {
         const before = editFirstCue(transcriptDraft());
 
-        assert.equal(canUndoReset(before, before, WORDS, { scope: "all" }), false);
+        assert.equal(canUndoReset(before, { before, reset: { scope: "all" } }, WORDS), false);
     });
 });

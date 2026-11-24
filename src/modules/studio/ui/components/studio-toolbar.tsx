@@ -12,6 +12,7 @@ import { Button } from "#/shared/ui/button";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { cn } from "#/shared/ui/cn";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const SAVE_LABELS: Record<SaveStatus, string> = {
     saved: "Rascunho salvo",
@@ -36,6 +37,7 @@ interface StudioToolbarProps {
 }
 
 function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
+    const track = useTrackPromise();
     const status = editor.autosave.status;
     let Icon = CloudCheckIcon;
 
@@ -56,9 +58,7 @@ function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
             {status === "failed" && (
                 <button
                     type="button"
-                    onClick={async () => {
-                        await editor.autosave.flush();
-                    }}
+                    onClick={() => track(editor.autosave.flush())}
                     className="rounded font-medium underline underline-offset-2 outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
                     Tentar de novo

@@ -4,6 +4,7 @@ import type { DashboardSearch } from "#/modules/videos/model/dashboard-search";
 import { NewVideoDialog } from "#/modules/videos/ui/components/new-video-dialog";
 import { NewVideoLink } from "#/modules/videos/ui/components/new-video-link";
 import { VideoList } from "#/modules/videos/ui/components/video-list";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const dashboardRoute = getRouteApi("/_app/videos/");
 
@@ -17,6 +18,7 @@ function withNewVideo(search: DashboardSearch, isOpen: boolean): DashboardSearch
 }
 
 export function DashboardScreen(): ReactNode {
+    const track = useTrackPromise();
     const search = dashboardRoute.useSearch();
     const navigate = useNavigate();
 
@@ -26,13 +28,15 @@ export function DashboardScreen(): ReactNode {
             <VideoList action={<NewVideoLink emphasis="primary" className="max-sm:w-full" />} />
             <NewVideoDialog
                 isOpen={search.newVideo === true}
-                onOpenChange={async (isOpen) => {
-                    await navigate({
-                        to: "/videos",
-                        search: withNewVideo(search, isOpen),
-                        replace: true,
-                    });
-                }}
+                onOpenChange={(isOpen) =>
+                    track(
+                        navigate({
+                            to: "/videos",
+                            search: withNewVideo(search, isOpen),
+                            replace: true,
+                        }),
+                    )
+                }
             />
         </div>
     );

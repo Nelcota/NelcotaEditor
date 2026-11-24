@@ -43,6 +43,15 @@ export function toCue(words: Array<CaptionWord>): CaptionCue | null {
     };
 }
 
+/** Adds the words as one cue to the list being built; an empty group adds nothing. */
+function pushCue(cues: Array<CaptionCue>, words: Array<CaptionWord>): void {
+    const cue = toCue(words);
+
+    if (cue !== null) {
+        cues.push(cue);
+    }
+}
+
 /** Short groups of words, broken at punctuation and pauses: how captions read best on a phone. */
 export function groupWordsIntoCues(words: Array<CaptionWord>): Array<CaptionCue> {
     const cues: Array<CaptionCue> = [];
@@ -50,23 +59,14 @@ export function groupWordsIntoCues(words: Array<CaptionWord>): Array<CaptionCue>
 
     for (const word of words) {
         if (startsNewCue(currentWords, word) === true) {
-            const cue = toCue(currentWords);
-
-            if (cue !== null) {
-                cues.push(cue);
-            }
-
+            pushCue(cues, currentWords);
             currentWords = [];
         }
 
         currentWords.push(word);
     }
 
-    const lastCue = toCue(currentWords);
-
-    if (lastCue !== null) {
-        cues.push(lastCue);
-    }
+    pushCue(cues, currentWords);
 
     return cues;
 }

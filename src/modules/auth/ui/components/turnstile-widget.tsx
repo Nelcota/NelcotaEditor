@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { FormAlert } from "#/shared/ui/form-alert";
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const TURNSTILE_SCRIPT_URL =
     "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -76,6 +78,7 @@ interface TurnstileWidgetProps {
 
 /** Cloudflare Turnstile; reports a fresh token, or null while there is none to send. */
 export function TurnstileWidget({ siteKey, onTokenChange }: TurnstileWidgetProps): ReactNode {
+    const track = useTrackPromise();
     const containerRef = useRef<HTMLDivElement>(null);
     const [hasLoadFailed, setHasLoadFailed] = useState(false);
 
@@ -85,7 +88,7 @@ export function TurnstileWidget({ siteKey, onTokenChange }: TurnstileWidgetProps
         let isUnmounted = false;
 
         if (container === null) {
-            return;
+            return undefined;
         }
 
         async function mountWidget(target: HTMLDivElement): Promise<void> {
@@ -106,12 +109,12 @@ export function TurnstileWidget({ siteKey, onTokenChange }: TurnstileWidgetProps
                     size: "flexible",
                 });
             } catch (error) {
-                console.warn("Could not show the Turnstile check", error);
+                reportClientProblem("Could not show the Turnstile check", error);
                 setHasLoadFailed(true);
             }
         }
 
-        void mountWidget(container);
+        track(mountWidget(container));
 
         return () => {
             isUnmounted = true;
@@ -121,7 +124,7 @@ export function TurnstileWidget({ siteKey, onTokenChange }: TurnstileWidgetProps
                 api.remove(widgetId);
             }
         };
-    }, [siteKey, onTokenChange]);
+    }, [siteKey, onTokenChange, track]);
 
     if (hasLoadFailed === true) {
         return <FormAlert message={LOAD_FAILED_MESSAGE} />;

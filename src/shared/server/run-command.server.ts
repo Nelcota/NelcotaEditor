@@ -64,6 +64,20 @@ function toCommandError(command: string, error: unknown): unknown {
  * Runs a program without a shell (arguments are never interpolated) and returns its stdout.
  * execa handles line splitting, cancellation and killing the process tree.
  */
+/** The iterable is lazy: without a listener nothing reads the output line by line. */
+async function forwardOutputLines(
+    lines: AsyncIterable<string>,
+    onOutputLine: ((line: string) => void) | undefined,
+): Promise<void> {
+    if (onOutputLine === undefined) {
+        return;
+    }
+
+    for await (const line of lines) {
+        onOutputLine(line);
+    }
+}
+
 export async function runCommand(
     command: string,
     args: ReadonlyArray<string>,
@@ -85,12 +99,7 @@ export async function runCommand(
     const onOutputLine = options.onOutputLine;
 
     try {
-        if (onOutputLine !== undefined) {
-            for await (const line of subprocess.iterable({ from: "all" })) {
-                onOutputLine(line);
-            }
-        }
-
+        await forwardOutputLines(subprocess.iterable({ from: "all" }), onOutputLine);
         const result = await subprocess;
         return result.stdout;
     } catch (error) {

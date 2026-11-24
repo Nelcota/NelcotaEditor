@@ -3,6 +3,7 @@ import { db } from "#/db/database.server";
 import { DEFAULT_PREFERENCES, preferencesSchema } from "#/modules/preferences/model/preferences";
 import type { Preferences } from "#/modules/preferences/model/preferences";
 import { userPreferences } from "#/modules/preferences/preferences.schema";
+import { logger } from "#/shared/server/logger.server";
 
 /** The user's saved preferences, or the defaults when nothing was saved (or the row is invalid). */
 export async function findPreferences(userId: string): Promise<Preferences> {
@@ -30,7 +31,7 @@ export async function findPreferences(userId: string): Promise<Preferences> {
     const result = preferencesSchema.safeParse(savedRow);
 
     if (result.success === false) {
-        console.warn(`Ignoring invalid saved preferences of user ${userId}`, result.error.issues);
+        logger.warn("Ignoring invalid saved preferences", { userId, issues: result.error.issues });
         return DEFAULT_PREFERENCES;
     }
 

@@ -14,6 +14,7 @@ import {
 } from "#/modules/overview/ui/components/overview-states";
 import { PeriodPicker } from "#/modules/overview/ui/components/period-picker";
 import { PageHeader } from "#/shared/ui/page-header";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const overviewRoute = getRouteApi("/_app/overview");
 
@@ -83,6 +84,7 @@ function OverviewContent({
 
 /** The Vídeos module owns the first-video welcome, so the route hands it in. */
 export function OverviewScreen({ firstVideoEmptyState }: { firstVideoEmptyState: ReactNode }) {
+    const track = useTrackPromise();
     const search = overviewRoute.useSearch();
     const navigate = useNavigate();
     const periodDays = search.period ?? DEFAULT_OVERVIEW_PERIOD_DAYS;
@@ -95,11 +97,16 @@ export function OverviewScreen({ firstVideoEmptyState }: { firstVideoEmptyState:
             <PageHeader
                 title="Painel"
                 description="Quanto você enviou, quantos cortes saíram e como foi cada etapa."
-                action={<PeriodPicker value={periodDays} onChange={changePeriod} />}
+                action={
+                    <PeriodPicker
+                        value={periodDays}
+                        onChange={(next) => track(changePeriod(next))}
+                    />
+                }
             />
             <OverviewContent
                 periodDays={periodDays}
-                onPeriodChange={changePeriod}
+                onPeriodChange={(next) => track(changePeriod(next))}
                 firstVideoEmptyState={firstVideoEmptyState}
             />
         </div>

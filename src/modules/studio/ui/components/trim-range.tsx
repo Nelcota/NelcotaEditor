@@ -29,7 +29,14 @@ interface TrimRangeProps {
 }
 
 /** Where an edge may go: the clip stays 15–90 s long and inside the video. */
-function limitEdge(draft: StudioDraft, durationSeconds: number, edge: TrimEdge, seconds: number) {
+interface EdgeMove {
+    edge: TrimEdge;
+    seconds: number;
+}
+
+function limitEdge(draft: StudioDraft, durationSeconds: number, move: EdgeMove): number {
+    const { edge, seconds } = move;
+
     if (edge === "start") {
         const earliest = Math.max(0, draft.endSeconds - MAX_CLIP_SECONDS);
         return clamp(seconds, earliest, draft.endSeconds - MIN_CLIP_SECONDS);
@@ -66,7 +73,7 @@ function describeLimit(draft: StudioDraft, drag: ActiveEdge | null): string | nu
 export function TrimRange(props: TrimRangeProps): ReactNode {
     const { draft, window, laneRef, videoDurationSeconds, isLocked, onTrim } = props;
     const limit = (edge: TrimEdge, seconds: number): number =>
-        limitEdge(draft, videoDurationSeconds, edge, seconds);
+        limitEdge(draft, videoDurationSeconds, { edge, seconds });
     const commit = (edge: TrimEdge, seconds: number): void => {
         if (edge === "start") {
             onTrim(seconds, draft.endSeconds);

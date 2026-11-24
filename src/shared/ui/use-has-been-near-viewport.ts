@@ -15,7 +15,7 @@ export function useHasBeenNearViewport(elementRef: RefObject<Element | null>): b
         const element = elementRef.current;
 
         if (element === null || hasBeenNear === true) {
-            return;
+            return undefined;
         }
 
         const observer = new IntersectionObserver(

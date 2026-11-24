@@ -1,3 +1,4 @@
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
 /** Speeds the speed button steps through, in order; it wraps around after the last one. */
 const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.5];
 const MIN_VOLUME = 0;
@@ -9,7 +10,7 @@ async function startPlayback(video: HTMLVideoElement): Promise<void> {
     } catch (error) {
         // The browser can refuse to start (autoplay rules) or a pause can interrupt the start; the
         // play button stays visible, so the person can simply press it again.
-        console.warn("Could not start the video", error);
+        reportClientProblem("Could not start the video", error);
     }
 }
 

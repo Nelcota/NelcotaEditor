@@ -22,6 +22,8 @@ import {
 import { StepRail } from "#/shared/ui/step-rail";
 import { TextField } from "#/shared/ui/text-field";
 import { useSteps } from "#/shared/ui/use-steps";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { focusWhenShown } from "#/shared/ui/focus-when-shown";
 
 const STEPS = [
     {
@@ -120,8 +122,9 @@ function DeleteFooter({ isConfirmStep, isSubmitting, onBack }: DeleteFooterProps
 }
 
 function DeleteAccountSteps(): ReactNode {
-    const steps = useSteps(STEPS.length);
-    const step = STEPS[steps.index];
+    const track = useTrackPromise();
+    const steps = useSteps(STEPS);
+    const step = steps.current;
     const isConfirmStep = steps.index === CONFIRM_INDEX;
     const { form, errorMessage } = useDeleteAccountForm();
 
@@ -137,7 +140,7 @@ function DeleteAccountSteps(): ReactNode {
     };
 
     return (
-        <form noValidate onSubmit={submit} className="grid min-h-0">
+        <form noValidate onSubmit={(event) => track(submit(event))} className="grid min-h-0">
             <StepDialogFrame
                 kind="dialog"
                 rail={
@@ -175,7 +178,7 @@ function DeleteAccountSteps(): ReactNode {
                                 label="Senha"
                                 type="password"
                                 autoComplete="current-password"
-                                autoFocus
+                                ref={focusWhenShown}
                                 value={field.state.value}
                                 onBlur={field.handleBlur}
                                 onValueChange={field.handleChange}

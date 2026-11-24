@@ -30,6 +30,7 @@ import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { resolveStoragePath } from "#/shared/server/storage.server";
+import { logger } from "#/shared/server/logger.server";
 
 const studioWordsInputSchema = z.object({ videoId: z.uuid() });
 
@@ -138,7 +139,7 @@ async function removeOldOutput(clip: Clip): Promise<void> {
     try {
         await rm(resolveStoragePath(outputPath), { force: true });
     } catch (error) {
-        console.error(`Failed to remove the previous file of clip ${clip.id}`, error);
+        logger.error("Failed to remove the previous clip file", { clipId: clip.id, error });
     }
 }
 

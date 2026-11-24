@@ -29,7 +29,7 @@ export function useSearchDraft(query: string, onSearch: (query: string) => void)
         const trimmed = draft.trim();
 
         if (trimmed === query) {
-            return;
+            return undefined;
         }
 
         const timeout = window.setTimeout(() => {

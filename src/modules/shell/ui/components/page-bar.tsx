@@ -47,7 +47,7 @@ export function PageBar({ children }: { children?: ReactNode }): ReactNode {
                 <ol className="flex min-w-0 items-center gap-2 text-sm">
                     {crumbs.map((crumb, index) => (
                         <li
-                            key={`${crumb.label}-${index}`}
+                            key={`${crumb.to ?? "current"}-${crumb.label}`}
                             className="flex min-w-0 items-center gap-2 last:shrink"
                         >
                             {index > 0 && (

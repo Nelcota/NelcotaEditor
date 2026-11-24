@@ -6,6 +6,7 @@ import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-masco
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 /** Two rows of the widest grid, so the first screen is full on any width. */
 const SKELETON_CARD_COUNT = 8;
@@ -56,10 +57,11 @@ const FAILURES_BEFORE_RELOAD = 2;
 interface ClipsLoadErrorProps {
     /** Failed loads so far, from the query itself, so it survives the loading screen in between. */
     errorCount: number;
-    onRetry: () => void;
+    onRetry: () => Promise<unknown>;
 }
 
 export function ClipsLoadError({ errorCount, onRetry }: ClipsLoadErrorProps): ReactNode {
+    const track = useTrackPromise();
     return (
         <EmptyState
             art={<StageCrewMascot status="failed" className="size-14" />}
@@ -75,7 +77,7 @@ export function ClipsLoadError({ errorCount, onRetry }: ClipsLoadErrorProps): Re
                             return;
                         }
 
-                        onRetry();
+                        track(onRetry());
                     }}
                 >
                     <RotateCwIcon aria-hidden="true" />

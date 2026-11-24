@@ -12,6 +12,7 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from "#/shared/ui/dropdown-menu";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const appRoute = getRouteApi("/_app");
 
@@ -42,6 +43,7 @@ export function AccountMenuContent({
     hasAccountLink,
     ...contentProps
 }: AccountMenuContentProps): ReactNode {
+    const track = useTrackPromise();
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
     const { signOut, isSigningOut, errorMessage } = useSignOut();
@@ -87,10 +89,10 @@ export function AccountMenuContent({
             <DropdownMenuItem
                 disabled={isSigningOut}
                 aria-busy={isSigningOut}
-                onSelect={async (event) => {
+                onSelect={(event) => {
                     // Keeps the menu open, so a failure can be shown next to the item.
                     event.preventDefault();
-                    await signOut();
+                    track(signOut());
                 }}
             >
                 <LogOutIcon aria-hidden="true" />

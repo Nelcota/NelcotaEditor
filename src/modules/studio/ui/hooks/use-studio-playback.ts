@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { createPlaybackClock } from "#/modules/studio/ui/hooks/playback-clock";
 import type { PlaybackClock } from "#/modules/studio/ui/hooks/playback-clock";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 interface PlaybackRange {
     startSeconds: number;
@@ -12,7 +13,7 @@ export interface StudioPlayback {
     /** The time, every frame; read it with usePlaybackValue, or clock.read() inside a handler. */
     clock: PlaybackClock;
     isPlaying: boolean;
-    togglePlay: () => Promise<void>;
+    togglePlay: () => void;
     seek: (seconds: number) => void;
 }
 
@@ -27,6 +28,7 @@ export function useStudioPlayback(
     const rangeRef = useRef(range);
     const [clock] = useState(() => createPlaybackClock(range.startSeconds));
     const [isPlaying, setIsPlaying] = useState(false);
+    const track = useTrackPromise();
 
     useEffect(() => {
         rangeRef.current = range;
@@ -45,7 +47,7 @@ export function useStudioPlayback(
         video.currentTime = clamped;
     };
 
-    const togglePlay = async (): Promise<void> => {
+    const togglePlay = (): void => {
         const video = videoRef.current;
 
         if (video === null) {
@@ -61,14 +63,14 @@ export function useStudioPlayback(
             video.currentTime = rangeRef.current.startSeconds;
         }
 
-        await video.play();
+        track(video.play());
     };
 
     useEffect(() => {
         const video = videoRef.current;
 
         if (video === null || isPlaying === false) {
-            return;
+            return undefined;
         }
 
         let frame = 0;
@@ -92,7 +94,7 @@ export function useStudioPlayback(
         const video = videoRef.current;
 
         if (video === null) {
-            return;
+            return undefined;
         }
 
         const onPlay = (): void => setIsPlaying(true);

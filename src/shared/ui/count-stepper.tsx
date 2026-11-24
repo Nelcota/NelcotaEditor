@@ -62,10 +62,9 @@ export function CountStepper(props: CountStepperProps): ReactNode {
                 {icon}
                 {label}
             </span>
-            <div
-                role="group"
+            <fieldset
                 aria-labelledby={labelId}
-                className="flex min-h-11 items-center justify-between gap-2 rounded-xl border border-input bg-background p-1"
+                className="flex min-w-0 min-h-11 items-center justify-between gap-2 rounded-xl border border-input bg-background p-1"
             >
                 <Button
                     type="button"
@@ -94,7 +93,7 @@ export function CountStepper(props: CountStepperProps): ReactNode {
                 >
                     <PlusIcon aria-hidden="true" />
                 </Button>
-            </div>
+            </fieldset>
         </div>
     );
 }

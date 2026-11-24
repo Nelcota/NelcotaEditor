@@ -17,6 +17,7 @@ import {
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import type { Video } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
+import { logger } from "#/shared/server/logger.server";
 
 // Used when the model leaves the score out: the middle of the 1–100 scale ranks it neutrally.
 const DEFAULT_SCORE = 50;
@@ -132,9 +133,11 @@ async function requestCandidates(
 
     const returnedItems = result.data.clips;
     const candidates = toCandidates(parseHighlightClips(returnedItems));
-    console.info(
-        `Highlights of video ${video.id}: ${returnedItems.length} returned, ${candidates.length} valid.`,
-    );
+    logger.info("Highlights returned", {
+        videoId: video.id,
+        returnedCount: returnedItems.length,
+        validCount: candidates.length,
+    });
     return candidates;
 }
 
@@ -191,9 +194,11 @@ export async function ensureHighlights(input: HighlightSelectionInput): Promise<
         maxCount: video.requestedClipCount,
         clipLength: video.clipLength,
     });
-    console.info(
-        `Highlights of video ${video.id}: ${highlights.length} of ${candidates.length} kept after fitting.`,
-    );
+    logger.info("Highlights fitted", {
+        videoId: video.id,
+        keptCount: highlights.length,
+        candidateCount: candidates.length,
+    });
 
     if (highlights.length === 0) {
         throw new UserFacingError(describeNoHighlights(durationSeconds));
