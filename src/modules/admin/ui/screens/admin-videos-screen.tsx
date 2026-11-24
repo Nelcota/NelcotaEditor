@@ -6,7 +6,6 @@ import HourglassIcon from "~icons/lucide/hourglass";
 import LayoutGridIcon from "~icons/lucide/layout-grid";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useCallback } from "react";
 import type { ReactNode } from "react";
 import {
     ADMIN_VIDEO_FILTERS,
@@ -163,11 +162,8 @@ export function AdminVideosScreen(props: AdminVideosScreenProps): ReactNode {
     const track = useTrackPromise();
     const onSearchChange = (next: AdminVideosSearch): void => track(navigateToSearch(next));
     const query = search.q ?? "";
-    const handleSearch = useCallback(
-        (next: string) =>
-            track(navigateToSearch(toAdminVideosSearch({ ...search, q: next, page: 1 }))),
-        [search, navigateToSearch, track],
-    );
+    const handleSearch = (next: string) =>
+        track(navigateToSearch(toAdminVideosSearch({ ...search, q: next, page: 1 })));
     const searchDraft = useSearchDraft(query, handleSearch);
 
     return (

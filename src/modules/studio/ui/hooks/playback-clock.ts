@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 /**
  * The preview's current time, outside React state. It changes every frame while playing; storing
@@ -40,7 +40,7 @@ export function usePlaybackValue<Value>(
     clock: PlaybackClock,
     select: (seconds: number) => Value,
 ): Value {
-    const readSelected = useCallback(() => select(clock.read()), [clock, select]);
+    const readSelected = () => select(clock.read());
 
     return useSyncExternalStore(clock.subscribe, readSelected, readSelected);
 }

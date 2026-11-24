@@ -2,7 +2,8 @@ import { loadEnv } from "vite";
 import type { Plugin, PluginOption } from "vite";
 import { configDefaults, defineConfig } from "vitest/config";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+import viteReact, { reactCompilerPreset } from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import icons from "unplugin-icons/vite";
@@ -108,6 +109,8 @@ export default defineConfig({
     plugins: [
         ...appServerPlugins(),
         viteReact(),
+        // The React Compiler memoizes components and hooks, so the code has no useMemo/useCallback.
+        babel({ presets: [reactCompilerPreset()] }),
         icons({
             compiler: "jsx",
             jsx: "react",

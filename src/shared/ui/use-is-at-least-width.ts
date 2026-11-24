@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 function readServerSnapshot(): boolean {
     return false;
@@ -18,25 +18,22 @@ export function useIsAtLeastWidth(element: HTMLElement | null, minWidthPixels: n
     }
 
     // Stable per element: a new subscribe function would resubscribe on every render.
-    const subscribe = useCallback(
-        (onChange: () => void): (() => void) => {
-            if (element === null) {
-                return ignoreUnsubscribe;
-            }
+    const subscribe = (onChange: () => void): (() => void) => {
+        if (element === null) {
+            return ignoreUnsubscribe;
+        }
 
-            const observer = new ResizeObserver(onChange);
-            observer.observe(element);
-            return () => observer.disconnect();
-        },
-        [element],
-    );
-    const readSnapshot = useCallback((): boolean => {
+        const observer = new ResizeObserver(onChange);
+        observer.observe(element);
+        return () => observer.disconnect();
+    };
+    const readSnapshot = (): boolean => {
         if (element === null) {
             return false;
         }
 
         return element.clientWidth >= minWidthPixels;
-    }, [element, minWidthPixels]);
+    };
 
     return useSyncExternalStore(subscribe, readSnapshot, readServerSnapshot);
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { TranscriptLineView } from "#/modules/transcription/model/transcript-view";
 import { SearchField } from "#/shared/ui/search-field";
 import { TranscriptLines } from "#/modules/videos/ui/components/transcript-lines";
@@ -47,8 +47,8 @@ interface TranscriptBodyProps {
 export function TranscriptBody({ lines, currentSeconds, onSeek }: TranscriptBodyProps) {
     const [query, setQuery] = useState("");
     // The player re-renders this about four times a second; only redo the work when the text changes.
-    const visibleLines = useMemo(() => filterLines(lines, query), [lines, query]);
-    const fullText = useMemo(() => lines.map((line) => line.text).join("\n"), [lines]);
+    const visibleLines = filterLines(lines, query);
+    const fullText = lines.map((line) => line.text).join("\n");
 
     if (lines.length === 0) {
         return (

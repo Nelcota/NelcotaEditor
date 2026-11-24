@@ -1,7 +1,7 @@
 import ClapperboardIcon from "~icons/lucide/clapperboard";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { StudioTabProps } from "#/modules/videos/model/studio-tab-props";
@@ -12,6 +12,7 @@ import {
     studioWordsQueryOptions,
 } from "#/modules/studio/model/studio-queries";
 import { StudioWorkspace } from "#/modules/studio/ui/components/studio-workspace";
+import type { ClipStudioState } from "#/modules/studio/model/clip-studio-view";
 import { toClipStudioState } from "#/modules/studio/model/to-clip-studio-state";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
@@ -76,14 +77,13 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
     const isFinished = isVideoFinished(video.status);
     const snapshot = studioQuery.data;
     const words = wordsQuery.data;
-    // Memoized so the applied draft keeps its identity between renders, as the query data did.
-    const studio = useMemo(() => {
-        if (snapshot === undefined || words === undefined) {
-            return undefined;
-        }
+    // The compiler keeps this value while the query data stays the same, so the applied draft
+    // keeps its identity between renders.
+    let studio: ClipStudioState | undefined = undefined;
 
-        return toClipStudioState(snapshot, words);
-    }, [snapshot, words]);
+    if (snapshot !== undefined && words !== undefined) {
+        studio = toClipStudioState(snapshot, words);
+    }
 
     // When Brasa finishes, the clip's applied version and file are new.
     useEffect(() => {

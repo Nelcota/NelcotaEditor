@@ -1,5 +1,5 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useReducer, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useReducer, useState } from "react";
 import { studioDraftSchema } from "#/modules/clips/model/clip-studio";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
 import type { ClipStudioState, ClipStudioView } from "#/modules/studio/model/clip-studio-view";
@@ -26,6 +26,8 @@ function roundTime(seconds: number): number {
 const INVALID_EDIT_MESSAGE = "Essa mudança não cabe nas regras do corte.";
 const RENDER_FAILED_MESSAGE = "Não foi possível enviar o corte para a Brasa. Tente novamente.";
 
+type RenderOutcome = "queued" | "conflict" | "failed";
+
 type DraftSettings = Omit<StudioDraft, "startSeconds" | "endSeconds" | "cues">;
 
 export interface StudioEditor {
@@ -45,7 +47,7 @@ export interface StudioEditor {
     trim: (startSeconds: number, endSeconds: number) => void;
     replaceCue: (index: number, replacement: Array<CaptionCue>) => void;
     resetAllCaptions: () => void;
-    render: () => Promise<"queued" | "conflict" | "failed">;
+    render: () => Promise<RenderOutcome>;
     keepMine: () => Promise<void>;
     takeTheirs: () => Promise<void>;
 }
@@ -69,15 +71,10 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
     const [history, dispatch] = useReducer(studioHistoryReducer, studio, (initial) =>
         createHistory(pickStartingDraft(initial)),
     );
-    const [isSendingRender, setIsSendingRender] = useState(false);
-    const [renderError, setRenderError] = useState<string | null>(null);
     const [editError, setEditError] = useState<string | null>(null);
     const draft = history.present;
     // The Studio re-renders every frame while playing; this compares every cue, so only redo it on edits.
-    const changeCount = useMemo(
-        () => countDraftChanges(draft, studio.applied),
-        [draft, studio.applied],
-    );
+    const changeCount = countDraftChanges(draft, studio.applied);
     const autosave = useDraftAutosave({
         videoId,
         clipId,
@@ -111,36 +108,47 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         return toClipStudioState(snapshot, studio.words);
     };
 
-    const render = async (): Promise<"queued" | "conflict" | "failed"> => {
-        setRenderError(null);
-        setIsSendingRender(true);
+    const sendRender = async (): Promise<RenderOutcome> => {
+        const isSaved = await autosave.flush();
 
+        if (isSaved === false) {
+            return "failed";
+        }
+
+        const result = await renderClipDraft({
+            data: { videoId, clipId, expectedVersion: autosave.readVersion() },
+        });
+
+        if (result.kind === "conflict") {
+            return "conflict";
+        }
+
+        // Rendering moved the version on and made this draft the applied one.
+        autosave.resync(autosave.readVersion() + 1, draft);
+        await invalidateVideoQueries(queryClient);
+        return "queued";
+    };
+
+    const renderMutation = useMutation({ mutationFn: sendRender });
+
+    // A thrown error stays in the mutation and shows as renderError; the caller only needs the outcome.
+    const render = async (): Promise<RenderOutcome> => {
         try {
-            const isSaved = await autosave.flush();
-
-            if (isSaved === false) {
+            return await renderMutation.mutateAsync();
+        } catch (error) {
+            if (error instanceof Error) {
                 return "failed";
             }
 
-            const result = await renderClipDraft({
-                data: { videoId, clipId, expectedVersion: autosave.readVersion() },
-            });
-
-            if (result.kind === "conflict") {
-                return "conflict";
-            }
-
-            // Rendering moved the version on and made this draft the applied one.
-            autosave.resync(autosave.readVersion() + 1, draft);
-            await invalidateVideoQueries(queryClient);
-            return "queued";
-        } catch (error) {
-            setRenderError(toErrorMessage(error, RENDER_FAILED_MESSAGE));
-            return "failed";
-        } finally {
-            setIsSendingRender(false);
+            throw error;
         }
     };
+
+    let renderError: string | null = null;
+
+    if (renderMutation.isError === true) {
+        renderError = toErrorMessage(renderMutation.error, RENDER_FAILED_MESSAGE);
+    }
 
     const keepMine = async (): Promise<void> => {
         const latest = await fetchLatest();
@@ -162,7 +170,7 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         canUndo: history.past.length > 0,
         canRedo: history.future.length > 0,
         autosave,
-        isSendingRender,
+        isSendingRender: renderMutation.isPending,
         renderError,
         editError,
         undo: () => dispatch({ type: "undo" }),

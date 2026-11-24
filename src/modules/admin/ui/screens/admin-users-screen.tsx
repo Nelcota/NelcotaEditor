@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
 import type { ReactNode } from "react";
 import type { AdminUsersSearch } from "#/modules/admin/model/admin-search";
 import { AdminPager } from "#/modules/admin/ui/components/admin-pager";
@@ -78,10 +77,8 @@ export function AdminUsersScreen(props: AdminUsersScreenProps): ReactNode {
     const { search, onSearchChange: navigateToSearch } = props;
     const track = useTrackPromise();
     const onSearchChange = (next: AdminUsersSearch): void => track(navigateToSearch(next));
-    const handleSearch = useCallback(
-        (next: string) => track(navigateToSearch(toAdminUsersSearch({ q: next, page: 1 }))),
-        [navigateToSearch, track],
-    );
+    const handleSearch = (next: string) =>
+        track(navigateToSearch(toAdminUsersSearch({ q: next, page: 1 })));
     const searchDraft = useSearchDraft(search.q ?? "", handleSearch);
 
     return (

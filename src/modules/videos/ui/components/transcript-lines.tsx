@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import type { TranscriptLineView } from "#/modules/transcription/model/transcript-view";
 import { findLastStartedIndex } from "#/modules/videos/model/find-last-started-index";
 import { cn } from "#/shared/ui/cn";
@@ -36,7 +36,10 @@ interface TranscriptLineProps {
     onSeek: (seconds: number) => void;
 }
 
-/** Memoized: on each player tick only the line that starts or stops playing re-renders. */
+/**
+ * Memoized by hand on purpose: the React Compiler does not memoize per item inside a list's map,
+ * and on each player tick only the line that starts or stops playing should re-render.
+ */
 const TranscriptLine = memo(function TranscriptLine({
     line,
     isPlaying,
@@ -73,7 +76,7 @@ function useStableSeek(onSeek: (seconds: number) => void): (seconds: number) => 
         onSeekRef.current = onSeek;
     }, [onSeek]);
 
-    return useCallback((seconds: number) => onSeekRef.current(seconds), []);
+    return (seconds: number) => onSeekRef.current(seconds);
 }
 
 /** Every line is a button: it moves the original video to where the line is said. */

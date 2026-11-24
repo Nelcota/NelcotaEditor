@@ -1,7 +1,7 @@
 import RotateCcwIcon from "~icons/lucide/rotate-ccw";
 import CaptionsIcon from "~icons/lucide/captions";
 import LocateIcon from "~icons/lucide/locate";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/model/clip-studio";
 import { pluralize } from "#/shared/ui/pluralize";
@@ -78,22 +78,29 @@ interface CaptionResetControls {
     undoReset: () => void;
 }
 
+/** The last reset, while one undo step still brings the person's edits back; null otherwise. */
+function findUndoableReset(
+    draft: StudioDraft,
+    lastReset: LastReset | null,
+    words: Array<CaptionWord>,
+): CaptionReset | null {
+    if (lastReset === null) {
+        return null;
+    }
+
+    if (canUndoReset(draft, lastReset, words) === false) {
+        return null;
+    }
+
+    return lastReset.reset;
+}
+
 /** "Voltar ao original" throws edits away, so right after it the list offers to take it back. */
 function useCaptionReset(editor: StudioEditor, words: Array<CaptionWord>): CaptionResetControls {
     const draft = editor.draft;
     const [lastReset, setLastReset] = useState<LastReset | null>(null);
-    const canResetAll = useMemo(() => hasCaptionsToReset(draft, words), [draft, words]);
-    const undoableReset = useMemo(() => {
-        if (lastReset === null) {
-            return null;
-        }
-
-        if (canUndoReset(draft, lastReset, words) === false) {
-            return null;
-        }
-
-        return lastReset.reset;
-    }, [draft, lastReset, words]);
+    const canResetAll = hasCaptionsToReset(draft, words);
+    const undoableReset = findUndoableReset(draft, lastReset, words);
 
     const remember = (reset: CaptionReset): void => {
         setLastReset({ reset, before: draft });
@@ -198,7 +205,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
     const draft = editor.draft;
     const cues = draft.cues;
     // Each check scans the whole transcript; the list re-renders every frame while the clip plays.
-    const editedIndexes = useMemo(() => findEditedCueIndexes(cues, words), [cues, words]);
+    const editedIndexes = findEditedCueIndexes(cues, words);
     const captionReset = useCaptionReset(editor, words);
     const undoableReset = captionReset.undoableReset;
     const listRef = useRef<HTMLDivElement>(null);

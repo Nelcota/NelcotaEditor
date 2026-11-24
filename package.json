@@ -61,7 +61,9 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
+        "@babel/core": "7.29.13",
         "@iconify-json/lucide": "^1.2.158",
+        "@rolldown/plugin-babel": "0.3.1",
         "@svgr/core": "^8.1.0",
         "@svgr/plugin-jsx": "^8.1.0",
         "@testing-library/dom": "10.4.2",
@@ -72,6 +74,7 @@
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
         "@vitejs/plugin-react": "^6.0.1",
+        "babel-plugin-react-compiler": "1.0.0",
         "dotenv": "^17.3.1",
         "happy-dom": "21.0.4",
         "oxfmt": "0.79.0",
