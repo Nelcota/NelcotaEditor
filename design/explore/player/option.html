@@ -51,9 +51,11 @@
             };
 
             const table = view === "phone" ? PHONE : DESK;
-            // Only the options defined above; anything else in the address shows the first one.
-            const optionName = Object.hasOwn(table, option) ? option : Object.keys(table)[0];
-            document.getElementById("root").innerHTML = table[optionName]();
+            // A Map holds only the options defined above (no inherited methods); anything else in the
+            // address shows the first one.
+            const options = new Map(Object.entries(table));
+            const render = options.get(option) ?? options.values().next().value;
+            document.getElementById("root").innerHTML = render();
             if (view === "phone") {
                 document.body.classList.add("is-phone");
             }

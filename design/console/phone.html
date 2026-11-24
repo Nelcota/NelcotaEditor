@@ -24,7 +24,7 @@
         <iframe id="frame" title="Prévia em 390px"></iframe>
         <script>
             // Only the boards in this folder: the address must never choose what the frame loads.
-            const BOARDS = new Set([
+            const BOARDS = [
                 "1.0-shell-states",
                 "2.1-list-couldnt-load",
                 "2.1-list-default",
@@ -47,10 +47,12 @@
                 "3.1-sign-in-submitting",
                 "3.2-sign-up-default",
                 "3.2-sign-up-field-errors",
-            ]);
-            const board = new URLSearchParams(location.search).get("board");
+            ];
+            const requested = new URLSearchParams(location.search).get("board");
+            // The frame gets the name from the list above, never the text from the address.
+            const board = BOARDS.find((name) => name === requested);
 
-            if (BOARDS.has(board)) {
+            if (board !== undefined) {
                 document.getElementById("frame").src = board + ".html";
             }
         </script>
