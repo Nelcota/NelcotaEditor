@@ -14,7 +14,10 @@ const PERCENT = 100;
 
 interface RenderPendingClipsInput {
     videoId: string;
-    sourcePath: string;
+    /** A local copy of the source that ffmpeg can read. */
+    localSourcePath: string;
+    /** The run's folder; renders are written here before they are stored. */
+    workDirectory: string;
     clips: Array<Clip>;
     words: Array<TranscriptWord>;
     signal: AbortSignal;
@@ -22,7 +25,7 @@ interface RenderPendingClipsInput {
 
 /** Returns whether the clip ended up rendered. */
 async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promise<boolean> {
-    const { videoId, sourcePath, words, signal } = input;
+    const { videoId, localSourcePath, workDirectory, words, signal } = input;
 
     if (clip.status === "done") {
         return true;
@@ -30,7 +33,7 @@ async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promis
 
     try {
         await setClipStatus(clip.id, "rendering");
-        await renderClip({ clip, sourcePath, words, signal });
+        await renderClip({ clip, localSourcePath, workDirectory, words, signal });
         return true;
     } catch (error) {
         if (signal.aborted === true) {

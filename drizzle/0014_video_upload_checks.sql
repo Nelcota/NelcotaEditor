@@ -1,0 +1,3 @@
+ALTER TABLE "video_uploads" ADD CONSTRAINT "video_uploads_declared_bytes_max" CHECK ("video_uploads"."declared_bytes" <= 5000000000);--> statement-breakpoint
+ALTER TABLE "video_uploads" ADD CONSTRAINT "video_uploads_requested_clip_count_range" CHECK ("video_uploads"."requested_clip_count" between 1 and 10);--> statement-breakpoint
+ALTER TABLE "video_uploads" ADD CONSTRAINT "video_uploads_title_length" CHECK (char_length("video_uploads"."title") between 1 and 200);

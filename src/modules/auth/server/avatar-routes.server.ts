@@ -7,8 +7,8 @@ import {
 import type { AvatarPhotoExtension } from "#/modules/auth/model/avatar";
 import {
     findUserImage,
-    readAvatarPhoto,
     saveUserImage,
+    respondWithAvatarPhoto,
     writeAvatarPhoto,
 } from "#/modules/auth/server/avatar-storage.server";
 import {
@@ -21,7 +21,6 @@ import {
     readAvatarSize,
 } from "#/modules/auth/server/avatar-photo-size.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
-import { isFileNotFoundError } from "#/shared/server/fs-errors";
 import {
     HTTP_BAD_REQUEST,
     HTTP_NOT_FOUND,
@@ -125,15 +124,12 @@ export async function handleAvatarUpload(request: Request): Promise<Response> {
     return storeAvatar(user.id, upload);
 }
 
-function photoResponse(photo: Buffer, extension: AvatarPhotoExtension): Response {
-    return new Response(new Uint8Array(photo), {
-        headers: {
-            "Content-Type": AVATAR_CONTENT_TYPES[extension],
-            "Content-Length": String(photo.byteLength),
-            // The URL carries a version, so a new upload is a new URL.
-            "Cache-Control": "private, max-age=31536000, immutable",
-            "X-Content-Type-Options": "nosniff",
-        },
+function buildPhotoHeaders(extension: AvatarPhotoExtension): Headers {
+    return new Headers({
+        "Content-Type": AVATAR_CONTENT_TYPES[extension],
+        // The URL carries a version, so a new upload is a new URL.
+        "Cache-Control": "private, max-age=31536000, immutable",
+        "X-Content-Type-Options": "nosniff",
     });
 }
 
@@ -151,14 +147,9 @@ export async function serveAvatar(request: Request): Promise<Response> {
         return new Response(null, { status: HTTP_NOT_FOUND });
     }
 
-    try {
-        return photoResponse(await readAvatarPhoto(user.id, extension), extension);
-    } catch (error) {
-        // The row can briefly point at a photo that a newer upload already replaced.
-        if (isFileNotFoundError(error) === true) {
-            return new Response(null, { status: HTTP_NOT_FOUND });
-        }
-
-        throw error;
-    }
+    return respondWithAvatarPhoto(
+        request,
+        { userId: user.id, extension },
+        buildPhotoHeaders(extension),
+    );
 }

@@ -1,4 +1,3 @@
-import { rm } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { ensureHighlights } from "#/modules/highlights/server/select-highlights.server";
 import { watchForCancellation } from "#/modules/processing/server/cancellation-watch.server";
@@ -6,6 +5,10 @@ import { renderPendingClips } from "#/modules/processing/server/render-pending-c
 import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
 import { ensureTranscript } from "#/modules/transcription/server/transcribe-video.server";
 import { prepareVideoSource } from "#/modules/processing/server/prepare-video-source.server";
+import {
+    createVideoWorkspace,
+    removeVideoWorkspace,
+} from "#/modules/processing/server/video-workspace.server";
 import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import {
     findVideoById,
@@ -16,7 +19,9 @@ import {
 } from "#/modules/video-records/server/video-progress.server";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
-import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
+import type { Video } from "#/modules/video-records/video-records.schema";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
+import { getVideoDirectory } from "#/shared/server/storage.server";
 import { toUserMessage } from "#/shared/server/user-facing-error";
 import { logger } from "#/shared/server/logger.server";
 
@@ -36,18 +41,14 @@ function saveStageProgress(
  * The whole pipeline: source → transcript → highlights → clips.
  * Every step skips work that is already saved, so running it again resumes where it stopped.
  */
-async function runPipeline(videoId: string, signal: AbortSignal): Promise<void> {
-    const video = await findVideoById(videoId);
-
-    // Finished or cancelled while waiting in the queue: nothing to do.
-    if (video === null || isVideoFinished(video.status) === true) {
-        return;
-    }
-
-    const source = await prepareVideoSource(video, signal);
+async function runStages(video: Video, workDirectory: string, signal: AbortSignal): Promise<void> {
+    const videoId = video.id;
+    const source = await prepareVideoSource(video, { signal, workDirectory });
+    const localSourcePath = source.localSourcePath;
     const words = await ensureTranscript({
         videoId,
-        sourcePath: source.sourcePath,
+        localSourcePath,
+        workDirectory,
         language: video.transcriptionLanguage,
         signal,
         saveProgress: saveStageProgress(videoId, "transcribing"),
@@ -60,12 +61,29 @@ async function runPipeline(videoId: string, signal: AbortSignal): Promise<void> 
         saveProgress: saveStageProgress(videoId, "selecting"),
     });
 
-    await renderPendingClips({ videoId, sourcePath: source.sourcePath, clips, words, signal });
+    await renderPendingClips({ videoId, localSourcePath, workDirectory, clips, words, signal });
     signal.throwIfAborted();
 
     // A cancel that arrived after the last step still wins over "done".
     if ((await markVideoDone(videoId)) === false) {
         await markVideoCancelled(videoId);
+    }
+}
+
+async function runPipeline(videoId: string, signal: AbortSignal): Promise<void> {
+    const video = await findVideoById(videoId);
+
+    // Finished or cancelled while waiting in the queue: nothing to do.
+    if (video === null || isVideoFinished(video.status) === true) {
+        return;
+    }
+
+    const workDirectory = await createVideoWorkspace(videoId);
+
+    try {
+        await runStages(video, workDirectory, signal);
+    } finally {
+        await removeVideoWorkspace(videoId);
     }
 }
 
@@ -80,7 +98,7 @@ async function removeFilesOfDeletedVideo(videoId: string): Promise<void> {
         return;
     }
 
-    await rm(resolveStoragePath(getVideoDirectory(videoId)), { recursive: true, force: true });
+    await getFileStorage().deleteFolder(getVideoDirectory(videoId));
 }
 
 const RECORD_STOP_ATTEMPTS = 3;

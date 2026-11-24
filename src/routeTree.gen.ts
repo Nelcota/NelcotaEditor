@@ -26,13 +26,13 @@ import { Route as AppVideosVideoIdRouteImport } from './routes/_app/videos.$vide
 import { Route as ApiAccountAvatarRouteImport } from './routes/api/account/avatar'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiShareTokenRouteImport } from './routes/api/share/$token'
-import { Route as ApiVideosUploadRouteImport } from './routes/api/videos/upload'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ApiClipsClipIdFileRouteImport } from './routes/api/clips/$clipId/file'
 import { Route as ApiVideosVideoIdCaptionsRouteImport } from './routes/api/videos/$videoId/captions'
 import { Route as ApiVideosVideoIdSourceRouteImport } from './routes/api/videos/$videoId/source'
 import { Route as ApiVideosVideoIdThumbnailRouteImport } from './routes/api/videos/$videoId/thumbnail'
+import { Route as ApiVideosUploadsUploadIdFileRouteImport } from './routes/api/videos/uploads/$uploadId/file'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -118,11 +118,6 @@ const ApiShareTokenRoute = ApiShareTokenRouteImport.update({
   path: '/api/share/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiVideosUploadRoute = ApiVideosUploadRouteImport.update({
-  id: '/api/videos/upload',
-  path: '/api/videos/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -155,6 +150,12 @@ const ApiVideosVideoIdThumbnailRoute =
     path: '/api/videos/$videoId/thumbnail',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiVideosUploadsUploadIdFileRoute =
+  ApiVideosUploadsUploadIdFileRouteImport.update({
+    id: '/api/videos/uploads/$uploadId/file',
+    path: '/api/videos/uploads/$uploadId/file',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -171,7 +172,6 @@ export interface FileRoutesByFullPath {
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
-  '/api/videos/upload': typeof ApiVideosUploadRoute
   '/admin/': typeof AppAdminIndexRoute
   '/videos/': typeof AppVideosIndexRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
@@ -180,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
+  '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
@@ -195,7 +196,6 @@ export interface FileRoutesByTo {
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
-  '/api/videos/upload': typeof ApiVideosUploadRoute
   '/admin': typeof AppAdminIndexRoute
   '/videos': typeof AppVideosIndexRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
@@ -204,6 +204,7 @@ export interface FileRoutesByTo {
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
+  '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -222,7 +223,6 @@ export interface FileRoutesById {
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
-  '/api/videos/upload': typeof ApiVideosUploadRoute
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/videos/': typeof AppVideosIndexRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
@@ -231,6 +231,7 @@ export interface FileRoutesById {
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
+  '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -249,7 +250,6 @@ export interface FileRouteTypes {
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
-    | '/api/videos/upload'
     | '/admin/'
     | '/videos/'
     | '/admin/users/$userId'
@@ -258,6 +258,7 @@ export interface FileRouteTypes {
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
     | '/admin/users/'
+    | '/api/videos/uploads/$uploadId/file'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -273,7 +274,6 @@ export interface FileRouteTypes {
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
-    | '/api/videos/upload'
     | '/admin'
     | '/videos'
     | '/admin/users/$userId'
@@ -282,6 +282,7 @@ export interface FileRouteTypes {
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
     | '/admin/users'
+    | '/api/videos/uploads/$uploadId/file'
   id:
     | '__root__'
     | '/_app'
@@ -299,7 +300,6 @@ export interface FileRouteTypes {
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
-    | '/api/videos/upload'
     | '/_app/admin/'
     | '/_app/videos/'
     | '/_app/admin/users/$userId'
@@ -308,6 +308,7 @@ export interface FileRouteTypes {
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
     | '/_app/admin/users/'
+    | '/api/videos/uploads/$uploadId/file'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -317,11 +318,11 @@ export interface RootRouteChildren {
   ApiAccountAvatarRoute: typeof ApiAccountAvatarRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiShareTokenRoute: typeof ApiShareTokenRoute
-  ApiVideosUploadRoute: typeof ApiVideosUploadRoute
   ApiClipsClipIdFileRoute: typeof ApiClipsClipIdFileRoute
   ApiVideosVideoIdCaptionsRoute: typeof ApiVideosVideoIdCaptionsRoute
   ApiVideosVideoIdSourceRoute: typeof ApiVideosVideoIdSourceRoute
   ApiVideosVideoIdThumbnailRoute: typeof ApiVideosVideoIdThumbnailRoute
+  ApiVideosUploadsUploadIdFileRoute: typeof ApiVideosUploadsUploadIdFileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -445,13 +446,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiShareTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/videos/upload': {
-      id: '/api/videos/upload'
-      path: '/api/videos/upload'
-      fullPath: '/api/videos/upload'
-      preLoaderRoute: typeof ApiVideosUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_app/admin/users/': {
       id: '/_app/admin/users/'
       path: '/users'
@@ -492,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/api/videos/$videoId/thumbnail'
       fullPath: '/api/videos/$videoId/thumbnail'
       preLoaderRoute: typeof ApiVideosVideoIdThumbnailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/videos/uploads/$uploadId/file': {
+      id: '/api/videos/uploads/$uploadId/file'
+      path: '/api/videos/uploads/$uploadId/file'
+      fullPath: '/api/videos/uploads/$uploadId/file'
+      preLoaderRoute: typeof ApiVideosUploadsUploadIdFileRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -548,11 +549,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAccountAvatarRoute: ApiAccountAvatarRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiShareTokenRoute: ApiShareTokenRoute,
-  ApiVideosUploadRoute: ApiVideosUploadRoute,
   ApiClipsClipIdFileRoute: ApiClipsClipIdFileRoute,
   ApiVideosVideoIdCaptionsRoute: ApiVideosVideoIdCaptionsRoute,
   ApiVideosVideoIdSourceRoute: ApiVideosVideoIdSourceRoute,
   ApiVideosVideoIdThumbnailRoute: ApiVideosVideoIdThumbnailRoute,
+  ApiVideosUploadsUploadIdFileRoute: ApiVideosUploadsUploadIdFileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

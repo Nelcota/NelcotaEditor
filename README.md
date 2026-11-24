@@ -47,6 +47,8 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 | `bun run test`                        | Unit tests (Vitest)                                              |
 | `bun run test:integration`            | Tests against the `nelcota_test` database (`.env.test`)          |
 | `bun run test:e2e`                    | Playwright flows with an axe check, on their own app (port 3299) |
+| `bun run storage:check-r2`            | Checks the R2 bucket from `.env` behaves as the app expects      |
+| `bun run storage:copy-to-r2`          | Copies `STORAGE_DIR` to the bucket (`-- --dry-run` to preview)   |
 
 ## Settings (`.env`)
 
@@ -56,12 +58,37 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 | `WHISPER_LANGUAGE` | `pt`                           | Spoken language; empty means auto-detect                                                                                                             |
 | `DEEPSEEK_MODEL`   | `deepseek-chat`                |                                                                                                                                                      |
 | `STORAGE_DIR`      | `./storage`                    | Uploaded videos and rendered clips                                                                                                                   |
+| `WORK_DIR`         | system temp folder             | The worker's scratch folder (downloads, audio, renders before they are stored); wiped when the worker starts                                         |
+| `STORAGE_DRIVER`   | `disk`                         | `disk` keeps files in `STORAGE_DIR`; `r2` keeps them in the Cloudflare R2 bucket below (see "Stored files")                                          |
+| `R2_*`             |                                | Account id, bucket, and the key pair of an R2 API token limited to that bucket with object read and write                                            |
 
 The worker container does not read the whole `.env`: `docker-compose.yml` passes it only the variables it uses
-(Whisper, DeepSeek, storage quota and concurrency). A new setting the worker needs goes there too.
+(Whisper, DeepSeek, storage driver and R2 keys, quota and concurrency). A new setting the worker
+needs goes there too.
 It runs as the unprivileged `bun` user (uid 1000); on Linux, `./storage` must be writable by that uid
 (`sudo chown -R 1000:1000 storage` once, if an older root worker created files there).
 To update yt-dlp, change its version and checksum in `Dockerfile.worker`.
+
+## Stored files
+
+Keys are the relative paths the database holds (`videos/<id>/source.mp4`, `avatars/<user>.png`), so
+both drivers read the same rows. With `r2`:
+
+- File routes check the owner as always, then redirect to a signed link (an hour for the owner, ten
+  minutes for a shared clip), so the bytes go from R2 to the browser, never through the app.
+- Uploads go straight from the browser to a signed PUT link that only takes the declared size. The
+  bucket's CORS rule allows `PUT` with `content-type` from the app's origin; add each origin that
+  serves the app (`cf r2 buckets cors update`).
+- The CSP allows the account's `r2.cloudflarestorage.com` endpoint; signed links do not work on a
+  custom domain.
+
+Switching a running install from `disk` to `r2`:
+
+1. Fill the `R2_*` settings and run `bun run storage:check-r2`; every line must say `ok`.
+2. Run `bun run storage:copy-to-r2` (safe to repeat; files already in the bucket are skipped).
+3. Stop the worker, run the copy once more for anything written meanwhile, set `STORAGE_DRIVER=r2`,
+   and restart the app and the worker.
+4. Keep `STORAGE_DIR` until the app has run on R2 for a while, then remove it.
 
 ## How it is built
 
