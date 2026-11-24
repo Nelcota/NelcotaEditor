@@ -24,6 +24,11 @@ import {
     recordImpersonationStop,
 } from "#/modules/admin/server/record-admin-action.server";
 import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
+import {
+    queueExistingAccountEmail,
+    queueResetPasswordEmail,
+    queueVerificationEmail,
+} from "#/modules/auth/server/auth-email-callbacks.server";
 import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
 import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
@@ -148,6 +153,19 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         minPasswordLength: MIN_PASSWORD_LENGTH,
+        // No session until the address is confirmed: a public SaaS cannot have accounts on
+        // emails their owners never saw. Also makes sign-up answer the same for a taken email.
+        requireEmailVerification: true,
+        sendResetPassword: queueResetPasswordEmail,
+        revokeSessionsOnPasswordReset: true,
+        onExistingUserSignUp: queueExistingAccountEmail,
+    },
+    emailVerification: {
+        sendVerificationEmail: queueVerificationEmail,
+        sendOnSignUp: true,
+        // A person who lost the first link gets a new one by trying to sign in.
+        sendOnSignIn: true,
+        autoSignInAfterVerification: true,
     },
     session: {
         // Every server function and every video range request reads the session; a signed cookie

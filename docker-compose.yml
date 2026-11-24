@@ -55,6 +55,9 @@ services:
             WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-}
             DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
             DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+            # Only the worker sends email; the web server queues it.
+            RESEND_API_KEY: ${RESEND_API_KEY:-}
+            EMAIL_FROM: ${EMAIL_FROM:-Nelcota <nao-responda@tela.nelcota.com>}
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
             WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
             YOUTUBE_COOKIES_BASE64: ${YOUTUBE_COOKIES_BASE64:-}
