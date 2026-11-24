@@ -11,6 +11,7 @@ import {
     clipStudioQueryOptions,
     studioWordsQueryOptions,
 } from "#/modules/studio/model/studio-queries";
+import { StudioFrame } from "#/modules/studio/ui/components/studio-frame";
 import { StudioWorkspace } from "#/modules/studio/ui/components/studio-workspace";
 import type { ClipStudioState } from "#/modules/studio/model/clip-studio-view";
 import { toClipStudioState } from "#/modules/studio/model/to-clip-studio-state";
@@ -26,17 +27,11 @@ function StudioLoading(): ReactNode {
         <div
             role="status"
             aria-busy="true"
-            className="@container/studio grid grid-cols-[minmax(0,1fr)] gap-4"
+            className="grid grid-cols-[minmax(0,1fr)] gap-px @4xl/studio:h-full @4xl/studio:grid-cols-[400px_minmax(0,1fr)]"
         >
             <span className="sr-only">Carregando o Studio</span>
-            <div className="flex flex-wrap gap-3">
-                <Skeleton className="h-10 w-64 max-w-full" />
-                <Skeleton className="h-10 w-80 max-w-full rounded-full" />
-            </div>
-            <div className="grid grid-cols-[minmax(0,1fr)] gap-px overflow-hidden rounded-2xl @4xl/studio:h-[clamp(520px,calc(100dvh-320px),900px)] @4xl/studio:grid-cols-[minmax(0,1fr)_456px] @6xl/studio:grid-cols-[minmax(0,1fr)_520px]">
-                <Skeleton className="h-[min(58dvh,560px)] rounded-none @4xl/studio:h-full" />
-                <Skeleton className="h-80 rounded-none @4xl/studio:h-full" />
-            </div>
+            <Skeleton className="order-last h-80 rounded-none @4xl/studio:order-none @4xl/studio:h-full" />
+            <Skeleton className="h-[min(46dvh,520px)] rounded-none @4xl/studio:h-full" />
         </div>
     );
 }
@@ -99,35 +94,45 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
     }, [isFinished, queryClient, track, video.id, selectedClipId]);
 
     if (selectedClip === undefined) {
-        return <NotReady details={details} onShowClips={onShowClips} />;
+        return (
+            <StudioFrame videoId={video.id} clipId={clipId}>
+                <NotReady details={details} onShowClips={onShowClips} />
+            </StudioFrame>
+        );
     }
 
     const loadError = studioQuery.error ?? wordsQuery.error;
 
     if (loadError !== null && (studio === undefined || words === undefined)) {
         return (
-            <EmptyState
-                art={<Mascot index={STAGE_CREW.failed} className="size-14" />}
-                title="Não foi possível abrir o Studio"
-                description={loadError.message}
-                action={
-                    <Button
-                        variant="secondary"
+            <StudioFrame videoId={video.id} clipId={clipId}>
+                <EmptyState
+                    art={<Mascot index={STAGE_CREW.failed} className="size-14" />}
+                    title="Não foi possível abrir o Studio"
+                    description={loadError.message}
+                    action={
+                        <Button
+                            variant="secondary"
 
-                        onClick={() =>
-                            track(Promise.all([studioQuery.refetch(), wordsQuery.refetch()]))
-                        }
-                    >
-                        <RotateCwIcon aria-hidden="true" />
-                        Tentar de novo
-                    </Button>
-                }
-            />
+                            onClick={() =>
+                                track(Promise.all([studioQuery.refetch(), wordsQuery.refetch()]))
+                            }
+                        >
+                            <RotateCwIcon aria-hidden="true" />
+                            Tentar de novo
+                        </Button>
+                    }
+                />
+            </StudioFrame>
         );
     }
 
     if (studio === undefined || words === undefined) {
-        return <StudioLoading />;
+        return (
+            <StudioFrame videoId={video.id} clipId={selectedClip.id} isFilling={true}>
+                <StudioLoading />
+            </StudioFrame>
+        );
     }
 
     return (

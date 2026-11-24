@@ -124,16 +124,16 @@ export function StudioTimeline(props: StudioTimelineProps): ReactNode {
         <section
             aria-labelledby="studio-timeline-title"
             className={cn(
-                "@container/timeline grid gap-2 rounded-2xl border bg-popover px-4 pt-3 pb-4",
+                "@container/timeline grid gap-2 border-t bg-background px-4 pt-3 pb-4",
                 isLocked === true && "opacity-60",
             )}
         >
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <h2
                     id="studio-timeline-title"
-                    className="flex items-center gap-2 text-lg leading-tight font-semibold"
+                    className="flex items-center gap-2 text-sm font-semibold"
                 >
-                    <ScissorsIcon className="size-5 text-muted-foreground" aria-hidden="true" />
+                    <ScissorsIcon className="size-4 text-muted-foreground" aria-hidden="true" />
                     Trecho do original
                 </h2>
                 <span className="text-sm text-muted-foreground tabular-nums">

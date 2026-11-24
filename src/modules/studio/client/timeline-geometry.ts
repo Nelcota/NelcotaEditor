@@ -1,6 +1,8 @@
 import type { StudioDraft } from "#/modules/clips/model/clip-studio";
 
-const WINDOW_PADDING_SECONDS = 20;
+// Enough room to see where the clip can grow; dragging an edge to the end of the window widens
+// it again. A wider margin shrinks the caption blocks until their words no longer fit.
+const WINDOW_PADDING_SECONDS = 8;
 const PERCENT = 100;
 const SHORT_WINDOW_SECONDS = 80;
 const SHORT_TICK_SECONDS = 5;

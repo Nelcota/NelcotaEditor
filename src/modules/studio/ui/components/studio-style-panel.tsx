@@ -213,7 +213,7 @@ function FineTuning({ editor, isLocked }: Omit<StudioStylePanelProps, "thumbnail
 
     return (
         <section aria-labelledby="studio-fine-title" className="@container/fine rounded-2xl border">
-            <h3
+            <h2
                 id="studio-fine-title"
                 className="flex items-center gap-2 px-4 py-3 text-sm font-semibold"
             >
@@ -222,7 +222,7 @@ function FineTuning({ editor, isLocked }: Omit<StudioStylePanelProps, "thumbnail
                     aria-hidden="true"
                 />
                 Ajuste fino
-            </h3>
+            </h2>
             <FineRow label="Destaque">
                 <SegmentedControl
                     label="Cor do destaque"

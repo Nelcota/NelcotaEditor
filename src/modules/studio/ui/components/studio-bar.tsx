@@ -5,13 +5,16 @@ import Undo2Icon from "~icons/lucide/undo-2";
 import Redo2Icon from "~icons/lucide/redo-2";
 import type { ReactNode } from "react";
 import type { ClipView } from "#/modules/clips/model/clip-view";
-import { pluralize } from "#/shared/ui/pluralize";
 import type { SaveStatus } from "#/modules/studio/ui/hooks/use-draft-autosave";
 import type { StudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
+import { StudioBackLink } from "#/modules/studio/ui/components/studio-back-link";
+import { StudioClipSwitcher } from "#/modules/studio/ui/components/studio-clip-switcher";
+import { StudioRenderButton } from "#/modules/studio/ui/components/studio-render-button";
+import { StudioRenderHint } from "#/modules/studio/ui/components/studio-render-hint";
 import { Button } from "#/shared/ui/button";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
 import { cn } from "#/shared/ui/cn";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
+import { pluralize } from "#/shared/ui/pluralize";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const SAVE_LABELS: Record<SaveStatus, string> = {
@@ -25,15 +28,15 @@ const SAVE_LABELS: Record<SaveStatus, string> = {
 const SHORTCUTS_LABEL =
     "Espaço toca · J e L voltam e avançam 5 s · [ e ] marcam início e fim · Ctrl+Z desfaz";
 
-interface StudioToolbarProps {
+interface StudioBarProps {
+    videoId: string;
     rankedClips: Array<ClipView>;
     clipId: string;
     onSelectClip: (clipId: string) => void;
     editor: StudioEditor;
     /** Brasa is rendering this video, so nothing can be edited or sent. */
     isRendering: boolean;
-    /** The steps, beside the clip on wide screens and on a row of their own on phones. */
-    stepper: ReactNode;
+    onRender: () => void;
 }
 
 function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
@@ -54,7 +57,7 @@ function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
             )}
         >
             <Icon className="size-4" aria-hidden="true" />
-            {SAVE_LABELS[status]}
+            <span className="@max-3xl/studio:sr-only">{SAVE_LABELS[status]}</span>
             {status === "failed" && (
                 <button
                     type="button"
@@ -68,9 +71,14 @@ function SaveState({ editor }: { editor: StudioEditor }): ReactNode {
     );
 }
 
+/** How much the file is behind the draft. */
 function ChangeCount({ changeCount }: { changeCount: number }): ReactNode {
+    if (changeCount === 0) {
+        return null;
+    }
+
     return (
-        <span className="inline-flex items-center gap-2 text-sm font-medium whitespace-nowrap before:size-2 before:rounded-full before:bg-primary">
+        <span className="inline-flex items-center gap-2 text-sm font-medium whitespace-nowrap before:size-2 before:rounded-full before:bg-primary @max-3xl/studio:hidden">
             {changeCount} {pluralize(changeCount, "alteração", "alterações")}
             <span className="sr-only">
                 {pluralize(changeCount, "não renderizada", "não renderizadas")}
@@ -82,7 +90,7 @@ function ChangeCount({ changeCount }: { changeCount: number }): ReactNode {
 function HistoryButtons({
     editor,
     isRendering,
-}: Pick<StudioToolbarProps, "editor" | "isRendering">) {
+}: Pick<StudioBarProps, "editor" | "isRendering">): ReactNode {
     return (
         <div className="flex items-center">
             <HintTooltip label="Desfazer" shortcut="Ctrl+Z">
@@ -105,6 +113,7 @@ function HistoryButtons({
                     aria-keyshortcuts="Control+Shift+Z"
                     disabled={editor.canRedo === false || isRendering === true}
                     onClick={editor.redo}
+                    className="max-sm:hidden"
                 >
                     <Redo2Icon aria-hidden="true" />
                 </Button>
@@ -124,43 +133,28 @@ function HistoryButtons({
     );
 }
 
-/** Which clip, the steps, whether the draft is safe and how much is waiting to be rendered. */
-export function StudioToolbar(props: StudioToolbarProps): ReactNode {
-    const { rankedClips, editor, isRendering } = props;
-    const total = rankedClips.length;
-    const changeCount = editor.changeCount;
+/** The editor's only bar: the way back, which clip, whether the draft is safe, and Renderizar. */
+export function StudioBar(props: StudioBarProps): ReactNode {
+    const { editor, isRendering } = props;
 
     return (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
-            <Select value={props.clipId} onValueChange={props.onSelectClip}>
-                <SelectTrigger
-                    aria-label="Corte em edição"
-                    className="h-10 min-w-0 flex-1 @4xl/studio:w-64 @4xl/studio:flex-none"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    {rankedClips.map((clip, index) => (
-                        <SelectItem key={clip.id} value={clip.id}>
-                            <span className="text-xs font-semibold text-muted-foreground">
-                                {index + 1} DE {total}
-                            </span>
-                            <span className="truncate">{clip.title}</span>
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-            <div className="order-last w-full @4xl/studio:order-none @4xl/studio:w-auto">
-                {props.stepper}
-            </div>
-            <span className="hidden flex-1 @4xl/studio:block" />
-            <div className="flex items-center gap-x-4 @max-4xl/studio:order-last @max-4xl/studio:w-full">
-                {isRendering === false && <SaveState editor={editor} />}
-                {changeCount > 0 && isRendering === false && (
-                    <ChangeCount changeCount={changeCount} />
-                )}
-            </div>
+        <header className="flex min-h-15 flex-wrap items-center gap-x-2 border-b bg-background px-2 @2xl/studio:gap-x-3 @2xl/studio:px-4 @3xl/studio:flex-nowrap">
+            <StudioBackLink videoId={props.videoId} clipId={props.clipId} />
+            <span aria-hidden="true" className="h-6 w-px bg-border max-sm:hidden" />
+            <StudioClipSwitcher
+                rankedClips={props.rankedClips}
+                clipId={props.clipId}
+                onSelectClip={props.onSelectClip}
+            />
+            {isRendering === false && <SaveState editor={editor} />}
+            {isRendering === false && <ChangeCount changeCount={editor.changeCount} />}
+            <StudioRenderHint editor={editor} isRendering={isRendering} />
             <HistoryButtons editor={editor} isRendering={isRendering} />
-        </div>
+            <StudioRenderButton
+                editor={editor}
+                isRendering={isRendering}
+                onRender={props.onRender}
+            />
+        </header>
     );
 }
