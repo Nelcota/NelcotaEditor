@@ -18,8 +18,8 @@ import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const HTTP_INTERNAL_SERVER_ERROR = 500;
 const SECOND_MILLISECONDS = 1_000;
-// The SDK default (600s per attempt, 3 attempts) is twice this; a chunk must give up well before.
-const LONGEST_CHUNK_WAIT_MILLISECONDS = 15 * 60 * SECOND_MILLISECONDS;
+// Two attempts of 180s each, plus the backoff between them; a third attempt would pass this.
+const LONGEST_CHUNK_WAIT_MILLISECONDS = 7 * 60 * SECOND_MILLISECONDS;
 
 // A Whisper server that takes every request and never answers.
 const silentServer = createServer(() => undefined);
