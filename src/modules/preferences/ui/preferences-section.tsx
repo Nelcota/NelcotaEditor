@@ -13,7 +13,7 @@ export function PreferencesSection(): ReactNode {
 
     if (preferencesQuery.isError === true && preferences === undefined) {
         return (
-            <div className="grid justify-items-start gap-3">
+            <div className="grid justify-items-start gap-3 p-4 sm:p-5">
                 <FormAlert message="Não foi possível carregar suas preferências." />
                 <Button
                     variant="secondary"
@@ -29,7 +29,11 @@ export function PreferencesSection(): ReactNode {
     }
 
     if (preferences === undefined) {
-        return <Skeleton className="h-56 rounded-2xl" aria-busy="true" aria-label="Carregando" />;
+        return (
+            <div className="p-4 sm:p-5">
+                <Skeleton className="h-40 rounded-xl" aria-busy="true" aria-label="Carregando" />
+            </div>
+        );
     }
 
     return <PreferencesForm initial={preferences} />;

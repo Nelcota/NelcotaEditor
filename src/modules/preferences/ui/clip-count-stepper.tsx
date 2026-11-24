@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/video-records/video-status";
 import { pluralize } from "#/shared/ui/pluralize";
 import { Button } from "#/shared/ui/button";
+import { cn } from "#/shared/ui/cn";
 
 // At 1 or 10 the button only looks disabled (aria-disabled): a native `disabled` would drop the
 // keyboard focus to <body> right after the press that reached the limit.
@@ -18,6 +19,8 @@ function describeCount(count: number): string {
 interface ClipCountStepperProps {
     id: string;
     label?: string;
+    /** E.g. `sr-only` in a settings row, whose own label already names it. */
+    labelClassName?: string;
     value: number;
     onValueChange: (value: number) => void;
     disabled?: boolean;
@@ -30,6 +33,7 @@ interface ClipCountStepperProps {
 export function ClipCountStepper({
     id,
     label = "Cortes",
+    labelClassName,
     value,
     onValueChange,
     disabled = false,
@@ -56,7 +60,10 @@ export function ClipCountStepper({
 
     return (
         <div className="grid gap-2">
-            <span id={labelId} className="flex items-center gap-2 text-sm font-medium">
+            <span
+                id={labelId}
+                className={cn("flex items-center gap-2 text-sm font-medium", labelClassName)}
+            >
                 <ScissorsIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 {label}
             </span>

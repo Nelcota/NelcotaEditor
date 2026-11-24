@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>Conta · 3 direções</title>
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap"
+        />
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+            }
+            body {
+                font:
+                    15px/1.5 "Inter",
+                    system-ui,
+                    sans-serif;
+                background: #0e0e0f;
+                color: #ededee;
+                padding: 48px 40px 64px;
+            }
+            .wrap {
+                max-width: 1480px;
+                margin: 0 auto;
+                display: grid;
+                gap: 56px;
+            }
+            h1 {
+                font-size: 34px;
+                letter-spacing: -0.03em;
+            }
+            h2 {
+                font-size: 24px;
+                letter-spacing: -0.02em;
+            }
+            .lede {
+                color: #a1a1a8;
+                max-width: 85ch;
+                margin-top: 8px;
+            }
+            .row {
+                display: grid;
+                grid-template-columns: 3.4fr 1fr;
+                gap: 16px;
+                margin-top: 16px;
+                align-items: start;
+            }
+            .two {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                margin-top: 16px;
+            }
+            img {
+                width: 100%;
+                display: block;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header>
+                <h1>Aba Conta do zero</h1>
+                <p class="lede">
+                    Hoje a Conta é uma coluna estreita de blocos soltos. As três direções usam o
+                    visual novo do app (escuro, azul, Inter) e mantêm tudo o que a tela faz: foto,
+                    nome, senha, sair, preferências dos cortes (quantidade, duração, idioma), o que
+                    a turma já fez, espaço e excluir conta.
+                </p>
+            </header>
+            <section>
+                <h2>A · Cartão de perfil</h2>
+                <p class="lede">
+                    Igual ao cartão de criador da referência: foto grande, nome com etiqueta, email,
+                    as preferências em resumo e os números ao lado (vídeos, cortes, espaço).
+                    Embaixo, duas caixas: "Seus cortes" para ajustar e "O que a turma já fez" com
+                    barras e as abas Turma e Espaço. Excluir conta fica separado, em vermelho.
+                </p>
+                <div class="row">
+                    <img src="renders/a.png" alt="" /><img src="renders/a-phone.png" alt="" />
+                </div>
+            </section>
+            <section>
+                <h2>B · Configurações com menu</h2>
+                <p class="lede">
+                    Um menu dentro da página (Perfil, Seus cortes, Uso e espaço, Segurança, Sair,
+                    Excluir conta) e, ao lado, linhas com rótulo, valor e botão. Cada assunto no seu
+                    lugar, como as configurações de um sistema.
+                </p>
+                <div class="row">
+                    <img src="renders/b.png" alt="" /><img src="renders/b-phone.png" alt="" />
+                </div>
+            </section>
+            <section>
+                <h2>C · Lista agrupada</h2>
+                <p class="lede">
+                    Uma coluna só, com grupos (Perfil, Seus cortes, Uso) em linhas: o nome à
+                    esquerda e o controle à direita. Tudo numa tela, sem cliques extras.
+                </p>
+                <div class="row">
+                    <img src="renders/c.png" alt="" /><img src="renders/c-phone.png" alt="" />
+                </div>
+            </section>
+            <section>
+                <h2>Como está hoje</h2>
+                <div class="two">
+                    <img src="renders/current-1.jpg" alt="" /><img
+                        src="renders/current-2.jpg"
+                        alt=""
+                    />
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

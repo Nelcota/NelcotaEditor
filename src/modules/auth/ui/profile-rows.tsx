@@ -1,8 +1,8 @@
+import CameraIcon from "~icons/lucide/camera";
 import CheckIcon from "~icons/lucide/check";
 import KeyRoundIcon from "~icons/lucide/key-round";
 import LogOutIcon from "~icons/lucide/log-out";
 import PenIcon from "~icons/lucide/pen";
-import CameraIcon from "~icons/lucide/camera";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -12,7 +12,7 @@ import { EditProfileDialog } from "#/modules/auth/ui/edit-profile-dialog";
 import { UserAvatar } from "#/modules/auth/ui/user-avatar";
 import { useSignOut } from "#/modules/auth/ui/use-sign-out";
 import { Button } from "#/shared/ui/button";
-import { FormAlert } from "#/shared/ui/form-alert";
+import { SettingsRow } from "#/shared/ui/settings-row";
 
 const appRoute = getRouteApi("/_app");
 
@@ -32,31 +32,44 @@ function AvatarButton({ onClick }: { onClick: () => void }): ReactNode {
             <UserAvatar
                 name={user.name}
                 image={user.image}
-                className="size-18 text-lg transition-opacity group-hover:opacity-85"
+                className="size-14 text-base transition-opacity group-hover:opacity-85"
             />
-            <span className="absolute -right-0.5 -bottom-0.5 grid size-7 place-items-center rounded-full bg-foreground text-background ring-3 ring-popover">
-                <CameraIcon className="size-4" aria-hidden="true" />
+            <span className="absolute -end-0.5 -bottom-0.5 grid size-6 place-items-center rounded-full bg-foreground text-background ring-2 ring-background">
+                <CameraIcon className="size-3.5" aria-hidden="true" />
             </span>
         </button>
     );
 }
 
-function PasswordChangedNote(): ReactNode {
+function PasswordLine({ hasChanged }: { hasChanged: boolean }): ReactNode {
+    if (hasChanged === false) {
+        return "Para entrar no Nelcota";
+    }
+
     return (
-        <p role="status" className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <CheckIcon className="size-4 text-success" aria-hidden="true" />
+        <span role="status" className="inline-flex items-center gap-1.5">
+            <CheckIcon className="size-3.5 text-success" aria-hidden="true" />
             Senha trocada
-        </p>
+        </span>
     );
 }
 
-/** Who is signed in, with everything that changes the person: photo, name, password, sign out. */
-export function ProfileCard(): ReactNode {
+/** The Perfil group's rows: who is signed in (photo, name, email), the password and the session. */
+export function ProfileRows(): ReactNode {
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
     const [openDialog, setOpenDialog] = useState<OpenDialog>(null);
     const [hasChangedPassword, setHasChangedPassword] = useState(false);
     const { signOut, isSigningOut, errorMessage } = useSignOut();
+    let sessionLine: ReactNode = "Neste navegador";
+
+    if (errorMessage !== null) {
+        sessionLine = (
+            <span role="alert" className="text-destructive">
+                {errorMessage}
+            </span>
+        );
+    }
 
     const toOpenChange =
         (dialog: OpenDialog): ((isOpen: boolean) => void) =>
@@ -70,28 +83,39 @@ export function ProfileCard(): ReactNode {
         };
 
     return (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border bg-popover p-4 sm:p-5">
-            <AvatarButton onClick={() => setOpenDialog("photo")} />
-            <div className="grid min-w-0 flex-[1_1_10rem] gap-0.5">
-                <p title={user.name} className="truncate text-xl font-semibold tracking-tight">
-                    {user.name}
-                </p>
-                <p title={user.email} className="truncate text-muted-foreground">
-                    {user.email}
-                </p>
-                {hasChangedPassword === true && <PasswordChangedNote />}
-            </div>
-            <div className="flex w-full flex-wrap gap-2 sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-none">
-                <Button variant="secondary" onClick={() => setOpenDialog("profile")}>
+        <>
+            <SettingsRow
+                art={<AvatarButton onClick={() => setOpenDialog("photo")} />}
+                label={
+                    <span title={user.name} className="block truncate text-base">
+                        {user.name}
+                    </span>
+                }
+                description={
+                    <span title={user.email} className="block truncate">
+                        {user.email}
+                    </span>
+                }
+                className="py-4"
+            >
+                <Button variant="secondary" size="sm" onClick={() => setOpenDialog("profile")}>
                     <PenIcon aria-hidden="true" />
                     Editar perfil
                 </Button>
-                <Button variant="secondary" onClick={() => setOpenDialog("password")}>
+            </SettingsRow>
+            <SettingsRow
+                label="Senha"
+                description={<PasswordLine hasChanged={hasChangedPassword} />}
+            >
+                <Button variant="secondary" size="sm" onClick={() => setOpenDialog("password")}>
                     <KeyRoundIcon aria-hidden="true" />
                     Trocar senha
                 </Button>
+            </SettingsRow>
+            <SettingsRow label="Sessão" description={sessionLine}>
                 <Button
-                    variant="ghost"
+                    variant="secondary"
+                    size="sm"
                     onClick={async () => {
                         await signOut();
                     }}
@@ -101,12 +125,7 @@ export function ProfileCard(): ReactNode {
                     <LogOutIcon aria-hidden="true" />
                     Sair
                 </Button>
-            </div>
-            {errorMessage !== null && (
-                <div className="w-full">
-                    <FormAlert message={errorMessage} />
-                </div>
-            )}
+            </SettingsRow>
             <AvatarDialog isOpen={openDialog === "photo"} onOpenChange={toOpenChange("photo")} />
             <EditProfileDialog
                 isOpen={openDialog === "profile"}
@@ -120,6 +139,6 @@ export function ProfileCard(): ReactNode {
                     setHasChangedPassword(true);
                 }}
             />
-        </div>
+        </>
     );
 }
