@@ -18,7 +18,7 @@ interface NewVideoLinkProps {
 export function NewVideoLink({ emphasis, className }: NewVideoLinkProps) {
     return (
         <Button asChild variant={BUTTON_VARIANTS[emphasis]} className={className}>
-            <Link to="/" search={{ newVideo: true }} preload="intent">
+            <Link to="/videos" search={{ newVideo: true }} preload="intent">
                 <PlusIcon aria-hidden="true" />
                 Novo vídeo
             </Link>

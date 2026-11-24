@@ -9,8 +9,8 @@ const TAB_CLASS =
     "relative grid h-16 content-center justify-items-center gap-1 text-xs font-medium text-muted-foreground outline-none transition-[color,scale] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring motion-safe:active:scale-[0.99] [&>svg]:size-6";
 
 const STATE_CLASSES: Record<NavSectionState, string> = {
-    current: "text-foreground",
-    parent: "text-foreground",
+    current: "text-primary-ink",
+    parent: "text-primary-ink",
     none: "",
 };
 

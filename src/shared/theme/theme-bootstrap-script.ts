@@ -60,6 +60,6 @@ export const THEME_BOOTSTRAP_SCRIPT = `(function installThemeAdapter() {
         }
     }
 
-    root.classList.toggle("dark", readSavedTheme() === "dark");
+    root.classList.toggle("dark", readSavedTheme() !== "light");
     window.nelcotaTheme = { toggle: toggle, syncBrowserColor: syncBrowserColor };
 })();`;

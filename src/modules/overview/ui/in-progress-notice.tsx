@@ -28,7 +28,7 @@ function InProgressText({ count }: { count: number }) {
             )}{" "}
             nos números ·
             <Link
-                to="/"
+                to="/videos"
                 search={{ status: "processing" }}
                 className="rounded font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring focus-visible:outline-none"
             >

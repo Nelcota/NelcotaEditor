@@ -7,7 +7,7 @@ import { THEME_BOOTSTRAP_SCRIPT } from "#/shared/theme/theme-bootstrap-script";
  */
 export const THEME_COLOR_META = {
     name: "theme-color",
-    content: THEME_BAR_COLORS.light,
+    content: THEME_BAR_COLORS.dark,
     "data-light-color": THEME_BAR_COLORS.light,
     "data-dark-color": THEME_BAR_COLORS.dark,
 };

@@ -6,15 +6,24 @@ interface PageHeaderProps {
     action?: ReactNode;
 }
 
-/** The title block every console page starts with: title and one line on the left, controls trailing. */
+/**
+ * The reference names the page in the breadcrumb, not in a big title: the heading and its line stay
+ * for screen readers, and only the page's controls show, on the leading side.
+ */
 export function PageHeader({ title, description, action }: PageHeaderProps) {
+    if (action === undefined) {
+        return (
+            <>
+                <h1 className="sr-only">{title}</h1>
+                <p className="sr-only">{description}</p>
+            </>
+        );
+    }
+
     return (
-        // Wraps by the space it has: a long action row moves below instead of squeezing the title.
-        <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-            <div className="min-w-0 flex-[1_1_20rem]">
-                <h1 className="text-title font-semibold tracking-[-0.02em]">{title}</h1>
-                <p className="mt-1 max-w-prose text-meta text-muted-foreground">{description}</p>
-            </div>
+        <header className="flex flex-wrap items-center gap-2">
+            <h1 className="sr-only">{title}</h1>
+            <p className="sr-only">{description}</p>
             {action}
         </header>
     );

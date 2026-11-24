@@ -1,12 +1,21 @@
 # Nelcota — design brief
 
-Nelcota turns long videos into vertical short clips with captions. Since 2026-11-21 the app follows the
-owner's reference design: a desktop-style window. A light grey frame holds the top bar (brand, sidebar
-toggle, the open videos as tabs, theme, inspector toggle) and the sidebar (search, sections with counts,
-the videos at work and the rest, the person at the foot). One white rounded panel holds the page; on a
-video it splits into the page and a soft grey inspector of white grouped cards. Ink-black primary
-buttons; blue kept for focus and progress. Light by default; dark only when the person picks it with the
-toggle in the top bar (saved in `localStorage`, applied before the first paint).
+Nelcota turns long videos into vertical short clips with captions. Since 2026-11-23 the app follows the
+owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
+(the owner asked for nothing bluish) and the brand green as the one action colour. The frame holds the
+sidebar: the lowercase logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
+the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
+(used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
+rounded panel holds the breadcrumb bar (theme toggle trailing) and the page; page titles live in the
+breadcrumb and stay for screen readers only. Light stays available through the toggle.
+
+- **Início** is the reference's Copilot: a greeting from Nel, a box to paste a YouTube link (it starts
+  the video with the saved preferences, shown as pills; the plus opens the full form), and shortcuts.
+- **Vídeos** is a table (status pill, source, clips, progress with the stage, date), columns by a
+  container query so a narrow panel falls back to compact rows.
+- **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
+- **Cortes** are cards with the green download button; a finished video's page opens with the summary
+  bubble and its settings as tags.
 
 ## Principles
 
@@ -18,22 +27,20 @@ toggle in the top bar (saved in `localStorage`, applied before the first paint).
 
 ## Tokens (`src/styles.css`)
 
-| Token                                   | Use                                                      |
-| --------------------------------------- | -------------------------------------------------------- |
-| `background` (white, dark: near-black)  | The rounded panel and the inspector's cards              |
-| `frame` (light grey)                    | Window frame: top bar and sidebar                        |
-| `inspector` (between frame and panel)   | The video inspector behind its white cards               |
-| `card` (white, dark: raised grey)       | Panels, `card-border` = ink at 10%                       |
-| `secondary` / `muted` (light grey)      | Sunken tracks: segmented controls, filters, placeholders |
-| `primary` (blue, oklch 0.58 0.21 263)   | Focus ring, progress, activity dots                      |
-| `primary-solid` (ink, dark: near-white) | The one primary button and the open clip's number        |
-| `primary-ink`                           | Blue text and links                                      |
-| `muted-foreground`                      | Secondary text                                           |
-| `success` (teal)                        | Finished videos and clip scores                          |
-| `destructive` (red)                     | Failures and delete                                      |
+| Token                                 | Use                                                    |
+| ------------------------------------- | ------------------------------------------------------ |
+| `frame` (dark: near-black)            | Window frame behind the sidebar                        |
+| `background` (dark: charcoal)         | The rounded panel                                      |
+| `card` (a step above the panel)       | Filled boxes: search, table head, cards, sidebar cards |
+| `secondary` / `muted` / `accent`      | Pills, tracks, hover fills                             |
+| `primary` / `primary-solid` (green)   | Primary buttons, current section, progress, focus      |
+| `primary-ink`                         | Green text, links and the sidebar icons                |
+| `muted-foreground`                    | Secondary text                                         |
+| `success` (green) / `warning` (amber) | Finished videos, storage bars / warnings               |
+| `destructive` (red)                   | Failures and delete                                    |
 
-- Font: Geist (400 to 600). Page titles 28px semibold, tracking -0.02em, one muted line under them.
-  No eyebrows, no grid backdrop, no gradients.
+- Font: Inter (400 to 700). Big numbers and the greeting bold with tight tracking. No gradients
+  (flat fills and the dot texture only).
 - Radius: controls 10px (`rounded-xl`), panels and covers 12px (`rounded-md`, `rounded-2xl`), small
   chips 8px (`rounded-lg`). Buttons are never pills; round is kept for avatars, dots and the big play button.
 - Scrollbar: a 4px strip.

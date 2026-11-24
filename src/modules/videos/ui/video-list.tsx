@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "#/shared/ui/cn";
 import type { VideoSummary } from "#/modules/videos/video-views";
 import { LibraryToolbar } from "#/modules/videos/ui/library-toolbar";
 import { useLibraryFilter } from "#/modules/videos/ui/use-library-filter";
@@ -7,7 +8,7 @@ import { useVideoListControls } from "#/modules/videos/ui/use-video-list-control
 import { useVideoPage } from "#/modules/videos/ui/use-video-page";
 import { useVideosQuery } from "#/modules/videos/ui/use-videos-query";
 import { ALL_FILTER, countVideosByFilter } from "#/modules/videos/ui/video-list-filter";
-import { VideoListRow } from "#/modules/videos/ui/video-list-row";
+import { VIDEO_TABLE_COLUMNS, VideoListRow } from "#/modules/videos/ui/video-list-row";
 import {
     FirstVideoEmptyState,
     NoMatchState,
@@ -25,8 +26,32 @@ function describeTotal(shownCount: number, totalCount: number): string {
     return `${shownCount} de ${totalCount} vídeos`;
 }
 
-/** Search, status and order over one card of rows. */
-function FilterableVideoList({ videos }: { videos: Array<VideoSummary> }): ReactNode {
+const TABLE_HEADINGS = ["Vídeo", "Status", "Origem", "Cortes", "Progresso", "Enviado", ""];
+
+/** The column names over the rows; the rows say the same to screen readers, so it is hidden. */
+function TableHead(): ReactNode {
+    return (
+        <div
+            aria-hidden="true"
+            className={cn(
+                "hidden h-11 items-center gap-x-4 bg-card px-4 text-xs font-semibold text-muted-foreground @4xl:grid",
+                VIDEO_TABLE_COLUMNS,
+            )}
+        >
+            {TABLE_HEADINGS.map((heading, index) => (
+                <span key={`${heading}-${index}`}>{heading}</span>
+            ))}
+        </div>
+    );
+}
+
+interface FilterableVideoListProps {
+    videos: Array<VideoSummary>;
+    action?: ReactNode;
+}
+
+/** Search, status and order over one table of rows. */
+function FilterableVideoList({ videos, action }: FilterableVideoListProps): ReactNode {
     const libraryFilter = useLibraryFilter();
     const filter = libraryFilter.filter;
     const controls = useVideoListControls(filter);
@@ -45,6 +70,7 @@ function FilterableVideoList({ videos }: { videos: Array<VideoSummary> }): React
                 counts={countVideosByFilter(videos)}
                 sort={controls.sort}
                 onSortChange={controls.changeSort}
+                action={action}
             />
             <p role="status" className="sr-only">
                 {describeTotal(matchingCount, videos.length)}. {announcement}
@@ -61,14 +87,14 @@ function FilterableVideoList({ videos }: { videos: Array<VideoSummary> }): React
                 </div>
             )}
             {matchingCount > 0 && (
-                <ul
-                    aria-label="Seus vídeos"
-                    className="divide-y overflow-hidden rounded-2xl border bg-background"
-                >
-                    {page.videos.map((video) => (
-                        <VideoListRow key={video.id} video={video} />
-                    ))}
-                </ul>
+                <div className="@container overflow-hidden rounded-2xl border">
+                    <TableHead />
+                    <ul aria-label="Seus vídeos" className="divide-y @4xl:border-t">
+                        {page.videos.map((video) => (
+                            <VideoListRow key={video.id} video={video} />
+                        ))}
+                    </ul>
+                </div>
             )}
             <div>
                 <VideoPager
@@ -84,8 +110,8 @@ function FilterableVideoList({ videos }: { videos: Array<VideoSummary> }): React
     );
 }
 
-/** The home page's body: loading, the first-video welcome, the load error or the list itself. */
-export function VideoList(): ReactNode {
+/** The Vídeos page body: loading, the first-video welcome, the load error or the table itself. */
+export function VideoList({ action }: { action?: ReactNode }): ReactNode {
     const videosQuery = useVideosQuery();
     const videos = videosQuery.data;
 
@@ -113,5 +139,5 @@ export function VideoList(): ReactNode {
         );
     }
 
-    return <FilterableVideoList videos={videos} />;
+    return <FilterableVideoList videos={videos} action={action} />;
 }

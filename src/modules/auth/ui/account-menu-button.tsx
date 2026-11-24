@@ -1,5 +1,4 @@
-import ChevronDownIcon from "~icons/lucide/chevron-down";
-import ChevronUpIcon from "~icons/lucide/chevron-up";
+import MenuIcon from "~icons/lucide/menu";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -11,9 +10,8 @@ import { DropdownMenu, DropdownMenuTrigger } from "#/shared/ui/dropdown-menu";
 const appRoute = getRouteApi("/_app");
 
 /**
- * Who is signed in, at the foot of the sidebar: photo, name and the up/down chevrons of a menu that
- * opens Conta, the photo and the way out. The photo's ring starts on the box line, the name on the
- * text line.
+ * Who is signed in, at the foot of the sidebar: photo, name and the menu glyph of a menu that
+ * opens Conta, the photo and the way out.
  */
 export function AccountMenuButton(): ReactNode {
     const routeContext = appRoute.useRouteContext();
@@ -25,20 +23,13 @@ export function AccountMenuButton(): ReactNode {
             <DropdownMenu>
                 <DropdownMenuTrigger
                     aria-label={`Menu da conta: ${user.name}`}
-                    className="flex h-14 w-full items-center gap-1.5 rounded-xl pe-3 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
+                    className="flex h-11 w-full items-center gap-2.5 rounded-xl px-2 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
                 >
-                    <UserAvatar
-                        name={user.name}
-                        image={user.image}
-                        className="ms-0.5 size-9 ring-2 ring-foreground"
-                    />
-                    <span className="min-w-0 flex-1 truncate text-base font-medium">
+                    <UserAvatar name={user.name} image={user.image} className="size-7" />
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">
                         {user.name}
                     </span>
-                    <span className="grid text-muted-foreground" aria-hidden="true">
-                        <ChevronUpIcon className="-mb-1 size-4" />
-                        <ChevronDownIcon className="size-4" />
-                    </span>
+                    <MenuIcon aria-hidden="true" className="size-5 text-muted-foreground" />
                 </DropdownMenuTrigger>
                 <AccountMenuContent
                     side="top"

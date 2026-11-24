@@ -50,7 +50,7 @@ export function DeleteVideoDialog({ video, isOpen, onOpenChange }: DeleteVideoDi
             hasDeletedRef.current = true;
             onOpenChange(false);
             await invalidateVideoQueries(queryClient);
-            await navigate({ to: "/" });
+            await navigate({ to: "/videos" });
         },
     });
 

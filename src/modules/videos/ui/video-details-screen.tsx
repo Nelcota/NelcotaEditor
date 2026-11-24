@@ -2,7 +2,6 @@ import ArrowLeftIcon from "~icons/lucide/arrow-left";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useEffect } from "react";
 import type { ComponentType, ReactNode } from "react";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { VideoHeader } from "#/modules/videos/ui/video-header";
@@ -11,7 +10,7 @@ import { VideoPageTabs } from "#/modules/videos/ui/video-page-tabs";
 import type { StudioTabProps } from "#/modules/videos/ui/video-page-tabs";
 import { videoDetailsQueryOptions } from "#/modules/videos/ui/video-queries";
 import { useIsInspectorHidden } from "#/modules/videos/ui/inspector-toggle";
-import { useOpenVideoTabs } from "#/modules/videos/ui/use-open-video-tabs";
+import { VideoResultSummary } from "#/modules/videos/ui/video-result-summary";
 import { VideoInspector } from "#/modules/videos/ui/video-inspector";
 import type { VideoDetails } from "#/modules/videos/video-views";
 import { Button } from "#/shared/ui/button";
@@ -63,7 +62,7 @@ function LoadErrorState({ message, onRetry }: { message: string; onRetry: () => 
                             Tentar de novo
                         </Button>
                         <Button asChild variant="ghost">
-                            <Link to="/">
+                            <Link to="/videos">
                                 <ArrowLeftIcon aria-hidden="true" />
                                 Voltar para seus vídeos
                             </Link>
@@ -84,19 +83,11 @@ interface VideoWorkspaceProps {
 /**
  * The page column and, from lg, the inspector beside it, each scrolling on its own. The Studio
  * needs the width, so the inspector steps aside there; the top bar's toggle hides it anywhere.
- * Opening a video also opens its tab in the top bar.
  */
 function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): ReactNode {
     const video = details.video;
-    const videoId = video.id;
-    const tabs = useOpenVideoTabs();
-    const openTab = tabs.open;
     const isInspectorHidden = useIsInspectorHidden();
     const isInspectorShown = isInspectorHidden === false && search.tab !== "studio";
-
-    useEffect(() => {
-        openTab(videoId);
-    }, [openTab, videoId]);
 
     return (
         <div
@@ -111,6 +102,9 @@ function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): Re
                     isInspectorShown={isInspectorShown}
                     isCompact={search.tab === "studio"}
                 />
+                {(search.tab === undefined || search.tab === "clips") && (
+                    <VideoResultSummary video={video} />
+                )}
                 <VideoPageTabs details={details} search={search} StudioTab={StudioTab} />
             </div>
             {isInspectorShown === true && (

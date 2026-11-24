@@ -18,7 +18,7 @@ const SECURE_URL_PREFIX = "https://";
 function BackToList() {
     return (
         <Link
-            to="/"
+            to="/videos"
             className="-ms-1 inline-flex h-10 w-fit items-center gap-1 rounded-xl pe-2 text-meta font-medium text-muted-foreground outline-none transition-[color,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] md:hidden"
         >
             <ChevronLeftIcon aria-hidden="true" className="size-5" />

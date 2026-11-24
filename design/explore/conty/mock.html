@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Nelcota · nova interface</title>
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..750&display=swap"
+        />
+        <link rel="stylesheet" href="mock.css" />
+        <script src="icons.js"></script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script>
+            const q = new URLSearchParams(location.search);
+            const D = q.get("d") || "a";
+            const T = q.get("t") || "dark";
+            const S = q.get("s") || "home";
+            const PHONE = q.get("p") === "1";
+            document.documentElement.dataset.d = D;
+            document.documentElement.dataset.t = T;
+            if (PHONE) document.body.classList.add("phone");
+
+            const ic = (k, c = "i") =>
+                `<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[k]}</svg>`;
+            const mascot = (n, s) => {
+                const sheet = n < 16 ? "shapes" : "objects";
+                const t = n % 16;
+                const x = (t % 4) * 33.333;
+                const y = Math.floor(t / 4) * 33.333;
+                return `<span style="display:inline-block;width:${s}px;height:${s}px;flex:none;background:url(img/${sheet}.webp) ${x}% ${y}%/400% 400% no-repeat"></span>`;
+            };
+
+            const NAV = [
+                ["home", "Início", S === "home"],
+                ["videos", "Vídeos", S === "videos" || S === "video", 7],
+                ["scissors", "Cortes", false, 31],
+                ["chart", "Painel", S === "overview"],
+                ["tuning", "Preferências", false],
+                ["shield", "Admin", false, null, true],
+            ];
+
+            function side() {
+                const nav = NAV.map(
+                    ([i, l, on, n, chev]) =>
+                        `<a class="${on ? "on" : ""}">${ic(i)}${l}${n ? `<span class="count">${n}</span>` : ""}${chev ? ic("down", "i chev i-sm") : ""}</a>`,
+                ).join("");
+                return `<aside class="side">
+                    <div class="side-top">
+                        <span class="logo">${mascot(15, 24)}nelcota</span>
+                        <span class="icon-btn accent">${ic("bell")}<span class="badge">1</span></span>
+                        <span class="icon-btn accent">${ic("sidebar")}</span>
+                    </div>
+                    <div class="ws">
+                        <span class="ws-mark">${ic("add")}</span>
+                        <div><span class="eyebrow">Novo vídeo</span><strong>Link ou arquivo</strong></div>
+                        <span class="end">${ic("upload")}</span>
+                    </div>
+                    <nav class="nav">${nav}</nav>
+                    <div class="spacer"></div>
+                    <div class="wallet">
+                        <div class="wallet-head">
+                            <div><small>Armazenamento</small><div class="big">3,2<span> GB de 10 GB</span></div></div>
+                            <span class="acts">${ic("eye", "i i-sm")}${ic("help", "i i-sm")}</span>
+                        </div>
+                        <div class="meter">
+                            <div class="meter-row">${ic("film")}Originais<b>2,1 GB <em>(66%)</em></b></div>
+                            <div class="bar"><i class="ok" style="width:66%"></i></div>
+                        </div>
+                        <div class="meter">
+                            <div class="meter-row">${ic("scissors")}Cortes<b>1,1 GB <em>(34%)</em></b></div>
+                            <div class="bar"><i style="width:34%"></i></div>
+                        </div>
+                        <div class="two"><span class="btn">Ver uso</span><span class="btn primary">Liberar espaço ${ic("arrow", "i i-sm")}</span></div>
+                    </div>
+                    <div class="me"><span class="avatar">C</span>Conta Demo<span class="end">${ic("menu")}</span></div>
+                </aside>`;
+            }
+
+            function topBar(crumbs, end = "") {
+                const c = crumbs
+                    .map((x, k) => (k === crumbs.length - 1 ? `<b>${x}</b>` : x))
+                    .join(ic("right"));
+                return `<div class="top"><div class="crumbs">${c}</div><div class="end">${end}</div></div>`;
+            }
+
+            function home() {
+                return (
+                    topBar(
+                        ["Início", "Novo vídeo"],
+                        `<span class="icon-btn">${ic("history")}</span>`,
+                    ) +
+                    `<div class="body"><div class="home">
+                        <div class="hello">${mascot(15, 34)}Boa noite, Conta.</div>
+                        <p class="sub">Sou o Nel: transformo seus vídeos longos em cortes verticais com legenda, prontos para postar.</p>
+                        <div class="composer">
+                            <span class="ph">Cole um link do YouTube ou arraste um vídeo aqui...</span>
+                            <div class="row">
+                                <span class="icon-btn">${ic("add")}</span>
+                                <span class="pill">${ic("scissors")}5 cortes</span>
+                                <span class="pill">${ic("clock")}30 a 60 s</span>
+                                <div class="end"><span class="icon-btn">${ic("upload")}</span><span class="send">${ic("up")}</span></div>
+                            </div>
+                        </div>
+                        <div class="chips">
+                            <span class="chip">${ic("upload")}Enviar arquivo</span>
+                            <span class="chip">${ic("scissors")}Ver meus cortes</span>
+                            <span class="chip">${ic("chart")}Analisar meus resultados</span>
+                        </div>
+                    </div></div>`
+                );
+            }
+
+            const CLIPS = [
+                ["v1", "A largada que ninguém esperava", 94, "0:42"],
+                ["v2", "O ronco do motor no túnel", 91, "0:38"],
+                ["v3", "Reação no primeiro 0 a 100", 88, "0:55"],
+                ["v4", "Comparando com o original", 85, "0:47"],
+                ["v5", "O preço de tudo isso", 82, "0:51"],
+            ];
+
+            function video() {
+                const cards = CLIPS.map(
+                    ([img, t, s, d]) => `<div class="ccard">
+                        <div class="thumb"><img src="img/${img}.jpg" alt="" /><span class="score">${ic("star")}${s}</span><span class="dur">${d}</span></div>
+                        <div class="meta"><b>${t}</b><small>Nota ${s} · ${d}</small><span class="btn primary">${ic("pen", "i i-sm")}Abrir no Studio</span></div>
+                    </div>`,
+                ).join("");
+                return (
+                    topBar(["Vídeos", "ACELEREI O GOLF R 4X4 DE 600CV"]) +
+                    `<div class="body"><div class="thread">
+                        <span class="back">${ic("back")}Voltar</span>
+                        <div class="msgs">
+                            <div class="bubble"><img src="img/v1.jpg" alt="" /><div>ACELEREI O GOLF R 4X4 DE 600CV<small>YouTube · 16:51</small></div></div>
+                            <span class="thought">Processou em 6 min ${ic("right")}</span>
+                            <p class="lede">Separei os 5 melhores momentos do vídeo, já em 9:16 e com legenda.</p>
+                            <div class="tags"><span class="tag">${ic("filter")}5 cortes</span><span class="tag">${ic("filter")}30 a 60 s</span><span class="tag">${ic("filter")}Português</span><span class="tag">${ic("filter")}Legenda Destaque</span></div>
+                            <div class="cards">${cards}<span class="next">${ic("right")}</span></div>
+                            <div class="foot-line">5 cortes · nota média 88<a>Ver na aba Cortes ${ic("arrow")}</a></div>
+                            <p class="lede">O melhor corte é "A largada que ninguém esperava": começa com o motor ligando e prende nos 3 primeiros segundos.</p>
+                            <div class="acts-row"><span class="icon-btn">${ic("copy")}</span><span class="icon-btn">${ic("download")}</span><span class="icon-btn">${ic("refresh")}</span></div>
+                        </div>
+                        <div class="composer small"><span class="ph">Cole outro link para cortar...</span><div class="row"><span class="icon-btn">${ic("add")}</span><div class="end"><span class="send">${ic("up")}</span></div></div></div>
+                    </div></div>`
+                );
+            }
+
+            const ROWS = [
+                [
+                    "v1",
+                    "ACELEREI O GOLF R 4X4 DE 600CV",
+                    "YouTube · 16:51",
+                    "ok",
+                    1,
+                    [5, 0],
+                    100,
+                    "412 MB",
+                    "88",
+                    "19/11",
+                ],
+                [
+                    "v2",
+                    "Teste de velocidade 10 min",
+                    "YouTube · 10:01",
+                    "ok",
+                    1,
+                    [4, 0],
+                    100,
+                    "268 MB",
+                    "84",
+                    "19/11",
+                ],
+                [
+                    "v3",
+                    "Entrevista com o mecânico",
+                    "Arquivo · 42:10",
+                    "run",
+                    0,
+                    [2, 3],
+                    62,
+                    "1,1 GB",
+                    "",
+                    "23/11",
+                ],
+                [
+                    "v4",
+                    "Dicas de produtividade",
+                    "YouTube · 1:15",
+                    "ok",
+                    1,
+                    [3, 0],
+                    100,
+                    "38 MB",
+                    "79",
+                    "19/11",
+                ],
+                [
+                    "v5",
+                    "Podcast episódio 12",
+                    "YouTube · 58:20",
+                    "wait",
+                    1,
+                    [0, 5],
+                    0,
+                    "",
+                    "",
+                    "23/11",
+                ],
+                [
+                    "v6",
+                    "Bastidores da gravação",
+                    "Arquivo · 8:44",
+                    "bad",
+                    0,
+                    [0, 0],
+                    35,
+                    "190 MB",
+                    "",
+                    "22/11",
+                ],
+                [
+                    "v7",
+                    "Review do carro novo",
+                    "YouTube · 21:03",
+                    "ok",
+                    1,
+                    [6, 0],
+                    100,
+                    "520 MB",
+                    "91",
+                    "18/11",
+                ],
+            ];
+            const ST = {
+                ok: ["st-ok", "check", "Pronto"],
+                run: ["st-run", "refresh", "Cortando"],
+                wait: ["st-wait", "clock", "Na fila"],
+                bad: ["st-bad", "danger", "Falhou"],
+            };
+
+            function videos() {
+                const rows = ROWS.map(
+                    ([img, t, sub, st, yt, [ready, todo], pct, size, score, date]) => {
+                        const [cls, icon, label] = ST[st];
+                        const tone = { ok: "ok", run: "", wait: "muted", bad: "warn" }[st];
+                        return `<div class="tr">
+                        <div class="vid"><img src="img/${img}.jpg" alt="" /><div><b>${t}</b><small>${sub}</small></div></div>
+                        <span class="status ${cls}">${ic(icon)}${label}${ic("down")}</span>
+                        <span class="src ${yt ? "" : "file"}">${ic(yt ? "youtube" : "film")}</span>
+                        <div class="cnt"><span style="color:var(--ok)">${ic("check")}${ready}</span>${todo ? `<span class="muted">${ic("clock")}${todo}</span>` : ""}</div>
+                        <div class="prog"><div class="l"><b>${pct === 100 ? "Concluído" : pct === 0 ? "Aguardando" : st === "bad" ? "Parou no download" : "Selecionando momentos"}</b>${pct}%</div><div class="bar"><i class="${tone}" style="width:${pct}%"></i></div></div>
+                        <span class="num">${size || '<span class="muted">0 MB</span>'}</span>
+                        <span class="num">${score ? `${score}<span class="muted">/100</span>` : '<span class="muted">sem nota</span>'}</span>
+                        <span class="icon-btn">${ic("dots")}</span>
+                    </div>`;
+                    },
+                ).join("");
+                return (
+                    topBar(
+                        ["Início", "Vídeos"],
+                        `<span class="money">${ic("eye")}3,2 GB<span>de 10 GB</span></span><span class="money">${mascot(15, 20)}Nel</span>`,
+                    ) +
+                    `<div class="body">
+                        <div class="toolbar">
+                            <span class="search">${ic("search")}Pesquisar</span>
+                            <span class="tbtn">${ic("filter")}Filtros</span>
+                            <span class="tbtn">${ic("columns")}Colunas</span>
+                            <span style="flex:1"></span>
+                            <span class="icon-btn accent">${ic("download")}</span>
+                            <span class="btn primary lg">${ic("add")}Novo vídeo</span>
+                        </div>
+                        <div class="table">
+                            <div class="tr head"><span>Vídeo</span><span>Status</span><span>Origem</span><span>Cortes</span><span>Progresso</span><span>Tamanho ${ic("sort")}</span><span>Nota ${ic("sort")}</span><span></span></div>
+                            ${rows}
+                        </div>
+                        <div class="pager"><span>1 a 7 de 7</span><span>Página 1 de 1</span></div>
+                    </div>`
+                );
+            }
+
+            function chartSvg() {
+                const pts = [
+                    3, 5, 2, 9, 4, 3, 12, 6, 4, 7, 5, 3, 8, 4, 6, 15, 7, 5, 4, 6, 3, 5, 9, 4, 3, 6,
+                    4, 5, 3, 4,
+                ];
+                const w = 380,
+                    h = 150,
+                    max = 16;
+                const xy = pts.map((v, i) => [(i / (pts.length - 1)) * w, h - (v / max) * h]);
+                let d = `M${xy[0][0]},${xy[0][1]}`;
+                for (let i = 1; i < xy.length; i++) {
+                    const [x0, y0] = xy[i - 1],
+                        [x1, y1] = xy[i];
+                    const mx = (x0 + x1) / 2;
+                    d += ` C${mx},${y0} ${mx},${y1} ${x1},${y1}`;
+                }
+                const grid = [0, 0.5, 1]
+                    .map(
+                        (f) =>
+                            `<line x1="0" x2="${w}" y1="${h * f}" y2="${h * f}" stroke="var(--line-2)" />`,
+                    )
+                    .join("");
+                return `<svg viewBox="-28 -14 ${w + 36} ${h + 34}" style="width:100%;height:auto;display:block">
+                    ${grid}
+                    <text x="-8" y="4" fill="var(--muted)" font-size="11" text-anchor="end">16</text>
+                    <text x="-8" y="${h / 2 + 4}" fill="var(--muted)" font-size="11" text-anchor="end">8</text>
+                    <text x="-8" y="${h + 4}" fill="var(--muted)" font-size="11" text-anchor="end">0</text>
+                    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" />
+                    <circle cx="${xy[15][0]}" cy="${xy[15][1]}" r="4" fill="var(--accent)" />
+                    <text x="${xy[15][0]}" y="${xy[15][1] - 9}" fill="var(--ink)" font-size="11.5" font-weight="700" text-anchor="middle">15 cortes</text>
+                    ${["24 out", "1 nov", "11 nov", "22 nov"].map((l, i) => `<text x="${(i / 3) * w}" y="${h + 18}" fill="var(--muted)" font-size="11" text-anchor="${i === 0 ? "start" : i === 3 ? "end" : "middle"}">${l}</text>`).join("")}
+                </svg>`;
+            }
+
+            function overview() {
+                const rank = ROWS.filter((r) => r[8]).sort((a, b) => b[8] - a[8]);
+                const list = rank
+                    .map(
+                        ([img, t, , , , [ready], , , score]) =>
+                            `<div><img src="img/${img}.jpg" alt="" /><span class="t">${t}</span><span class="bar"><i style="width:${score}%"></i></span><b>${score}</b></div>`,
+                    )
+                    .join("");
+                return (
+                    topBar(
+                        ["Início", "Painel"],
+                        `<span class="icon-btn">${ic("calendar")}</span>`,
+                    ) +
+                    `<div class="body"><div class="ov">
+                        <div class="tags" style="margin:6px 0 0"><span class="tag">${ic("calendar")}Últimos 30 dias</span><span class="pill">Últimos 7 dias</span><span class="pill">Últimos 90 dias</span></div>
+                        <div class="ov-card">
+                            <div class="ov-head">
+                                <div><h2>Cortes dos últimos 30 dias</h2><small>24 out a 22 nov · todos os vídeos</small></div>
+                                <div class="stats"><div><b>31</b><small>cortes</small></div><div><b>86</b><small>nota média</small></div><div><b>3,2 GB</b><small>usados</small></div></div>
+                            </div>
+                            <div class="ov-grid">
+                                <div class="box rank">${list}</div>
+                                <div class="box"><div class="legend"><i></i>Cortes por dia</div>${chartSvg()}</div>
+                            </div>
+                        </div>
+                        <p class="lede">"Review do carro novo" e "ACELEREI O GOLF" têm as maiores notas. O pico foi em 13 nov, com 15 cortes em um dia.</p>
+                    </div></div>`
+                );
+            }
+
+            const SCREENS = { home, video, videos, overview };
+            const tabs = [
+                ["home", "Início", S === "home"],
+                ["videos", "Vídeos", S === "videos" || S === "video"],
+                ["scissors", "Cortes", false],
+                ["chart", "Painel", S === "overview"],
+            ]
+                .map(([i, l, on]) => `<a class="${on ? "on" : ""}">${ic(i)}${l}</a>`)
+                .join("");
+            document.getElementById("root").innerHTML =
+                `<div class="app">${side()}<main class="panel">${SCREENS[S]()}</main></div><nav class="tabbar">${tabs}</nav>`;
+        </script>
+    </body>
+</html>

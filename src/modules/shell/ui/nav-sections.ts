@@ -1,16 +1,24 @@
 import ChartNoAxesColumnIcon from "~icons/lucide/chart-no-axes-column";
+import HouseIcon from "~icons/lucide/house";
 import ScissorsIcon from "~icons/lucide/scissors";
-import SquarePlayIcon from "~icons/lucide/square-play";
 import ShieldIcon from "~icons/lucide/shield";
-import UserIcon from "~icons/lucide/user";
+import SquarePlayIcon from "~icons/lucide/square-play";
+import UserRoundIcon from "~icons/lucide/user-round";
 import type { IconComponent } from "#/shared/ui/icon-component";
 
-export type SectionPath = "/" | "/clips" | "/overview" | "/admin" | "/account";
+export type SectionPath = "/" | "/videos" | "/clips" | "/overview" | "/account" | "/admin";
 
 export interface NavSection {
     path: SectionPath;
     label: string;
     icon: IconComponent;
+}
+
+export type AdminSubPath = "/admin" | "/admin/users" | "/admin/videos";
+
+export interface AdminSubSection {
+    path: AdminSubPath;
+    label: string;
 }
 
 /**
@@ -20,13 +28,15 @@ export interface NavSection {
 export type NavSectionState = "current" | "parent" | "none";
 
 export const HOME_PATH = "/";
-const VIDEO_PAGE_PREFIX = "/videos/";
+export const VIDEOS_PATH = "/videos";
 const ADMIN_PATH = "/admin";
 
 export const NAV_SECTIONS: ReadonlyArray<NavSection> = [
-    { path: HOME_PATH, label: "Vídeos", icon: SquarePlayIcon },
+    { path: HOME_PATH, label: "Início", icon: HouseIcon },
+    { path: VIDEOS_PATH, label: "Vídeos", icon: SquarePlayIcon },
     { path: "/clips", label: "Cortes", icon: ScissorsIcon },
     { path: "/overview", label: "Painel", icon: ChartNoAxesColumnIcon },
+    { path: "/account", label: "Conta", icon: UserRoundIcon },
 ];
 
 /** Shown to admins only; the admin routes and server functions check the role on their own. */
@@ -36,25 +46,41 @@ export const ADMIN_SECTION: NavSection = {
     icon: ShieldIcon,
 };
 
-/** Phones only: the sidebar's account menu becomes the last tab. */
-export const ACCOUNT_SECTION: NavSection = {
-    path: "/account",
-    label: "Conta",
-    icon: UserIcon,
-};
+/** The admin pages, listed under Admin when it is open in the sidebar. */
+export const ADMIN_SUB_SECTIONS: ReadonlyArray<AdminSubSection> = [
+    { path: "/admin", label: "Visão geral" },
+    { path: "/admin/users", label: "Usuários" },
+    { path: "/admin/videos", label: "Vídeos" },
+];
+
+/** Every section fits the phone tab bar; Admin stays a desktop page. */
+export const PHONE_SECTIONS: ReadonlyArray<NavSection> = NAV_SECTIONS;
+
+/** A path and every page under it ("/videos" holds "/videos/abc"). */
+function isUnder(pathname: string, path: string): boolean {
+    return pathname.startsWith(`${path}/`);
+}
 
 export function getSectionState(section: NavSection, pathname: string): NavSectionState {
-    if (pathname === section.path) {
+    const path = section.path;
+
+    if (pathname === path || pathname === `${path}/`) {
         return "current";
     }
 
-    if (section.path === HOME_PATH && pathname.startsWith(VIDEO_PAGE_PREFIX) === true) {
-        return "parent";
-    }
-
-    if (section.path === ADMIN_PATH && pathname.startsWith(`${ADMIN_PATH}/`) === true) {
+    if (path !== HOME_PATH && isUnder(pathname, path) === true) {
         return "parent";
     }
 
     return "none";
+}
+
+export function isAdminSubSectionCurrent(subSection: AdminSubSection, pathname: string): boolean {
+    const path = subSection.path;
+
+    if (path === ADMIN_PATH) {
+        return pathname === ADMIN_PATH || pathname === `${ADMIN_PATH}/`;
+    }
+
+    return pathname === path || isUnder(pathname, path) === true;
 }

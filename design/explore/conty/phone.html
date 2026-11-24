@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>Celular</title>
+        <style>
+            body {
+                margin: 0;
+                background: #141415;
+            }
+            iframe {
+                display: block;
+                width: 390px;
+                height: 844px;
+                border: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            const frame = document.createElement("iframe");
+            frame.src = "mock.html" + location.search;
+            document.body.append(frame);
+        </script>
+    </body>
+</html>

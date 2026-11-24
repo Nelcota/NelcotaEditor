@@ -4,8 +4,8 @@ import type { OverviewStats } from "#/modules/overview/overview-views";
 import { BestClipsCarousel } from "#/modules/overview/ui/best-clips-carousel";
 import { CompactMetric } from "#/modules/overview/ui/compact-metric";
 import { CREW_STAGES, CrewStageCard } from "#/modules/overview/ui/crew-stage-card";
-import { CumulativeClipsChart } from "#/modules/overview/ui/cumulative-clips-chart";
 import { InProgressNotice } from "#/modules/overview/ui/in-progress-notice";
+import { ResultsCard } from "#/modules/overview/ui/results-card";
 import { findMetricDefinition } from "#/modules/overview/ui/metric-definitions";
 import { StageCrewMascot } from "#/modules/videos/ui/stage-crew-mascot";
 import { cn } from "#/shared/ui/cn";
@@ -20,7 +20,7 @@ interface OverviewBoardProps {
 function FailedVideosLink(): ReactNode {
     return (
         <Link
-            to="/"
+            to="/videos"
             search={{ status: "failed" }}
             className="w-fit rounded text-xs font-medium text-foreground underline-offset-4 hover:underline focus-visible:ring-4 focus-visible:ring-ring focus-visible:outline-none motion-safe:active:scale-[0.99]"
         >
@@ -57,8 +57,8 @@ function TimeAndFailures({ stats }: { stats: OverviewStats }): ReactNode {
 }
 
 /**
- * Direction "Equipe" (DESIGN.md): each crew member shows what they did in the period, in the
- * order the work flows, then time and failures, the best clips and the trend. Columns follow the
+ * The reference's results card first (totals, the ranking and the clips per day), then what each
+ * crew member did in the period, time and failures, and the best clips to watch. Columns follow the
  * board's own width (container queries), so a narrow window does not squeeze them.
  */
 export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps): ReactNode {
@@ -73,6 +73,7 @@ export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps): 
             aria-busy={isStale}
         >
             <InProgressNotice count={stats.inProgressCount} />
+            <ResultsCard stats={stats} />
             {videosSent.previous === 0 && (
                 <p className="text-sm text-muted-foreground">
                     Nada no período anterior para comparar: as variações aparecem a partir do
@@ -91,7 +92,6 @@ export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps): 
             </section>
             <TimeAndFailures stats={stats} />
             <BestClipsCarousel clips={stats.bestClips} onWiden={onWiden} />
-            <CumulativeClipsChart stats={stats} />
         </div>
     );
 }

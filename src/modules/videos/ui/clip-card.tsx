@@ -12,7 +12,7 @@ import { formatClock } from "#/shared/ui/format";
 /** Grows to share a row, and drops to its own row when the card is too narrow for both words. */
 const SHARED_ROW_BUTTON_CLASS = "min-w-0 flex-auto";
 
-/** The actions under a card, each with its word: download on its own row, then edit and copy. */
+/** The actions under a card: the green download (the reference's invite button), then edit and copy. */
 function ClipCardActions({ item }: { item: LibraryClip }): ReactNode {
     const clip = item.clip;
 
@@ -25,7 +25,7 @@ function ClipCardActions({ item }: { item: LibraryClip }): ReactNode {
             <ClipDownloadLink
                 clip={clip}
                 label="Baixar"
-                emphasis="secondary"
+                emphasis="primary"
                 className="min-w-0 basis-full"
             />
             <OpenInStudioLink
@@ -45,9 +45,9 @@ export function ClipCard({ item }: { item: LibraryClip }): ReactNode {
     const durationSeconds = Math.round(clip.endSeconds - clip.startSeconds);
 
     return (
-        <li className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-3">
+        <li className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-3 overflow-hidden rounded-2xl border border-card-border bg-card pb-3">
             <ClipPreview clip={clip} />
-            <div className="grid min-w-0 gap-1.5">
+            <div className="grid min-w-0 gap-1.5 px-3">
                 <h2
                     title={clip.title}
                     className="line-clamp-2 leading-snug font-medium [overflow-wrap:anywhere]"
@@ -63,7 +63,9 @@ export function ClipCard({ item }: { item: LibraryClip }): ReactNode {
                 </p>
                 <ClipReasonDisclosure reason={clip.reason} />
             </div>
-            <ClipCardActions item={item} />
+            <div className="px-3">
+                <ClipCardActions item={item} />
+            </div>
         </li>
     );
 }
