@@ -2,8 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
-import { respondWithFileRange } from "#/shared/server/serve-file-range.server";
-import { resolveStoragePath } from "#/shared/server/storage.server";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { HTTP_NOT_FOUND } from "#/shared/server/http-response";
 
 // 24 random bytes in base64url are always 32 characters.
@@ -40,5 +39,5 @@ export async function serveSharedClip(request: Request, token: string): Promise<
         "X-Content-Type-Options": "nosniff",
     });
 
-    return respondWithFileRange(request, resolveStoragePath(outputPath), headers);
+    return getFileStorage().respondWithFile(request, outputPath, headers);
 }

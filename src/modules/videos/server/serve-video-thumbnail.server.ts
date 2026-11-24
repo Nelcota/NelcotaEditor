@@ -1,12 +1,10 @@
-import { readFile } from "node:fs/promises";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { videos } from "#/modules/video-records/video-records.schema";
-import { isFileNotFoundError } from "#/shared/server/fs-errors";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";
-import { resolveStoragePath } from "#/shared/server/storage.server";
 
 const videoIdSchema = z.uuid();
 
@@ -23,19 +21,6 @@ async function findOwnedThumbnailPath(videoId: string, userId: string): Promise<
     }
 
     return row.thumbnailPath;
-}
-
-/** The row can outlive its file (storage cleaned by hand); that is a 404, not a server error. */
-async function readThumbnail(thumbnailPath: string): Promise<Buffer | null> {
-    try {
-        return await readFile(resolveStoragePath(thumbnailPath));
-    } catch (error) {
-        if (isFileNotFoundError(error) === true) {
-            return null;
-        }
-
-        throw error;
-    }
 }
 
 /** GET /api/videos/:videoId/thumbnail — the frame the worker saved, for the video's owner only. */
@@ -58,18 +43,11 @@ export async function serveVideoThumbnail(request: Request, videoId: string): Pr
         return new Response(null, { status: HTTP_NOT_FOUND });
     }
 
-    const image = await readThumbnail(thumbnailPath);
-
-    if (image === null) {
-        return new Response(null, { status: HTTP_NOT_FOUND });
-    }
-
-    return new Response(new Uint8Array(image), {
-        headers: {
-            "Content-Type": "image/jpeg",
-            "Content-Length": String(image.byteLength),
-            "Cache-Control": "private, max-age=86400",
-            "X-Content-Type-Options": "nosniff",
-        },
+    const headers = new Headers({
+        "Content-Type": "image/jpeg",
+        "Cache-Control": "private, max-age=86400",
+        "X-Content-Type-Options": "nosniff",
     });
+
+    return getFileStorage().respondWithFile(request, thumbnailPath, headers);
 }

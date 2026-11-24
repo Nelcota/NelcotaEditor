@@ -8,8 +8,6 @@ import {
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
 import type { Video } from "#/modules/video-records/video-records.schema";
-import { measureFileBytes } from "#/shared/server/directory-size.server";
-import { resolveStoragePath } from "#/shared/server/storage.server";
 
 /** The database or an open transaction, so a caller can reset the video with its other updates. */
 type DatabaseExecutor = Pick<typeof db, "update">;
@@ -166,20 +164,22 @@ export async function resetVideoToQueued(
 
 export async function saveVideoSource(
     videoId: string,
-    source: { sourcePath: string; durationSeconds: number },
+    source: { sourcePath: string; sourceBytes: number; durationSeconds: number },
 ): Promise<void> {
-    const durationSeconds = source.durationSeconds;
+    const { sourcePath, sourceBytes, durationSeconds } = source;
 
     if (Number.isFinite(durationSeconds) === false || durationSeconds <= 0) {
         throw new InvalidVideoProgressError(videoId, "duration", durationSeconds);
     }
 
-    // Stored with the path, so the usage screen and the quota sum the database, not the disk.
-    const sourceBytes = await measureFileBytes(resolveStoragePath(source.sourcePath));
+    if (Number.isSafeInteger(sourceBytes) === false || sourceBytes <= 0) {
+        throw new InvalidVideoProgressError(videoId, "size", sourceBytes);
+    }
 
+    // Stored with the path, so the usage screen and the quota sum the database, not the disk.
     await db
         .update(videos)
-        .set({ sourcePath: source.sourcePath, sourceBytes, durationSeconds })
+        .set({ sourcePath, sourceBytes, durationSeconds })
         .where(eq(videos.id, videoId));
 }
 

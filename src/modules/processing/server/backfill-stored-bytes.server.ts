@@ -2,8 +2,7 @@ import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import { videos } from "#/modules/video-records/video-records.schema";
-import { measureFileBytes } from "#/shared/server/directory-size.server";
-import { resolveStoragePath } from "#/shared/server/storage.server";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { logger } from "#/shared/server/logger.server";
 
 async function backfillSourceBytes(): Promise<number> {
@@ -19,7 +18,7 @@ async function backfillSourceBytes(): Promise<number> {
             continue;
         }
 
-        const sourceBytes = await measureFileBytes(resolveStoragePath(sourcePath));
+        const sourceBytes = await getFileStorage().measureFile(sourcePath);
         await db.update(videos).set({ sourceBytes }).where(eq(videos.id, video.id));
     }
 
@@ -39,7 +38,7 @@ async function backfillOutputBytes(): Promise<number> {
             continue;
         }
 
-        const outputBytes = await measureFileBytes(resolveStoragePath(outputPath));
+        const outputBytes = await getFileStorage().measureFile(outputPath);
         await db.update(clips).set({ outputBytes }).where(eq(clips.id, clip.id));
     }
 

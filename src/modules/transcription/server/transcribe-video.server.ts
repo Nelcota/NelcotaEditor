@@ -13,7 +13,6 @@ import {
 import type { ChunkTranscription } from "#/modules/transcription/server/whisper-client.server";
 import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
-import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { logger } from "#/shared/server/logger.server";
 
@@ -23,6 +22,7 @@ import { logger } from "#/shared/server/logger.server";
  */
 const TRANSCRIPTION_CONCURRENCY = 3;
 const PERCENT = 100;
+const AUDIO_DIRECTORY_NAME = "audio";
 
 interface Transcription {
     words: Array<TranscriptWord>;
@@ -58,7 +58,10 @@ async function transcribeChunks(
 
 interface TranscriptRequest {
     videoId: string;
-    sourcePath: string;
+    /** A local copy of the source that ffmpeg can read. */
+    localSourcePath: string;
+    /** The run's folder; the audio chunks are written here. */
+    workDirectory: string;
     /** The video's language (from the user's preferences); null lets Whisper detect it. */
     language: string | null;
     signal: AbortSignal;
@@ -68,15 +71,11 @@ interface TranscriptRequest {
 
 /** Splits the audio, transcribes it and always removes the WAV chunks, which can be large. */
 async function transcribeAudio(request: TranscriptRequest): Promise<Transcription> {
-    const { videoId, sourcePath, language, signal, saveProgress } = request;
-    const audioDirectory = resolveStoragePath(path.posix.join(getVideoDirectory(videoId), "audio"));
+    const { videoId, localSourcePath, workDirectory, language, signal, saveProgress } = request;
+    const audioDirectory = path.join(workDirectory, AUDIO_DIRECTORY_NAME);
 
     try {
-        const chunks = await extractAudioChunks(
-            resolveStoragePath(sourcePath),
-            audioDirectory,
-            signal,
-        );
+        const chunks = await extractAudioChunks(localSourcePath, audioDirectory, signal);
 
         // Also keeps transcribeChunks from dividing by zero when it reports progress.
         if (chunks.length === 0) {

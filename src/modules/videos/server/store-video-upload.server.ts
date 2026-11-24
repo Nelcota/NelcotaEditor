@@ -1,8 +1,7 @@
-import { mkdir, open, rm } from "node:fs/promises";
-import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
 import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
-import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
+import { getVideoDirectory } from "#/shared/server/storage.server";
 
 const SOURCE_FILE_NAME = "source";
 
@@ -20,58 +19,30 @@ export class EmptyUploadError extends Error {
     }
 }
 
-interface UploadDestination {
-    fileHandle: FileHandle;
-    /** The space reserved for the upload; a body that sends more is refused. */
-    maxBytes: number;
-}
-
-/** Copies every chunk to the file and returns how many bytes were written. */
-async function copyChunks(
+/** Errors the stream as soon as it passes the reserved size, whatever Content-Length claimed. */
+function capStreamBytes(
     body: ReadableStream<Uint8Array>,
-    destination: UploadDestination,
-): Promise<number> {
-    const { fileHandle, maxBytes } = destination;
-    const reader = body.getReader();
-    let writtenBytes = 0;
+    maxBytes: number,
+): ReadableStream<Uint8Array> {
+    let receivedBytes = 0;
 
-    for (let chunk = await reader.read(); chunk.done === false; chunk = await reader.read()) {
-        const bytes = chunk.value;
-        writtenBytes += bytes.byteLength;
+    return body.pipeThrough(
+        new TransformStream<Uint8Array, Uint8Array>({
+            transform(chunk, controller) {
+                receivedBytes += chunk.byteLength;
 
-        if (writtenBytes > maxBytes) {
-            throw new UploadTooLargeError(maxBytes);
-        }
+                if (receivedBytes > maxBytes) {
+                    throw new UploadTooLargeError(maxBytes);
+                }
 
-        await fileHandle.write(bytes);
-    }
-
-    return writtenBytes;
-}
-
-/** Writes the body straight to disk, so multi-gigabyte files never sit in memory. */
-async function writeBodyToFile(
-    body: ReadableStream<Uint8Array>,
-    target: { absolutePath: string; maxBytes: number },
-): Promise<number> {
-    const fileHandle = await open(target.absolutePath, "w");
-    let writtenBytes = 0;
-
-    try {
-        writtenBytes = await copyChunks(body, { fileHandle, maxBytes: target.maxBytes });
-    } finally {
-        await fileHandle.close();
-    }
-
-    if (writtenBytes === 0) {
-        throw new EmptyUploadError();
-    }
-
-    return writtenBytes;
+                controller.enqueue(chunk);
+            },
+        }),
+    );
 }
 
 export async function removeVideoDirectory(videoId: string): Promise<void> {
-    await rm(resolveStoragePath(getVideoDirectory(videoId)), { recursive: true, force: true });
+    await getFileStorage().deleteFolder(getVideoDirectory(videoId));
 }
 
 interface UploadTarget {
@@ -84,6 +55,23 @@ interface UploadTarget {
 export interface StoredUpload {
     sourcePath: string;
     sourceBytes: number;
+}
+
+async function storeCappedBody(
+    body: ReadableStream<Uint8Array>,
+    target: UploadTarget,
+    sourcePath: string,
+): Promise<number> {
+    const sourceBytes = await getFileStorage().storeStream(
+        sourcePath,
+        capStreamBytes(body, target.maxBytes),
+    );
+
+    if (sourceBytes === 0) {
+        throw new EmptyUploadError();
+    }
+
+    return sourceBytes;
 }
 
 /** Saves the upload as the video's source file and returns its relative path and size. */
@@ -100,13 +88,8 @@ export async function storeVideoUpload(
     const videoDirectory = getVideoDirectory(target.videoId);
     const sourcePath = path.posix.join(videoDirectory, `${SOURCE_FILE_NAME}${target.extension}`);
 
-    await mkdir(resolveStoragePath(videoDirectory), { recursive: true });
-
     try {
-        const sourceBytes = await writeBodyToFile(body, {
-            absolutePath: resolveStoragePath(sourcePath),
-            maxBytes,
-        });
+        const sourceBytes = await storeCappedBody(body, target, sourcePath);
         return { sourcePath, sourceBytes };
     } catch (error) {
         await removeVideoDirectory(target.videoId);

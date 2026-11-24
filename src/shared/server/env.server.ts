@@ -1,3 +1,5 @@
+import os from "node:os";
+import path from "node:path";
 import { config } from "dotenv";
 import { z } from "zod";
 
@@ -7,6 +9,7 @@ config({ path: ".env", quiet: true });
 const PRODUCTION = "production";
 const SECURE_PROTOCOL = "https:";
 const HEADER_NAME_PATTERN = /^[a-z0-9-]+$/;
+const DEFAULT_WORK_DIRECTORY = path.join(os.tmpdir(), "nelcota-work");
 
 function toUndefinedWhenEmpty(value: string | undefined): string | undefined {
     if (value === undefined || value.length === 0) {
@@ -23,6 +26,11 @@ const baseEnvironmentSchema = z.object({
     NODE_ENV: z.string().optional(),
     DATABASE_URL: z.string().min(1),
     STORAGE_DIR: z.string().min(1),
+    // The worker's scratch space (downloads, audio chunks, renders before they are stored). Each
+    // worker needs its own: it is wiped when the worker starts.
+    WORK_DIR: optionalTextSchema.transform(
+        (workDirectory) => workDirectory ?? DEFAULT_WORK_DIRECTORY,
+    ),
     BETTER_AUTH_URL: z.url().optional(),
     BETTER_AUTH_SECRET: z.string().optional(),
     /**

@@ -44,6 +44,7 @@ services:
         environment:
             DATABASE_URL: postgresql://nelcota:nelcota@postgres:5432/nelcota
             STORAGE_DIR: /app/storage
+            WORK_DIR: /app/work
             WHISPER_URL: http://whisper:8000
             WHISPER_MODEL: ${WHISPER_MODEL}
             WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-}
@@ -57,6 +58,8 @@ services:
             - no-new-privileges:true
         volumes:
             - ./storage:/app/storage
+            # Scratch space for downloads and renders; wiped when the worker starts.
+            - worker-work:/app/work
             # Mounted so code changes only need `bun run worker:restart`, not a rebuild.
             - ./src:/app/src:ro
             - ./scripts/worker.ts:/app/scripts/worker.ts:ro
@@ -70,3 +73,4 @@ services:
 volumes:
     postgres-data:
     whisper-models:
+    worker-work:

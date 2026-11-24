@@ -1,23 +1,24 @@
-import { readFile, rm, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { AVATAR_PHOTO_EXTENSIONS } from "#/modules/auth/model/avatar";
 import type { AvatarPhotoExtension } from "#/modules/auth/model/avatar";
 import { user } from "#/modules/auth/auth.schema";
-import { resolveStoragePath } from "#/shared/server/storage.server";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 
 const AVATAR_DIRECTORY = "avatars";
 
-function toAvatarPath(userId: string, extension: AvatarPhotoExtension): string {
-    return resolveStoragePath(path.posix.join(AVATAR_DIRECTORY, `${userId}.${extension}`));
+function toAvatarKey(userId: string, extension: AvatarPhotoExtension): string {
+    return path.posix.join(AVATAR_DIRECTORY, `${userId}.${extension}`);
 }
 
 /** Removes every stored photo of the user, whatever its format. */
 export async function deleteAvatarPhotos(userId: string): Promise<void> {
+    const storage = getFileStorage();
+
     await Promise.all(
         AVATAR_PHOTO_EXTENSIONS.map((extension) =>
-            rm(toAvatarPath(userId, extension), { force: true }),
+            storage.deleteFile(toAvatarKey(userId, extension)),
         ),
     );
 }
@@ -27,16 +28,29 @@ export async function writeAvatarPhoto(
     extension: AvatarPhotoExtension,
     bytes: Uint8Array,
 ): Promise<void> {
-    await mkdir(resolveStoragePath(AVATAR_DIRECTORY), { recursive: true });
+    // Blob takes only bytes backed by a plain ArrayBuffer; a photo is small enough to copy.
+    const photo = new Blob([new Uint8Array(bytes)]);
+
     await deleteAvatarPhotos(userId);
-    await writeFile(toAvatarPath(userId, extension), bytes);
+    await getFileStorage().storeStream(toAvatarKey(userId, extension), photo.stream());
 }
 
-export async function readAvatarPhoto(
-    userId: string,
-    extension: AvatarPhotoExtension,
-): Promise<Buffer> {
-    return readFile(toAvatarPath(userId, extension));
+interface AvatarPhoto {
+    userId: string;
+    extension: AvatarPhotoExtension;
+}
+
+/** 404 when the row briefly points at a photo that a newer upload already replaced. */
+export function respondWithAvatarPhoto(
+    request: Request,
+    photo: AvatarPhoto,
+    headers: Headers,
+): Promise<Response> {
+    return getFileStorage().respondWithFile(
+        request,
+        toAvatarKey(photo.userId, photo.extension),
+        headers,
+    );
 }
 
 export async function saveUserImage(userId: string, image: string | null): Promise<void> {
