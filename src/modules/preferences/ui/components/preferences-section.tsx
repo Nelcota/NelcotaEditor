@@ -33,5 +33,5 @@ export function PreferencesSection(): ReactNode {
         );
     }
 
-    return <PreferencesForm initial={preferences} />;
+    return <PreferencesForm preferences={preferences} />;
 }
