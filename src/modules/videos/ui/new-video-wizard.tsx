@@ -81,7 +81,7 @@ function WizardFooter({ isFirst, isReview, isBusy, onBack }: WizardFooterProps):
 
     return (
         <>
-            {isFirst === false && <StepBackButton onClick={onBack} />}
+            {isFirst === false && <StepBackButton onClick={onBack} isDisabled={isBusy} />}
             <Button
                 type="submit"
                 size="lg"
@@ -205,6 +205,13 @@ export function NewVideoWizard({
         />,
     ];
 
+    // While the video is being sent, changing an earlier step would be ignored and hide the upload.
+    let reachableIndex = steps.reachableIndex;
+
+    if (isBusy === true) {
+        reachableIndex = steps.index;
+    }
+
     return (
         <form noValidate onSubmit={submit} className="grid min-h-0">
             <StepDialogFrame
@@ -216,7 +223,7 @@ export function NewVideoWizard({
                         tone="default"
                         steps={STEPS}
                         currentIndex={steps.index}
-                        reachableIndex={steps.reachableIndex}
+                        reachableIndex={reachableIndex}
                         onStepSelect={steps.goTo}
                     />
                 }
