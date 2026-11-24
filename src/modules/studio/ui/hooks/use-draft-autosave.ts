@@ -282,6 +282,8 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
     const resync = (version: number, serverDraft: StudioDraft): void => {
         versionRef.current = version;
         savedDraftRef.current = serverDraft;
+        // Made on the old version, the backup would raise the same conflict on the next visit.
+        clearDraftBackup(clipId);
         setStatus("saved");
     };
 

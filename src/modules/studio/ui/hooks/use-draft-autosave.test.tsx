@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import type { RenderHookResult } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { StudioDraft } from "#/modules/clips/model/clip-studio";
-import { readDraftBackup } from "#/modules/studio/client/draft-backup";
+import { readDraftBackup, writeDraftBackup } from "#/modules/studio/client/draft-backup";
 import type { SaveDraftResult } from "#/modules/studio/model/clip-studio-view";
 import { clipDraftLeaveSaveKey, clipStudioQueryKey } from "#/modules/studio/model/studio-queries";
 import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
@@ -202,5 +202,15 @@ describe("useDraftAutosave", () => {
                 fetch: expect.any(Function),
             });
         });
+    });
+
+    it("forgets the browser backup once the server's draft is taken", () => {
+        const queryClient = new QueryClient();
+        const rendered = renderAutosave(queryClient);
+        writeDraftBackup(CLIP_ID, { baseVersion: 3, draft: EDITED_DRAFT });
+
+        act(() => rendered.result.current.resync(5, SAVED_DRAFT));
+
+        expect(readDraftBackup(CLIP_ID)).toBeNull();
     });
 });

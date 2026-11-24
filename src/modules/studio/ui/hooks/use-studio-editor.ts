@@ -7,6 +7,7 @@ import { renderClipDraft } from "#/modules/studio/server/clip-studio-functions";
 import { clipStudioQueryKey, clipStudioQueryOptions } from "#/modules/studio/model/studio-queries";
 import { replaceCueAt, resetAllCues } from "#/modules/studio/model/cue-editing";
 import { readDraftBackup } from "#/modules/studio/client/draft-backup";
+import { pickStartingDraft } from "#/modules/studio/model/pick-starting-draft";
 import { countDraftChanges } from "#/modules/studio/model/draft-changes";
 import { DraftNotSavedError } from "#/modules/studio/model/draft-not-saved-error";
 import { trimDraft } from "#/modules/studio/model/draft-trim";
@@ -53,25 +54,18 @@ export interface StudioEditor {
     takeTheirs: () => Promise<void>;
 }
 
-/** The newest edits: a backup made on top of the server's version wins, then the saved draft. */
-function pickStartingDraft(studio: ClipStudioView): StudioDraft {
-    const backup = readDraftBackup(studio.clip.id);
-
-    if (backup !== null && backup.baseVersion === studio.draftVersion) {
-        return backup.draft;
-    }
-
-    return studio.draft ?? studio.applied;
-}
-
 /** Everything the Studio can do to one clip's draft, with undo, autosave and render. */
 export function useStudioEditor(videoId: string, studio: ClipStudioView): StudioEditor {
     const queryClient = useQueryClient();
     const clipId = studio.clip.id;
     const savedDraft = studio.draft ?? studio.applied;
-    const [history, dispatch] = useReducer(studioHistoryReducer, studio, (initial) =>
-        createHistory(pickStartingDraft(initial)),
+    const [start] = useState(() =>
+        pickStartingDraft(
+            { savedDraft, draftVersion: studio.draftVersion },
+            readDraftBackup(clipId),
+        ),
     );
+    const [history, dispatch] = useReducer(studioHistoryReducer, start.draft, createHistory);
     const [editError, setEditError] = useState<string | null>(null);
     const draft = history.present;
     // The Studio re-renders every frame while playing; this compares every cue, so only redo it on edits.
@@ -80,7 +74,7 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         videoId,
         clipId,
         draft,
-        initialVersion: studio.draftVersion,
+        initialVersion: start.version,
         serverVersion: studio.draftVersion,
         savedDraft,
     });
