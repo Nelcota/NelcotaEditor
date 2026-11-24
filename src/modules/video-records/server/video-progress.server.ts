@@ -64,10 +64,12 @@ export async function findVideoById(videoId: string): Promise<Video | null> {
 }
 
 export async function updateVideoStage(
-    videoId: string,
+    run: VideoRun,
     status: VideoStatus,
     progressPercent: number,
 ): Promise<void> {
+    const videoId = run.videoId;
+
     if (Number.isFinite(progressPercent) === false) {
         throw new InvalidVideoProgressError(videoId, "progress percent", progressPercent);
     }
@@ -76,11 +78,12 @@ export async function updateVideoStage(
         Math.min(MAX_PERCENT, Math.max(MIN_PERCENT, progressPercent)),
     );
 
-    // A late progress update must not bring back a video that was cancelled or finished meanwhile.
+    // A late progress update must not bring back a video that was cancelled or finished meanwhile,
+    // nor move a video that a newer run took.
     await db
         .update(videos)
         .set({ status, progressPercent: boundedPercent, errorMessage: null })
-        .where(and(eq(videos.id, videoId), canMoveVideoTo(status)));
+        .where(and(eq(videos.id, videoId), isCurrentRun(run), canMoveVideoTo(status)));
 }
 
 /**

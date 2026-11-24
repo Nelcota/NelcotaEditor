@@ -33,11 +33,10 @@ import { logger } from "#/shared/server/logger.server";
  * so the stage modules never depend on processing.
  */
 function saveStageProgress(
-    videoId: string,
+    run: VideoRun,
     status: VideoStatus,
 ): (stagePercent: number) => Promise<void> {
-    return (stagePercent) =>
-        updateVideoStage(videoId, status, toOverallPercent(status, stagePercent));
+    return (stagePercent) => updateVideoStage(run, status, toOverallPercent(status, stagePercent));
 }
 
 /**
@@ -46,6 +45,7 @@ function saveStageProgress(
  */
 async function runStages(video: Video, workDirectory: string, signal: AbortSignal): Promise<void> {
     const videoId = video.id;
+    const run = toVideoRun(video);
     const source = await prepareVideoSource(video, { signal, workDirectory });
     const localSourcePath = source.localSourcePath;
     const words = await ensureTranscript({
@@ -54,22 +54,20 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
         workDirectory,
         language: video.transcriptionLanguage,
         signal,
-        saveProgress: saveStageProgress(videoId, "transcribing"),
+        saveProgress: saveStageProgress(run, "transcribing"),
     });
     const clips = await ensureHighlights({
         video,
         words,
         durationSeconds: source.durationSeconds,
         signal,
-        saveProgress: saveStageProgress(videoId, "selecting"),
+        saveProgress: saveStageProgress(run, "selecting"),
     });
 
-    await renderPendingClips({ videoId, localSourcePath, workDirectory, clips, words, signal });
+    await renderPendingClips({ run, localSourcePath, workDirectory, clips, words, signal });
     signal.throwIfAborted();
 
     // A cancel that arrived after the last step still wins over "done".
-    const run = toVideoRun(video);
-
     if ((await markVideoDone(run)) === false) {
         // Records nothing unless this run was the one the user cancelled.
         await markVideoCancelled(run);

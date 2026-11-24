@@ -4,6 +4,7 @@ import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import { runLanesToTheEnd } from "#/modules/processing/server/run-lanes-to-the-end.server";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
+import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { logger } from "#/shared/server/logger.server";
@@ -13,7 +14,7 @@ const RENDER_CONCURRENCY = 2;
 const PERCENT = 100;
 
 interface RenderPendingClipsInput {
-    videoId: string;
+    run: VideoRun;
     /** A local copy of the source that ffmpeg can read. */
     localSourcePath: string;
     /** The run's folder; renders are written here before they are stored. */
@@ -25,7 +26,8 @@ interface RenderPendingClipsInput {
 
 /** Returns whether the clip ended up rendered. */
 async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promise<boolean> {
-    const { videoId, localSourcePath, workDirectory, words, signal } = input;
+    const { run, localSourcePath, workDirectory, words, signal } = input;
+    const videoId = run.videoId;
 
     if (clip.status === "done") {
         return true;
@@ -67,7 +69,7 @@ async function renderAll(
 
 /** Renders every clip that is not done yet, so a retry only redoes what failed. */
 export async function renderPendingClips(input: RenderPendingClipsInput): Promise<void> {
-    const { videoId, clips } = input;
+    const { run, clips } = input;
 
     // Also keeps renderAll from dividing by zero when it reports progress.
     if (clips.length === 0) {
@@ -75,7 +77,7 @@ export async function renderPendingClips(input: RenderPendingClipsInput): Promis
     }
 
     const saveProgress = (stagePercent: number): Promise<void> =>
-        updateVideoStage(videoId, "rendering", toOverallPercent("rendering", stagePercent));
+        updateVideoStage(run, "rendering", toOverallPercent("rendering", stagePercent));
 
     await saveProgress(0);
     const renderedCount = await runWithProgress(

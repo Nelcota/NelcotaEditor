@@ -13,6 +13,7 @@ import {
     resetVideoToQueued,
     shouldStopVideoRun,
     toVideoRun,
+    updateVideoStage,
 } from "#/modules/video-records/server/video-progress.server";
 import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 import { videos } from "#/modules/video-records/video-records.schema";
@@ -153,6 +154,30 @@ describe("markVideoFailed", () => {
         await markVideoFailed(run, "Falhou");
 
         assert.equal((await readVideo(run.videoId)).status, "queued");
+    });
+});
+
+describe("updateVideoStage", () => {
+    test("moves the video of the current run", async () => {
+        const run = await insertQueuedVideo();
+
+        await updateVideoStage(run, "transcribing", 40);
+
+        const video = await readVideo(run.videoId);
+        assert.equal(video.status, "transcribing");
+        assert.equal(video.progressPercent, 40);
+    });
+
+    test("leaves a video that a newer run took", async () => {
+        const run = await insertQueuedVideo();
+        await requestVideoCancellation(run.videoId);
+        await resetVideoToQueued(run.videoId);
+
+        await updateVideoStage(run, "transcribing", 40);
+
+        const video = await readVideo(run.videoId);
+        assert.equal(video.status, "queued");
+        assert.equal(video.progressPercent, 0);
     });
 });
 
