@@ -13,7 +13,8 @@ export class MissingR2SettingError extends Error {
 // The R2 client keeps its connections open, so it is built once and shared.
 let r2FileStorage: FileStorage | null = null;
 
-function getR2FileStorage(): FileStorage {
+/** The R2 adapter whatever STORAGE_DRIVER says: scripts use it to copy and check files. */
+export function getR2FileStorage(): FileStorage {
     if (r2FileStorage !== null) {
         return r2FileStorage;
     }

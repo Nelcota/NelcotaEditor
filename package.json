@@ -20,6 +20,8 @@
         "db:migrate": "drizzle-kit migrate",
         "db:studio": "drizzle-kit studio",
         "admin:grant": "bun scripts/grant-admin.ts",
+        "storage:check-r2": "bun scripts/check-r2-storage.ts",
+        "storage:copy-to-r2": "bun scripts/copy-storage-to-r2.ts",
         "typecheck": "tsc --noEmit",
         "format": "oxfmt",
         "format:check": "oxfmt --check",
