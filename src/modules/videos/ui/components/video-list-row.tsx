@@ -71,7 +71,7 @@ interface RowMetaProps {
 }
 
 /** Under the title: the source when done, the way out of a failure, the crew's line while working. */
-function RowMeta({ video, titleId, actions }: RowMetaProps): ReactNode {
+function RowStatusLine({ video, titleId, actions }: RowMetaProps): ReactNode {
     if (video.status === "failed" || video.status === "cancelled") {
         return (
             <p className="relative z-10 text-xs text-muted-foreground">
@@ -95,6 +95,25 @@ function RowMeta({ video, titleId, actions }: RowMetaProps): ReactNode {
     }
 
     return <p className="truncate text-xs text-primary-ink">{toCrewLine(video)}</p>;
+}
+
+/**
+ * The status line, plus why a resume or cancel from the menu did not go through. A failed row
+ * already shows that error in its own line; every other status needs it here.
+ */
+function RowMeta({ video, titleId, actions }: RowMetaProps): ReactNode {
+    const errorMessage = actions.errorMessage;
+
+    return (
+        <>
+            <RowStatusLine video={video} titleId={titleId} actions={actions} />
+            {errorMessage !== null && video.status !== "failed" && (
+                <p role="alert" className="text-xs text-destructive [overflow-wrap:anywhere]">
+                    {errorMessage}
+                </p>
+            )}
+        </>
+    );
 }
 
 function StatusPill({ video }: { video: VideoSummary }): ReactNode {
