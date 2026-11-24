@@ -158,8 +158,11 @@ Set these in the service's environment: `POSTGRES_PASSWORD`, `APP_DATABASE_PASSW
 `TURNSTILE_SECRET_KEY`, `WHISPER_MODEL`, `WHISPER_LANGUAGE`, `WORKER_CONCURRENCY` (default 1)
 and `STORAGE_QUOTA_GIGABYTES`. Generate passwords and the secret with `openssl rand -hex 32`.
 
-The app reads the client address from `CF-Connecting-IP`, so the server must accept web traffic
-only from Cloudflare.
+The app reads the client address from `CF-Connecting-IP`, so web traffic reaches the server only
+through a Cloudflare Tunnel: a `cloudflared` container on `dokploy-network` forwards the app's
+hostname to Traefik over HTTP (the Dokploy domain has HTTPS off; Cloudflare serves the
+certificate). Docker publishes Traefik on 80/443 past ufw, so the `block-direct-web` systemd unit
+drops new connections to those ports in the `DOCKER-USER` chain. Only SSH is open.
 
 ## Limits
 
