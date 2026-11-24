@@ -5,7 +5,10 @@ import { useRef } from "react";
 import type { ReactNode } from "react";
 import { deleteVideo } from "#/modules/videos/server/video-functions";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
-import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
+import {
+    invalidateVideoQueries,
+    videoDetailsQueryOptions,
+} from "#/modules/videos/model/video-queries";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -192,8 +195,14 @@ export function DeleteVideoDialog({ video, isOpen, onOpenChange }: DeleteVideoDi
         onSuccess: async () => {
             hasDeletedRef.current = true;
             onOpenChange(false);
-            await invalidateVideoQueries(queryClient);
+            // Leave the page first, so no mounted screen fetches the video again; then drop its
+            // cached page, or Back would show the deleted video.
             await navigate({ to: "/videos" });
+            queryClient.removeQueries({
+                queryKey: videoDetailsQueryOptions(video.id).queryKey,
+                exact: true,
+            });
+            await invalidateVideoQueries(queryClient);
         },
     });
     let errorMessage: string | null = null;

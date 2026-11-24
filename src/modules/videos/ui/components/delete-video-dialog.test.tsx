@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -73,5 +73,23 @@ describe("DeleteVideoDialog", () => {
         await user.click(screen.getByRole("button", { name: "Excluir" }));
 
         expect(screen.queryByText(REFUSAL)).toBeNull();
+    });
+
+    it("forgets the deleted video's page so going back does not show it", async () => {
+        vi.mocked(deleteVideo).mockResolvedValue(undefined);
+        const user = userEvent.setup();
+        const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+        const detailsKey = ["videos", VIDEO.id];
+        queryClient.setQueryData(detailsKey, { video: VIDEO, clips: [] });
+        render(
+            <QueryClientProvider client={queryClient}>
+                <DialogHost />
+            </QueryClientProvider>,
+        );
+        await user.click(screen.getByRole("button", { name: "Excluir" }));
+        await user.click(screen.getByRole("button", { name: "Entendi, continuar" }));
+        await user.click(screen.getByRole("button", { name: "Excluir vídeo" }));
+
+        await waitFor(() => expect(queryClient.getQueryState(detailsKey)).toBeUndefined());
     });
 });
