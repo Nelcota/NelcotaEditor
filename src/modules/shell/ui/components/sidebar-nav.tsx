@@ -14,7 +14,7 @@ import {
 import type { NavSection } from "#/modules/shell/model/nav-sections";
 import { SIDEBAR_ITEM_CLASS } from "#/modules/shell/ui/components/sidebar-item-class";
 import { useQuery } from "@tanstack/react-query";
-import { videosQueryOptions } from "#/modules/videos/model/video-queries";
+import { videoCountsQueryOptions } from "#/modules/videos/model/video-queries";
 import { cn } from "#/shared/ui/cn";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
@@ -22,14 +22,14 @@ const appRoute = getRouteApi("/_app");
 
 /** The count beside Vídeos; nothing elsewhere, so the numbers keep one meaning. */
 function useVideoCount(section: NavSection): number | null {
-    const videosQuery = useQuery(videosQueryOptions());
-    const videos = videosQuery.data;
+    const countsQuery = useQuery(videoCountsQueryOptions());
+    const counts = countsQuery.data;
 
-    if (section.path !== VIDEOS_PATH || videos === undefined || videos.length === 0) {
+    if (section.path !== VIDEOS_PATH || counts === undefined || counts.all === 0) {
         return null;
     }
 
-    return videos.length;
+    return counts.all;
 }
 
 function SectionLink({ section, pathname }: { section: NavSection; pathname: string }): ReactNode {

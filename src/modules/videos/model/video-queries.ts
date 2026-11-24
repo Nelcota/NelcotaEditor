@@ -1,8 +1,12 @@
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, keepPreviousData, queryOptions } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { isNotFound } from "@tanstack/react-router";
-import type { VideoDetails } from "#/modules/videos/model/video-views";
-import { getVideoDetails, listVideos } from "#/modules/videos/server/video-functions";
+import type { VideoDetails, VideoSummary } from "#/modules/videos/model/video-views";
+import type { VideoFilter } from "#/modules/videos/model/video-list-filter";
+import { MAX_VIDEOS_PER_PAGE, VIDEOS_PER_PAGE } from "#/modules/videos/model/video-list-page";
+import type { VideoListCursor } from "#/modules/videos/model/video-list-page";
+import type { VideoSort } from "#/modules/videos/model/video-sort";
+import { countVideos, getVideoDetails, listVideos } from "#/modules/videos/server/video-functions";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 
@@ -51,14 +55,65 @@ export function pollWhileProcessing(statuses: Array<VideoStatus>): number | fals
     return POLL_INTERVAL_MILLISECONDS;
 }
 
+/** Every filter, search and order of the Vídeos list lives under this key. */
+export const VIDEO_LIST_QUERY_KEY = [...VIDEOS_QUERY_KEY, "list"];
+// The first page has no cursor; typed so later pages may carry one.
+const FIRST_PAGE: VideoListCursor | null = null;
+
+export interface VideoListRequest {
+    query: string;
+    filter: VideoFilter;
+    sort: VideoSort;
+}
+
 /**
- * The whole list, fetched on load and after changes. It does not poll itself: useVideosQuery
- * polls the light progress endpoint and refetches this only when a video changes stage.
+ * The Vídeos list, a page at a time. It does not poll itself: the progress poll writes the moving
+ * numbers into it and refetches it only when a video changes stage.
  */
-export function videosQueryOptions() {
+export function videoListQueryOptions(request: VideoListRequest) {
+    const { query, filter, sort } = request;
+
+    return infiniteQueryOptions({
+        queryKey: [...VIDEO_LIST_QUERY_KEY, { query, filter, sort }],
+        queryFn: ({ pageParam }) =>
+            listVideos({
+                data: { query, filter, sort, cursor: pageParam, limit: VIDEOS_PER_PAGE },
+            }),
+        initialPageParam: FIRST_PAGE,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        // A new search or filter keeps the current videos on screen until its own arrive.
+        placeholderData: keepPreviousData,
+    });
+}
+
+/** How many videos each status filter holds: the toolbar, the sidebar count and the bell. */
+export function videoCountsQueryOptions() {
     return queryOptions({
-        queryKey: VIDEOS_QUERY_KEY,
-        queryFn: () => listVideos(),
+        queryKey: [...VIDEOS_QUERY_KEY, "counts"],
+        queryFn: () => countVideos(),
+    });
+}
+
+/**
+ * The videos still queued or at work, newest first: what the progress poll watches, whatever
+ * page or filter the list is on.
+ */
+export function workingVideosQueryOptions() {
+    return queryOptions({
+        queryKey: [...VIDEOS_QUERY_KEY, "working"],
+        queryFn: async (): Promise<Array<VideoSummary>> => {
+            const page = await listVideos({
+                data: {
+                    query: "",
+                    filter: "processing",
+                    sort: "newest",
+                    cursor: FIRST_PAGE,
+                    limit: MAX_VIDEOS_PER_PAGE,
+                },
+            });
+
+            return page.items;
+        },
     });
 }
 

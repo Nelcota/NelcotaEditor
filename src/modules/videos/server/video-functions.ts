@@ -8,10 +8,12 @@ import { clips } from "#/modules/clips/clips.schema";
 import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/model/preferences";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import {
-    countReadyClips,
-    listUserVideos,
+    countUserVideos,
+    listUserVideosPage,
     toVideoSummary,
 } from "#/modules/videos/server/video-queries.server";
+import { videoListInputSchema } from "#/modules/videos/model/video-list-page";
+import type { VideoCounts, VideoListPage } from "#/modules/videos/model/video-list-page";
 import { listVideoClips } from "#/modules/clips/server/clip-views.server";
 import { toClipView } from "#/modules/clips/server/clip-views.server";
 import {
@@ -30,7 +32,7 @@ import {
     MIN_CLIP_COUNT,
     isVideoResumable,
 } from "#/modules/video-records/model/video-status";
-import type { VideoDetails, VideoSummary } from "#/modules/videos/model/video-views";
+import type { VideoDetails } from "#/modules/videos/model/video-views";
 import { toStoredVideoTitle } from "#/modules/video-records/model/video-title";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { CLIP_LENGTHS } from "#/modules/video-records/model/clip-length";
@@ -82,14 +84,17 @@ async function resolveYoutubeTitle(url: string): Promise<string> {
     }
 }
 
+/** One page of the signed-in user's videos, filtered, searched and ordered on the server. */
 export const listVideos = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
-    .handler(async ({ context }): Promise<Array<VideoSummary>> => {
-        const userVideos = await listUserVideos(context.user.id);
-        const readyCounts = await countReadyClips(userVideos.map((video) => video.id));
+    .validator(videoListInputSchema)
+    .handler(async ({ context, data }): Promise<VideoListPage> =>
+        listUserVideosPage(context.user.id, data),
+    );
 
-        return userVideos.map((video) => toVideoSummary(video, readyCounts.get(video.id) ?? 0));
-    });
+export const countVideos = createServerFn({ method: "GET" })
+    .middleware([authMiddleware])
+    .handler(async ({ context }): Promise<VideoCounts> => countUserVideos(context.user.id));
 
 export const getVideoDetails = createServerFn({ method: "GET" })
     .middleware([authMiddleware])

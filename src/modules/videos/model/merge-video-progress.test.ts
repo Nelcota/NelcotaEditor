@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { mergeVideoProgress } from "#/modules/videos/model/merge-video-progress";
+import {
+    mergeVideoProgress,
+    writeVideoProgress,
+} from "#/modules/videos/model/merge-video-progress";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import type { VideoProgress } from "#/modules/videos/server/video-progress-functions";
 
@@ -25,6 +28,7 @@ const RENDERING_VIDEO: VideoSummary = {
 function toProgress(changes: Partial<VideoProgress>): VideoProgress {
     return {
         id: RENDERING_VIDEO.id,
+        title: RENDERING_VIDEO.title,
         status: RENDERING_VIDEO.status,
         progressPercent: RENDERING_VIDEO.progressPercent,
         isCancelling: RENDERING_VIDEO.isCancelling,
@@ -58,5 +62,19 @@ describe("mergeVideoProgress", () => {
         );
 
         expect(merged).toBeNull();
+    });
+});
+
+describe("writeVideoProgress", () => {
+    it("updates a page of the list that holds only some of the watched videos", () => {
+        const doneVideo: VideoSummary = { ...RENDERING_VIDEO, id: "video-2", status: "done" };
+        const otherProgress: VideoProgress = { ...toProgress({}), id: "video-3" };
+
+        const written = writeVideoProgress(
+            [RENDERING_VIDEO, doneVideo],
+            [toProgress({ progressPercent: 90 }), otherProgress],
+        );
+
+        expect(written.map((video) => video.progressPercent)).toEqual([90, 80]);
     });
 });

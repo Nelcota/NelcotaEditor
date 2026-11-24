@@ -5,12 +5,15 @@ import { VIDEO_STATUS_LABELS } from "#/modules/videos/model/video-status-labels"
 
 type StatusById = ReadonlyMap<string, VideoStatus>;
 
-function toStatusById(videos: Array<VideoSummary>): StatusById {
+/** A video list or the progress poll: anything that names a video and its stage. */
+type StagedVideo = Pick<VideoSummary, "id" | "title" | "status">;
+
+function toStatusById(videos: Array<StagedVideo>): StatusById {
     return new Map(videos.map((video) => [video.id, video.status]));
 }
 
 /** Only videos seen before count: a page change or a new upload is not a stage change. */
-function describeStageChanges(previous: StatusById, videos: Array<VideoSummary>): string {
+function describeStageChanges(previous: StatusById, videos: Array<StagedVideo>): string {
     const changedVideos = videos.filter((video) => {
         const previousStatus = previous.get(video.id);
 
@@ -26,7 +29,7 @@ function describeStageChanges(previous: StatusById, videos: Array<VideoSummary>)
  * One sentence per stage change, so a screen reader hears "Pronto" once instead of every poll's
  * progress on every row.
  */
-export function useStageAnnouncement(videos: Array<VideoSummary>): string {
+export function useStageAnnouncement(videos: Array<StagedVideo>): string {
     const [statusById, setStatusById] = useState<StatusById>(() => toStatusById(videos));
     const [announcement, setAnnouncement] = useState("");
 

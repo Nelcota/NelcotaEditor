@@ -1,6 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { videosQueryOptions } from "#/modules/videos/model/video-queries";
+import { videoDetailsQueryOptions } from "#/modules/videos/model/video-queries";
 
 export type CrumbPath = "/" | "/videos" | "/admin" | "/admin/users";
 
@@ -36,23 +36,34 @@ function trimTrailingSlash(pathname: string): string {
     return pathname;
 }
 
+/**
+ * The open video's title, from the page's own cached details. Never fetched here: the video page
+ * loads them, and a malformed id in the address must not reach the server.
+ */
+function useVideoTitle(videoId: string): string | null {
+    const detailsQuery = useQuery({ ...videoDetailsQueryOptions(videoId), enabled: false });
+    const details = detailsQuery.data;
+
+    if (details === undefined) {
+        return null;
+    }
+
+    return details.video.title;
+}
+
 /** The trail at the top of the panel, from the address; a video's crumb is its title. */
 export function useBreadcrumbs(): ReadonlyArray<Crumb> {
     const pathname = trimTrailingSlash(useLocation({ select: (location) => location.pathname }));
-    const videosQuery = useQuery(videosQueryOptions());
+    const videoMatch = VIDEO_PAGE_PATTERN.exec(pathname);
+    const videoTitle = useVideoTitle(videoMatch?.[1] ?? "");
     const fixed = FIXED_CRUMBS[pathname];
 
     if (fixed !== undefined) {
         return fixed;
     }
 
-    const videoMatch = VIDEO_PAGE_PATTERN.exec(pathname);
-
     if (videoMatch !== null) {
-        const videos = videosQuery.data ?? [];
-        const video = videos.find((candidate) => candidate.id === videoMatch[1]);
-
-        return [VIDEOS_CRUMB, { label: video?.title ?? "Vídeo" }];
+        return [VIDEOS_CRUMB, { label: videoTitle ?? "Vídeo" }];
     }
 
     if (ADMIN_USER_PATTERN.test(pathname) === true) {

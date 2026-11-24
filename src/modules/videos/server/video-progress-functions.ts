@@ -7,9 +7,10 @@ import { isVideoWorking } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { countReadyClips } from "#/modules/videos/server/video-queries.server";
+import { MAX_VIDEOS_PER_PAGE } from "#/modules/videos/model/video-list-page";
 
 /** More than anyone has in the queue at once; it caps the query the poll can ask for. */
-export const MAX_WATCHED_VIDEOS = 50;
+export const MAX_WATCHED_VIDEOS = MAX_VIDEOS_PER_PAGE;
 
 const videoProgressInputSchema = z.object({
     videoIds: z.array(z.uuid()).min(1).max(MAX_WATCHED_VIDEOS),
@@ -18,6 +19,8 @@ const videoProgressInputSchema = z.object({
 /** Just what moves while a video is processed; the list refetches the rest when it changes. */
 export interface VideoProgress {
     id: string;
+    /** So a stage change can be announced by name after the video leaves the lists that had it. */
+    title: string;
     status: VideoStatus;
     progressPercent: number;
     isCancelling: boolean;
@@ -36,6 +39,7 @@ export const getVideoProgress = createServerFn({ method: "GET" })
         const rows = await db
             .select({
                 id: videos.id,
+                title: videos.title,
                 status: videos.status,
                 progressPercent: videos.progressPercent,
                 cancelRequested: videos.cancelRequested,
@@ -47,6 +51,7 @@ export const getVideoProgress = createServerFn({ method: "GET" })
 
         return rows.map((row) => ({
             id: row.id,
+            title: row.title,
             status: row.status,
             progressPercent: row.progressPercent,
             isCancelling: row.cancelRequested && isVideoWorking(row.status),

@@ -6,7 +6,10 @@ import { AppLayout } from "#/modules/shell/ui/screens/app-layout";
 import { currentUserQueryOptions } from "#/modules/auth/model/current-user-query";
 import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
 import { usageQueryOptions } from "#/modules/videos/model/library-queries";
-import { videosQueryOptions } from "#/modules/videos/model/video-queries";
+import {
+    videoCountsQueryOptions,
+    workingVideosQueryOptions,
+} from "#/modules/videos/model/video-queries";
 import { VideoProgressWatcher } from "#/modules/videos/ui/components/video-progress-watcher";
 
 export const Route = createFileRoute("/_app")({
@@ -27,7 +30,14 @@ export const Route = createFileRoute("/_app")({
     // query refreshes it in the background, so returning to a page never waits on the network.
     loader: async ({ context }): Promise<void> => {
         await Promise.all([
-            context.queryClient.prefetchQuery({ ...videosQueryOptions(), staleTime: "static" }),
+            context.queryClient.prefetchQuery({
+                ...videoCountsQueryOptions(),
+                staleTime: "static",
+            }),
+            context.queryClient.prefetchQuery({
+                ...workingVideosQueryOptions(),
+                staleTime: "static",
+            }),
             context.queryClient.prefetchQuery({ ...usageQueryOptions(), staleTime: "static" }),
             context.queryClient.prefetchQuery({
                 ...preferencesQueryOptions(),
