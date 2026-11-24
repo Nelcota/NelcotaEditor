@@ -95,9 +95,30 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         timeout-minutes: 5
+        # One deploy at a time; a newer pending deploy replaces an older one that has not started.
+        concurrency:
+            group: deploy-production
+            cancel-in-progress: false
         steps:
+            # Dokploy builds whatever main points to when it is called, not this run's commit. If main
+            # moved on, that newer commit is untested here; its own run deploys it once it passes.
+            - name: Check that the tested commit is still the tip of main
+              id: tip
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  REPOSITORY: ${{ github.repository }}
+                  COMMIT: ${{ github.sha }}
+              run: |
+                  tip=$(gh api "repos/$REPOSITORY/commits/main" --jq .sha)
+                  if [ "$tip" != "$COMMIT" ]; then
+                      echo "main is at $tip, not the tested $COMMIT; its own run deploys it" >> "$GITHUB_STEP_SUMMARY"
+                      echo "is-tip=false" >> "$GITHUB_OUTPUT"
+                      exit 0
+                  fi
+                  echo "is-tip=true" >> "$GITHUB_OUTPUT"
             # Dokploy's webhook takes a GitHub push payload and deploys when its branch matches.
             - name: Ask Dokploy to deploy main
+              if: steps.tip.outputs.is-tip == 'true'
               env:
                   DEPLOY_WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
                   COMMIT: ${{ github.sha }}
