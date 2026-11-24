@@ -1,4 +1,5 @@
 import { setTimeout as delay } from "node:timers/promises";
+import { releaseRenderingClips } from "#/modules/clips/server/release-rendering-clips.server";
 import { ensureHighlights } from "#/modules/highlights/server/select-highlights.server";
 import { watchForCancellation } from "#/modules/processing/server/cancellation-watch.server";
 import { renderPendingClips } from "#/modules/processing/server/render-pending-clips.server";
@@ -108,11 +109,15 @@ const RECORD_STOP_RETRY_DELAY_MILLISECONDS = 2_000;
  * because a retry took the video leaves it to the new run.
  */
 async function writeStop(run: VideoRun, error: unknown, signal: AbortSignal): Promise<void> {
+    const videoId = run.videoId;
+
     if (signal.aborted === true) {
+        await releaseRenderingClips(videoId, "pending");
         await markVideoCancelled(run);
         return;
     }
 
+    await releaseRenderingClips(videoId, "failed");
     await markVideoFailed(run, toUserMessage(error));
 }
 
