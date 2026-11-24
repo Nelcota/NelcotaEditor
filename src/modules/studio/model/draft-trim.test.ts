@@ -42,6 +42,16 @@ describe("trimDraft", () => {
         assert.equal(studioDraftSchema.safeParse(restored).success, true);
     });
 
+    it("gives a word cut by the end back its length when the end grows again", () => {
+        const draft = draftWithOneCue();
+        const shortened = trimDraft(draft, { startSeconds: 9.5, endSeconds: 10.7 }, WORDS);
+
+        const grown = trimDraft(shortened, { startSeconds: 9.5, endSeconds: 40 }, WORDS);
+
+        assert.equal(grown.cues[0]?.words.at(-1)?.endSeconds, 11);
+        assert.equal(grown.cues[0]?.endSeconds, 11);
+    });
+
     it("keeps an uncut cue's own start", () => {
         const draft = draftWithOneCue();
 
