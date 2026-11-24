@@ -22,17 +22,16 @@ export function AccountMenuButton(): ReactNode {
     return (
         <>
             <DropdownMenu>
-                <DropdownMenuTrigger
-                    aria-label={`Menu da conta: ${user.name}`}
-                    className="flex h-12 w-full items-center gap-2 rounded-xl ps-2 pe-3 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5"
-                >
+                <DropdownMenuTrigger className="flex h-12 w-full items-center gap-2 rounded-xl ps-2 pe-3 text-start outline-none transition-[background-color,scale] hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] data-[state=open]:bg-foreground/5">
                     <UserAvatar
                         name={user.name}
                         avatar={toAvatar(user.image)}
                         className="size-[1.875rem]"
                     />
+                    {/* The visible name starts the button's name (WCAG 2.5.3); the rest is for screen readers. */}
                     <span className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold">
                         {user.name}
+                        <span className="sr-only">, menu da conta</span>
                     </span>
                     <MenuIcon
                         aria-hidden="true"
