@@ -10,6 +10,7 @@ import {
     UploadedFileMissingError,
     confirmVideoUpload,
 } from "#/modules/videos/server/confirm-video-upload.server";
+import { deleteVideoCoveringUploadLink } from "#/modules/videos/server/delete-video.server";
 import {
     discardPendingUpload,
     findOwnedPendingUpload,
@@ -89,6 +90,25 @@ async function sendFile(upload: VideoUpload, byteCount: number): Promise<void> {
     });
 }
 
+async function expireReservation(uploadId: string): Promise<void> {
+    await db
+        .update(videoUploads)
+        .set({ expiresAt: new Date(Date.now() - 1000) })
+        .where(eq(videoUploads.id, uploadId));
+}
+
+/** A store with signed links only takes the declared size, so the stored file reads as that. */
+async function uploadAndDeleteVideo(userId: string, declaredBytes: number): Promise<VideoUpload> {
+    const upload = await reserveVideoUpload(userId, uploadInput(declaredBytes));
+    await sendFile(upload, SMALL_UPLOAD_BYTES);
+    vi.spyOn(getFileStorage(), "measureFile").mockResolvedValueOnce(declaredBytes);
+    const videoId = await confirmVideoUpload(upload.id, userId);
+    await db.update(videos).set({ status: "done" }).where(eq(videos.id, videoId));
+    await deleteVideoCoveringUploadLink(videoId);
+
+    return upload;
+}
+
 async function countReservations(uploadId: string): Promise<number> {
     const rows = await db.select().from(videoUploads).where(eq(videoUploads.id, uploadId));
     return rows.length;
@@ -147,14 +167,18 @@ describe("video uploads", () => {
         expect(await countReservations(upload.id)).toBe(0);
     });
 
-    it("refuses to confirm before the file arrived and frees the reservation", async () => {
+    it("refuses to confirm before the file arrived and cancels the reservation", async () => {
         const userId = await createTestUser();
         const upload = await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
 
         const run = confirmVideoUpload(upload.id, userId);
 
         await expect(run).rejects.toThrow(UploadedFileMissingError);
-        expect(await countReservations(upload.id)).toBe(0);
+        const [reservation] = await db
+            .select({ cancelledAt: videoUploads.cancelledAt })
+            .from(videoUploads)
+            .where(eq(videoUploads.id, upload.id));
+        expect(reservation?.cancelledAt).not.toBeNull();
     });
 
     it("answers another person's upload as missing", async () => {
@@ -233,5 +257,75 @@ describe("video uploads", () => {
 
         expect(await findOwnedPendingUpload(upload.id, userId)).toBeNull();
         expect(await countReservations(upload.id)).toBe(1);
+    });
+
+    it("frees the processing slot of a cancelled upload at once", async () => {
+        const userId = await createTestUser();
+        const cancelled = await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
+        await discardPendingUpload(cancelled.id);
+
+        for (let upload = 0; upload < MAX_VIDEOS_IN_PROGRESS; upload += 1) {
+            await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
+        }
+
+        expect(await countReservations(cancelled.id)).toBe(1);
+    });
+
+    it("keeps counting a cancelled upload against the quota while its link may still write", async () => {
+        const userId = await createTestUser();
+        await insertStoredVideo(userId, getStorageQuotaBytes() - FREE_BYTES_LEFT);
+        const cancelled = await reserveVideoUpload(userId, uploadInput(FITTING_UPLOAD_BYTES));
+        await discardPendingUpload(cancelled.id);
+
+        const next = reserveVideoUpload(userId, uploadInput(FITTING_UPLOAD_BYTES));
+
+        await expect(next).rejects.toThrow(StorageQuotaExceededError);
+    });
+
+    it("refuses to take or confirm the file of a cancelled upload", async () => {
+        const userId = await createTestUser();
+        const upload = await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
+        await discardPendingUpload(upload.id);
+        await sendFile(upload, SMALL_UPLOAD_BYTES);
+
+        const run = confirmVideoUpload(upload.id, userId);
+
+        await expect(run).rejects.toThrow(UploadNotFoundError);
+        expect(await findOwnedPendingUpload(upload.id, userId)).toBeNull();
+    });
+
+    it("sweeps a file sent through the link after the upload was cancelled", async () => {
+        const userId = await createTestUser();
+        const upload = await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
+        await discardPendingUpload(upload.id);
+        await sendFile(upload, SMALL_UPLOAD_BYTES);
+        await expireReservation(upload.id);
+
+        await removeExpiredUploads();
+
+        expect(await getFileStorage().measureFile(upload.sourcePath)).toBe(0);
+        expect(await countReservations(upload.id)).toBe(0);
+    });
+
+    it("keeps counting the upload of a deleted video while its link may still write", async () => {
+        const userId = await createTestUser();
+        await insertStoredVideo(userId, getStorageQuotaBytes() - FREE_BYTES_LEFT);
+        await uploadAndDeleteVideo(userId, FITTING_UPLOAD_BYTES);
+
+        const next = reserveVideoUpload(userId, uploadInput(FITTING_UPLOAD_BYTES));
+
+        await expect(next).rejects.toThrow(StorageQuotaExceededError);
+    });
+
+    it("sweeps a file sent through the link of a deleted video", async () => {
+        const userId = await createTestUser();
+        const upload = await uploadAndDeleteVideo(userId, SMALL_UPLOAD_BYTES);
+        await sendFile(upload, SMALL_UPLOAD_BYTES);
+        await expireReservation(upload.id);
+
+        await removeExpiredUploads();
+
+        expect(await getFileStorage().measureFile(upload.sourcePath)).toBe(0);
+        expect(await countReservations(upload.id)).toBe(0);
     });
 });
