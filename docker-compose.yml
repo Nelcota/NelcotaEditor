@@ -57,6 +57,7 @@ services:
             DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
             WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+            YOUTUBE_COOKIES_BASE64: ${YOUTUBE_COOKIES_BASE64:-}
         cap_drop:
             - ALL
         security_opt:

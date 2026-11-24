@@ -96,6 +96,8 @@ services:
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
             # One video at a time: ffmpeg and Whisper share the server's 6 cores.
             WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-1}
+            # YouTube asks the server's datacenter address to sign in; see .env.example.
+            YOUTUBE_COOKIES_BASE64: ${YOUTUBE_COOKIES_BASE64:-}
         cap_drop:
             - ALL
         security_opt:
