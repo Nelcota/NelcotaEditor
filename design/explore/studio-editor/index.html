@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>Studio · atual + 3 direções</title>
+        <link rel="stylesheet" href="studio.css" />
+        <style>
+            body {
+                padding: 40px 32px 80px;
+                width: 1600px;
+            }
+            .wrap {
+                display: grid;
+                gap: 40px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            .legend {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+            }
+            .legend article {
+                padding: 18px;
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                background: var(--card);
+                display: grid;
+                gap: 8px;
+                align-content: start;
+            }
+            .legend article.is-pick {
+                border-color: var(--primary);
+            }
+            .tag {
+                display: inline-block;
+                font-size: 12px;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: var(--primary);
+                color: white;
+                vertical-align: middle;
+            }
+            .legend h3 {
+                font-size: 18px;
+            }
+            .legend p,
+            .shared,
+            .problems {
+                font-size: 14px;
+            }
+            .legend b,
+            .shared b,
+            .problems b {
+                color: var(--foreground);
+            }
+            section {
+                display: grid;
+                gap: 14px;
+            }
+            section h2 {
+                font-size: 20px;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 300px;
+                gap: 16px;
+                align-items: start;
+            }
+            .shots.three {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            .shots img {
+                width: 100%;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                display: block;
+            }
+            .caption {
+                font-size: 13px;
+                color: var(--muted-foreground);
+            }
+            .shared {
+                padding: 16px 18px;
+                border: 1px dashed var(--border);
+                border-radius: 14px;
+            }
+            .problems {
+                padding-left: 20px;
+                display: grid;
+                gap: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header style="display: grid; gap: 6px">
+                <h1>Studio · atual + 3 direções</h1>
+                <p class="muted">
+                    Legendas reais do corte "Perdidos em São Paulo com o ID4" (0:59 a 1:21, 31
+                    blocos). O quadro do vídeo é neutro: os arquivos deste vídeo não estão nesta
+                    máquina. Computador 1440 px e celular 390. Nada disso está no app ainda.
+                </p>
+            </header>
+
+            <section>
+                <h2>Atual</h2>
+                <div class="shots three">
+                    <img src="renders/current-trim.jpg" alt="Passo Trecho" />
+                    <img
+                        src="renders/current-captions.jpg"
+                        alt="Passo Legendas com um bloco aberto"
+                    />
+                    <img src="renders/current-style.jpg" alt="Passo Estilo" />
+                </div>
+                <ul class="problems muted">
+                    <li>
+                        <b>Pouco espaço para editar:</b> título, abas e barra do Studio ocupam uns
+                        250 px antes do editor; as legendas cabem em 7 linhas numa caixa com rolagem
+                        própria.
+                    </li>
+                    <li>
+                        <b>Passos escondem o resto:</b> Trecho, Legendas e Estilo aparecem um de
+                        cada vez; para ver o estilo enquanto corrige o texto é preciso ir e voltar.
+                    </li>
+                    <li>
+                        <b>Corrigir uma palavra parece formulário:</b> abrir o bloco, campo de
+                        texto, campos Início e Fim em números.
+                    </li>
+                    <li>
+                        <b>Trecho minúsculo:</b> a barra do corte é um cartão dentro do painel, com
+                        90 s espremidos em 200 px.
+                    </li>
+                    <li>
+                        <b>No celular:</b> a prévia ocupa a tela inteira e as ferramentas ficam
+                        abaixo da dobra.
+                    </li>
+                </ul>
+            </section>
+
+            <p class="shared muted">
+                <b>Igual nas três:</b> o Studio vira um editor de verdade, com uma barra só: voltar,
+                nome do corte com anterior e próximo, "Rascunho salvo", desfazer, refazer e
+                "Renderizar corte" sempre à vista. Sem passos 1, 2, 3. A legenda aparece na prévia
+                no estilo escolhido. Palavras ouvidas com pouca certeza ("rótimo") ficam marcadas
+                para revisar. Os atalhos de hoje continuam (espaço, I, O, Ctrl+Z).
+            </p>
+
+            <div class="legend">
+                <article class="is-pick">
+                    <span><span class="tag">Recomendo</span></span>
+                    <h3>A · Editor com linha do tempo</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> o jeito do CapCut, que quem posta cortes já conhece. Tela
+                        cheia, sem o menu do app. Esquerda: Legendas e Estilo. Centro: prévia
+                        grande. Direita: detalhes do bloco escolhido. Embaixo: linha do tempo com o
+                        trecho (arrasta as alças amarelas) e os blocos de legenda.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> tudo visível ao mesmo tempo; mudar o trecho é arrastar, não
+                        digitar números; clicar na legenda da prévia ou da linha do tempo abre o
+                        texto.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> é a mudança maior; no celular a linha do tempo fica fina e as
+                        ferramentas vão para abas embaixo.
+                    </p>
+                </article>
+                <article>
+                    <h3>B · Editar pelo texto</h3>
+                    <p class="muted">
+                        <b>Ideia:</b> o jeito do Descript. O corte vira um texto corrido: clica na
+                        palavra e corrige, Enter divide o bloco, Backspace junta. As marcas Início e
+                        Fim ficam dentro do texto e se arrastam para pegar mais ou menos frase.
+                        Estilo numa faixa sob a prévia.
+                    </p>
+                    <p class="muted">
+                        <b>Bom em:</b> o mais fácil para quem nunca editou vídeo; corrigir legenda
+                        vira corrigir um texto.
+                    </p>
+                    <p class="muted">
+                        <b>Custa:</b> ajuste fino de tempo (décimos de segundo) fica escondido;
+                        arrastar Início e Fim pelo texto só corta entre palavras.
+                    </p>
+                </article>
+                <article>
+                    <h3>
+                        C · Tudo numa coluna
+                        <span class="muted" style="font-size: 13px; font-weight: 600"
+                            >(menor mudança)</span
+                        >
+                    </h3>
+                    <p class="muted">
+                        <b>Ideia:</b> mantém a página com abas, mas tira os passos: Trecho, Legendas
+                        e Estilo um embaixo do outro, com a rolagem da página. Prévia fixa à
+                        esquerda. Barra de renderizar presa embaixo, dizendo o que mudou.
+                    </p>
+                    <p class="muted"><b>Bom em:</b> pouco para aprender e pouco para construir.</p>
+                    <p class="muted">
+                        <b>Custa:</b> continua apertado; trecho e legendas longe um do outro; no
+                        celular a prévia sai da tela quando você desce até o estilo.
+                    </p>
+                </article>
+            </div>
+
+            <section>
+                <h2>A · Editor com linha do tempo <span class="tag">Recomendo</span></h2>
+                <div class="shots">
+                    <img src="renders/a.png" alt="Direção A" /><img
+                        src="renders/phone-a.png"
+                        alt="Direção A no celular"
+                    />
+                </div>
+                <p class="caption">
+                    Bloco "caminho rótimo" aberto para corrigir, com Dividir e Juntar. No celular,
+                    Trecho, Legendas e Estilo abrem uma gaveta sobre a linha do tempo.
+                </p>
+            </section>
+            <section>
+                <h2>B · Editar pelo texto</h2>
+                <div class="shots">
+                    <img src="renders/b.png" alt="Direção B" /><img
+                        src="renders/phone-b.png"
+                        alt="Direção B no celular"
+                    />
+                </div>
+                <p class="caption">
+                    Clicou em "rótimo": sugestão de troca. O texto antes de Início e depois de Fim é
+                    o resto do vídeo, apagado.
+                </p>
+            </section>
+            <section>
+                <h2>C · Tudo numa coluna</h2>
+                <div class="shots">
+                    <img src="renders/c.png" alt="Direção C" /><img
+                        src="renders/phone-c.png"
+                        alt="Direção C no celular"
+                    />
+                </div>
+            </section>
+        </div>
+    </body>
+</html>
