@@ -167,5 +167,5 @@ export const deleteVideo = createServerFn({ method: "POST" })
     .validator(videoIdInputSchema)
     .handler(async ({ context, data }): Promise<void> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
-        await deleteVideoCoveringUploadLink(video.id);
+        await deleteVideoCoveringUploadLink(video);
     });

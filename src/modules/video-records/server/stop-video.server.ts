@@ -42,16 +42,29 @@ export type DeletedVideo = Pick<
     | "createdAt"
 >;
 
+/** The database or the open transaction that also holds the upload link of the video. */
+type DeleteExecutor = Pick<typeof db, "delete">;
+
 /**
- * Deletes the row; the caller deletes its files after it. The status is checked in the same
- * statement, so a worker that starts in between wins. The caller checks who may delete it.
+ * Deletes the row; the caller deletes its files after the commit. The status is checked in the
+ * same statement, so a worker that starts in between wins. The owner is matched too, so a caller
+ * holding that owner's lock deletes only that owner's video. The caller checks who may delete it.
  *
  * @returns The deleted video, for the caller to clean up after.
  */
-export async function deleteStoppedVideoRow(videoId: string): Promise<DeletedVideo> {
-    const deletedRows = await db
+export async function deleteStoppedVideoRow(
+    video: Pick<Video, "id" | "userId">,
+    executor: DeleteExecutor,
+): Promise<DeletedVideo> {
+    const deletedRows = await executor
         .delete(videos)
-        .where(and(eq(videos.id, videoId), notInArray(videos.status, WORKING_VIDEO_STATUSES)))
+        .where(
+            and(
+                eq(videos.id, video.id),
+                eq(videos.userId, video.userId),
+                notInArray(videos.status, WORKING_VIDEO_STATUSES),
+            ),
+        )
         .returning({
             id: videos.id,
             userId: videos.userId,

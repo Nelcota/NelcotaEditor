@@ -28,8 +28,10 @@ import { storeVideoUpload } from "#/modules/videos/server/store-video-upload.ser
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
 import { videoUploads } from "#/modules/videos/videos.schema";
 import type { VideoUpload } from "#/modules/videos/videos.schema";
+import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
+import { UserFacingError } from "#/shared/server/user-facing-error";
 
 // Runs against the test database from .env.test: bun run test:integration
 
@@ -37,6 +39,7 @@ const SMALL_UPLOAD_BYTES = 16;
 // Room for one upload of FITTING_UPLOAD_BYTES, not two.
 const FREE_BYTES_LEFT = 3_000_000_000;
 const FITTING_UPLOAD_BYTES = 2_000_000_000;
+const THUMBNAIL_BYTES = 40_000;
 
 async function createTestUser(): Promise<string> {
     const userId = randomUUID();
@@ -104,9 +107,36 @@ async function uploadAndDeleteVideo(userId: string, declaredBytes: number): Prom
     vi.spyOn(getFileStorage(), "measureFile").mockResolvedValueOnce(declaredBytes);
     const videoId = await confirmVideoUpload(upload.id, userId);
     await db.update(videos).set({ status: "done" }).where(eq(videos.id, videoId));
-    await deleteVideoCoveringUploadLink(videoId);
+    await deleteVideoCoveringUploadLink({ id: videoId, userId });
 
     return upload;
+}
+
+/** A finished video made from an upload, its file and thumbnail already in its folder. */
+async function insertUploadedVideo(userId: string, sourceBytes: number): Promise<string> {
+    const videoId = randomUUID();
+    const sourcePath = `videos/${videoId}/source.mp4`;
+    await db.insert(videos).values({
+        id: videoId,
+        userId,
+        title: "Uploaded video",
+        source: "upload",
+        sourcePath,
+        sourceBytes,
+        requestedClipCount: 3,
+        status: "done",
+    });
+    await storeVideoUpload(streamOfBytes(SMALL_UPLOAD_BYTES), {
+        sourcePath,
+        maxBytes: SMALL_UPLOAD_BYTES,
+    });
+
+    return videoId;
+}
+
+async function countVideos(videoId: string): Promise<number> {
+    const rows = await db.select({ id: videos.id }).from(videos).where(eq(videos.id, videoId));
+    return rows.length;
 }
 
 async function countReservations(uploadId: string): Promise<number> {
@@ -327,5 +357,35 @@ describe("video uploads", () => {
 
         expect(await getFileStorage().measureFile(upload.sourcePath)).toBe(0);
         expect(await countReservations(upload.id)).toBe(0);
+    });
+
+    it("holds at most 5 GB for a deleted video whose size counts its thumbnail", async () => {
+        const userId = await createTestUser();
+        const videoId = await insertUploadedVideo(userId, MAX_UPLOAD_BYTES + THUMBNAIL_BYTES);
+
+        await deleteVideoCoveringUploadLink({ id: videoId, userId });
+
+        const [reservation] = await db
+            .select({ declaredBytes: videoUploads.declaredBytes })
+            .from(videoUploads)
+            .where(eq(videoUploads.id, videoId));
+        expect(reservation?.declaredBytes).toBe(MAX_UPLOAD_BYTES);
+        expect(await getFileStorage().measureFile(`videos/${videoId}/source.mp4`)).toBe(0);
+        expect(await countVideos(videoId)).toBe(0);
+    });
+
+    it("keeps the video and its files when another person asks to delete it", async () => {
+        const ownerId = await createTestUser();
+        const otherId = await createTestUser();
+        const videoId = await insertUploadedVideo(ownerId, SMALL_UPLOAD_BYTES);
+
+        const run = deleteVideoCoveringUploadLink({ id: videoId, userId: otherId });
+
+        await expect(run).rejects.toThrow(UserFacingError);
+        expect(await countVideos(videoId)).toBe(1);
+        expect(await countReservations(videoId)).toBe(0);
+        expect(await getFileStorage().measureFile(`videos/${videoId}/source.mp4`)).toBe(
+            SMALL_UPLOAD_BYTES,
+        );
     });
 });

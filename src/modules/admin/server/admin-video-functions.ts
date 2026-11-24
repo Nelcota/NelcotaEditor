@@ -62,7 +62,7 @@ export const deleteAnyVideo = createServerFn({ method: "POST" })
     .handler(async ({ context, data }): Promise<void> => {
         const ownerId = await findVideoOwnerId(data.videoId);
 
-        await deleteVideoCoveringUploadLink(data.videoId);
+        await deleteVideoCoveringUploadLink({ id: data.videoId, userId: ownerId });
         await recordAdminAction({
             action: "delete-video",
             adminId: context.admin.id,

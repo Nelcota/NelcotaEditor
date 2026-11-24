@@ -3,6 +3,7 @@ import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { videoUploads } from "#/modules/videos/videos.schema";
 import type { VideoUpload } from "#/modules/videos/videos.schema";
+import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
 import type { DeletedVideo } from "#/modules/video-records/server/stop-video.server";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { getVideoDirectory } from "#/shared/server/storage.server";
@@ -10,6 +11,9 @@ import { logger } from "#/shared/server/logger.server";
 
 /** The database or the open transaction that holds the user's start lock. */
 type QueryExecutor = Pick<typeof db, "select">;
+
+/** The open transaction that deletes the video the hold stands in for. */
+type InsertExecutor = Pick<typeof db, "insert">;
 
 export interface PendingUploads {
     count: number;
@@ -103,9 +107,12 @@ export async function discardPendingUpload(uploadId: string): Promise<void> {
  * The upload link of a video made from an upload may outlive the video: a PUT through it would
  * write the file again with no row pointing at it. A cancelled upload row in its place keeps the
  * space counted for as long as the reservation could have lasted, and the sweep deletes what
- * arrives.
+ * arrives. Run it in the transaction that deletes the video, so the space is never free in between.
  */
-export async function holdUploadOfDeletedVideo(video: DeletedVideo): Promise<void> {
+export async function holdUploadOfDeletedVideo(
+    video: DeletedVideo,
+    executor: InsertExecutor,
+): Promise<void> {
     const { sourcePath, sourceBytes } = video;
     // The video row is created after its reservation, so this ends no earlier than the link.
     const expiresAt = new Date(video.createdAt.getTime() + UPLOAD_RESERVATION_MILLISECONDS);
@@ -118,13 +125,14 @@ export async function holdUploadOfDeletedVideo(video: DeletedVideo): Promise<voi
         return;
     }
 
-    await db
+    await executor
         .insert(videoUploads)
         .values({
             id: video.id,
             userId: video.userId,
             sourcePath,
-            declaredBytes: sourceBytes,
+            // The video's size also counts its thumbnail, but the link never takes more than this.
+            declaredBytes: Math.min(sourceBytes, MAX_UPLOAD_BYTES),
             title: video.title,
             requestedClipCount: video.requestedClipCount,
             clipLength: video.clipLength,
