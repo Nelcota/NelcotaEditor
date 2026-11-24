@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import {
@@ -121,6 +121,7 @@ export async function markVideoFailed(videoId: string, errorMessage: string): Pr
  * cancel right as the last step ended. The caller then records the cancel instead.
  */
 export async function markVideoDone(videoId: string): Promise<boolean> {
+    const finishedAt = new Date();
     const doneRows = await db
         .update(videos)
         .set({
@@ -128,7 +129,9 @@ export async function markVideoDone(videoId: string): Promise<boolean> {
             progressPercent: MAX_PERCENT,
             errorMessage: null,
             cancelRequested: false,
-            finishedAt: new Date(),
+            finishedAt,
+            // Only the first time: a later retry or Studio render must not move it.
+            firstFinishedAt: sql`coalesce(${videos.firstFinishedAt}, ${finishedAt.toISOString()}::timestamptz)`,
         })
         .where(
             and(eq(videos.id, videoId), eq(videos.cancelRequested, false), canMoveVideoTo("done")),
