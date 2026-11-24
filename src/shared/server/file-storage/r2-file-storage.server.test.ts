@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
     InvalidStorageKeyError,
@@ -87,5 +90,31 @@ describe("createR2FileStorage createUploadUrl", () => {
         expect(location.pathname).toBe("/nelcota-media/videos/abc/source.mp4");
         expect(location.searchParams.get("X-Amz-SignedHeaders")).toContain("content-length");
         expect(location.searchParams.get("X-Amz-Expires")).toBe("3600");
+    });
+});
+
+describe("createR2FileStorage cancellation", () => {
+    it("stops fetching a stored file when the run is cancelled", async () => {
+        const workDirectory = await mkdtemp(path.join(tmpdir(), "nelcota-r2-"));
+
+        const run = storage.getLocalFile("videos/abc/source.mp4", workDirectory, {
+            signal: AbortSignal.abort(),
+        });
+
+        await expect(run).rejects.toMatchObject({ name: "AbortError" });
+        await rm(workDirectory, { recursive: true, force: true });
+    });
+
+    it("stops storing a local file when the run is cancelled", async () => {
+        const workDirectory = await mkdtemp(path.join(tmpdir(), "nelcota-r2-"));
+        const localFile = path.join(workDirectory, "thumbnail.jpg");
+        await writeFile(localFile, "a frame");
+
+        const run = storage.storeLocalFile("videos/abc/thumbnail.jpg", localFile, {
+            signal: AbortSignal.abort(),
+        });
+
+        await expect(run).rejects.toMatchObject({ name: "AbortError" });
+        await rm(workDirectory, { recursive: true, force: true });
     });
 });

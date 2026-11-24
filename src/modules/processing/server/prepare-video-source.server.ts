@@ -62,11 +62,18 @@ async function downloadSource(video: Video, context: SourceContext): Promise<Dow
     return downloaded;
 }
 
-/** ffprobe fails on damaged or unusual files; the person can fix that by exporting again. */
-async function probeSourceMedia(localPath: string): Promise<MediaInfo> {
+/**
+ * ffprobe fails on damaged or unusual files; the person can fix that by exporting again.
+ * A cancelled run is not a broken file.
+ */
+async function probeSourceMedia(localPath: string, signal: AbortSignal): Promise<MediaInfo> {
     try {
-        return await probeMedia(localPath);
+        return await probeMedia(localPath, signal);
     } catch (error) {
+        if (signal.aborted === true) {
+            throw error;
+        }
+
         throw new UserFacingError(UNREADABLE_FILE_MESSAGE, { cause: error });
     }
 }
@@ -77,8 +84,8 @@ interface CheckedSource {
 }
 
 /** Refuses files the pipeline cannot use and reads what is saved with the path. */
-async function inspectSource(localPath: string): Promise<CheckedSource> {
-    const mediaInfo = await probeSourceMedia(localPath);
+async function inspectSource(localPath: string, signal: AbortSignal): Promise<CheckedSource> {
+    const mediaInfo = await probeSourceMedia(localPath, signal);
 
     if (mediaInfo.hasVideo === false) {
         throw new UserFacingError(
@@ -120,8 +127,10 @@ async function prepareStoredSource(
     sourcePath: string,
     context: SourceContext,
 ): Promise<VideoSource> {
-    const localSourcePath = await getFileStorage().getLocalFile(sourcePath, context.workDirectory);
-    const checkedSource = await inspectSource(localSourcePath);
+    const localSourcePath = await getFileStorage().getLocalFile(sourcePath, context.workDirectory, {
+        signal: context.signal,
+    });
+    const checkedSource = await inspectSource(localSourcePath, context.signal);
     await saveVideoSource(video.id, { sourcePath, ...checkedSource });
     return { sourcePath, localSourcePath, durationSeconds: checkedSource.durationSeconds };
 }
@@ -139,11 +148,11 @@ function toDownloadedSourcePath(videoId: string, localPath: string): string {
 async function prepareDownloadedSource(video: Video, context: SourceContext): Promise<VideoSource> {
     const downloaded = await downloadSource(video, context);
     const localSourcePath = downloaded.localPath;
-    const checkedSource = await inspectSource(localSourcePath);
+    const checkedSource = await inspectSource(localSourcePath, context.signal);
     const sourcePath = toDownloadedSourcePath(video.id, localSourcePath);
     const storage = getFileStorage();
 
-    await storage.storeLocalFile(sourcePath, localSourcePath);
+    await storage.storeLocalFile(sourcePath, localSourcePath, { signal: context.signal });
 
     try {
         await saveDownloadedSource({
@@ -181,6 +190,7 @@ export async function prepareVideoSource(
         localSourcePath: source.localSourcePath,
         durationSeconds: source.durationSeconds,
         workDirectory: context.workDirectory,
+        signal: context.signal,
     });
     return source;
 }

@@ -17,6 +17,7 @@ import { contentTypeForKey } from "#/shared/server/file-storage/content-type-for
 import type {
     FileStorage,
     ServedFile,
+    TransferOptions,
     UploadSlot,
 } from "#/shared/server/file-storage/file-storage";
 
@@ -100,6 +101,18 @@ function smallRequestSignal(): { abortSignal: AbortSignal } {
     return { abortSignal: AbortSignal.timeout(SMALL_REQUEST_TIMEOUT_MILLISECONDS) };
 }
 
+/** The run's cancellation, when there is one, also stops the transfer before its own deadline. */
+function transferSignal(options: TransferOptions): AbortSignal {
+    const deadline = AbortSignal.timeout(TRANSFER_TIMEOUT_MILLISECONDS);
+    const runSignal = options.signal;
+
+    if (runSignal === undefined) {
+        return deadline;
+    }
+
+    return AbortSignal.any([deadline, runSignal]);
+}
+
 function listedKeys(page: ListObjectsV2CommandOutput): Array<string> {
     const objects = page.Contents ?? [];
 
@@ -119,7 +132,11 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
     const client = createR2Client(settings);
     const bucket = settings.bucket;
 
-    async function storeLocalFile(key: string, localPath: string): Promise<number> {
+    async function storeLocalFile(
+        key: string,
+        localPath: string,
+        options: TransferOptions = {},
+    ): Promise<number> {
         assertValidKey(key);
         const fileStats = await stat(localPath);
         // R2 refuses a body without a length, so the size goes with it.
@@ -131,7 +148,7 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
                 ContentLength: fileStats.size,
                 ContentType: contentTypeForKey(key),
             }),
-            { abortSignal: AbortSignal.timeout(TRANSFER_TIMEOUT_MILLISECONDS) },
+            { abortSignal: transferSignal(options) },
         );
         return fileStats.size;
     }
@@ -169,13 +186,17 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
         }
     }
 
-    async function getLocalFile(key: string, workDirectory: string): Promise<string> {
+    async function getLocalFile(
+        key: string,
+        workDirectory: string,
+        options: TransferOptions = {},
+    ): Promise<string> {
         assertValidKey(key);
         const localPath = path.join(
             workDirectory,
             `${DOWNLOADED_FILE_PREFIX}${path.posix.basename(key)}`,
         );
-        const abortSignal = AbortSignal.timeout(TRANSFER_TIMEOUT_MILLISECONDS);
+        const abortSignal = transferSignal(options);
         const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }), {
             abortSignal,
         });

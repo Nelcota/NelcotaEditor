@@ -79,6 +79,7 @@ describe("ensureVideoThumbnail", () => {
             localSourcePath: path.join(workDirectory, "source.mp4"),
             durationSeconds: DURATION_SECONDS,
             workDirectory,
+            signal: new AbortController().signal,
         });
 
         assert.equal((await readVideo(videoId)).sourceBytes, SOURCE_BYTES + THUMBNAIL_BYTES);
