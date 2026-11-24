@@ -130,6 +130,27 @@ describe("useDraftAutosave", () => {
         });
     });
 
+    it("keeps saving on flush until the server holds a draft edited during the save", async () => {
+        const queryClient = new QueryClient();
+        const rendered = renderAutosave(queryClient);
+        const laterDraft: StudioDraft = { ...EDITED_DRAFT, captionSize: "large" };
+        vi.mocked(saveClipDraft)
+            .mockImplementationOnce(async () => {
+                rendered.rerender({ draft: laterDraft });
+                return { kind: "saved", draftVersion: 4 };
+            })
+            .mockResolvedValueOnce({ kind: "saved", draftVersion: 5 });
+        rendered.rerender({ draft: EDITED_DRAFT });
+
+        // Not inside act: React would hold the edit's effect until the whole flush ended.
+        const outcome = await rendered.result.current.flush();
+
+        expect(outcome).toBe("saved");
+        expect(saveClipDraft).toHaveBeenLastCalledWith({
+            data: { videoId: VIDEO_ID, clipId: CLIP_ID, expectedVersion: 4, draft: laterDraft },
+        });
+    });
+
     it("keeps the edit in this browser when the closing save fails", async () => {
         vi.mocked(saveClipDraft).mockRejectedValue(new TypeError("Failed to fetch"));
         vi.stubGlobal("reportError", vi.fn());

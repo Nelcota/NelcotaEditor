@@ -15,8 +15,16 @@ import { reportClientProblem } from "#/shared/errors/report-client-problem";
 // Long enough to group a burst of typing into one request, short enough to feel instant.
 const SAVE_DELAY_MILLISECONDS = 800;
 const SAVE_SCOPE_PREFIX = "studio-draft-save:";
+// Each round saves what was typed during the one before; a person cannot outtype this many.
+const MAX_FLUSH_ROUNDS = 5;
 
 export type SaveStatus = "saved" | "saving" | "failed" | "offline" | "conflict";
+
+/** How a flush ended: the server holds the current draft, or why it does not. */
+export type FlushOutcome = "saved" | "conflict" | "failed";
+
+/** One save; "changed" means it landed but the draft moved on while it was on its way. */
+type SaveOutcome = FlushOutcome | "changed";
 
 interface AutosaveInput {
     videoId: string;
@@ -31,8 +39,8 @@ export interface DraftAutosave {
     status: SaveStatus;
     /** The server version the next save builds on. */
     readVersion: () => number;
-    /** Saves right away; resolves to whether the server now holds the current draft. */
-    flush: () => Promise<boolean>;
+    /** Saves right away, again while edits keep arriving, until the server holds the draft. */
+    flush: () => Promise<FlushOutcome>;
     /** Takes the server's latest version as the base; a draft that differs is saved over it next. */
     resync: (version: number, serverDraft: StudioDraft) => void;
 }
@@ -84,12 +92,12 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
         draftRef.current = draft;
     }, [draft]);
 
-    const saveOnce = async (): Promise<boolean> => {
+    const saveOnce = async (): Promise<SaveOutcome> => {
         const current = draftRef.current;
 
         if (current === savedDraftRef.current) {
             setStatus("saved");
-            return true;
+            return "saved";
         }
 
         setStatus("saving");
@@ -101,7 +109,7 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
 
             if (result.kind === "conflict") {
                 setStatus("conflict");
-                return false;
+                return "conflict";
             }
 
             versionRef.current = result.draftVersion;
@@ -114,13 +122,18 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
             });
             clearDraftBackup(clipId);
             setStatus("saved");
-            return draftRef.current === current;
+
+            if (draftRef.current !== current) {
+                return "changed";
+            }
+
+            return "saved";
         } catch (error) {
             // The edits stay on screen and in this browser; the person can try again.
             reportClientProblem("Could not save the Studio draft", error);
             writeDraftBackup(clipId, { baseVersion: versionRef.current, draft: current });
             setStatus("failed");
-            return false;
+            return "failed";
         }
     };
 
@@ -142,7 +155,17 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
         networkMode: "always",
     });
 
-    const flush = (): Promise<boolean> => saveMutation.mutateAsync();
+    const flush = async (): Promise<FlushOutcome> => {
+        for (let round = 0; round < MAX_FLUSH_ROUNDS; round += 1) {
+            const outcome = await saveMutation.mutateAsync();
+
+            if (outcome !== "changed") {
+                return outcome;
+            }
+        }
+
+        return "failed";
+    };
 
     const saveLater = useEffectEvent((): void => {
         saveMutation.mutate();
