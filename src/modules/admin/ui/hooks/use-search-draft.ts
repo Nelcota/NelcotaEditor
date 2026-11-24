@@ -20,8 +20,11 @@ export function useSearchDraft(query: string, onSearch: (query: string) => void)
     if (query !== seenQuery) {
         setSeenQuery(query);
 
+        // An outside query also ends our own request, so a later return to that same query
+        // (Back, then Forward) counts as outside too and fills the field.
         if (query !== requestedQuery) {
             setDraft(query);
+            setRequestedQuery(query);
         }
     }
 
