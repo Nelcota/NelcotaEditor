@@ -1,4 +1,4 @@
-import { relative, resolve } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 import { execa } from "execa";
 import { z } from "zod";
 
@@ -25,7 +25,12 @@ async function readStdin(): Promise<string> {
 function toFormattablePath(filePath: string): string | null {
     const projectPath = relative(process.cwd(), resolve(filePath));
 
+    // On Windows a file on another drive stays absolute instead of starting with "..".
     if (projectPath.startsWith("..") === true || projectPath.length === 0) {
+        return null;
+    }
+
+    if (isAbsolute(projectPath) === true) {
         return null;
     }
 
