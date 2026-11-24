@@ -68,7 +68,7 @@ export function StudioTools(props: StudioToolsProps): ReactNode {
 
                 props.onTabChange(tab);
             }}
-            className="min-h-0 gap-0 bg-background @4xl/studio:col-start-1 @4xl/studio:row-start-1 @4xl/studio:border-e"
+            className="min-h-0 gap-0 bg-background @4xl/studio:border-e"
         >
             <div className="border-b p-3">
                 <TabsList aria-label="Ferramentas do Studio" className="h-11 w-full">

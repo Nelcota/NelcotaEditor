@@ -90,7 +90,7 @@ interface VideoWorkspaceProps {
 }
 
 /** The Studio fills the window on its own: no page header, tabs or inspector around it. */
-function StudioWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): ReactNode {
+function StudioPage({ details, search, StudioTab }: VideoWorkspaceProps): ReactNode {
     const track = useTrackPromise();
     const goTo = useVideoTabNavigation(details.video.id, search);
 
@@ -114,7 +114,7 @@ function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): Re
     const isInspectorShown = isInspectorHidden === false;
 
     if (search.tab === "studio") {
-        return <StudioWorkspace details={details} search={search} StudioTab={StudioTab} />;
+        return <StudioPage details={details} search={search} StudioTab={StudioTab} />;
     }
 
     return (

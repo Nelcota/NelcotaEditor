@@ -4,6 +4,7 @@ import ArrowUpRightIcon from "~icons/lucide/arrow-up-right";
 import UploadIcon from "~icons/lucide/upload";
 import ChevronLeftIcon from "~icons/lucide/chevron-left";
 import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { VideoActionsMenu } from "#/modules/videos/ui/components/video-actions-menu";
@@ -86,7 +87,7 @@ interface VideoHeaderProps {
     isInspectorShown: boolean;
 }
 
-export function VideoHeader({ video, isInspectorShown }: VideoHeaderProps) {
+export function VideoHeader({ video, isInspectorShown }: VideoHeaderProps): ReactNode {
     const inspectorOwnedClass = cn(isInspectorShown === true && "lg:hidden");
 
     return (

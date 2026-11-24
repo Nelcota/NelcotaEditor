@@ -27,17 +27,11 @@ function StudioLoading(): ReactNode {
         <div
             role="status"
             aria-busy="true"
-            className="@container/studio grid min-h-full grid-rows-[auto_minmax(0,1fr)] md:h-full"
+            className="grid grid-cols-[minmax(0,1fr)] gap-px @4xl/studio:h-full @4xl/studio:grid-cols-[400px_minmax(0,1fr)]"
         >
             <span className="sr-only">Carregando o Studio</span>
-            <div className="flex h-15 items-center gap-3 border-b px-4">
-                <Skeleton className="h-8 w-24" />
-                <Skeleton className="h-8 w-64 max-w-full" />
-            </div>
-            <div className="grid grid-cols-[minmax(0,1fr)] gap-px @4xl/studio:grid-cols-[400px_minmax(0,1fr)]">
-                <Skeleton className="order-last h-80 rounded-none @4xl/studio:order-none @4xl/studio:h-full" />
-                <Skeleton className="h-[min(46dvh,520px)] rounded-none @4xl/studio:h-full" />
-            </div>
+            <Skeleton className="order-last h-80 rounded-none @4xl/studio:order-none @4xl/studio:h-full" />
+            <Skeleton className="h-[min(46dvh,520px)] rounded-none @4xl/studio:h-full" />
         </div>
     );
 }
@@ -134,7 +128,11 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
     }
 
     if (studio === undefined || words === undefined) {
-        return <StudioLoading />;
+        return (
+            <StudioFrame videoId={video.id} clipId={selectedClip.id} isFilling={true}>
+                <StudioLoading />
+            </StudioFrame>
+        );
     }
 
     return (

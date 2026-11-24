@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import type { ReactNode } from "react";
 import type { ClipStudioView } from "#/modules/studio/model/clip-studio-view";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
@@ -38,6 +39,22 @@ function shownTab(tab: StudioToolTab, isDesktop: boolean): StudioToolTab {
     }
 
     return tab;
+}
+
+/**
+ * The panes in reading order, so Tab follows what the eye sees: tools then preview where they sit
+ * side by side, preview then tools where they stack. The keys move the nodes instead of
+ * remounting them, so the preview keeps playing when the width crosses the breakpoint.
+ */
+function orderPanes(
+    isDesktop: boolean,
+    panes: { stage: ReactNode; tools: ReactNode },
+): Array<ReactNode> {
+    if (isDesktop === true) {
+        return [panes.tools, panes.stage];
+    }
+
+    return [panes.stage, panes.tools];
 }
 
 /**
@@ -97,7 +114,7 @@ export function StudioWorkspace({
 
     return (
         <div ref={setRootElement} className="@container/studio min-h-full md:h-full">
-            <div className="grid min-h-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_auto_auto] @4xl/studio:h-full @4xl/studio:grid-rows-[auto_auto_minmax(0,1fr)_auto]">
+            <div className="grid min-h-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_auto_auto] @4xl/studio:h-full @4xl/studio:grid-rows-[auto_auto_minmax(18rem,1fr)_auto]">
                 <StudioBar
                     videoId={video.id}
                     rankedClips={rankedClips}
@@ -116,29 +133,36 @@ export function StudioWorkspace({
                     />
                 </div>
                 <div className="grid min-h-0 grid-cols-[minmax(0,1fr)] @4xl/studio:grid-cols-[400px_minmax(0,1fr)] @4xl/studio:grid-rows-[minmax(0,1fr)] @6xl/studio:grid-cols-[440px_minmax(0,1fr)]">
-                    <div className="grid min-h-0 @4xl/studio:col-start-2 @4xl/studio:row-start-1">
-                        <StudioStage
-                            video={video}
-                            editor={editor}
-                            videoRef={videoRef}
-                            playback={playback}
-                            isRendering={isRendering}
-                        />
-                    </div>
-                    <StudioTools
-                        tab={shownTab(tab, isDesktop)}
-                        onTabChange={setTab}
-                        video={video}
-                        studio={studio}
-                        editor={editor}
-                        playback={playback}
-                        videoDurationSeconds={durationSeconds}
-                        isDesktop={isDesktop}
-                        isRendering={isRendering}
-                        playingIndex={playingIndex}
-                        openIndex={openIndex}
-                        onOpenCue={setOpenIndex}
-                    />
+                    {orderPanes(isDesktop, {
+                        stage: (
+                            <div key="stage" className="grid min-h-0">
+                                <StudioStage
+                                    video={video}
+                                    editor={editor}
+                                    videoRef={videoRef}
+                                    playback={playback}
+                                    isRendering={isRendering}
+                                />
+                            </div>
+                        ),
+                        tools: (
+                            <StudioTools
+                                key="tools"
+                                tab={shownTab(tab, isDesktop)}
+                                onTabChange={setTab}
+                                video={video}
+                                studio={studio}
+                                editor={editor}
+                                playback={playback}
+                                videoDurationSeconds={durationSeconds}
+                                isDesktop={isDesktop}
+                                isRendering={isRendering}
+                                playingIndex={playingIndex}
+                                openIndex={openIndex}
+                                onOpenCue={setOpenIndex}
+                            />
+                        ),
+                    })}
                 </div>
                 {/* Not just hidden on phones: the filmstrip loads ten videos that nobody would see. */}
                 {isDesktop === true && (
