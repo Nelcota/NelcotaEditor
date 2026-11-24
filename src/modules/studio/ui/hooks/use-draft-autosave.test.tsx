@@ -182,4 +182,25 @@ describe("useDraftAutosave", () => {
             data: { videoId: VIDEO_ID, clipId: CLIP_ID, expectedVersion: 5, draft: EDITED_DRAFT },
         });
     });
+
+    it("keeps and sends an edit still waiting for its delay when the page is closed", async () => {
+        const queryClient = new QueryClient();
+        const rendered = renderAutosave(queryClient);
+        rendered.rerender({ draft: EDITED_DRAFT });
+
+        window.dispatchEvent(new Event("pagehide"));
+
+        expect(readDraftBackup(CLIP_ID)?.draft).toEqual(EDITED_DRAFT);
+        await waitFor(() => {
+            expect(saveClipDraft).toHaveBeenCalledWith({
+                data: {
+                    videoId: VIDEO_ID,
+                    clipId: CLIP_ID,
+                    expectedVersion: 3,
+                    draft: EDITED_DRAFT,
+                },
+                fetch: expect.any(Function),
+            });
+        });
+    });
 });

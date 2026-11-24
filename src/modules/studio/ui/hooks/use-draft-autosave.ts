@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type { StudioDraft } from "#/modules/clips/model/clip-studio";
+import type { SaveDraftResult } from "#/modules/studio/model/clip-studio-view";
 import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
 import { clearDraftBackup, writeDraftBackup } from "#/modules/studio/client/draft-backup";
 import {
@@ -18,6 +19,22 @@ const SAVE_DELAY_MILLISECONDS = 800;
 const SAVE_SCOPE_PREFIX = "studio-draft-save:";
 // Each round saves what was typed during the one before; a person cannot outtype this many.
 const MAX_FLUSH_ROUNDS = 5;
+
+/**
+ * A save sent as the page goes away must outlive it. Browsers without keepalive ignore the flag;
+ * the edit is in the browser backup either way.
+ */
+const keepaliveFetch: typeof fetch = (input, init) => fetch(input, { ...init, keepalive: true });
+
+type SaveDraftData = Parameters<typeof saveClipDraft>[0]["data"];
+
+function sendDraft(data: SaveDraftData, transport: typeof fetch | null): Promise<SaveDraftResult> {
+    if (transport === null) {
+        return saveClipDraft({ data });
+    }
+
+    return saveClipDraft({ data, fetch: transport });
+}
 
 export type SaveStatus = "saved" | "saving" | "failed" | "offline" | "conflict";
 
@@ -114,7 +131,7 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
         followServer(input.serverVersion, input.savedDraft);
     }, [input.serverVersion, input.savedDraft]);
 
-    const saveOnce = async (): Promise<SaveOutcome> => {
+    const saveOnce = async (transport: typeof fetch | null): Promise<SaveOutcome> => {
         const current = draftRef.current;
 
         if (current === savedDraftRef.current) {
@@ -125,9 +142,10 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
         setStatus("saving");
 
         try {
-            const result = await saveClipDraft({
-                data: { videoId, clipId, expectedVersion: versionRef.current, draft: current },
-            });
+            const result = await sendDraft(
+                { videoId, clipId, expectedVersion: versionRef.current, draft: current },
+                transport,
+            );
 
             if (result.kind === "conflict") {
                 setStatus("conflict");
@@ -164,7 +182,7 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
     // fails into the browser backup instead of waiting, so flush() never hangs. saveOnce never
     // rejects.
     const saveMutation = useMutation({
-        mutationFn: saveOnce,
+        mutationFn: () => saveOnce(null),
         scope: { id: `${SAVE_SCOPE_PREFIX}${clipId}` },
         networkMode: "always",
     });
@@ -172,7 +190,7 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
     // start from the version it replaces.
     const leaveSaveMutation = useMutation({
         mutationKey: clipDraftLeaveSaveKey(videoId, clipId),
-        mutationFn: saveOnce,
+        mutationFn: () => saveOnce(null),
         scope: { id: `${SAVE_SCOPE_PREFIX}${clipId}` },
         networkMode: "always",
     });
@@ -224,6 +242,42 @@ export function useDraftAutosave(input: AutosaveInput): DraftAutosave {
     useEffect(() => {
         return () => track(saveOnLeave());
     }, [track]);
+
+    // Closing or reloading the tab skips both the delayed save and the unmount above; the edit
+    // goes to the browser backup at once and to the server on a request that outlives the page.
+    const hideSaveMutation = useMutation({
+        mutationFn: () => saveOnce(keepaliveFetch),
+        scope: { id: `${SAVE_SCOPE_PREFIX}${clipId}` },
+        networkMode: "always",
+    });
+
+    const saveOnHide = useEffectEvent((): void => {
+        const current = draftRef.current;
+
+        if (current === savedDraftRef.current) {
+            return;
+        }
+
+        writeDraftBackup(clipId, { baseVersion: versionRef.current, draft: current });
+        hideSaveMutation.mutate();
+    });
+
+    useEffect(() => {
+        const onPageHide = (): void => saveOnHide();
+        const onVisibilityChange = (): void => {
+            if (document.visibilityState === "hidden") {
+                saveOnHide();
+            }
+        };
+
+        window.addEventListener("pagehide", onPageHide);
+        document.addEventListener("visibilitychange", onVisibilityChange);
+
+        return () => {
+            window.removeEventListener("pagehide", onPageHide);
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+        };
+    }, []);
 
     const resync = (version: number, serverDraft: StudioDraft): void => {
         versionRef.current = version;
