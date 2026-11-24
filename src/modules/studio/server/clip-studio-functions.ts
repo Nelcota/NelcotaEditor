@@ -20,7 +20,7 @@ import {
 } from "#/modules/studio/server/clip-studio.server";
 import { findClipOfVideo } from "#/modules/clips/server/find-clip-of-video.server";
 import { requeueThenRemoveOldOutput } from "#/modules/studio/server/remove-old-output-after-requeue";
-import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
+import { assertVideoStartAllowed } from "#/modules/videos/server/video-start-limits.server";
 import {
     VIDEO_ALREADY_PROCESSING_MESSAGE,
     resetVideoToQueued,
@@ -90,7 +90,8 @@ async function applyDraftAndRequeue(target: DraftToApply): Promise<RenderDraftRe
     return runVideoStartTransaction(
         userId,
         async ({ transaction, jobDatabase }): Promise<RenderDraftResult> => {
-            await assertCanStartAnotherVideo(userId, transaction);
+            // A render writes new files too, so a full account is refused like a retry.
+            await assertVideoStartAllowed({ userId, incomingBytes: 0 }, transaction);
             const updated = await transaction
                 .update(clips)
                 .set({
