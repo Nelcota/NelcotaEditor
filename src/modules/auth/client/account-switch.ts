@@ -1,8 +1,10 @@
-import { AccountSwitchError } from "#/modules/auth/model/account-switch-error";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
+import { AccountSwitchError } from "#/modules/auth/model/account-switch-error";
 
-type AuthRequest = () => Promise<{ error: { code?: string; status?: number } | null }>;
+type AuthRequest = () => Promise<{
+    error: { code?: string; status?: number } | null;
+}>;
 
 /**
  * Switching accounts swaps the session cookie, so the page reloads at its destination: every cached

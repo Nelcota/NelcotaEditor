@@ -113,7 +113,11 @@ function ProcessingSteps({ video }: { video: VideoSummary }) {
                 const state = stepState(step.status, video.status);
 
                 return (
-                    <li key={step.status} className="flex items-center gap-2.5 text-sm">
+                    <li
+                        key={step.status}
+                        aria-current={state === "current" && "step"}
+                        className="flex items-center gap-2.5 text-sm"
+                    >
                         <StepCrew status={step.status} state={state} />
                         <span className={STEP_LABEL_STYLES[state]}>{step.label}</span>
                     </li>

@@ -1,5 +1,6 @@
 import PlayIcon from "~icons/lucide/play";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
+import type { ReactNode, RefObject } from "react";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { retryVideo } from "#/modules/videos/server/video-functions";
@@ -44,8 +45,13 @@ function resolveCopy(video: VideoSummary): PanelCopy {
     return FAILED_COPY;
 }
 
+interface ResumePanelProps {
+    video: VideoSummary;
+    mascotRef: RefObject<HTMLSpanElement | null>;
+}
+
 /** Shown for failed and cancelled videos: resuming keeps every step that already finished. */
-export function ResumePanel({ video }: { video: VideoSummary }) {
+export function ResumePanel({ video, mascotRef }: ResumePanelProps): ReactNode {
     const queryClient = useQueryClient();
     const resume = useMutation({
         mutationFn: () => retryVideo({ data: { videoId: video.id } }),
@@ -64,7 +70,9 @@ export function ResumePanel({ video }: { video: VideoSummary }) {
                 copy.className,
             )}
         >
-            <StageCrewMascot status={video.status} className="size-12" />
+            <span ref={mascotRef} className="inline-flex w-fit shrink-0 origin-bottom">
+                <StageCrewMascot status={video.status} className="size-12" />
+            </span>
             <div className="flex-1">
                 <p className="font-medium">{copy.title}</p>
                 <p className="text-sm text-muted-foreground">

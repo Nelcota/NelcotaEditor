@@ -80,6 +80,9 @@ Each drawing has one meaning only:
 
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
+  In the sidebar, its eyes follow the pointer or keyboard focus with up to 2px of travel at the
+  default size. It blinks at irregular intervals while the tab is visible, including when there is
+  no input. The original sprite is shown when reduced motion is enabled.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
   (`src/modules/videos/model/video-mascot.ts`). Gallery cards and the video header.
 - **Objects (16–31) are the crew**, one per stage (`src/modules/videos/model/stage-crew.ts`):
@@ -97,7 +100,12 @@ Each drawing has one meaning only:
 
 - The crew appears in the processing panel, the failed/cancelled panels, clip placeholders and
   empty/error states. It is decorative: the stage is always written next to it.
-- The member at work bobs (`animate-crew-work`, motion-safe only); upcoming ones wait in grey.
+- The member at work makes a short gesture when its step starts and repeats it at intervals of
+  8 to 12 seconds: Lightning darts down, Octopus taps twice, Star twinkles with a turn, and Fire
+  flickers from its base. Upcoming members wait in grey. Replays pause while the tab is hidden.
+  Clover makes one small hop when the cuts summary sees a video finish. Shield shakes its head
+  once when processing fails. Opening a video with a known result shows its mascot at rest.
+  Reduced motion keeps the crew still.
 - **The cast** (`src/modules/videos/model/crew-lines.ts`), friendly and discreet — one short line, always
   next to the facts, never instead of them: **Nel** (brand ghost, host of empty screens), **Luna**
   (queue), **Faísca** (download), **Tinta** (transcription), **Brilho** (best moments), **Brasa**

@@ -13,6 +13,7 @@ import { VIDEO_PAGE_TABS } from "#/modules/videos/model/video-page-search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/tabs";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { useVideoTabNavigation } from "#/modules/videos/ui/hooks/use-video-tab-navigation";
+import { useVideoResultGesture } from "#/modules/videos/ui/hooks/use-video-result-gesture";
 
 interface VideoPageTabsProps {
     details: VideoDetails;
@@ -30,6 +31,7 @@ export function VideoPageTabs({ details, search }: VideoPageTabsProps): ReactNod
     const video = details.video;
     const tab = search.tab ?? "clips";
     const goTo = useVideoTabNavigation(video.id, search);
+    const failureMascot = useVideoResultGesture(video, "failed");
 
     return (
         <Tabs
@@ -71,7 +73,9 @@ export function VideoPageTabs({ details, search }: VideoPageTabsProps): ReactNod
             </TabsList>
             <TabsContent value="clips" className="grid grid-cols-[minmax(0,1fr)] gap-8">
                 {isVideoFinished(video.status) === false && <ProcessingPanel video={video} />}
-                {isVideoResumable(video.status) === true && <ResumePanel video={video} />}
+                {isVideoResumable(video.status) === true && (
+                    <ResumePanel video={video} mascotRef={failureMascot} />
+                )}
                 <VideoClipsSection details={details} />
             </TabsContent>
             <TabsContent value="original" className="min-w-0">
