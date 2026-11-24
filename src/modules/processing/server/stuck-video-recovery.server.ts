@@ -55,18 +55,24 @@ export async function requeueInterruptedVideos(): Promise<void> {
     }
 }
 
+async function findAndRequeueStuckVideos(): Promise<void> {
+    const stuckVideos = await findVideosWithoutJob();
+    await requeueOrCancel(stuckVideos);
+
+    if (stuckVideos.length > 0) {
+        logger.warn({ videoCount: stuckVideos.length }, "Stuck videos requeued");
+    }
+}
+
+/**
+ * Handled here, since pg-boss records a failed handler only on the job and logs nothing. The next
+ * scheduled run tries again.
+ */
 async function recoverStuckVideos(): Promise<void> {
     try {
-        const stuckVideos = await findVideosWithoutJob();
-        await requeueOrCancel(stuckVideos);
-
-        if (stuckVideos.length > 0) {
-            logger.warn({ videoCount: stuckVideos.length }, "Stuck videos requeued");
-        }
+        await findAndRequeueStuckVideos();
     } catch (error) {
-        // The next run tries again; the job is only marked failed.
         logger.error({ error }, "Could not recover stuck videos");
-        throw error;
     }
 }
 
