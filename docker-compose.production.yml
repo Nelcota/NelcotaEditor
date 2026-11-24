@@ -77,6 +77,19 @@ services:
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
         expose:
             - "3000"
+        # The slim Bun image has no curl or wget; Bun's fetch exits non-zero on a 503 or no answer.
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "bun",
+                    "-e",
+                    "const response = await fetch('http://localhost:3000/health', { signal: AbortSignal.timeout(4000) }); process.exit(Number(response.status !== 200))",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 30s
         depends_on:
             migrate:
                 condition: service_completed_successfully
