@@ -1,15 +1,9 @@
-import { isVideoWorking } from "#/modules/video-records/model/video-status";
-import { useQuery } from "@tanstack/react-query";
-import { videosQueryOptions } from "#/modules/videos/model/video-queries";
+import { useWorkingVideoCount } from "#/modules/shell/ui/hooks/use-working-video-count";
 
-/** True while any video is still being processed; the Vídeos tab then shows a small dot. */
+/**
+ * True while any video is still being cut (queued or at work); the Vídeos tab then shows a small
+ * dot. It counts the same videos as the desktop bell, so phone and desktop agree.
+ */
 export function useHasWorkingVideo(): boolean {
-    const videosQuery = useQuery(videosQueryOptions());
-    const videos = videosQuery.data;
-
-    if (videos === undefined) {
-        return false;
-    }
-
-    return videos.some((video) => isVideoWorking(video.status) === true);
+    return useWorkingVideoCount() > 0;
 }
