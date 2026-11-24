@@ -30,6 +30,7 @@ import { StepDialogFrame } from "#/shared/ui/step-dialog-frame";
 import { StepRail } from "#/shared/ui/step-rail";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { useSteps } from "#/shared/ui/use-steps";
+import type { Steps } from "#/shared/ui/use-steps";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 const FALLBACK_ERROR_MESSAGE = "Não foi possível adicionar o vídeo. Tente de novo.";
@@ -125,7 +126,24 @@ export function NewVideoWizard({
     };
     const { submission, uploadPercent } = useVideoSubmission();
     const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
-    const steps = useSteps(STEPS);
+    const wizardSteps = useSteps(STEPS);
+    // The last send's error is about what the review showed then; going back to change anything
+    // clears it, so the review never shows it next to a different video or settings.
+    const steps: Steps<(typeof STEPS)[number]> = {
+        ...wizardSteps,
+        goTo: (index: number): void => {
+            if (index === wizardSteps.index) {
+                return;
+            }
+
+            submission.reset();
+            wizardSteps.goTo(index);
+        },
+        goBack: (): void => {
+            submission.reset();
+            wizardSteps.goBack();
+        },
+    };
     const step = steps.current;
     const isReview = steps.index === REVIEW_INDEX;
     const isBusy = submission.isPending;

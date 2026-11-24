@@ -18,8 +18,7 @@ import {
     findOwnedVideo,
     findOwnedVideoOrNull,
 } from "#/modules/video-records/server/find-owned-video.server";
-import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
-import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
+import { assertVideoStartAllowed } from "#/modules/videos/server/video-start-limits.server";
 import {
     deleteStoppedVideo,
     requestVideoCancellation,
@@ -119,9 +118,8 @@ export const createYoutubeVideo = createServerFn({ method: "POST" })
         const title = await resolveYoutubeTitle(data.url);
 
         await runVideoStartTransaction(userId, async ({ transaction, jobDatabase }) => {
-            await assertCanStartAnotherVideo(userId, transaction);
             // The download size is unknown up front, so only an account that is already full is refused.
-            await assertStorageAvailable({ userId, incomingBytes: 0 }, transaction);
+            await assertVideoStartAllowed({ userId, incomingBytes: 0 }, transaction);
             await transaction.insert(videos).values({
                 id: videoId,
                 userId,

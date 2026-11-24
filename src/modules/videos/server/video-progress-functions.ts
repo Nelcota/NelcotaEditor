@@ -6,6 +6,7 @@ import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { isVideoWorking } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
+import { countReadyClips } from "#/modules/videos/server/video-queries.server";
 
 /** More than anyone has in the queue at once; it caps the query the poll can ask for. */
 export const MAX_WATCHED_VIDEOS = 50;
@@ -20,6 +21,8 @@ export interface VideoProgress {
     status: VideoStatus;
     progressPercent: number;
     isCancelling: boolean;
+    /** Grows while the clips render, before the stage changes. */
+    readyClipCount: number;
 }
 
 /**
@@ -39,11 +42,14 @@ export const getVideoProgress = createServerFn({ method: "GET" })
             })
             .from(videos)
             .where(and(eq(videos.userId, context.user.id), inArray(videos.id, data.videoIds)));
+        // Only the owned ids found above, so another person's clips are never counted.
+        const readyCounts = await countReadyClips(rows.map((row) => row.id));
 
         return rows.map((row) => ({
             id: row.id,
             status: row.status,
             progressPercent: row.progressPercent,
             isCancelling: row.cancelRequested && isVideoWorking(row.status),
+            readyClipCount: readyCounts.get(row.id) ?? 0,
         }));
     });

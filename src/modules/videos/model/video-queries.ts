@@ -12,14 +12,21 @@ export const VIDEOS_QUERY_KEY = ["videos"];
 // The Studio's queries (the whole transcript's words, each clip's draft) are refreshed on their
 // own when a render ends (the clip it shows comes from the video details, which do refresh).
 const STUDIO_KEY_SEGMENT = "studio";
+/** The list's progress poll, which calls invalidateVideoQueries itself when a stage changes. */
+export const PROGRESS_KEY_SEGMENT = "progress";
 
 function isRefreshedAfterChanges(queryKey: ReadonlyArray<unknown>): boolean {
-    return queryKey.includes(STUDIO_KEY_SEGMENT) === false;
+    return (
+        queryKey.includes(STUDIO_KEY_SEGMENT) === false &&
+        queryKey.includes(PROGRESS_KEY_SEGMENT) === false
+    );
 }
 
 /**
- * After a video or clip changes: refresh the lists, details, overview and usage, but not the open
- * Studio, which would download its full transcript again for a rename or a share.
+ * After a video or clip changes: refresh the lists, details, library, overview and usage, but not
+ * the open Studio, which would download its full transcript again for a rename or a share. The
+ * progress poll is left alone too: it runs on its own interval, and refetching it from inside its
+ * own fetch would cancel that fetch.
  */
 export async function invalidateVideoQueries(queryClient: QueryClient): Promise<void> {
     await queryClient.invalidateQueries({

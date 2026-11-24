@@ -1,3 +1,4 @@
+import { resolveUploadTitle } from "#/modules/videos/model/resolve-upload-title";
 import type { YoutubePreview } from "#/modules/videos/model/youtube-preview";
 import { toLinkVideoId } from "#/modules/videos/model/video-source";
 import type { VideoSource } from "#/modules/videos/model/video-source";
@@ -22,7 +23,7 @@ function describeLink(preview: YoutubePreview | undefined): PreviewText {
     return { title: preview.title, detail: `YouTube · ${channel}` };
 }
 
-/** The title the video will get: the one typed for a file, else the file name, else YouTube's. */
+/** The title the video will get: what the server stores for a file, else YouTube's. */
 export function describeNewVideoSource(
     source: VideoSource,
     title: string,
@@ -30,14 +31,11 @@ export function describeNewVideoSource(
 ): PreviewText {
     if (source.kind === "file") {
         const file = source.file;
-        const typedTitle = title.trim();
-        const detail = `Arquivo · ${formatBytes(file.size)}`;
 
-        if (typedTitle.length === 0) {
-            return { title: file.name, detail };
-        }
-
-        return { title: typedTitle, detail };
+        return {
+            title: resolveUploadTitle(file.name, title),
+            detail: `Arquivo · ${formatBytes(file.size)}`,
+        };
     }
 
     if (toLinkVideoId(source) === null) {

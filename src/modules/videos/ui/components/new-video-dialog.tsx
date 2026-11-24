@@ -64,7 +64,8 @@ function useReturnFocus(isOpen: boolean): (event: Event) => void {
 export function NewVideoDialog({ isOpen, onOpenChange }: NewVideoDialogProps): ReactNode {
     const preferencesQuery = useQuery(preferencesQueryOptions());
     // The form starts from the saved preferences; until they load, the app defaults.
-    const preferences = preferencesQuery.data ?? DEFAULT_PREFERENCES;
+    const savedPreferences = preferencesQuery.data;
+    const preferences = savedPreferences ?? DEFAULT_PREFERENCES;
     const defaultClipCount = preferences.defaultClipCount;
     const defaultClipLength = preferences.defaultClipLength;
     const defaultLanguage = preferences.transcriptionLanguage;
@@ -77,8 +78,11 @@ export function NewVideoDialog({ isOpen, onOpenChange }: NewVideoDialogProps): R
                 onCloseAutoFocus={returnFocus}
                 className={cn(STEP_DIALOG_CONTENT_CLASS, STEP_DIALOG_WIDE_CLASS)}
             >
+                {/* Closing unmounts the wizard, so each opening starts fresh. The key only restarts
+                    it when the saved preferences first arrive; a later refetch must not wipe what
+                    the person already picked or the file being sent. */}
                 <NewVideoWizard
-                    key={`${defaultClipCount}-${defaultClipLength}-${defaultLanguage}`}
+                    key={String(savedPreferences !== undefined)}
                     defaultClipCount={defaultClipCount}
                     defaultClipLength={defaultClipLength}
                     defaultLanguage={defaultLanguage}
