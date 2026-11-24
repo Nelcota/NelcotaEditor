@@ -73,7 +73,7 @@ function clock(seconds) {
 }
 
 function relative(seconds) {
-    return clock(seconds - START).replace(/^0:/, "0:");
+    return clock(seconds - START);
 }
 
 function preview(options = {}) {
@@ -395,5 +395,10 @@ const VIEWS = {
 
 const params = new URLSearchParams(location.search);
 const key = `${params.get("o") ?? "a"}-${params.get("v") ?? "desk"}`;
-document.body.innerHTML = VIEWS[key]();
+// The render comes from the pair found by comparing names, never from indexing with the text from
+// the address; anything unknown shows the first view.
+const entries = Object.entries(VIEWS);
+const entry = entries.find(([name]) => name === key) ?? entries[0];
+const render = entry[1];
+document.body.innerHTML = render();
 document.body.style.width = "fit-content";
