@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, test } from "vitest";
+import { afterEach, describe, test, vi } from "vitest";
 
 // auth.server reads the environment when it is imported; nothing here opens a database connection.
 process.env.DATABASE_URL = "postgres://test:test@127.0.0.1:1/test";
@@ -60,6 +60,53 @@ describe("raw auth routes", () => {
             assert.equal(disabledPaths.includes(path), false);
         });
     }
+});
+
+describe("sign-up honeypot", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    // The form sends the honeypot beside the fields Better Auth knows; it ignores unknown ones.
+    const botBody = {
+        name: "Bot",
+        email: "Bot@Example.com",
+        password: "senha-do-bot-123",
+        website: "https://spam.example",
+    };
+
+    // auth.api skips the rate limiter, and the unit tests reach no database: answering at all
+    // shows the sign-up stopped before storing anything.
+    test("answers a filled honeypot as a successful sign-up", async () => {
+        vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+        const result = await auth.api.signUpEmail({ body: botBody });
+
+        assert.equal(result.token, null);
+        assert.equal(result.user.email, "bot@example.com");
+    });
+
+    test("lets a sign-up with an empty honeypot through to the database", async () => {
+        const personBody = { ...botBody, website: "" };
+
+        await assert.rejects(auth.api.signUpEmail({ body: personBody }), /from "user"/);
+    });
+
+    test("logs a filled honeypot at warn", async () => {
+        const written: Array<string> = [];
+        vi.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
+            written.push(String(chunk));
+            return true;
+        });
+
+        await auth.api.signUpEmail({ body: botBody });
+
+        assert.ok(written.some((line) => line.includes('"message":"Sign-up honeypot filled"')));
+        assert.equal(
+            written.some((line) => line.includes("bot@example.com")),
+            false,
+        );
+    });
 });
 
 describe("account name hooks", () => {

@@ -39,10 +39,15 @@ import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
 import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
 import {
+    buildFakeSignUpResponse,
+    isHoneypotFilled,
+} from "#/modules/auth/server/sign-up-honeypot.server";
+import {
     AccountHasWorkingVideosError,
     deleteAccountWithFiles,
 } from "#/modules/video-records/server/delete-user-videos.server";
 import { getEnvironment, InvalidEnvironmentError } from "#/shared/server/env.server";
+import { logger } from "#/shared/server/logger.server";
 
 const MIN_SECRET_LENGTH = 32;
 const SESSION_COOKIE_CACHE_SECONDS = 5 * 60;
@@ -115,6 +120,7 @@ async function trimNameWithinLimit(fields: {
 }
 
 const DELETE_USER_PATH = "/delete-user";
+const SIGN_UP_PATH = "/sign-up/email";
 
 const deleteUserBodySchema = z.object({ password: z.string().min(1) });
 
@@ -122,16 +128,30 @@ const deleteUserBodySchema = z.object({ password: z.string().min(1) });
  * Better Auth skips the password on /delete-user when the session is under a day old, so anyone
  * at an unlocked computer could erase the account. The password is required every time.
  */
-const requirePasswordToDeleteUser = createAuthMiddleware(async (ctx) => {
-    if (ctx.path !== DELETE_USER_PATH) {
-        return;
-    }
-
-    const result = deleteUserBodySchema.safeParse(ctx.body);
+function requirePasswordToDeleteUser(body: unknown): void {
+    const result = deleteUserBodySchema.safeParse(body);
 
     if (result.success === false) {
         throw new APIError("BAD_REQUEST", { message: "Digite sua senha para excluir a conta." });
     }
+}
+
+/** Runs before the captcha plugin's hook, so a caught bot never costs a Turnstile check. */
+const runBeforeAuthHooks = createAuthMiddleware(async (ctx) => {
+    if (ctx.path === DELETE_USER_PATH) {
+        requirePasswordToDeleteUser(ctx.body);
+    }
+
+    if (ctx.path === SIGN_UP_PATH && isHoneypotFilled(ctx.body) === true) {
+        logger.warn("Sign-up honeypot filled");
+        const body = ctx.body;
+
+        return ctx.json(
+            buildFakeSignUpResponse({ body, userId: crypto.randomUUID(), now: new Date() }),
+        );
+    }
+
+    return undefined;
 });
 
 const adminPlugin = admin({
@@ -196,7 +216,7 @@ export const auth = betterAuth({
         },
     },
     hooks: {
-        before: requirePasswordToDeleteUser,
+        before: runBeforeAuthHooks,
     },
     rateLimit: AUTH_RATE_LIMIT,
     advanced: {
