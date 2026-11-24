@@ -9,7 +9,9 @@ import { Button } from "#/shared/ui/button";
 export function ImpersonationBanner(): ReactNode {
     const currentUserQuery = useQuery(currentUserQueryOptions());
     const currentUser = currentUserQuery.data;
-    const stop = useMutation({ mutationFn: stopImpersonation });
+    const stop = useMutation({ mutationFn: stopImpersonation, networkMode: "always" });
+    // On success the page is already leaving; a second click would start another switch.
+    const isSwitching = stop.isPending || stop.isSuccess;
 
     if (currentUser === null || currentUser === undefined || currentUser.isImpersonated === false) {
         return null;
@@ -33,8 +35,8 @@ export function ImpersonationBanner(): ReactNode {
             <Button
                 size="sm"
                 variant="secondary"
-                disabled={stop.isPending}
-                aria-busy={stop.isPending}
+                disabled={isSwitching}
+                aria-busy={isSwitching}
                 onClick={() => stop.mutate()}
             >
                 Voltar para minha conta

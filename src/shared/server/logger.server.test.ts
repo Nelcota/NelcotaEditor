@@ -39,14 +39,23 @@ describe("logger", () => {
         expect(JSON.stringify(readLines())).not.toContain("share-token-123");
     });
 
-    it("redacts secrets at the top level and one level down", () => {
+    it("redacts secrets up to two levels down, dashed names included", () => {
         const readLines = captureLogLines();
 
-        logger.info({ password: "hunter2", headers: { cookie: "session=abc" } }, "Signed in");
+        logger.info(
+            {
+                password: "hunter2",
+                headers: { cookie: "session=abc", "set-cookie": "session=def" },
+                request: { headers: { authorization: "Bearer xyz" } },
+            },
+            "Signed in",
+        );
 
         const serialized = JSON.stringify(readLines());
         expect(serialized).not.toContain("hunter2");
         expect(serialized).not.toContain("session=abc");
+        expect(serialized).not.toContain("session=def");
+        expect(serialized).not.toContain("Bearer xyz");
     });
 
     it("adds the request id to every line written inside its context", async () => {

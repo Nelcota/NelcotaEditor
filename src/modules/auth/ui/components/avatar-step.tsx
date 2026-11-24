@@ -10,6 +10,9 @@ import { forgetCurrentUser } from "#/modules/auth/model/current-user-query";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 
 const appRoute = getRouteApi("/_app");
+/** The profile dialog reads it to hold the person on this step until a change settles. */
+export const AVATAR_CHANGE_MUTATION_KEY = ["avatar-change"];
+
 const CHANGE_FAILED_MESSAGE =
     "Não foi possível trocar a foto. Confira sua conexão e tente de novo.";
 
@@ -32,6 +35,7 @@ export function AvatarStep(): ReactNode {
     const user = routeContext.user;
     const avatar = toAvatar(user.image);
     const change = useMutation({
+        mutationKey: AVATAR_CHANGE_MUTATION_KEY,
         mutationFn: applyAvatarChange,
         // The signed-in user lives in the route context (and its cache), so reload it to show the
         // new avatar.

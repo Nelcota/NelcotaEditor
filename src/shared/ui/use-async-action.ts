@@ -11,6 +11,9 @@ export function useAsyncAction<Input = void>(
 ): UseMutationResult<unknown, Error, Input> {
     return useMutation({
         mutationFn: action,
+        // The default "online" mode pauses the action while the browser is offline, leaving the
+        // control busy and, for a promise already started, its failure unhandled.
+        networkMode: "always",
         onError: (error) => {
             reportClientProblem("An action started by the page failed", error);
         },
