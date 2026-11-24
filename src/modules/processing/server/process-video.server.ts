@@ -4,6 +4,7 @@ import { ensureHighlights } from "#/modules/highlights/server/select-highlights.
 import { watchForCancellation } from "#/modules/processing/server/cancellation-watch.server";
 import { renderPendingClips } from "#/modules/processing/server/render-pending-clips.server";
 import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
+import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import { ensureTranscript } from "#/modules/transcription/server/transcribe-video.server";
 import { prepareVideoSource } from "#/modules/processing/server/prepare-video-source.server";
 import {
@@ -99,6 +100,7 @@ async function removeFilesOfDeletedVideo(videoId: string): Promise<void> {
     await getFileStorage().deleteFolder(getVideoDirectory(videoId));
 }
 
+const LOCKED_VIDEO_RETRY_SECONDS = 60;
 const RECORD_STOP_ATTEMPTS = 3;
 const RECORD_STOP_RETRY_DELAY_MILLISECONDS = 2_000;
 
@@ -202,14 +204,28 @@ async function runIfStillQueued(videoId: string): Promise<void> {
 }
 
 /**
- * Two workers (replicas, an overlapping restart) never process the same video at once. A job that
- * finds the lock taken ends here; if the video is still unfinished once the holder lets go, the
- * stuck video recovery queues it again.
+ * Another run holds the lock, maybe a stale one that never lets go. A job waits a while and tries
+ * again, so an unfinished video always has one; once the holder finishes it, that job is a no-op.
  */
+async function retryWhenLockIsFree(videoId: string): Promise<void> {
+    const video = await findVideoById(videoId);
+
+    if (video === null || isVideoFinished(video.status) === true) {
+        return;
+    }
+
+    await enqueueVideoProcessing(
+        { videoId, userId: video.userId, startAfterSeconds: LOCKED_VIDEO_RETRY_SECONDS },
+        null,
+    );
+    logger.info({ videoId }, "Video already processing in another run, retrying later");
+}
+
+/** Two workers (replicas, an overlapping restart) never process the same video at once. */
 export async function processVideo(videoId: string): Promise<void> {
     const hasRun = await runWithVideoProcessingLock(videoId, () => runIfStillQueued(videoId));
 
     if (hasRun === false) {
-        logger.info({ videoId }, "Video already processing in another worker");
+        await retryWhenLockIsFree(videoId);
     }
 }

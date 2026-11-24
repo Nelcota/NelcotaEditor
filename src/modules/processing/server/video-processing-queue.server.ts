@@ -46,6 +46,8 @@ export function ensureProcessVideoQueue(): Promise<void> {
 export interface VideoProcessingRequest {
     videoId: string;
     userId: string;
+    /** Seconds the job waits before a worker may take it; it starts at once when absent. */
+    startAfterSeconds?: number;
 }
 
 /**
@@ -57,6 +59,7 @@ export async function enqueueVideoProcessing(
     jobDatabase: JobDatabase | null,
 ): Promise<void> {
     const { videoId, userId } = request;
+    const startAfterSeconds = request.startAfterSeconds ?? 0;
 
     if (videoId.trim().length === 0) {
         throw new RangeError("Cannot enqueue processing for a video without an id");
@@ -64,6 +67,10 @@ export async function enqueueVideoProcessing(
 
     if (userId.trim().length === 0) {
         throw new RangeError(`Cannot enqueue processing of video ${videoId} without its owner`);
+    }
+
+    if (Number.isFinite(startAfterSeconds) === false || startAfterSeconds < 0) {
+        throw new RangeError(`Invalid start delay for video ${videoId}: ${startAfterSeconds}`);
     }
 
     await ensureProcessVideoQueue();
@@ -74,6 +81,7 @@ export async function enqueueVideoProcessing(
         singletonKey: videoId,
         group: { id: userId },
         heartbeatSeconds: JOB_HEARTBEAT_SECONDS,
+        startAfter: startAfterSeconds,
     };
 
     if (jobDatabase === null) {
