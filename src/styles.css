@@ -34,6 +34,8 @@
     --primary-ink: oklch(0.5 0.2 262);
     /* Primary button fill. */
     --primary-solid: oklch(0.56 0.2 260);
+    /* Hover darkens on white: mixing toward the page would drop white text below 4.5:1. */
+    --primary-solid-hover: oklch(0.5 0.2 260);
     --primary-foreground: oklch(1 0 0);
     --secondary: oklch(0.935 0 0);
     --secondary-foreground: var(--foreground);
@@ -92,6 +94,7 @@
     --primary: oklch(0.56 0.2 258);
     --primary-ink: oklch(0.74 0.14 255);
     --primary-solid: oklch(0.56 0.2 258);
+    --primary-solid-hover: oklch(0.5 0.18 258);
     --primary-foreground: oklch(1 0 0);
     --secondary: oklch(0.28 0 0);
     --muted: oklch(0.26 0 0);
@@ -152,6 +155,7 @@
     --color-primary: var(--primary);
     --color-primary-ink: var(--primary-ink);
     --color-primary-solid: var(--primary-solid);
+    --color-primary-solid-hover: var(--primary-solid-hover);
     --color-primary-foreground: var(--primary-foreground);
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
