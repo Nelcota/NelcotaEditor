@@ -1,4 +1,4 @@
-import { Outlet, useMatchRoute, useSearch } from "@tanstack/react-router";
+import { Outlet, useMatch, useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { AppSidebar } from "#/modules/shell/ui/components/app-sidebar";
 import { PageBar } from "#/modules/shell/ui/components/page-bar";
@@ -15,11 +15,20 @@ import { useStoredFlag } from "#/shared/ui/use-stored-flag";
 
 const SIDEBAR_HIDDEN_KEY = "nelcota:sidebar-hidden";
 
-/** The video page lays out its own columns (page and inspector) and scrolls them apart. */
-function useIsVideoPage(): boolean {
-    const matchRoute = useMatchRoute();
+const VIDEO_ROUTE_ID = "/_app/videos/$videoId";
 
-    return matchRoute({ to: "/videos/$videoId", fuzzy: true }) !== false;
+/**
+ * The video page lays out its own columns (page and inspector) and scrolls them apart. When its
+ * route fails (a missing video, an error), the page shown is the plain 404 or error screen.
+ */
+function useIsVideoPage(): boolean {
+    const status = useMatch({
+        from: VIDEO_ROUTE_ID,
+        shouldThrow: false,
+        select: (match) => match.status,
+    });
+
+    return status === "pending" || status === "success";
 }
 
 /** The Studio is an editor that needs the whole window: no sidebar, top bar or tab bar. */
