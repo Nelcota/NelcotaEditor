@@ -90,7 +90,8 @@ async function migrateDatabase(): Promise<void> {
         console.log("Job queue schema ready");
         await upsertAppRole(client, environment);
         await grantRowAccess(client, environment.APP_DATABASE_USER);
-        console.log(`Role ${environment.APP_DATABASE_USER} can read and write rows`);
+        // A fixed line: the settings object also holds the passwords.
+        console.log("App role can read and write rows");
     } finally {
         await client.end();
     }
