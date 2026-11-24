@@ -1,7 +1,7 @@
 import ArrowLeftIcon from "~icons/lucide/arrow-left";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, isNotFound } from "@tanstack/react-router";
 import type { ComponentType, ReactNode } from "react";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { VideoHeader } from "#/modules/videos/ui/components/video-header";
@@ -16,6 +16,7 @@ import type { VideoDetails } from "#/modules/videos/model/video-views";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { EmptyState } from "#/shared/ui/empty-state";
+import { NotFoundScreen } from "#/shared/ui/not-found-screen";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
@@ -152,6 +153,11 @@ interface VideoDetailsScreenProps {
 export function VideoDetailsScreen({ videoId, search, StudioTab }: VideoDetailsScreenProps) {
     const detailsQuery = useQuery(videoDetailsQueryOptions(videoId));
     const details = detailsQuery.data;
+
+    // Deleted in another tab while this page was open: the poll answers not found over old data.
+    if (isNotFound(detailsQuery.error) === true) {
+        return <NotFoundScreen />;
+    }
 
     if (detailsQuery.isError === true && details === undefined) {
         return (

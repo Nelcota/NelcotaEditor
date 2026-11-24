@@ -1,5 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
+import { isNotFound } from "@tanstack/react-router";
+import type { VideoDetails } from "#/modules/videos/model/video-views";
 import { getVideoDetails, listVideos } from "#/modules/videos/server/video-functions";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
@@ -60,19 +62,23 @@ export function videosQueryOptions() {
     });
 }
 
+/** A video deleted in another tab answers not found; asking again every 2.5 s would not bring it back. */
+export function pollVideoDetails(
+    details: VideoDetails | undefined,
+    error: unknown,
+): number | false {
+    if (details === undefined || isNotFound(error) === true) {
+        return false;
+    }
+
+    return pollWhileProcessing([details.video.status]);
+}
+
 export function videoDetailsQueryOptions(videoId: string) {
     return queryOptions({
         queryKey: [...VIDEOS_QUERY_KEY, videoId],
         queryFn: () => getVideoDetails({ data: { videoId } }),
         retry: false,
-        refetchInterval: (query) => {
-            const details = query.state.data;
-
-            if (details === undefined) {
-                return false;
-            }
-
-            return pollWhileProcessing([details.video.status]);
-        },
+        refetchInterval: (query) => pollVideoDetails(query.state.data, query.state.error),
     });
 }
