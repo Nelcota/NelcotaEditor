@@ -10,22 +10,66 @@ class SaveFailedError extends Error {
     }
 }
 
-// Long enough for the once-per-second flush to run once, twice with the second value.
-const ONE_FLUSH_MILLISECONDS = 1_300;
-const TWO_FLUSHES_MILLISECONDS = 2_400;
+// Long enough for the once-per-second flush to run once while the work is still going.
+const ONE_FLUSH_MILLISECONDS = 1_100;
+// Far below the flush interval: the stage must not wait out the rest of it.
+const MAX_FINISH_MILLISECONDS = 200;
 
 afterEach(() => {
     vi.restoreAllMocks();
 });
 
 describe("runWithProgress", () => {
+    it("ends with the work, without waiting for the next flush", async () => {
+        const startedAt = performance.now();
+
+        await runWithProgress(
+            async () => "transcript",
+            async () => undefined,
+        );
+
+        expect(performance.now() - startedAt).toBeLessThan(MAX_FINISH_MILLISECONDS);
+    });
+
+    it("saves the last reported percent when the work ends", async () => {
+        const saved: Array<number> = [];
+
+        await runWithProgress(
+            async (report) => {
+                report(30);
+                report(70);
+            },
+            async (percent) => {
+                saved.push(percent);
+            },
+        );
+
+        expect(saved).toEqual([70]);
+    });
+
+    it("saves the latest percent once per interval while the work runs", async () => {
+        const saved: Array<number> = [];
+
+        await runWithProgress(
+            async (report) => {
+                report(40);
+                await delay(ONE_FLUSH_MILLISECONDS);
+                report(80);
+            },
+            async (percent) => {
+                saved.push(percent);
+            },
+        );
+
+        expect(saved).toEqual([40, 80]);
+    });
+
     it("keeps the finished work when a progress save fails", async () => {
         vi.spyOn(logger, "warn").mockImplementation(() => undefined);
 
         const result = await runWithProgress(
             async (report) => {
                 report(50);
-                await delay(ONE_FLUSH_MILLISECONDS);
                 return "transcript";
             },
             async () => {
@@ -42,7 +86,6 @@ describe("runWithProgress", () => {
         await runWithProgress(
             async (report) => {
                 report(50);
-                await delay(ONE_FLUSH_MILLISECONDS);
             },
             async () => {
                 throw new SaveFailedError();
@@ -62,7 +105,6 @@ describe("runWithProgress", () => {
                 report(40);
                 await delay(ONE_FLUSH_MILLISECONDS);
                 report(80);
-                await delay(TWO_FLUSHES_MILLISECONDS - ONE_FLUSH_MILLISECONDS);
             },
             async (percent) => {
                 attempts += 1;
@@ -75,7 +117,7 @@ describe("runWithProgress", () => {
             },
         );
 
-        expect(saved).toContain(80);
+        expect(saved).toEqual([80]);
     });
 
     it("still rejects with the work's own failure", async () => {

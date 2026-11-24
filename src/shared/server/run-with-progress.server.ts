@@ -18,6 +18,11 @@ interface FlushLoopOptions {
     signal: AbortSignal;
 }
 
+interface FlushState {
+    savedPercent: number | null;
+    consecutiveFailures: number;
+}
+
 /** Tools print odd values now and then (NaN, 100.4); only a whole 0–100 number is saved. */
 function toSavablePercent(percent: number): number | null {
     if (Number.isFinite(percent) === false) {
@@ -47,30 +52,53 @@ function logSaveFailure(error: unknown, consecutiveFailures: number): void {
     }
 }
 
-/** Saves the latest percent once per interval until aborted; the last pass saves the final value. */
-async function flushUntilAborted(options: FlushLoopOptions): Promise<void> {
-    let savedPercent: number | null = null;
-    let consecutiveFailures = 0;
-
-    while (options.signal.aborted === false) {
-        await sleep(FLUSH_INTERVAL_MILLISECONDS);
-        const latestPercent = options.readLatestPercent();
-
-        if (latestPercent === null || latestPercent === savedPercent) {
-            continue;
+/**
+ * Resolves false as soon as the work finishes, so the stage does not wait out the rest of the
+ * interval before it can end.
+ */
+async function waitForNextFlush(signal: AbortSignal): Promise<boolean> {
+    try {
+        await sleep(FLUSH_INTERVAL_MILLISECONDS, undefined, { signal });
+        return true;
+    } catch (error) {
+        if (signal.aborted === true) {
+            return false;
         }
 
-        const saveFailure = await trySave(options, latestPercent);
-
-        if (saveFailure !== null) {
-            consecutiveFailures += 1;
-            logSaveFailure(saveFailure.error, consecutiveFailures);
-            continue;
-        }
-
-        savedPercent = latestPercent;
-        consecutiveFailures = 0;
+        throw error;
     }
+}
+
+async function flushLatestPercent(
+    options: FlushLoopOptions,
+    state: FlushState,
+): Promise<FlushState> {
+    const latestPercent = options.readLatestPercent();
+
+    if (latestPercent === null || latestPercent === state.savedPercent) {
+        return state;
+    }
+
+    const saveFailure = await trySave(options, latestPercent);
+
+    if (saveFailure !== null) {
+        const consecutiveFailures = state.consecutiveFailures + 1;
+        logSaveFailure(saveFailure.error, consecutiveFailures);
+        return { savedPercent: state.savedPercent, consecutiveFailures };
+    }
+
+    return { savedPercent: latestPercent, consecutiveFailures: 0 };
+}
+
+/** Saves the latest percent once per interval until aborted, then saves the final value once. */
+async function flushUntilAborted(options: FlushLoopOptions): Promise<void> {
+    let state: FlushState = { savedPercent: null, consecutiveFailures: 0 };
+
+    while ((await waitForNextFlush(options.signal)) === true) {
+        state = await flushLatestPercent(options, state);
+    }
+
+    await flushLatestPercent(options, state);
 }
 
 /**
