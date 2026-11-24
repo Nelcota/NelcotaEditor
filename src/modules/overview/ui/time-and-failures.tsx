@@ -24,7 +24,10 @@ interface MetricTileProps {
 }
 
 /** How the number moved, or why there is nothing to compare: the line at the foot of a tile. */
-function TileFootnote({ definition, metric }: Pick<MetricTileProps, "definition" | "metric">) {
+function TileFootnote({
+    definition,
+    metric,
+}: Pick<MetricTileProps, "definition" | "metric">): ReactNode {
     const change = describeChange(metric, {
         betterWhen: definition.betterWhen,
         isAbsolute: definition.isAbsolute,
@@ -49,7 +52,10 @@ function TileFootnote({ definition, metric }: Pick<MetricTileProps, "definition"
     );
 }
 
-function TileValue({ definition, metric }: Pick<MetricTileProps, "definition" | "metric">) {
+function TileValue({
+    definition,
+    metric,
+}: Pick<MetricTileProps, "definition" | "metric">): ReactNode {
     const value = metric.current;
 
     // An empty value reads quieter than a number, so it never looks like a fault.

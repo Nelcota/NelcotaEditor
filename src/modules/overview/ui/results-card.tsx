@@ -133,7 +133,13 @@ function ClipRanking({ clips }: { clips: Array<LibraryClip> }): ReactNode {
     );
 }
 
-function DailyClipsChart({ points, peak }: { points: Array<DailyPoint>; peak: Peak | null }) {
+function DailyClipsChart({
+    points,
+    peak,
+}: {
+    points: Array<DailyPoint>;
+    peak: Peak | null;
+}): ReactNode {
     return (
         <div className="grid gap-2">
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
