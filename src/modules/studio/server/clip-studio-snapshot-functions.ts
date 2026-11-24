@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
-import { clipStudioInputSchema } from "#/modules/clips/clip-studio.schema";
-import type { CaptionCue, StudioDraft } from "#/modules/clips/clip-studio.schema";
-import type { ClipView } from "#/modules/clips/clip-view";
+import { clipStudioInputSchema } from "#/modules/clips/model/clip-studio";
+import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
+import type { ClipView } from "#/modules/clips/model/clip-view";
 import { readStoredDraft } from "#/modules/studio/server/clip-studio.server";
 import { findClipOfVideo } from "#/modules/clips/server/find-clip-of-video.server";
 import { toClipView } from "#/modules/clips/server/clip-views.server";

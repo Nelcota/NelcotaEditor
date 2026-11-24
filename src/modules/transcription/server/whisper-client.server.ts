@@ -1,8 +1,8 @@
 import { openAsBlob } from "node:fs";
 import OpenAI, { APIConnectionError, APIError, APIUserAbortError, toFile } from "openai";
 import { z } from "zod";
-import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/transcript-word";
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/model/transcript-word";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { AUDIO_CHUNK_SECONDS } from "#/modules/transcription/server/extract-audio-chunks.server";
 import type { AudioChunk } from "#/modules/transcription/server/extract-audio-chunks.server";
 import { getEnvironment } from "#/shared/server/env.server";

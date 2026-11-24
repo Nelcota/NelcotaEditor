@@ -3,8 +3,8 @@ import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import { deleteAvatarPhotos } from "#/modules/auth/server/avatar-storage.server";
-import { isVideoWorking } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { isVideoWorking } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 
 export class AccountHasWorkingVideosError extends Error {

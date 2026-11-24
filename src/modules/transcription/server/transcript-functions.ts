@@ -3,9 +3,9 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
-import { buildTranscriptLines } from "#/modules/transcription/build-transcript-lines";
+import { buildTranscriptLines } from "#/modules/transcription/model/build-transcript-lines";
 import { transcripts } from "#/modules/transcription/transcription.schema";
-import type { TranscriptView } from "#/modules/transcription/transcript-view";
+import type { TranscriptView } from "#/modules/transcription/model/transcript-view";
 import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
 
 const transcriptInputSchema = z.object({ videoId: z.uuid() });

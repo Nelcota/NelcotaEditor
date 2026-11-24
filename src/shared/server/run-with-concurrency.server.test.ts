@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { setTimeout as delay } from "node:timers/promises";
 import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
 

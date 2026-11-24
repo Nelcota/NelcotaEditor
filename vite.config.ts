@@ -1,7 +1,9 @@
-import { defineConfig } from "vite";
-import type { Plugin } from "vite";
+import { loadEnv } from "vite";
+import type { Plugin, PluginOption } from "vite";
+import { configDefaults, defineConfig } from "vitest/config";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+import viteReact, { reactCompilerPreset } from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import icons from "unplugin-icons/vite";
@@ -62,15 +64,54 @@ function apiRequestsAreNeverAssets(): Plugin {
     };
 }
 
+/**
+ * The server, the router and the styles. Vitest imports modules straight, and Nitro's dev server
+ * would otherwise start with it and keep the run from exiting.
+ */
+function appServerPlugins(): Array<PluginOption> {
+    if (process.env.VITEST !== undefined) {
+        return [];
+    }
+
+    return [apiRequestsAreNeverAssets(), nitro({ preset: "bun" }), tailwindcss(), tanstackStart()];
+}
+
+/** Integration tests read .env.test, never .env: they write to their own database. */
+const TEST_ENVIRONMENT = loadEnv("test", process.cwd(), "");
+
 export default defineConfig({
     resolve: { tsconfigPaths: true },
+    test: {
+        projects: [
+            {
+                extends: true,
+                test: {
+                    name: "unit",
+                    include: ["src/**/*.test.{ts,tsx}"],
+                    exclude: [...configDefaults.exclude, "src/**/*.integration.test.ts"],
+                    environment: "node",
+                },
+            },
+            {
+                extends: true,
+                test: {
+                    name: "integration",
+                    include: ["src/**/*.integration.test.ts"],
+                    environment: "node",
+                    env: TEST_ENVIRONMENT,
+                    setupFiles: ["scripts/assert-test-database.ts"],
+                    // The files share one database; one at a time keeps their rows apart.
+                    fileParallelism: false,
+                },
+            },
+        ],
+    },
     server: { port: 3210, strictPort: true },
     plugins: [
-        apiRequestsAreNeverAssets(),
-        nitro(),
-        tailwindcss(),
-        tanstackStart(),
+        ...appServerPlugins(),
         viteReact(),
+        // The React Compiler memoizes components and hooks, so the code has no useMemo/useCallback.
+        babel({ presets: [reactCompilerPreset()] }),
         icons({
             compiler: "jsx",
             jsx: "react",

@@ -1,4 +1,5 @@
-import { toAuthErrorMessage } from "#/modules/auth/auth-error-message";
+import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
 
 interface AuthResult {
     error: { code?: string; status?: number } | null;
@@ -19,7 +20,7 @@ export async function runAuthRequest(request: () => Promise<AuthResult>): Promis
 
         return toAuthErrorMessage(error.code, error.status);
     } catch (error) {
-        console.warn("Auth request failed", error);
+        reportClientProblem("Auth request failed", error);
         return toAuthErrorMessage(undefined);
     }
 }

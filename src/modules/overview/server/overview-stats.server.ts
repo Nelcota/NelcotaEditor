@@ -2,15 +2,15 @@ import type {
     OverviewFunnel,
     OverviewMetrics,
     OverviewStats,
-} from "#/modules/overview/overview-views";
+} from "#/modules/overview/model/overview-views";
 import {
     bucketByDay,
     createPeriodWindow,
     findDayIndex,
     listCurrentDays,
-} from "#/modules/overview/period-buckets";
-import type { PeriodWindow } from "#/modules/overview/period-buckets";
-import { accumulate, summarizeMetric } from "#/modules/overview/summarize-metric";
+} from "#/modules/overview/model/period-buckets";
+import type { PeriodWindow } from "#/modules/overview/model/period-buckets";
+import { accumulate, summarizeMetric } from "#/modules/overview/model/summarize-metric";
 import {
     countVideos,
     listClipStatuses,
@@ -19,7 +19,7 @@ import {
 import type { OverviewVideoRow } from "#/modules/overview/server/overview-rows.server";
 import { listReadyClipsSince, toClipView } from "#/modules/clips/server/clip-views.server";
 import type { ReadyClipRow } from "#/modules/clips/server/clip-views.server";
-import type { LibraryClip } from "#/modules/videos/video-views";
+import type { LibraryClip } from "#/modules/videos/model/video-views";
 
 const BEST_CLIP_COUNT = 10;
 const SECONDS_PER_MINUTE = 60;

@@ -10,22 +10,22 @@ Turns long videos into short vertical clips (9:16) with word-by-word captions.
 
 ## Requirements
 
-- Node.js 24+
+- Bun 1.4+
 - Docker Desktop (runs PostgreSQL, Whisper and the worker with FFmpeg and yt-dlp)
 - A DeepSeek API key: https://platform.deepseek.com
 
 ## Getting started
 
 ```bash
-npm install
-npm run setup     # creates .env, starts Docker services, creates the database
+bun install
+bun run setup     # creates .env, starts Docker services, creates the database
 ```
 
 Open `.env` and paste your key into `DEEPSEEK_API_KEY`, then:
 
 ```bash
-npm run worker:restart
-npm run dev
+bun run worker:restart
+bun run dev
 ```
 
 Open http://localhost:3210, create an account and send your first video.
@@ -34,16 +34,19 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 
 ## Everyday commands
 
-| Command                               | What it does                                                   |
-| ------------------------------------- | -------------------------------------------------------------- |
-| `npm run dev`                         | Starts the web app on port 3210                                |
-| `npm run services:up`                 | Starts PostgreSQL, Whisper and the worker                      |
-| `npm run services:down`               | Stops them                                                     |
-| `npm run worker:logs`                 | Follows what the worker is doing                               |
-| `npm run worker:restart`              | Recreates the worker so it reads `.env` and code changes again |
-| `npm run services:rebuild`            | Rebuilds the worker image (yt-dlp is pinned in it)             |
-| `npm run db:generate` / `db:migrate`  | Creates / applies database migrations                          |
-| `npm run typecheck`, `lint`, `format` | Code checks                                                    |
+| Command                               | What it does                                                     |
+| ------------------------------------- | ---------------------------------------------------------------- |
+| `bun run dev`                         | Starts the web app on port 3210                                  |
+| `bun run services:up`                 | Starts PostgreSQL, Whisper and the worker                        |
+| `bun run services:down`               | Stops them                                                       |
+| `bun run worker:logs`                 | Follows what the worker is doing                                 |
+| `bun run worker:restart`              | Recreates the worker so it reads `.env` and code changes again   |
+| `bun run services:rebuild`            | Rebuilds the worker image (yt-dlp is pinned in it)               |
+| `bun run db:generate` / `db:migrate`  | Creates / applies database migrations                            |
+| `bun run typecheck`, `lint`, `format` | Code checks                                                      |
+| `bun run test`                        | Unit tests (Vitest)                                              |
+| `bun run test:integration`            | Tests against the `nelcota_test` database (`.env.test`)          |
+| `bun run test:e2e`                    | Playwright flows with an axe check, on their own app (port 3299) |
 
 ## Settings (`.env`)
 
@@ -56,7 +59,7 @@ The first transcription downloads the Whisper model (about 500 MB), so it takes 
 
 The worker container does not read the whole `.env`: `docker-compose.yml` passes it only the variables it uses
 (Whisper, DeepSeek, storage quota and concurrency). A new setting the worker needs goes there too.
-It runs as the unprivileged `node` user (uid 1000); on Linux, `./storage` must be writable by that uid
+It runs as the unprivileged `bun` user (uid 1000); on Linux, `./storage` must be writable by that uid
 (`sudo chown -R 1000:1000 storage` once, if an older root worker created files there).
 To update yt-dlp, change its version and checksum in `Dockerfile.worker`.
 
@@ -76,9 +79,10 @@ src/
     transcription/         audio extraction + Whisper
     highlights/            DeepSeek prompt and clip selection
     clips/                 captions (ASS) and rendering with FFmpeg
-    processing/            the pipeline and the worker entry point
+    processing/            the video pipeline the worker runs
   shared/                  UI kit and server infrastructure
   db/                      database client and schema index
+scripts/worker.ts          the worker entry point (runs in its container)
 ```
 
 Long steps report progress and an estimated time left, and any video can be cancelled while it's processing. Each step of the pipeline saves its result, so **Retry** on a failed video continues where it

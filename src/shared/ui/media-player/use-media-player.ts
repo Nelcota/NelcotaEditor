@@ -1,4 +1,4 @@
-import type { KeyboardEvent, RefObject } from "react";
+import type { RefObject } from "react";
 import {
     seekBy,
     seekTo,
@@ -8,24 +8,26 @@ import {
     togglePlayback,
 } from "#/shared/ui/media-player/media-commands";
 import { handleMediaShortcut } from "#/shared/ui/media-player/media-shortcuts";
+import type { ShortcutKeyEvent } from "#/shared/ui/media-player/media-shortcuts";
 import type { MediaState } from "#/shared/ui/media-player/media-state";
 import { useFullscreen } from "#/shared/ui/media-player/use-fullscreen";
 import { useIdle } from "#/shared/ui/media-player/use-idle";
 import { useMediaState } from "#/shared/ui/media-player/use-media-state";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 export interface MediaPlayer {
     media: MediaState;
     isIdle: boolean;
     isFullscreen: boolean;
     wake: () => void;
-    togglePlay: () => Promise<void>;
+    togglePlay: () => void;
     seekTo: (seconds: number) => void;
     seekBy: (deltaSeconds: number) => void;
     toggleMute: () => void;
     setVolume: (level: number) => void;
     stepRate: () => void;
-    toggleFullscreen: () => Promise<void>;
-    handleKeyDown: (event: KeyboardEvent<HTMLElement>) => Promise<void>;
+    toggleFullscreen: () => void;
+    handleKeyDown: (event: ShortcutKeyEvent) => void;
 }
 
 /**
@@ -39,6 +41,7 @@ export function useMediaPlayer(
     const media = useMediaState(videoRef);
     const idle = useIdle(media.isPlaying);
     const fullscreen = useFullscreen(containerRef, videoRef);
+    const track = useTrackPromise();
 
     const withVideo =
         <Args extends Array<unknown>>(command: (video: HTMLVideoElement, ...args: Args) => void) =>
@@ -52,7 +55,7 @@ export function useMediaPlayer(
             command(video, ...args);
         };
 
-    const togglePlay = async (): Promise<void> => {
+    const togglePlay = (): void => {
         const video = videoRef.current;
 
         if (video === null) {
@@ -60,7 +63,7 @@ export function useMediaPlayer(
         }
 
         idle.wake();
-        await togglePlayback(video);
+        track(togglePlayback(video));
     };
 
     const actions = {
@@ -70,12 +73,12 @@ export function useMediaPlayer(
         toggleMute: withVideo(toggleMute),
         setVolume: withVideo(setVolumeLevel),
         stepRate: withVideo(stepPlaybackRate),
-        toggleFullscreen: fullscreen.toggleFullscreen,
+        toggleFullscreen: () => track(fullscreen.toggleFullscreen()),
     };
 
-    const handleKeyDown = async (event: KeyboardEvent<HTMLElement>): Promise<void> => {
+    const handleKeyDown = (event: ShortcutKeyEvent): void => {
         idle.wake();
-        await handleMediaShortcut(event, actions);
+        handleMediaShortcut(event, actions);
     };
 
     return {

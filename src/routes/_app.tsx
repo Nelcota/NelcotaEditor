@@ -1,9 +1,13 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AppLayout } from "#/modules/shell/ui/app-layout";
-import { currentUserQueryOptions } from "#/modules/auth/ui/current-user-query";
-import { preferencesQueryOptions } from "#/modules/preferences/ui/preferences-queries";
-import { usageQueryOptions } from "#/modules/videos/ui/library-queries";
-import { videosQueryOptions } from "#/modules/videos/ui/video-queries";
+import type { ReactNode } from "react";
+import { AccountMenuButton } from "#/modules/auth/ui/components/account-menu-button";
+import { ImpersonationBanner } from "#/modules/auth/ui/components/impersonation-banner";
+import { AppLayout } from "#/modules/shell/ui/screens/app-layout";
+import { currentUserQueryOptions } from "#/modules/auth/model/current-user-query";
+import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
+import { usageQueryOptions } from "#/modules/videos/model/library-queries";
+import { videosQueryOptions } from "#/modules/videos/model/video-queries";
+import { VideoProgressWatcher } from "#/modules/videos/ui/components/video-progress-watcher";
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: async ({ context }) => {
@@ -30,5 +34,15 @@ export const Route = createFileRoute("/_app")({
             }),
         ]);
     },
-    component: AppLayout,
+    component: AppLayoutRoute,
 });
+
+function AppLayoutRoute(): ReactNode {
+    return (
+        <AppLayout
+            accountMenu={<AccountMenuButton />}
+            impersonationBanner={<ImpersonationBanner />}
+            videoProgressWatcher={<VideoProgressWatcher />}
+        />
+    );
+}

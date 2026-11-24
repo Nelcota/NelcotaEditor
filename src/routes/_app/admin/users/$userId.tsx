@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { DEFAULT_ADMIN_VIDEO_FILTER } from "#/modules/admin/admin-search";
-import { adminUserQueryOptions, adminVideosQueryOptions } from "#/modules/admin/ui/admin-queries";
-import { AdminUserScreen } from "#/modules/admin/ui/admin-user-screen";
+import { DEFAULT_ADMIN_VIDEO_FILTER } from "#/modules/admin/model/admin-search";
+import {
+    adminUserQueryOptions,
+    adminVideosQueryOptions,
+} from "#/modules/admin/model/admin-queries";
+import { AdminUserScreen } from "#/modules/admin/ui/screens/admin-user-screen";
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({
     head: () => ({ meta: [{ title: "Conta · Admin · Nelcota" }] }),

@@ -2,14 +2,14 @@ import { subDays } from "date-fns";
 import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import type { SQL, SQLWrapper } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import type { AdminOverview } from "#/modules/admin/admin-views";
+import type { AdminOverview } from "#/modules/admin/model/admin-views";
 import { selectAdminUserRows } from "#/modules/admin/server/admin-user-rows.server";
 import { selectAdminVideoRows } from "#/modules/admin/server/admin-video-rows.server";
 import { ADMIN_ROLE, user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
-import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 const RECENT_DAYS = 30;
 const HIGHLIGHT_ROW_COUNT = 5;

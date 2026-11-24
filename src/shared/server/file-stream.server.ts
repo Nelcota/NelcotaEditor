@@ -1,6 +1,7 @@
 import fileSystem from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
+import { logger } from "#/shared/server/logger.server";
 
 const CHUNK_SIZE_BYTES = 256 * 1024;
 
@@ -120,9 +121,12 @@ export function createFileStream(
                 await enqueueNextChunk(handle, controller);
             } catch (error) {
                 // The response has already started, so the route handler cannot log this failure.
-                console.warn(
-                    `File stream failed mid-way: ${describeFileForLog(absolutePath)}`,
-                    error,
+                logger.warn(
+                    {
+                        file: describeFileForLog(absolutePath),
+                        error,
+                    },
+                    "File stream failed mid-way",
                 );
                 // A failed read errors the stream, which never calls cancel(); close the file here.
                 await closeFile();

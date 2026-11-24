@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, test } from "node:test";
+import { describe, test } from "vitest";
 import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
 
 const VISIT_ENDS_AT = new Date("2026-11-23T15:00:00Z");

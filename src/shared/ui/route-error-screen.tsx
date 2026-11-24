@@ -4,13 +4,16 @@ import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Button } from "#/shared/ui/button";
 import { StandaloneMessageScreen } from "#/shared/ui/standalone-message-screen";
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
+import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
-/** Last resort for errors no screen handled; the details go to the console, not to the page. */
+/** Last resort for errors no screen handled; the details go to the error handlers, not to the page. */
 export function RouteErrorScreen({ error, reset }: ErrorComponentProps) {
+    const track = useTrackPromise();
     const router = useRouter();
 
     useEffect(() => {
-        console.error("Unhandled route error", error);
+        reportClientProblem("Unhandled route error", error);
     }, [error]);
 
     const retry = async (): Promise<void> => {
@@ -20,7 +23,7 @@ export function RouteErrorScreen({ error, reset }: ErrorComponentProps) {
         try {
             await router.invalidate();
         } catch (invalidateError) {
-            console.error("Could not reload the route", invalidateError);
+            reportClientProblem("Could not reload the route", invalidateError);
         }
     };
 
@@ -29,7 +32,7 @@ export function RouteErrorScreen({ error, reset }: ErrorComponentProps) {
             title="Algo deu errado"
             description="Não foi possível mostrar esta página. Tente de novo; se continuar, volte ao início."
             actions={
-                <Button onClick={retry}>
+                <Button onClick={() => track(retry())}>
                     <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </Button>

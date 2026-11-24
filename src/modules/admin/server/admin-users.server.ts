@@ -1,20 +1,20 @@
 import { and, count, desc, eq, gt, ilike, inArray, or } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import type { AdminUserListInput } from "#/modules/admin/admin-search";
-import { ADMIN_PAGE_SIZE } from "#/modules/admin/admin-search";
+import type { AdminUserListInput } from "#/modules/admin/model/admin-search";
+import { ADMIN_PAGE_SIZE } from "#/modules/admin/model/admin-search";
 import type {
     AdminSessionView,
     AdminUserDetails,
     AdminUserPage,
-} from "#/modules/admin/admin-views";
+} from "#/modules/admin/model/admin-views";
 import { selectAdminUserRows } from "#/modules/admin/server/admin-user-rows.server";
 import { toContainsPattern } from "#/modules/admin/server/like-pattern.server";
 import { session, user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
-import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 function toUserSearchCondition(query: string): SQL | undefined {

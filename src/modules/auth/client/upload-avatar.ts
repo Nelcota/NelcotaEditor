@@ -1,3 +1,4 @@
+import { reportClientProblem } from "#/shared/errors/report-client-problem";
 import { z } from "zod";
 
 const uploadSuccessSchema = z.object({ image: z.string() });
@@ -20,7 +21,7 @@ async function readJson(response: Response): Promise<unknown> {
         return parsed;
     } catch (error) {
         // A proxy error page is not JSON; the caller then shows the generic message.
-        console.warn("Avatar upload answered with a body that is not JSON", error);
+        reportClientProblem("Avatar upload answered with a body that is not JSON", error);
         return null;
     }
 }
@@ -30,7 +31,7 @@ async function sendAvatar(file: File): Promise<Response> {
         return await fetch(AVATAR_UPLOAD_URL, { method: "POST", body: file });
     } catch (error) {
         // Offline or the connection dropped: the browser's own message is not for people.
-        console.warn("Avatar upload request failed", error);
+        reportClientProblem("Avatar upload request failed", error);
         throw new AvatarUploadError(UNKNOWN_ERROR_MESSAGE);
     }
 }

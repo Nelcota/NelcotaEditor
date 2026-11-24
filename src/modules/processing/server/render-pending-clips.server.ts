@@ -1,11 +1,12 @@
 import { renderClip, setClipStatus } from "#/modules/clips/server/render-clip.server";
 import type { Clip } from "#/modules/clips/clips.schema";
-import { toOverallPercent } from "#/modules/processing/processing-stages";
+import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import { runLanesToTheEnd } from "#/modules/processing/server/run-lanes-to-the-end.server";
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
+import { logger } from "#/shared/server/logger.server";
 
 /** Clips rendered at once; ffmpeg already uses several cores, so more lanes stop paying off. */
 const RENDER_CONCURRENCY = 2;
@@ -39,7 +40,7 @@ async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promis
         }
 
         // One broken clip should not throw away the others; it is marked as failed instead.
-        console.error(`Failed to render clip ${clip.id} of video ${videoId}`, error);
+        logger.error({ clipId: clip.id, videoId, error }, "Failed to render clip");
         await setClipStatus(clip.id, "failed");
         return false;
     }

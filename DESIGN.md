@@ -80,8 +80,8 @@ Each drawing has one meaning only:
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
-  (`src/modules/videos/video-mascot.ts`). Gallery cards and the video header.
-- **Objects (16–31) are the crew**, one per stage (`src/modules/videos/stage-crew.ts`):
+  (`src/modules/videos/model/video-mascot.ts`). Gallery cards and the video header.
+- **Objects (16–31) are the crew**, one per stage (`src/modules/videos/model/stage-crew.ts`):
 
 | Stage        | Crew      | Why                                                                |
 | ------------ | --------- | ------------------------------------------------------------------ |
@@ -97,7 +97,7 @@ Each drawing has one meaning only:
 - The crew appears in the processing panel, the failed/cancelled panels, clip placeholders and
   empty/error states. It is decorative: the stage is always written next to it.
 - The member at work bobs (`animate-crew-work`, motion-safe only); upcoming ones wait in grey.
-- **The cast** (`src/modules/videos/crew-lines.ts`), friendly and discreet — one short line, always
+- **The cast** (`src/modules/videos/model/crew-lines.ts`), friendly and discreet — one short line, always
   next to the facts, never instead of them: **Nel** (brand ghost, host of empty screens), **Luna**
   (queue), **Faísca** (download), **Tinta** (transcription), **Brilho** (best moments), **Brasa**
   (clips), **Sorte** (done), **Guarda** (failed), **Cogu** (cancelled).
@@ -247,3 +247,4 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-21 | Layout rebuilt from scratch, direction B "Topo" (board `design/explore/rebuild/index.html`): no sidebar; one top bar with the sections, "Novo vídeo" and the account; phone tab bar with a central "Novo vídeo"; 12-column page; videos as a 16:9 cover gallery with the state on the cover; Cortes as a 9:16 grid; video page 8 + 4 with the clips panel beside the original; neutral tokens replace the landing system (no lavender, eyebrows, grid backdrop or gradient button); "Início" is now "Vídeos" | The person asked to stop copying the landing and redo the whole layout; picked B from three directions |
 | 2026-11-21 | Layout rebuilt again, direction A "Mesa" (same board): icon rail, video list pane fixed beside the open video, Cortes · Original · Studio tabs, ink primary button over a warm grey frame; replaces direction B's top bar and gallery | The person picked A from the three directions after seeing B shipped |
 | 2026-11-21 | The window design from the owner's reference replaces direction A's rail and list pane: grey frame with a top bar of open-video tabs and a sidebar (search, sections with counts, videos, person), one white rounded panel, and an inspector with grouped cards on the video page | The person sent the reference and asked to redo everything to match it |
+| 2026-11-24 | Primary fill (`primary`, `primary-solid`) darkened to `oklch(0.56 0.2 260)` light and `oklch(0.56 0.2 258)` dark | The axe check in the end-to-end tests measured white text on the blue at 4.39:1 and 4.03:1; AA needs 4.5:1 |

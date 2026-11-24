@@ -3,9 +3,9 @@ import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
-import { isVideoWorking } from "#/modules/video-records/video-status";
-import type { VideoStatus } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { isVideoWorking } from "#/modules/video-records/model/video-status";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 /** More than anyone has in the queue at once; it caps the query the poll can ask for. */
 export const MAX_WATCHED_VIDEOS = 50;

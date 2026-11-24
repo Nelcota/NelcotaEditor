@@ -1,5 +1,5 @@
 import { imageSize } from "image-size";
-import type { AvatarPhotoExtension } from "#/modules/auth/avatar";
+import type { AvatarPhotoExtension } from "#/modules/auth/model/avatar";
 import { logger } from "#/shared/server/logger.server";
 
 /**
@@ -22,7 +22,7 @@ function readHeader(bytes: Uint8Array): { type: string; size: PhotoSize } | null
         return { type, size: { width: result.width, height: result.height } };
     } catch (error) {
         // A header image-size cannot read is refused like any other unreadable photo.
-        logger.warn("Could not read the avatar photo header", { error });
+        logger.warn({ error }, "Could not read the avatar photo header");
         return null;
     }
 }

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
-import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/preferences";
+import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/model/preferences";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import {
     countReadyClips,
@@ -26,17 +26,17 @@ import {
     MAX_CLIP_COUNT,
     MIN_CLIP_COUNT,
     isVideoResumable,
-} from "#/modules/video-records/video-status";
-import type { VideoDetails, VideoSummary } from "#/modules/videos/video-views";
-import { toStoredVideoTitle } from "#/modules/video-records/video-title";
-import { videos } from "#/modules/video-records/videos.schema";
-import { CLIP_LENGTHS } from "#/modules/video-records/clip-length";
+} from "#/modules/video-records/model/video-status";
+import type { VideoDetails, VideoSummary } from "#/modules/videos/model/video-views";
+import { toStoredVideoTitle } from "#/modules/video-records/model/video-title";
+import { videos } from "#/modules/video-records/video-records.schema";
+import { CLIP_LENGTHS } from "#/modules/video-records/model/clip-length";
 import { fetchYoutubePreview } from "#/modules/videos/server/fetch-youtube-preview.server";
 import {
     toCanonicalYoutubeUrl,
     toYoutubeVideoId,
     youtubeUrlSchema,
-} from "#/modules/videos/youtube-url";
+} from "#/modules/videos/model/youtube-url";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const videoIdInputSchema = z.object({ videoId: z.uuid() });

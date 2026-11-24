@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execa } from "execa";
+import { prepareTestDatabase } from "./prepare-test-database";
 
 const ENV_FILE = ".env";
 const ENV_EXAMPLE_FILE = ".env.example";
@@ -70,10 +71,10 @@ function printNextSteps(): void {
         console.info(
             "\n!! Falta a chave da DeepSeek: abra o arquivo .env e preencha DEEPSEEK_API_KEY.",
         );
-        console.info("   Depois rode: npm run worker:restart");
+        console.info("   Depois rode: bun run worker:restart");
     }
 
-    console.info(`\nAgora rode \`npm run local\` e abra ${APP_URL}`);
+    console.info(`\nAgora rode \`bun run local\` e abra ${APP_URL}`);
 }
 
 createEnvFile();
@@ -91,7 +92,8 @@ await runStep("Starting PostgreSQL and Whisper", "docker", [
     "postgres",
     "whisper",
 ]);
-await runStep("Applying database migrations", "npx", ["drizzle-kit", "migrate"]);
+await runStep("Applying database migrations", "bunx", ["drizzle-kit", "migrate"]);
+await prepareTestDatabase();
 await runStep("Building and starting the worker", "docker", [
     "compose",
     "up",

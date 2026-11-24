@@ -1,9 +1,10 @@
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { measureFileBytes } from "#/shared/server/directory-size.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
+import { logger } from "#/shared/server/logger.server";
 
 async function backfillSourceBytes(): Promise<number> {
     const missing = await db
@@ -55,6 +56,6 @@ export async function backfillStoredBytes(): Promise<void> {
     const outputCount = await backfillOutputBytes();
 
     if (sourceCount + outputCount > 0) {
-        console.info(`Stored the size of ${sourceCount} source(s) and ${outputCount} clip(s).`);
+        logger.info({ sourceCount, outputCount }, "Stored file sizes backfilled");
     }
 }

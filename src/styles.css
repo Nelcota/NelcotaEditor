@@ -30,11 +30,11 @@
     --popover: oklch(1 0 0);
     --popover-foreground: var(--foreground);
     /* Dark enough that white text on it keeps 4.5:1. */
-    --primary: oklch(0.58 0.2 260);
+    --primary: oklch(0.56 0.2 260);
     /* Blue text and links: darker than the fill so small text keeps 4.5:1 on white. */
     --primary-ink: oklch(0.5 0.2 262);
     /* Primary button fill. */
-    --primary-solid: oklch(0.58 0.2 260);
+    --primary-solid: oklch(0.56 0.2 260);
     --primary-foreground: oklch(1 0 0);
     --secondary: oklch(0.935 0 0);
     --secondary-foreground: var(--foreground);
@@ -90,9 +90,9 @@
     --inspector: oklch(0.2 0 0);
     --card: oklch(0.245 0 0);
     --popover: oklch(0.255 0 0);
-    --primary: oklch(0.6 0.2 258);
+    --primary: oklch(0.56 0.2 258);
     --primary-ink: oklch(0.74 0.14 255);
-    --primary-solid: oklch(0.6 0.2 258);
+    --primary-solid: oklch(0.56 0.2 258);
     --primary-foreground: oklch(1 0 0);
     --secondary: oklch(0.28 0 0);
     --muted: oklch(0.26 0 0);

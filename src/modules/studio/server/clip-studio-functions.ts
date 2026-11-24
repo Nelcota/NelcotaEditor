@@ -6,13 +6,13 @@ import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { z } from "zod";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
-import type { CaptionWord, StudioDraft } from "#/modules/clips/clip-studio.schema";
+import type { CaptionWord, StudioDraft } from "#/modules/clips/model/clip-studio";
 import {
     renderClipDraftInputSchema,
     saveClipDraftInputSchema,
-} from "#/modules/clips/clip-studio.schema";
+} from "#/modules/clips/model/clip-studio";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
-import type { RenderDraftResult, SaveDraftResult } from "#/modules/studio/clip-studio-view";
+import type { RenderDraftResult, SaveDraftResult } from "#/modules/studio/model/clip-studio-view";
 import {
     assertDraftFitsVideo,
     assertVideoEditable,
@@ -30,6 +30,7 @@ import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { resolveStoragePath } from "#/shared/server/storage.server";
+import { logger } from "#/shared/server/logger.server";
 
 const studioWordsInputSchema = z.object({ videoId: z.uuid() });
 
@@ -138,7 +139,7 @@ async function removeOldOutput(clip: Clip): Promise<void> {
     try {
         await rm(resolveStoragePath(outputPath), { force: true });
     } catch (error) {
-        console.error(`Failed to remove the previous file of clip ${clip.id}`, error);
+        logger.error({ clipId: clip.id, error }, "Failed to remove the previous clip file");
     }
 }
 

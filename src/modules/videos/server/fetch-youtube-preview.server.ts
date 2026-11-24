@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { toYoutubeThumbnailUrl } from "#/modules/videos/youtube-preview";
-import type { YoutubePreview } from "#/modules/videos/youtube-preview";
-import { YOUTUBE_VIDEO_ID_PATTERN } from "#/modules/videos/youtube-url";
+import { toYoutubeThumbnailUrl } from "#/modules/videos/model/youtube-preview";
+import type { YoutubePreview } from "#/modules/videos/model/youtube-preview";
+import { YOUTUBE_VIDEO_ID_PATTERN } from "#/modules/videos/model/youtube-url";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import {
     HTTP_BAD_REQUEST,

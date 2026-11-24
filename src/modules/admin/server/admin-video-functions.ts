@@ -1,8 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { adminVideoIdInputSchema, adminVideoListInputSchema } from "#/modules/admin/admin-search";
-import type { AdminOverview, AdminVideoPage } from "#/modules/admin/admin-views";
+import {
+    adminVideoIdInputSchema,
+    adminVideoListInputSchema,
+} from "#/modules/admin/model/admin-search";
+import type { AdminOverview, AdminVideoPage } from "#/modules/admin/model/admin-views";
 import { adminMiddleware } from "#/modules/admin/server/admin-middleware";
 import { summarizeAdminOverview } from "#/modules/admin/server/admin-overview.server";
 import { listAdminVideos } from "#/modules/admin/server/admin-video-rows.server";
@@ -11,7 +14,7 @@ import {
     deleteStoppedVideo,
     requestVideoCancellation,
 } from "#/modules/video-records/server/stop-video.server";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 /** The owner goes into the admin audit log next to the video. */

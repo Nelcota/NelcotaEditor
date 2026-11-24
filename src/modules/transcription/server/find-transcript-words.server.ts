@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { transcripts } from "#/modules/transcription/transcription.schema";
 
 /**

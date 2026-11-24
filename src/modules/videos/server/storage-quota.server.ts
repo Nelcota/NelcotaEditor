@@ -3,7 +3,7 @@ import {
     getStorageQuotaBytes,
     measureUserStorage,
 } from "#/modules/videos/server/usage-summary.server";
-import { StorageQuotaExceededError } from "#/modules/videos/storage-quota-exceeded-error";
+import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
 
 interface StorageRequest {
     userId: string;

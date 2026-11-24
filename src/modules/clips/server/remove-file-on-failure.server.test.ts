@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { access, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { after, describe, it } from "node:test";
+import { afterAll, describe, it } from "vitest";
 import { removeFileOnFailure } from "#/modules/clips/server/remove-file-on-failure.server";
 
 class RenderFailedError extends Error {
@@ -14,7 +14,7 @@ class RenderFailedError extends Error {
 
 const directory = await mkdtemp(path.join(tmpdir(), "remove-file-on-failure-"));
 
-after(async () => {
+afterAll(async () => {
     await rm(directory, { recursive: true, force: true });
 });
 

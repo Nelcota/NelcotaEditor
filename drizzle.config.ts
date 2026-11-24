@@ -6,7 +6,7 @@ config({ path: ".env", quiet: true });
 const databaseUrl = process.env.DATABASE_URL;
 
 if (databaseUrl === undefined) {
-    throw new Error("DATABASE_URL is missing. Run `npm run setup` first.");
+    throw new Error("DATABASE_URL is missing. Run `bun run setup` first.");
 }
 
 export default defineConfig({

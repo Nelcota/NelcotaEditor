@@ -1,4 +1,4 @@
-import type { RenderDraftResult } from "#/modules/studio/clip-studio-view";
+import type { RenderDraftResult } from "#/modules/studio/model/clip-studio-view";
 
 /**
  * Requeues the clip and only then removes its previous file. A failed or conflicting requeue

@@ -1,14 +1,14 @@
 import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import type { AdminVideoFilter, AdminVideoListInput } from "#/modules/admin/admin-search";
-import { ADMIN_PAGE_SIZE } from "#/modules/admin/admin-search";
-import type { AdminVideoPage, AdminVideoRow } from "#/modules/admin/admin-views";
+import type { AdminVideoFilter, AdminVideoListInput } from "#/modules/admin/model/admin-search";
+import { ADMIN_PAGE_SIZE } from "#/modules/admin/model/admin-search";
+import type { AdminVideoPage, AdminVideoRow } from "#/modules/admin/model/admin-views";
 import { toContainsPattern } from "#/modules/admin/server/like-pattern.server";
 import { user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
-import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 // Correlated subqueries instead of a join on a whole-table aggregate: Postgres evaluates them only for
 // the rows that survive ORDER BY and LIMIT, so a page reads its own videos' clips, not every clip.

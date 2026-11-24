@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { TranscriptionLanguage } from "#/modules/preferences/preferences";
-import type { ClipLength } from "#/modules/video-records/clip-length";
+import type { TranscriptionLanguage } from "#/modules/preferences/model/preferences";
+import type { ClipLength } from "#/modules/video-records/model/clip-length";
 
 const uploadSuccessSchema = z.object({ videoId: z.uuid() });
 const uploadFailureSchema = z.object({ error: z.string() });

@@ -1,11 +1,11 @@
 import { count, desc, eq, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { readPhotoExtension } from "#/modules/auth/avatar";
+import { readPhotoExtension } from "#/modules/auth/model/avatar";
 import { ADMIN_ROLE, user } from "#/modules/auth/auth.schema";
-import type { AdminUserRow } from "#/modules/admin/admin-views";
+import type { AdminUserRow } from "#/modules/admin/model/admin-views";
 import { clips } from "#/modules/clips/clips.schema";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 // A page in signup order reads only its own users' videos and clips: Postgres evaluates these
 // correlated subqueries after ORDER BY and LIMIT, so they run once per row shown.

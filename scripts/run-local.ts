@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { execa } from "execa";
+import { prepareTestDatabase } from "./prepare-test-database";
 
 // Everything "run it locally" needs, in order: Docker up, services up, schema current, worker
 // rebuilt from the current code, then the dev server. Each step is safe to run again.
@@ -30,7 +31,7 @@ async function isDockerRunning(): Promise<boolean> {
 
 async function startDockerDesktop(): Promise<void> {
     if (process.platform !== "win32" || existsSync(DOCKER_DESKTOP_PATH) === false) {
-        throw new RunLocalError("Docker is not running. Start it and run `npm run local` again.");
+        throw new RunLocalError("Docker is not running. Start it and run `bun run local` again.");
     }
 
     console.info("\n> Starting Docker Desktop");
@@ -68,7 +69,8 @@ await runStep("Starting PostgreSQL and Whisper", "docker", [
     "postgres",
     "whisper",
 ]);
-await runStep("Applying database migrations", "npx", ["drizzle-kit", "migrate"]);
+await runStep("Applying database migrations", "bunx", ["drizzle-kit", "migrate"]);
+await prepareTestDatabase();
 // Docker's layer cache makes this quick when the worker code has not changed.
 await runStep("Building and starting the worker", "docker", [
     "compose",
@@ -77,4 +79,4 @@ await runStep("Building and starting the worker", "docker", [
     "--build",
     "worker",
 ]);
-await runStep("Starting the dev server", "npx", ["vite", "dev"]);
+await runStep("Starting the dev server", "bun", ["run", "dev"]);

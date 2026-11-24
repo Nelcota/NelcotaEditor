@@ -2,8 +2,8 @@ import { rm } from "node:fs/promises";
 import { and, eq, notInArray, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { canMoveVideoTo } from "#/modules/video-records/server/video-progress.server";
-import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 

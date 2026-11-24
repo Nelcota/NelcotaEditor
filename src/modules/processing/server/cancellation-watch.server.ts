@@ -1,3 +1,4 @@
+import { setInterval } from "node:timers/promises";
 import { isFailureWorthLogging } from "#/modules/processing/server/failure-log-throttle";
 import { isCancelRequested } from "#/modules/video-records/server/video-progress.server";
 import { logger } from "#/shared/server/logger.server";
@@ -13,7 +14,58 @@ export class VideoCancelledError extends Error {
 
 export interface CancellationWatch {
     signal: AbortSignal;
-    stop: () => void;
+    /** Ends the polling and waits for a check still in flight. */
+    stop: () => Promise<void>;
+}
+
+interface PollTarget {
+    videoId: string;
+    controller: AbortController;
+}
+
+/** One poll; a failed check is logged (throttled) and the next tick tries again. */
+async function checkOnce(target: PollTarget, consecutiveFailures: number): Promise<number> {
+    const { videoId, controller } = target;
+
+    try {
+        if ((await isCancelRequested(videoId)) === true) {
+            controller.abort(new VideoCancelledError(videoId));
+        }
+
+        logRecovery(videoId, consecutiveFailures);
+        return 0;
+    } catch (error) {
+        const failures = consecutiveFailures + 1;
+        logFailure(videoId, failures, error);
+        return failures;
+    }
+}
+
+/** Each check finishes before the next tick, so a slow database never piles up queries. */
+async function pollTicks(ticks: AsyncIterable<PollTarget>): Promise<void> {
+    let consecutiveFailures = 0;
+
+    for await (const target of ticks) {
+        if (target.controller.signal.aborted === true) {
+            return;
+        }
+
+        consecutiveFailures = await checkOnce(target, consecutiveFailures);
+    }
+}
+
+async function pollUntilStopped(target: PollTarget, stopSignal: AbortSignal): Promise<void> {
+    const ticks = setInterval(POLL_INTERVAL_MILLISECONDS, target, { signal: stopSignal });
+
+    try {
+        await pollTicks(ticks);
+    } catch (error) {
+        if (stopSignal.aborted === true) {
+            return;
+        }
+
+        throw error;
+    }
 }
 
 /**
@@ -26,41 +78,15 @@ export function watchForCancellation(videoId: string): CancellationWatch {
     }
 
     const controller = new AbortController();
-    const signal = controller.signal;
-    let isChecking = false;
-    let consecutiveFailures = 0;
+    const stopController = new AbortController();
+    const polling = pollUntilStopped({ videoId, controller }, stopController.signal);
 
-    const check = async (): Promise<void> => {
-        if ((await isCancelRequested(videoId)) === true) {
-            controller.abort(new VideoCancelledError(videoId));
-        }
+    const stop = async (): Promise<void> => {
+        stopController.abort();
+        await polling;
     };
 
-    const checkInBackground = async (): Promise<void> => {
-        // A slow database must not pile up overlapping queries for the same video.
-        if (isChecking === true || signal.aborted === true) {
-            return;
-        }
-
-        isChecking = true;
-
-        try {
-            await check();
-            logRecovery(videoId, consecutiveFailures);
-            consecutiveFailures = 0;
-        } catch (error) {
-            consecutiveFailures += 1;
-            logFailure(videoId, consecutiveFailures, error);
-        } finally {
-            isChecking = false;
-        }
-    };
-
-    const timer = setInterval(() => {
-        void checkInBackground();
-    }, POLL_INTERVAL_MILLISECONDS);
-
-    return { signal, stop: () => clearInterval(timer) };
+    return { signal: controller.signal, stop };
 }
 
 function logFailure(videoId: string, consecutiveFailures: number, error: unknown): void {
@@ -68,7 +94,7 @@ function logFailure(videoId: string, consecutiveFailures: number, error: unknown
         return;
     }
 
-    logger.error("Could not check video cancellation", { videoId, consecutiveFailures, error });
+    logger.error({ videoId, consecutiveFailures, error }, "Could not check video cancellation");
 }
 
 function logRecovery(videoId: string, consecutiveFailures: number): void {
@@ -76,5 +102,5 @@ function logRecovery(videoId: string, consecutiveFailures: number): void {
         return;
     }
 
-    logger.info("Video cancellation check recovered", { videoId, consecutiveFailures });
+    logger.info({ videoId, consecutiveFailures }, "Video cancellation check recovered");
 }

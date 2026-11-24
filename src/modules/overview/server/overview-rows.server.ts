@@ -3,9 +3,9 @@ import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { transcripts } from "#/modules/transcription/transcription.schema";
-import { FINISHED_VIDEO_STATUSES } from "#/modules/video-records/video-status";
-import type { VideoStatus } from "#/modules/video-records/video-status";
-import { videos } from "#/modules/video-records/videos.schema";
+import { FINISHED_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
+import { videos } from "#/modules/video-records/video-records.schema";
 
 export interface OverviewVideoRow {
     id: string;

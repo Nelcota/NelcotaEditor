@@ -1,7 +1,7 @@
 import { mkdir, open, rm } from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
-import { MAX_UPLOAD_BYTES } from "#/modules/video-records/upload-limits";
+import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 
 const SOURCE_FILE_NAME = "source";

@@ -1,8 +1,8 @@
 import { and, count, eq, gte, sum } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
-import type { StorageUsage, UsageSummary } from "#/modules/videos/video-views";
-import { videos } from "#/modules/video-records/videos.schema";
+import type { StorageUsage, UsageSummary } from "#/modules/videos/model/video-views";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 import { startOfBusinessMonth } from "#/shared/server/business-time-zone";
 

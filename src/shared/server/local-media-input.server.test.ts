@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 
 const SOURCE_PATH = "/app/storage/videos/0b6e4d0a-2f7c-4a4e-9a51-3f4d1c2b7e10/source.mp4";

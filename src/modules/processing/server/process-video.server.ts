@@ -6,7 +6,7 @@ import { renderPendingClips } from "#/modules/processing/server/render-pending-c
 import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
 import { ensureTranscript } from "#/modules/transcription/server/transcribe-video.server";
 import { prepareVideoSource } from "#/modules/processing/server/prepare-video-source.server";
-import { toOverallPercent } from "#/modules/processing/processing-stages";
+import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import {
     findVideoById,
     markVideoCancelled,
@@ -14,10 +14,11 @@ import {
     markVideoFailed,
     updateVideoStage,
 } from "#/modules/video-records/server/video-progress.server";
-import { isVideoFinished } from "#/modules/video-records/video-status";
-import type { VideoStatus } from "#/modules/video-records/video-status";
+import { isVideoFinished } from "#/modules/video-records/model/video-status";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { toUserMessage } from "#/shared/server/user-facing-error";
+import { logger } from "#/shared/server/logger.server";
 
 /**
  * Stages report their own progress (0 to 100); the pipeline owns how that maps onto the whole run,
@@ -115,12 +116,12 @@ async function tryWriteStop(
  */
 async function recordStop(videoId: string, error: unknown, signal: AbortSignal): Promise<void> {
     if (signal.aborted === true) {
-        console.info(`Video ${videoId} was cancelled.`);
+        logger.info({ videoId }, "Video cancelled");
     }
 
     if (signal.aborted === false) {
         // The failure is recorded on the video so the user sees it and can retry.
-        console.error(`Failed to process video ${videoId}`, error);
+        logger.error({ videoId, error }, "Failed to process video");
     }
 
     for (let attempt = 1; attempt <= RECORD_STOP_ATTEMPTS; attempt += 1) {
@@ -130,9 +131,14 @@ async function recordStop(videoId: string, error: unknown, signal: AbortSignal):
             return;
         }
 
-        console.error(
-            `Could not record the stop of video ${videoId} (attempt ${attempt} of ${RECORD_STOP_ATTEMPTS})`,
-            writeError,
+        logger.error(
+            {
+                videoId,
+                attempt,
+                maxAttempts: RECORD_STOP_ATTEMPTS,
+                error: writeError,
+            },
+            "Could not record the video stop",
         );
 
         if (attempt === RECORD_STOP_ATTEMPTS) {
@@ -151,7 +157,7 @@ async function runAndRecord(videoId: string): Promise<void> {
     } catch (error) {
         await recordStop(videoId, error, cancellation.signal);
     } finally {
-        cancellation.stop();
+        await cancellation.stop();
     }
 
     await removeFilesOfDeletedVideo(videoId);
@@ -162,6 +168,6 @@ export async function processVideo(videoId: string): Promise<void> {
     const hasRun = await runWithVideoProcessingLock(videoId, () => runAndRecord(videoId));
 
     if (hasRun === false) {
-        console.info(`Video ${videoId} is already being processed by another worker; skipping.`);
+        logger.info({ videoId }, "Video already processing in another worker");
     }
 }

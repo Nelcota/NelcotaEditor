@@ -2,21 +2,21 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { buildAssSubtitles } from "#/modules/clips/build-ass-subtitles";
+import { buildAssSubtitles } from "#/modules/clips/model/build-ass-subtitles";
 import {
     groupWordsIntoCues,
     toClipRelativeCues,
     wordsInsideRange,
-} from "#/modules/clips/caption-cues";
-import type { CaptionCue } from "#/modules/clips/clip-studio.schema";
-import { ASPECT_RATIO_SIZES } from "#/modules/clips/clip-format";
-import { buildClipOutputFileName } from "#/modules/clips/clip-output-file";
-import { buildRenderedClipUpdate } from "#/modules/clips/rendered-clip-update";
-import type { AspectRatio } from "#/modules/clips/clip-format";
-import type { ClipStatus } from "#/modules/clips/clip-status";
+} from "#/modules/clips/model/caption-cues";
+import type { CaptionCue } from "#/modules/clips/model/clip-studio";
+import { ASPECT_RATIO_SIZES } from "#/modules/clips/model/clip-format";
+import { buildClipOutputFileName } from "#/modules/clips/model/clip-output-file";
+import { buildRenderedClipUpdate } from "#/modules/clips/model/rendered-clip-update";
+import type { AspectRatio } from "#/modules/clips/model/clip-format";
+import type { ClipStatus } from "#/modules/clips/model/clip-status";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
-import type { TranscriptWord } from "#/modules/transcription/transcript-word";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { measureFileBytes } from "#/shared/server/directory-size.server";
 import { removeFileOnFailure } from "#/modules/clips/server/remove-file-on-failure.server";
 import { localFileInput } from "#/shared/server/local-media-input.server";

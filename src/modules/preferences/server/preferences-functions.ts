@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
-import { preferencesSchema } from "#/modules/preferences/preferences";
-import type { Preferences } from "#/modules/preferences/preferences";
+import { preferencesSchema } from "#/modules/preferences/model/preferences";
+import type { Preferences } from "#/modules/preferences/model/preferences";
 import { userPreferences } from "#/modules/preferences/preferences.schema";
 import { findPreferences } from "#/modules/preferences/server/find-preferences.server";
 

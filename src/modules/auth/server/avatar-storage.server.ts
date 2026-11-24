@@ -2,8 +2,8 @@ import { readFile, rm, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { AVATAR_PHOTO_EXTENSIONS } from "#/modules/auth/avatar";
-import type { AvatarPhotoExtension } from "#/modules/auth/avatar";
+import { AVATAR_PHOTO_EXTENSIONS } from "#/modules/auth/model/avatar";
+import type { AvatarPhotoExtension } from "#/modules/auth/model/avatar";
 import { user } from "#/modules/auth/auth.schema";
 import { resolveStoragePath } from "#/shared/server/storage.server";
 

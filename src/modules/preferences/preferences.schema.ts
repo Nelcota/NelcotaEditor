@@ -1,13 +1,13 @@
 import { sql } from "drizzle-orm";
 import { check, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "#/modules/auth/auth.schema";
-import { DEFAULT_CLIP_LENGTH } from "#/modules/video-records/clip-length";
-import { clipLengthEnum } from "#/modules/video-records/videos.schema";
+import { DEFAULT_CLIP_LENGTH } from "#/modules/video-records/model/clip-length";
+import { clipLengthEnum } from "#/modules/video-records/video-records.schema";
 import {
     DEFAULT_CLIP_COUNT,
     MAX_CLIP_COUNT,
     MIN_CLIP_COUNT,
-} from "#/modules/video-records/video-status";
+} from "#/modules/video-records/model/video-status";
 
 /** One row per user, created on first save; missing rows mean the defaults. */
 export const userPreferences = pgTable(

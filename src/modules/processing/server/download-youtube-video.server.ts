@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/video-status";
-import type { Video } from "#/modules/video-records/videos.schema";
+import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/model/video-status";
+import type { Video } from "#/modules/video-records/video-records.schema";
 import { CommandFailedError, runCommand } from "#/shared/server/run-command.server";
 import { getVideoDirectory, resolveStoragePath } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";

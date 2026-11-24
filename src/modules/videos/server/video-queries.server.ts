@@ -1,12 +1,12 @@
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
-import { isOriginalPlayable, isVideoWorking } from "#/modules/video-records/video-status";
-import { toYoutubeThumbnailUrl } from "#/modules/videos/youtube-preview";
-import { toYoutubeVideoId } from "#/modules/videos/youtube-url";
-import type { VideoSummary } from "#/modules/videos/video-views";
-import { videos } from "#/modules/video-records/videos.schema";
-import type { Video } from "#/modules/video-records/videos.schema";
+import { isOriginalPlayable, isVideoWorking } from "#/modules/video-records/model/video-status";
+import { toYoutubeThumbnailUrl } from "#/modules/videos/model/youtube-preview";
+import { toYoutubeVideoId } from "#/modules/videos/model/youtube-url";
+import type { VideoSummary } from "#/modules/videos/model/video-views";
+import { videos } from "#/modules/video-records/video-records.schema";
+import type { Video } from "#/modules/video-records/video-records.schema";
 
 /** The worker's frame when there is one; for YouTube links, YouTube's own thumbnail meanwhile. */
 function toThumbnailUrl(video: Video): string | null {

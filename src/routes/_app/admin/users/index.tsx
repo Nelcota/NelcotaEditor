@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { adminUsersSearchSchema } from "#/modules/admin/admin-search";
-import type { AdminUsersSearch } from "#/modules/admin/admin-search";
-import { adminUsersQueryOptions } from "#/modules/admin/ui/admin-queries";
-import { AdminUsersScreen } from "#/modules/admin/ui/admin-users-screen";
+import { adminUsersSearchSchema } from "#/modules/admin/model/admin-search";
+import type { AdminUsersSearch } from "#/modules/admin/model/admin-search";
+import { adminUsersQueryOptions } from "#/modules/admin/model/admin-queries";
+import { AdminUsersScreen } from "#/modules/admin/ui/screens/admin-users-screen";
 
 export const Route = createFileRoute("/_app/admin/users/")({
     validateSearch: adminUsersSearchSchema,

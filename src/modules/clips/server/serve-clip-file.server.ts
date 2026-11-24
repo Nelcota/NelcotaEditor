@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "#/db/database.server";
 import { getSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { clips } from "#/modules/clips/clips.schema";
-import { videos } from "#/modules/video-records/videos.schema";
+import { videos } from "#/modules/video-records/video-records.schema";
 import { respondWithFileRange } from "#/shared/server/serve-file-range.server";
 import { resolveStoragePath } from "#/shared/server/storage.server";
 import { HTTP_NOT_FOUND, HTTP_UNAUTHORIZED } from "#/shared/server/http-response";

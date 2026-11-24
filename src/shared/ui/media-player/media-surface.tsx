@@ -1,4 +1,5 @@
 import PlayIcon from "~icons/lucide-solid/play";
+import { useEffect, useEffectEvent } from "react";
 import type { ReactNode, RefObject } from "react";
 import { cn } from "#/shared/ui/cn";
 import { toBarPercent } from "#/shared/ui/media-player/seek-bar";
@@ -23,9 +24,7 @@ function BigPlayButton({ player, size }: { player: MediaPlayer; size: "md" | "sm
         <button
             type="button"
             aria-label="Tocar"
-            onClick={async () => {
-                await player.togglePlay();
-            }}
+            onClick={player.togglePlay}
             className={cn(
                 "absolute top-1/2 left-1/2 z-10 grid -translate-1/2 place-items-center rounded-full border border-white/20 bg-black/65 text-white outline-none transition-[scale,background-color] hover:scale-105 hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
                 size === "md" && "size-18 [&>svg]:size-8",
@@ -62,6 +61,10 @@ function IdleProgress({ player }: { player: MediaPlayer }): ReactNode {
  * shortcuts once it has focus, the big play button while paused, and controls that hide while
  * the video plays and the mouse rests. The browser's own right-click menu is turned off.
  */
+function preventDefault(event: Event): void {
+    event.preventDefault();
+}
+
 export function MediaSurface({
     player,
     containerRef,
@@ -72,35 +75,59 @@ export function MediaSurface({
     className,
 }: MediaSurfaceProps): ReactNode {
     const media = player.media;
+    const onShortcutKey = useEffectEvent((event: KeyboardEvent): void => {
+        player.handleKeyDown(event);
+    });
+    const onPointerMove = useEffectEvent((): void => {
+        player.wake();
+    });
+
+    // Key presses bubble up from the player's own buttons and sliders, so the shortcuts work while
+    // any of them has focus; the box itself stays out of the tab order.
+    useEffect(() => {
+        const container = containerRef.current;
+
+        if (container === null) {
+            return undefined;
+        }
+
+        container.addEventListener("keydown", onShortcutKey);
+        container.addEventListener("pointermove", onPointerMove);
+        // The browser menu offers "Show controls", which stacks its bar over ours; "Baixar" covers saving.
+        container.addEventListener("contextmenu", preventDefault);
+
+        return () => {
+            container.removeEventListener("keydown", onShortcutKey);
+            container.removeEventListener("pointermove", onPointerMove);
+            container.removeEventListener("contextmenu", preventDefault);
+        };
+    }, [containerRef]);
 
     return (
         <div
             ref={containerRef}
             role="region"
             aria-label={label}
-            tabIndex={0}
             data-idle={player.isIdle}
-            onKeyDown={async (event) => {
-                await player.handleKeyDown(event);
-            }}
-            onPointerMove={player.wake}
-            onContextMenu={(event) => {
-                // The browser menu offers "Show controls", which stacks its bar over ours; "Baixar" covers saving.
-                event.preventDefault();
-            }}
             className={cn(
                 "group/player @container relative isolate overflow-hidden bg-black outline-none focus-visible:ring-4 focus-visible:ring-ring data-[idle=true]:cursor-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0",
                 className,
             )}
         >
-            <div
-                className="absolute inset-0 [&>video]:size-full"
-                onClick={async () => {
-                    await player.togglePlay();
+            <div className="absolute inset-0 [&>video]:size-full">{children}</div>
+            {/* The whole picture plays and pauses on click; keyboard users have the controls. */}
+            <button
+                type="button"
+                tabIndex={-1}
+                aria-hidden="true"
+                className="absolute inset-0 outline-none"
+                onClick={(event) => {
+                    // Safari does not focus a button on click; without focus inside the player,
+                    // its keys (K, F, M, arrows) would go to the page instead.
+                    event.currentTarget.focus({ preventScroll: true });
+                    player.togglePlay();
                 }}
-            >
-                {children}
-            </div>
+            />
             {media.isPlaying === false && <BigPlayButton player={player} size={size} />}
             {media.isPlaying === true && media.isWaiting === true && (
                 <Spinner className="pointer-events-none absolute top-1/2 left-1/2 size-12 -translate-1/2 text-white" />

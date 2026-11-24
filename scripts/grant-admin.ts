@@ -18,7 +18,7 @@ function readEmailArgument(): string {
     const result = emailSchema.safeParse(process.argv[2]?.trim().toLowerCase());
 
     if (result.success === false) {
-        throw new GrantAdminError('Usage: npm run admin:grant -- "person@example.com"');
+        throw new GrantAdminError('Usage: bun run admin:grant -- "person@example.com"');
     }
 
     return result.data;

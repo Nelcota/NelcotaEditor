@@ -1,4 +1,4 @@
-import { AVATAR_TOO_LARGE_MESSAGE, MAX_AVATAR_BYTES } from "#/modules/auth/avatar";
+import { AVATAR_TOO_LARGE_MESSAGE, MAX_AVATAR_BYTES } from "#/modules/auth/model/avatar";
 import { uploadAvatar } from "#/modules/auth/client/upload-avatar";
 import { chooseAvatarMascot, removeAvatar } from "#/modules/auth/server/avatar-functions";
 

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AdminLayout } from "#/modules/admin/ui/admin-layout";
+import { AdminLayout } from "#/modules/admin/ui/screens/admin-layout";
 
 // Hiding the pages is only for the person's convenience: every admin server function checks the
 // role again on the server.

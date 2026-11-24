@@ -23,7 +23,7 @@ export async function handleApiRoute(
             return errorResponse(HTTP_BAD_REQUEST, error.message);
         }
 
-        logger.error("API route failed", { route: routeName, error });
+        logger.error({ route: routeName, error }, "API route failed");
         return errorResponse(HTTP_INTERNAL_SERVER_ERROR, toUserMessage(error));
     }
 }

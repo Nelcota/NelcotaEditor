@@ -2,7 +2,7 @@ import { isNotFound, isRedirect } from "@tanstack/react-router";
 import { createCsrfMiddleware, createMiddleware, createStart } from "@tanstack/react-start";
 import { setResponseHeader } from "@tanstack/react-start/server";
 import { buildContentSecurityPolicy } from "#/shared/server/content-security-policy";
-import { logger } from "#/shared/server/logger.server";
+import { logger, withLogContext } from "#/shared/server/logger.server";
 import { SECURITY_HEADERS, withNoStoreByDefault } from "#/shared/server/security-headers";
 import { UserFacingError, toUserMessage } from "#/shared/server/user-facing-error";
 
@@ -16,6 +16,17 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const csrfMiddleware = createCsrfMiddleware({
     filter: (context) =>
         context.handlerType === "serverFn" || SAFE_METHODS.has(context.request.method) === false,
+});
+
+/**
+ * Every log line of a request carries its id, and the response says it, so a report from a person
+ * leads to their lines. Always made here: a client could send any id it likes.
+ */
+const requestIdMiddleware = createMiddleware({ type: "request" }).server(async ({ next }) => {
+    const requestId = crypto.randomUUID();
+    setResponseHeader("X-Request-Id", requestId);
+
+    return await withLogContext({ requestId }, async () => await next());
 });
 
 /** A fresh random nonce per response; dashes dropped so it is plain base16. */
@@ -55,11 +66,14 @@ const hideInternalErrorsMiddleware = createMiddleware({ type: "function" }).serv
             }
 
             // Only the function's name: its input may hold personal data.
-            logger.error("Server function failed", {
-                serverFunction: serverFnMeta.name,
-                serverFunctionId: serverFnMeta.id,
-                error,
-            });
+            logger.error(
+                {
+                    serverFunction: serverFnMeta.name,
+                    serverFunctionId: serverFnMeta.id,
+                    error,
+                },
+                "Server function failed",
+            );
             throw toPublicError(error);
         }
     },
@@ -79,6 +93,6 @@ function toPublicError(error: unknown): Error {
 }
 
 export const startInstance = createStart(() => ({
-    requestMiddleware: [csrfMiddleware, securityHeadersMiddleware],
+    requestMiddleware: [requestIdMiddleware, csrfMiddleware, securityHeadersMiddleware],
     functionMiddleware: [hideInternalErrorsMiddleware],
 }));
