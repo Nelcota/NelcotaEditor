@@ -1,6 +1,5 @@
 import ArrowUpIcon from "~icons/lucide/arrow-up";
 import SquarePlusIcon from "~icons/lucide/square-plus";
-import UploadIcon from "~icons/lucide/upload";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
@@ -134,22 +133,6 @@ export function VideoLinkComposer(): ReactNode {
                         </Button>
                     </HintTooltip>
                     <span className="flex-1" />
-                    <HintTooltip label="Enviar um arquivo do computador">
-                        <Button
-                            asChild
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-muted-foreground"
-                        >
-                            <Link
-                                to="/videos"
-                                search={{ newVideo: true }}
-                                aria-label="Enviar um arquivo do computador"
-                            >
-                                <UploadIcon aria-hidden="true" />
-                            </Link>
-                        </Button>
-                    </HintTooltip>
                     <Button
                         type="submit"
                         size="icon-sm"
