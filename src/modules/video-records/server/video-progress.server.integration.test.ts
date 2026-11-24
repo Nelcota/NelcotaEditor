@@ -13,8 +13,9 @@ import { videos } from "#/modules/video-records/video-records.schema";
 // Runs against the test database from .env.test: bun run test:integration
 
 const REQUESTED_CLIP_COUNT = 1;
+const TEN_DAYS_IN_MILLISECONDS = 10 * 24 * 60 * 60 * 1000;
 
-async function insertRenderingVideo(): Promise<string> {
+async function insertRenderingVideo(createdAt: Date, processingStartedAt: Date): Promise<string> {
     const userId = randomUUID();
     const videoId = randomUUID();
     await db.insert(user).values({
@@ -30,6 +31,8 @@ async function insertRenderingVideo(): Promise<string> {
         source: "upload",
         requestedClipCount: REQUESTED_CLIP_COUNT,
         status: "rendering",
+        createdAt,
+        processingStartedAt,
     });
 
     return videoId;
@@ -50,7 +53,8 @@ describe("markVideoDone", () => {
     });
 
     test("records the first finish and keeps it through a later render", async () => {
-        const videoId = await insertRenderingVideo();
+        const now = new Date();
+        const videoId = await insertRenderingVideo(now, now);
         await markVideoDone(videoId);
         const firstFinishedAt = await readFirstFinishedAt(videoId);
         await resetVideoToQueued(videoId);
@@ -60,5 +64,15 @@ describe("markVideoDone", () => {
 
         assert.ok(firstFinishedAt instanceof Date);
         assert.deepEqual(await readFirstFinishedAt(videoId), firstFinishedAt);
+    });
+
+    test("leaves out a run that did not start with the video", async () => {
+        const now = new Date();
+        const createdAt = new Date(now.getTime() - TEN_DAYS_IN_MILLISECONDS);
+        const videoId = await insertRenderingVideo(createdAt, now);
+
+        await markVideoDone(videoId);
+
+        assert.equal(await readFirstFinishedAt(videoId), null);
     });
 });
