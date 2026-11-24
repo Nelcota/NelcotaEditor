@@ -121,7 +121,12 @@ export function MediaSurface({
                 tabIndex={-1}
                 aria-hidden="true"
                 className="absolute inset-0 outline-none"
-                onClick={player.togglePlay}
+                onClick={(event) => {
+                    // Safari does not focus a button on click; without focus inside the player,
+                    // its keys (K, F, M, arrows) would go to the page instead.
+                    event.currentTarget.focus({ preventScroll: true });
+                    player.togglePlay();
+                }}
             />
             {media.isPlaying === false && <BigPlayButton player={player} size={size} />}
             {media.isPlaying === true && media.isWaiting === true && (
