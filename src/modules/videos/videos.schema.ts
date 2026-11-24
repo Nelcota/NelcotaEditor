@@ -1,6 +1,9 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "#/modules/auth/auth.schema";
+import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
+import { MAX_VIDEO_TITLE_LENGTH } from "#/modules/video-records/model/video-title";
+import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/video-records/model/video-status";
 import { clipLengthEnum } from "#/modules/video-records/video-records.schema";
 
 /**
@@ -36,6 +39,20 @@ export const videoUploads = pgTable(
         index("video_uploads_user_id_expires_at_idx").on(table.userId, table.expiresAt),
         index("video_uploads_expires_at_idx").on(table.expiresAt),
         check("video_uploads_declared_bytes_positive", sql`${table.declaredBytes} > 0`),
+        // The row becomes a video as is, so it holds the video's own limits; a value that slipped
+        // past them would only fail at confirmation, after the whole file was sent.
+        check(
+            "video_uploads_declared_bytes_max",
+            sql`${table.declaredBytes} <= ${sql.raw(String(MAX_UPLOAD_BYTES))}`,
+        ),
+        check(
+            "video_uploads_requested_clip_count_range",
+            sql`${table.requestedClipCount} between ${sql.raw(String(MIN_CLIP_COUNT))} and ${sql.raw(String(MAX_CLIP_COUNT))}`,
+        ),
+        check(
+            "video_uploads_title_length",
+            sql`char_length(${table.title}) between 1 and ${sql.raw(String(MAX_VIDEO_TITLE_LENGTH))}`,
+        ),
     ],
 );
 
