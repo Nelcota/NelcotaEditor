@@ -81,6 +81,18 @@ async function handleJob(job: ProcessVideoJob): Promise<void> {
     await withLogContext({ jobId: job.id, videoId }, () => processVideoWithLogs(videoId));
 }
 
+/**
+ * A backfill is no reason to stay down: with the file store unreachable at boot, throwing here
+ * would restart the worker in a loop and stop every video. The next start tries again.
+ */
+async function backfillStoredBytesWithoutBlocking(): Promise<void> {
+    try {
+        await backfillStoredBytes();
+    } catch (error) {
+        logger.error({ error }, "Could not backfill stored file sizes");
+    }
+}
+
 async function startWorker(): Promise<void> {
     setJobQueueRole("worker");
     await ensureProcessVideoQueue();
@@ -91,7 +103,7 @@ async function startWorker(): Promise<void> {
     // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
     // their video's lock is free, so a start never touches the active runs of other replicas.
     await removeAbandonedVideoWorkspaces();
-    await backfillStoredBytes();
+    await backfillStoredBytesWithoutBlocking();
     await requeueInterruptedVideos();
     // groupConcurrency is tracked in the database, so "one video per person" holds across replicas.
     await jobQueue.work(
