@@ -74,6 +74,20 @@ function toProgress(video: VideoSummary): VideoProgress {
 }
 
 /**
+ * The last poll, finished videos included, plus the videos that started since: a video that
+ * finishes leaves the watched list on the refetch its own poll causes, yet its "Pronto" must be heard.
+ */
+function combineProgress(
+    polled: Array<VideoProgress>,
+    watched: Array<VideoSummary>,
+): Array<VideoProgress> {
+    const polledIds = new Set(polled.map((entry) => entry.id));
+    const started = watched.filter((video) => polledIds.has(video.id) === false);
+
+    return [...polled, ...started.map(toProgress)];
+}
+
+/**
  * Polls the videos still in progress while any is, at the pace their stage calls for, and keeps
  * every list current. Returns the latest numbers, a finished video's last stage included.
  */
@@ -83,7 +97,9 @@ export function useVideoProgressWatch(): Array<VideoProgress> {
     const watched = workingQuery.data ?? [];
     const watchedIds = watched.map((video) => video.id);
     const progressQuery = useQuery({
-        queryKey: [...VIDEOS_QUERY_KEY, PROGRESS_KEY_SEGMENT, ...watchedIds],
+        // One key whatever is watched: a poll that finishes a video refetches the watched list
+        // before it resolves, and a key made of the ids would store its result where no one looks.
+        queryKey: [...VIDEOS_QUERY_KEY, PROGRESS_KEY_SEGMENT],
         queryFn: async (): Promise<Array<VideoProgress>> => {
             const progress = await getVideoProgress({ data: { videoIds: watchedIds } });
             await syncVideoLists(queryClient, watchedIds, progress);
@@ -97,5 +113,5 @@ export function useVideoProgressWatch(): Array<VideoProgress> {
         refetchInterval: pollWhileProcessing(watched.map((video) => video.status)),
     });
 
-    return progressQuery.data ?? [];
+    return combineProgress(progressQuery.data ?? [], watched);
 }
