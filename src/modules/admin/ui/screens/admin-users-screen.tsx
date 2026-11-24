@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import type { AdminUsersSearch } from "#/modules/admin/model/admin-search";
 import { AdminPager } from "#/modules/admin/ui/components/admin-pager";
+import { AdminPagePastEnd } from "#/modules/admin/ui/components/admin-page-past-end";
 import { adminUsersQueryOptions } from "#/modules/admin/model/admin-queries";
 import { toPageSearch, toQuerySearch } from "#/modules/admin/model/admin-search-params";
 import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admin-states";
@@ -49,6 +50,13 @@ function UserResults({ search, onSearchChange }: ResultsProps): ReactNode {
         return <AdminLoading label="Carregando contas" />;
     }
 
+    const goToPage = (next: number): void =>
+        onSearchChange(toAdminUsersSearch({ ...search, page: next }));
+
+    if (result.users.length === 0 && result.totalCount > 0) {
+        return <AdminPagePastEnd totalCount={result.totalCount} onPageChange={goToPage} />;
+    }
+
     if (result.users.length === 0) {
         return (
             <EmptyState
@@ -62,13 +70,7 @@ function UserResults({ search, onSearchChange }: ResultsProps): ReactNode {
     return (
         <div className="grid gap-3">
             <AdminUserList users={result.users} />
-            <AdminPager
-                page={page}
-                totalCount={result.totalCount}
-                onPageChange={(next) =>
-                    onSearchChange(toAdminUsersSearch({ ...search, page: next }))
-                }
-            />
+            <AdminPager page={page} totalCount={result.totalCount} onPageChange={goToPage} />
         </div>
     );
 }
