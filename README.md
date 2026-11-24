@@ -86,7 +86,7 @@ src/
     preferences/           default clip count, length and language
     video-records/         the video row, its statuses and transitions
     auth/                  accounts and sessions (Better Auth)
-  shared/                  UI kit, server infrastructure, errors
+  shared/                  UI kit, server infrastructure, errors, theme
   db/                      database client and schema index
 scripts/worker.ts          the worker entry point (runs in its container)
 e2e/                       Playwright flows with an axe check

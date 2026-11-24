@@ -75,7 +75,7 @@ Raised one step on 2026-11-19: small grey text on the dark canvas was hard to re
 
 ## Mascots
 
-Two 4x4 sprites in `public/mascots/` (sources in `assets/`), drawn by `Mascot` (index 0–31).
+Two 4x4 sprites in `public/mascots/` (sources in `design/assets/`), drawn by `Mascot` (index 0–31).
 Each drawing has one meaning only:
 
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
