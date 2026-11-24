@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { createPlaybackClock } from "#/modules/studio/ui/hooks/playback-clock";
 import type { PlaybackClock } from "#/modules/studio/ui/hooks/playback-clock";
+import { findPlaybackCorrection } from "#/modules/studio/model/playback-correction";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 interface PlaybackRange {
@@ -59,8 +60,10 @@ export function useStudioPlayback(
             return;
         }
 
-        if (video.currentTime >= rangeRef.current.endSeconds) {
-            video.currentTime = rangeRef.current.startSeconds;
+        const clipRange = rangeRef.current;
+
+        if (findPlaybackCorrection(video.currentTime, clipRange) !== "none") {
+            video.currentTime = clipRange.startSeconds;
         }
 
         track(video.play());
@@ -75,11 +78,15 @@ export function useStudioPlayback(
 
         let frame = 0;
         const follow = (): void => {
-            const { startSeconds, endSeconds } = rangeRef.current;
+            const clipRange = rangeRef.current;
+            const correction = findPlaybackCorrection(video.currentTime, clipRange);
 
-            if (video.currentTime >= endSeconds) {
+            if (correction === "rewindAndPause") {
                 video.pause();
-                video.currentTime = startSeconds;
+            }
+
+            if (correction !== "none") {
+                video.currentTime = clipRange.startSeconds;
             }
 
             clock.write(video.currentTime);
