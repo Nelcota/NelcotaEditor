@@ -54,8 +54,9 @@ export function buildYtDlpArguments(
         // Second guard behind the server schema: never walk more than one entry of a list.
         "--playlist-items",
         "1",
+        // The worker image has Bun only; its "node" is a shim that cannot solve YouTube's challenges.
         "--js-runtimes",
-        "node",
+        "bun",
         "--format",
         FORMAT_SELECTOR,
         "--format-sort",
