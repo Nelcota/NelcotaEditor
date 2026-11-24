@@ -1,14 +1,20 @@
 name: Check
 
-# Runs the same gate as the local pre-commit hook, so pull requests from any machine get it too.
+# Runs the same gate as the local pre-commit hook, plus the database and browser tests, on every
+# pull request. A push to main that passes all of them is deployed to production.
 on:
     pull_request:
     push:
         branches: [main]
 
-# The job only reads the code; the token gets nothing more.
+# The jobs only read the code; the token gets nothing more.
 permissions:
     contents: read
+
+# A newer push to main supersedes a deploy still waiting on its tests; pull requests run in full.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
     check:
@@ -27,3 +33,80 @@ jobs:
               env:
                   DATABASE_URL: postgres://ci:ci@localhost:5432/ci
               run: bunx drizzle-kit check
+
+    database-and-browser:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        services:
+            postgres:
+                image: postgres:18.7-alpine
+                env:
+                    POSTGRES_USER: nelcota
+                    POSTGRES_PASSWORD: nelcota
+                    POSTGRES_DB: nelcota_test
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U nelcota -d nelcota_test"
+                    --health-interval 2s
+                    --health-timeout 5s
+                    --health-retries 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version-file: package.json
+            - run: bun install --frozen-lockfile
+            # The same values scripts/prepare-test-database.ts writes locally; none is a secret.
+            - name: Write .env.test
+              run: |
+                  cat > .env.test <<'EOF'
+                  DATABASE_URL=postgresql://nelcota:nelcota@127.0.0.1:5432/nelcota_test
+                  BETTER_AUTH_URL=http://localhost:3299
+                  BETTER_AUTH_SECRET=test-only-secret-never-used-outside-local-tests
+                  TRUSTED_PROXY_IP_HEADER=x-real-ip
+                  TURNSTILE_SITE_KEY=
+                  TURNSTILE_SECRET_KEY=
+                  DEEPSEEK_API_KEY=
+                  STORAGE_DIR=storage-test
+                  WHISPER_URL=http://127.0.0.1:1
+                  WHISPER_MODEL=test-model
+                  EOF
+            - name: Apply migrations to the test database
+              env:
+                  DATABASE_URL: postgresql://nelcota:nelcota@127.0.0.1:5432/nelcota_test
+              run: bunx drizzle-kit migrate
+            - name: Integration tests
+              run: bun run test:integration
+            - name: Install the browser
+              run: bunx playwright install --with-deps chromium
+            - name: End-to-end tests
+              run: bun run test:e2e
+
+    deploy:
+        needs: [check, database-and-browser]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            # Dokploy's webhook takes a GitHub push payload and deploys when its branch matches.
+            - name: Ask Dokploy to deploy main
+              env:
+                  DEPLOY_WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
+                  COMMIT: ${{ github.sha }}
+              run: |
+                  if [ -z "$DEPLOY_WEBHOOK" ]; then
+                      echo "The DOKPLOY_DEPLOY_WEBHOOK secret is not set" >&2
+                      exit 1
+                  fi
+                  # A branch mismatch answers 301, which curl counts as success; only 200 deploys.
+                  status=$(curl --silent --show-error --max-time 60 -o response.json -w "%{http_code}" \
+                      -X POST "$DEPLOY_WEBHOOK" \
+                      -H "Content-Type: application/json" \
+                      -H "X-GitHub-Event: push" \
+                      -d "{\"ref\":\"refs/heads/main\",\"after\":\"$COMMIT\",\"head_commit\":{\"id\":\"$COMMIT\",\"message\":\"Deploy $COMMIT\"}}")
+                  cat response.json
+                  if [ "$status" != "200" ]; then
+                      echo "Dokploy answered HTTP $status" >&2
+                      exit 1
+                  fi
