@@ -11,10 +11,14 @@ import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
 import { useDraftAutosave } from "#/modules/studio/ui/hooks/use-draft-autosave";
 import type { DraftAutosave } from "#/modules/studio/ui/hooks/use-draft-autosave";
 
-// The server function is the network call to the server; the hook's job is when it is sent.
+// Server functions are the network calls to the server; the hook's job is when the save is sent.
+// The query modules the hook reads keys from import the others, and outside the app's build those
+// files load the server's environment, which CI does not have.
 vi.mock("#/modules/studio/server/clip-studio-functions", () => ({
     saveClipDraft: vi.fn(),
 }));
+vi.mock("#/modules/studio/server/clip-studio-snapshot-functions", () => ({}));
+vi.mock("#/modules/videos/server/video-functions", () => ({}));
 
 const VIDEO_ID = "video-1";
 const CLIP_ID = "clip-1";
