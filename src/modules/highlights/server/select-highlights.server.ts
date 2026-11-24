@@ -133,11 +133,14 @@ async function requestCandidates(
 
     const returnedItems = result.data.clips;
     const candidates = toCandidates(parseHighlightClips(returnedItems));
-    logger.info("Highlights returned", {
-        videoId: video.id,
-        returnedCount: returnedItems.length,
-        validCount: candidates.length,
-    });
+    logger.info(
+        {
+            videoId: video.id,
+            returnedCount: returnedItems.length,
+            validCount: candidates.length,
+        },
+        "Highlights returned",
+    );
     return candidates;
 }
 
@@ -194,11 +197,14 @@ export async function ensureHighlights(input: HighlightSelectionInput): Promise<
         maxCount: video.requestedClipCount,
         clipLength: video.clipLength,
     });
-    logger.info("Highlights fitted", {
-        videoId: video.id,
-        keptCount: highlights.length,
-        candidateCount: candidates.length,
-    });
+    logger.info(
+        {
+            videoId: video.id,
+            keptCount: highlights.length,
+            candidateCount: candidates.length,
+        },
+        "Highlights fitted",
+    );
 
     if (highlights.length === 0) {
         throw new UserFacingError(describeNoHighlights(durationSeconds));

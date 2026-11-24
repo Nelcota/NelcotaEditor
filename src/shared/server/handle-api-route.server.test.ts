@@ -6,9 +6,9 @@ import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const SHARE_TOKEN = "share-token-123";
 
-function captureStderr(): { read: () => string; restore: () => void } {
+function captureStdout(): { read: () => string; restore: () => void } {
     const written: Array<string> = [];
-    const writeMock = vi.spyOn(process.stderr, "write").mockImplementation((chunk: unknown) => {
+    const writeMock = vi.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
         written.push(String(chunk));
         return true;
     });
@@ -17,17 +17,17 @@ function captureStderr(): { read: () => string; restore: () => void } {
 
 describe("handleApiRoute", () => {
     it("logs a failed query without its parameters", async () => {
-        const stderr = captureStderr();
+        const stdout = captureStdout();
 
         try {
             await handleApiRoute("GET /api/share/$token", async () => {
                 throw new DrizzleQueryError("select 1 where token = $1", [SHARE_TOKEN]);
             });
         } finally {
-            stderr.restore();
+            stdout.restore();
         }
 
-        const output = stderr.read();
+        const output = stdout.read();
         assert.equal(output.includes("GET /api/share/$token"), true);
         assert.equal(output.includes(SHARE_TOKEN), false);
     });

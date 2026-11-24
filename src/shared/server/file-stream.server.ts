@@ -121,10 +121,13 @@ export function createFileStream(
                 await enqueueNextChunk(handle, controller);
             } catch (error) {
                 // The response has already started, so the route handler cannot log this failure.
-                logger.warn("File stream failed mid-way", {
-                    file: describeFileForLog(absolutePath),
-                    error,
-                });
+                logger.warn(
+                    {
+                        file: describeFileForLog(absolutePath),
+                        error,
+                    },
+                    "File stream failed mid-way",
+                );
                 // A failed read errors the stream, which never calls cancel(); close the file here.
                 await closeFile();
                 throw error;

@@ -822,5 +822,5 @@ Pull requests:
   `.env.test` and keep that database migrated. `bun run test` and `bun run check` run the unit
   project only.
 - Migration in progress (from npm/tsx/node:test): the rules above are the target. Until a stage
-  lands, code that predates it may not follow it yet (pino, GlitchTip, Playwright, the
-  format-on-edit hook); new code follows the rules.
+  lands, code that predates it may not follow it yet (GlitchTip, Playwright, the format-on-edit
+  hook); new code follows the rules.

@@ -12,7 +12,7 @@ import { logger } from "#/shared/server/logger.server";
  * when the insert fails; that failure still reaches the caller.
  */
 export async function recordAdminAction(entry: AdminAuditEntry): Promise<void> {
-    logger.info("Admin action", entry);
+    logger.info(entry, "Admin action");
     await db.insert(adminAuditLog).values(entry);
 }
 

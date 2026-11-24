@@ -32,7 +32,7 @@ export function readStoredDraft(clip: Clip): StudioDraft | null {
     const result = studioDraftSchema.safeParse(stored);
 
     if (result.success === false) {
-        logger.warn("Ignoring an invalid Studio draft", { clipId: clip.id });
+        logger.warn({ clipId: clip.id }, "Ignoring an invalid Studio draft");
         return null;
     }
 

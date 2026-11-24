@@ -139,7 +139,7 @@ async function removeOldOutput(clip: Clip): Promise<void> {
     try {
         await rm(resolveStoragePath(outputPath), { force: true });
     } catch (error) {
-        logger.error("Failed to remove the previous clip file", { clipId: clip.id, error });
+        logger.error({ clipId: clip.id, error }, "Failed to remove the previous clip file");
     }
 }
 

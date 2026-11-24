@@ -94,7 +94,7 @@ function logFailure(videoId: string, consecutiveFailures: number, error: unknown
         return;
     }
 
-    logger.error("Could not check video cancellation", { videoId, consecutiveFailures, error });
+    logger.error({ videoId, consecutiveFailures, error }, "Could not check video cancellation");
 }
 
 function logRecovery(videoId: string, consecutiveFailures: number): void {
@@ -102,5 +102,5 @@ function logRecovery(videoId: string, consecutiveFailures: number): void {
         return;
     }
 
-    logger.info("Video cancellation check recovered", { videoId, consecutiveFailures });
+    logger.info({ videoId, consecutiveFailures }, "Video cancellation check recovered");
 }

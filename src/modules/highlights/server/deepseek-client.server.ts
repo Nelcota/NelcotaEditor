@@ -95,11 +95,14 @@ function logCompletion(
     const usage = completion.usage;
     const durationMs = Math.round(performance.now() - startedAt);
 
-    logger.info("DeepSeek answered", {
-        durationMs,
-        promptTokens: usage?.prompt_tokens ?? null,
-        completionTokens: usage?.completion_tokens ?? null,
-    });
+    logger.info(
+        {
+            durationMs,
+            promptTokens: usage?.prompt_tokens ?? null,
+            completionTokens: usage?.completion_tokens ?? null,
+        },
+        "DeepSeek answered",
+    );
 }
 
 async function createCompletion(

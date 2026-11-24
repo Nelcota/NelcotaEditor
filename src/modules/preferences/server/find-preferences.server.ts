@@ -31,7 +31,7 @@ export async function findPreferences(userId: string): Promise<Preferences> {
     const result = preferencesSchema.safeParse(savedRow);
 
     if (result.success === false) {
-        logger.warn("Ignoring invalid saved preferences", { userId, issues: result.error.issues });
+        logger.warn({ userId, issues: result.error.issues }, "Ignoring invalid saved preferences");
         return DEFAULT_PREFERENCES;
     }
 

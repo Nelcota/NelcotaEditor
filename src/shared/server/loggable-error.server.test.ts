@@ -3,7 +3,6 @@ import { describe, it } from "vitest";
 import { DrizzleQueryError } from "drizzle-orm/errors";
 import { DatabaseError } from "pg";
 import { toLoggableError } from "#/shared/server/loggable-error.server";
-import { formatLogLine } from "#/shared/server/logger.server";
 
 const PERSONAL_VALUES = ["ana@example.com", "https://youtu.be/dQw4w9WgXcQ", "share-token-123"];
 
@@ -70,23 +69,5 @@ describe("toLoggableError", () => {
             name: "NonErrorThrown",
             message: "A string was thrown",
         });
-    });
-});
-
-describe("formatLogLine", () => {
-    it("writes one JSON line with the level, message and context", () => {
-        const line = JSON.parse(formatLogLine("warn", "Slow step", { videoId: "v1" }));
-
-        assert.equal(line.level, "warn");
-        assert.equal(line.message, "Slow step");
-        assert.equal(line.videoId, "v1");
-    });
-
-    it("sanitizes the error in the context", () => {
-        const line = formatLogLine("error", "Request failed", { error: createFailedQuery() });
-
-        for (const value of PERSONAL_VALUES) {
-            assert.equal(line.includes(value), false, value);
-        }
     });
 });

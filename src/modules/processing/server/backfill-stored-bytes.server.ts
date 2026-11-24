@@ -56,6 +56,6 @@ export async function backfillStoredBytes(): Promise<void> {
     const outputCount = await backfillOutputBytes();
 
     if (sourceCount + outputCount > 0) {
-        logger.info("Stored file sizes backfilled", { sourceCount, outputCount });
+        logger.info({ sourceCount, outputCount }, "Stored file sizes backfilled");
     }
 }

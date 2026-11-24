@@ -17,6 +17,7 @@ import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 import { getJobQueue, setJobQueueRole } from "#/shared/server/job-queue.server";
+import { logger, withLogContext } from "#/shared/server/logger.server";
 
 /** One person's videos run one after the other, so nobody waits behind someone else's batch. */
 const VIDEOS_PER_USER_AT_ONCE = 1;
@@ -46,7 +47,7 @@ async function requeueInterruptedVideos(): Promise<void> {
     }
 
     if (interrupted.length > 0) {
-        console.info(`Requeued ${interrupted.length} interrupted video(s).`);
+        logger.info({ videoCount: interrupted.length }, "Interrupted videos requeued");
     }
 }
 
@@ -75,23 +76,24 @@ async function readFinalStatus(videoId: string): Promise<string> {
     return video.status;
 }
 
-/** Ids and timing only: titles, links and transcripts are the person's data. */
-async function processVideoWithLogs(videoId: string, jobId: string): Promise<void> {
+/**
+ * Ids and timing only: titles, links and transcripts are the person's data. The job and video ids
+ * come from the log context around the job.
+ */
+async function processVideoWithLogs(videoId: string): Promise<void> {
     const startedAt = Date.now();
-    console.info(`Job ${jobId} started for video ${videoId}.`);
+    logger.info({}, "Job started");
 
     try {
         await processVideo(videoId);
     } catch (error) {
-        console.error(
-            `Job ${jobId} for video ${videoId} threw after ${Date.now() - startedAt} ms.`,
-        );
+        // pg-boss only marks the job failed; this line is the one record of why.
+        logger.error({ durationMs: Date.now() - startedAt, error }, "Job threw");
         throw error;
     }
 
     const status = await readFinalStatus(videoId);
-    const durationMs = Date.now() - startedAt;
-    console.info(`Job ${jobId} ended for video ${videoId}: status ${status}, ${durationMs} ms.`);
+    logger.info({ status, durationMs: Date.now() - startedAt }, "Job ended");
 }
 
 async function handleJob(job: ProcessVideoJob): Promise<void> {
@@ -99,11 +101,15 @@ async function handleJob(job: ProcessVideoJob): Promise<void> {
 
     // Throwing makes pg-boss record the job as failed instead of silently completing it.
     if (result.success === false) {
-        console.error(`Rejecting job ${job.id} with invalid payload`, result.error.issues);
+        logger.error(
+            { jobId: job.id, issueCount: result.error.issues.length },
+            "Rejecting a job with an invalid payload",
+        );
         throw new InvalidJobPayloadError(result.error.issues.length);
     }
 
-    await processVideoWithLogs(result.data.videoId, job.id);
+    const videoId = result.data.videoId;
+    await withLogContext({ jobId: job.id, videoId }, () => processVideoWithLogs(videoId));
 }
 
 async function startWorker(): Promise<void> {
@@ -127,7 +133,7 @@ async function startWorker(): Promise<void> {
             }
         },
     );
-    console.info(`Worker ready, processing up to ${workerConcurrency} video(s) at once.`);
+    logger.info({ workerConcurrency }, "Worker ready");
 
     process.once("SIGTERM", stopWorker);
     process.once("SIGINT", stopWorker);
@@ -149,7 +155,7 @@ function stopWorker(): void {
 
     isStopping = true;
     stopGracefully().catch((error: unknown) => {
-        console.error("Worker did not stop gracefully", error);
+        logger.error({ error }, "Worker did not stop gracefully");
         process.exit(1);
     });
 }

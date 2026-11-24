@@ -1,47 +1,48 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+import { pino } from "pino";
 import { toLoggableError } from "#/shared/server/loggable-error.server";
 
-type LogLevel = "info" | "warn" | "error";
+/** Ids that tie log lines to one request or one job; never personal data. */
+export type LogContext = Readonly<Record<string, string>>;
 
-/** Ids, counts, durations and route names only: never titles, links, e-mails or tokens. */
-export type LogContext = Readonly<Record<string, unknown>>;
+const logContextStorage = new AsyncLocalStorage<LogContext>();
+
+const SECRET_FIELDS = ["authorization", "cookie", '"set-cookie"', "password", "token", "secret"];
+const SECRET_FIELD_PATHS = [...SECRET_FIELDS, "apiKey"].flatMap((field) => [
+    field,
+    `*.${field}`,
+    `*.*.${field}`,
+]);
+
+const DEFAULT_LEVEL = "info";
 
 /**
- * One JSON object per line, so a log aggregator can filter by level, videoId or route.
- * Errors at the top level of the context go through toLoggableError.
+ * One JSON object per line on stdout, so the log collector can filter by level, requestId or
+ * videoId. Writing through process.stdout (not pino's own file descriptor) lets tests read it.
  */
-export function formatLogLine(level: LogLevel, message: string, context: LogContext): string {
-    const fields: Record<string, unknown> = {};
+export const logger = pino(
+    {
+        level: process.env.LOG_LEVEL ?? DEFAULT_LEVEL,
+        base: null,
+        messageKey: "message",
+        timestamp: pino.stdTimeFunctions.isoTime,
+        formatters: { level: (label) => ({ level: label }) },
+        // Database errors repeat query values and row data; only their kind and codes are kept.
+        serializers: { error: toLoggableError },
+        redact: { paths: SECRET_FIELD_PATHS, censor: "[redacted]" },
+        mixin: () => logContextStorage.getStore() ?? {},
+    },
+    process.stdout,
+);
 
-    for (const [key, value] of Object.entries(context)) {
-        fields[key] = toLoggableValue(key, value);
+/** Runs `work` with these fields added to every log line written inside it. */
+export async function withLogContext<Result>(
+    context: LogContext,
+    work: () => Promise<Result>,
+): Promise<Result> {
+    if (Object.keys(context).length === 0) {
+        throw new RangeError("A log context needs at least one field.");
     }
 
-    return JSON.stringify({ ...fields, time: new Date().toISOString(), level, message });
+    return await logContextStorage.run(context, work);
 }
-
-/** A caught value is `unknown`, so the `error` key is sanitized even when it is not an Error. */
-function toLoggableValue(key: string, value: unknown): unknown {
-    if (key === "error" || value instanceof Error) {
-        return toLoggableError(value);
-    }
-
-    return value;
-}
-
-function writeLine(level: LogLevel, message: string, context: LogContext): void {
-    const line = `${formatLogLine(level, message, context)}\n`;
-
-    if (level === "info") {
-        process.stdout.write(line);
-        return;
-    }
-
-    process.stderr.write(line);
-}
-
-export const logger = {
-    info: (message: string, context: LogContext = {}): void => writeLine("info", message, context),
-    warn: (message: string, context: LogContext = {}): void => writeLine("warn", message, context),
-    error: (message: string, context: LogContext = {}): void =>
-        writeLine("error", message, context),
-};

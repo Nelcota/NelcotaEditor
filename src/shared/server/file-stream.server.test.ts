@@ -160,7 +160,7 @@ describe("createFileStream", () => {
     it("logs a read that fails mid-way without the server's directories, then closes the file", async () => {
         const openedFiles = spyOnOpenedFiles();
         const logLines: Array<string> = [];
-        vi.spyOn(process.stderr, "write").mockImplementation((chunk: unknown) => {
+        vi.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
             logLines.push(String(chunk));
             return true;
         });

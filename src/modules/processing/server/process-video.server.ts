@@ -116,12 +116,12 @@ async function tryWriteStop(
  */
 async function recordStop(videoId: string, error: unknown, signal: AbortSignal): Promise<void> {
     if (signal.aborted === true) {
-        logger.info("Video cancelled", { videoId });
+        logger.info({ videoId }, "Video cancelled");
     }
 
     if (signal.aborted === false) {
         // The failure is recorded on the video so the user sees it and can retry.
-        logger.error("Failed to process video", { videoId, error });
+        logger.error({ videoId, error }, "Failed to process video");
     }
 
     for (let attempt = 1; attempt <= RECORD_STOP_ATTEMPTS; attempt += 1) {
@@ -131,12 +131,15 @@ async function recordStop(videoId: string, error: unknown, signal: AbortSignal):
             return;
         }
 
-        logger.error("Could not record the video stop", {
-            videoId,
-            attempt,
-            maxAttempts: RECORD_STOP_ATTEMPTS,
-            error: writeError,
-        });
+        logger.error(
+            {
+                videoId,
+                attempt,
+                maxAttempts: RECORD_STOP_ATTEMPTS,
+                error: writeError,
+            },
+            "Could not record the video stop",
+        );
 
         if (attempt === RECORD_STOP_ATTEMPTS) {
             throw writeError;
@@ -165,6 +168,6 @@ export async function processVideo(videoId: string): Promise<void> {
     const hasRun = await runWithVideoProcessingLock(videoId, () => runAndRecord(videoId));
 
     if (hasRun === false) {
-        logger.info("Video already processing in another worker", { videoId });
+        logger.info({ videoId }, "Video already processing in another worker");
     }
 }

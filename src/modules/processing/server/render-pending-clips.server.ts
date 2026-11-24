@@ -40,7 +40,7 @@ async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promis
         }
 
         // One broken clip should not throw away the others; it is marked as failed instead.
-        logger.error("Failed to render clip", { clipId: clip.id, videoId, error });
+        logger.error({ clipId: clip.id, videoId, error }, "Failed to render clip");
         await setClipStatus(clip.id, "failed");
         return false;
     }

@@ -58,6 +58,6 @@ export async function ensureVideoThumbnail(input: ThumbnailSource): Promise<void
         ]);
         await db.update(videos).set({ thumbnailPath }).where(eq(videos.id, video.id));
     } catch (error) {
-        logger.warn("Could not create the video thumbnail", { videoId: video.id, error });
+        logger.warn({ videoId: video.id, error }, "Could not create the video thumbnail");
     }
 }

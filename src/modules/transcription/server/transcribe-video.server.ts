@@ -89,13 +89,16 @@ async function transcribeAudio(request: TranscriptRequest): Promise<Transcriptio
             saveProgress,
         );
         const durationMs = Math.round(performance.now() - startedAt);
-        logger.info("Video transcribed", {
-            videoId,
-            chunkCount: chunks.length,
-            wordCount: transcription.words.length,
-            language: transcription.language ?? null,
-            durationMs,
-        });
+        logger.info(
+            {
+                videoId,
+                chunkCount: chunks.length,
+                wordCount: transcription.words.length,
+                language: transcription.language ?? null,
+                durationMs,
+            },
+            "Video transcribed",
+        );
         return transcription;
     } finally {
         await rm(audioDirectory, { recursive: true, force: true });

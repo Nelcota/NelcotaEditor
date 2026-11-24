@@ -30,7 +30,7 @@ async function startJobQueue(): Promise<PgBoss> {
     });
 
     jobQueue.on("error", (error: unknown) => {
-        logger.error("Job queue error", { error });
+        logger.error({ error }, "Job queue error");
     });
     await jobQueue.start();
     return jobQueue;
