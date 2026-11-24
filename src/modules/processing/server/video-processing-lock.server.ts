@@ -9,6 +9,7 @@ const lockRowSchema = z.object({ isLocked: z.boolean() });
  * Runs the work only when no other worker is processing the same video, and returns whether it
  * ran. The session lock lives on a dedicated connection held for the whole run: if the worker
  * dies, Postgres drops the connection and the lock with it, so a video is never locked forever.
+ * The pool is sized for one such connection per concurrent video (see database.server.ts).
  */
 export async function runWithVideoProcessingLock(
     videoId: string,
