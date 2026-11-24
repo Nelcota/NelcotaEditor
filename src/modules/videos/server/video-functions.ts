@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -13,7 +14,10 @@ import {
 } from "#/modules/videos/server/video-queries.server";
 import { listVideoClips } from "#/modules/clips/server/clip-views.server";
 import { toClipView } from "#/modules/clips/server/clip-views.server";
-import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
+import {
+    findOwnedVideo,
+    findOwnedVideoOrNull,
+} from "#/modules/video-records/server/find-owned-video.server";
 import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import {
@@ -92,7 +96,13 @@ export const getVideoDetails = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
     .validator(videoIdInputSchema)
     .handler(async ({ context, data }): Promise<VideoDetails> => {
-        const video = await findOwnedVideo(data.videoId, context.user.id);
+        const video = await findOwnedVideoOrNull(data.videoId, context.user.id);
+
+        // The video page answers 404 for a video that is gone or someone else's.
+        if (video === null) {
+            throw notFound();
+        }
+
         const videoClips = await listVideoClips(video.id);
         const readyCount = videoClips.filter((clip) => clip.status === "done").length;
 

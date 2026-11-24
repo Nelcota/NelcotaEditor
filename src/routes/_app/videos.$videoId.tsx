@@ -10,7 +10,14 @@ export const Route = createFileRoute("/_app/videos/$videoId")({
     loader: async ({ context, params }) => ({
         title: await loadVideoPageTitle(context.queryClient, params.videoId),
     }),
-    head: ({ loaderData }) => ({ meta: [{ title: `${loaderData?.title ?? "Vídeo"} · Nelcota` }] }),
+    head: ({ loaderData, match }) => {
+        // A missing video keeps the 404 page's title, which the root sets.
+        if (match.status === "notFound") {
+            return {};
+        }
+
+        return { meta: [{ title: `${loaderData?.title ?? "Vídeo"} · Nelcota` }] };
+    },
     component: VideoDetailsRoute,
 });
 
