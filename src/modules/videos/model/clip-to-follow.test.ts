@@ -18,6 +18,7 @@ function clipView(id: string, startSeconds: number, endSeconds: number): ClipVie
         fileUrl: null,
         downloadUrl: null,
         sharePath: null,
+        isShared: false,
     };
 }
 

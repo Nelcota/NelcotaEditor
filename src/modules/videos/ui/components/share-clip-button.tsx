@@ -12,10 +12,28 @@ interface ShareClipButtonProps {
     clip: ClipView;
 }
 
+/** The copy button for a ready clip; while it renders again the link opens nothing, so say so. */
+function SharedLink({ sharePath }: { sharePath: string | null }) {
+    if (sharePath === null) {
+        return (
+            <p className="text-sm text-muted-foreground">
+                Link ativo. Ele volta a abrir quando o corte ficar pronto.
+            </p>
+        );
+    }
+
+    return (
+        <CopyTextButton
+            text={`${window.location.origin}${sharePath}`}
+            label="Copiar link"
+            className="min-w-36"
+        />
+    );
+}
+
 /** Without a link nobody but the owner can watch the clip; turning it off kills the old link. */
 export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
     const queryClient = useQueryClient();
-    const sharePath = clip.sharePath;
     const mutation = useMutation({
         mutationFn: (isShared: boolean) =>
             setClipSharing({ data: { videoId, clipId: clip.id, isShared } }),
@@ -24,7 +42,11 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
         },
     });
 
-    if (sharePath === null) {
+    if (clip.isShared === false && clip.status !== "done") {
+        return null;
+    }
+
+    if (clip.isShared === false) {
         return (
             <div className="grid gap-2">
                 <Button
@@ -44,11 +66,7 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
 
     return (
         <div className="grid gap-2">
-            <CopyTextButton
-                text={`${window.location.origin}${sharePath}`}
-                label="Copiar link"
-                className="min-w-36"
-            />
+            <SharedLink sharePath={clip.sharePath} />
             <Button
                 variant="ghost"
                 onClick={() => mutation.mutate(false)}
