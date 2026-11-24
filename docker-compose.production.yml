@@ -78,18 +78,22 @@ services:
         expose:
             - "3000"
         # The slim Bun image has no curl or wget; Bun's fetch exits non-zero on a 503 or no answer.
+        # /health queries through the same database pool as the app, so a busy pool can make it
+        # slow or fail for a moment. Once the container is unhealthy, Traefik stops routing to it and
+        # every visitor gets an error, so it takes five failures in a row (over a minute) to get
+        # there, not one load spike.
         healthcheck:
             test:
                 [
                     "CMD",
                     "bun",
                     "-e",
-                    "const response = await fetch('http://localhost:3000/health', { signal: AbortSignal.timeout(4000) }); process.exit(Number(response.status !== 200))",
+                    "const response = await fetch('http://localhost:3000/health', { signal: AbortSignal.timeout(8000) }); process.exit(Number(response.status !== 200))",
                 ]
-            interval: 10s
-            timeout: 5s
-            retries: 3
-            start_period: 30s
+            interval: 15s
+            timeout: 10s
+            retries: 5
+            start_period: 60s
         depends_on:
             migrate:
                 condition: service_completed_successfully
