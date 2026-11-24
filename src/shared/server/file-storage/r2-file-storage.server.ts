@@ -153,17 +153,26 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
     ): Promise<number> {
         assertValidKey(key);
         const fileStats = await stat(localPath);
-        // R2 refuses a body without a length, so the size goes with it.
-        await client.send(
-            new PutObjectCommand({
-                Bucket: bucket,
-                Key: key,
-                Body: createReadStream(localPath),
-                ContentLength: fileStats.size,
-                ContentType: contentTypeForKey(key),
-            }),
-            { abortSignal: transferSignal(options) },
-        );
+        const body = createReadStream(localPath);
+
+        // On abort the SDK only ends the request and never touches the body, which would keep the
+        // file open (and its disk space held after the workspace is removed) until a restart.
+        try {
+            // R2 refuses a body without a length, so the size goes with it.
+            await client.send(
+                new PutObjectCommand({
+                    Bucket: bucket,
+                    Key: key,
+                    Body: body,
+                    ContentLength: fileStats.size,
+                    ContentType: contentTypeForKey(key),
+                }),
+                { abortSignal: transferSignal(options) },
+            );
+        } finally {
+            body.destroy();
+        }
+
         return fileStats.size;
     }
 

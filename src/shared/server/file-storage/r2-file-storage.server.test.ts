@@ -1,11 +1,34 @@
+import type { ReadStream } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
     InvalidStorageKeyError,
     createR2FileStorage,
 } from "#/shared/server/file-storage/r2-file-storage.server";
+
+const openedStreams = vi.hoisted(() => {
+    const streams: Array<ReadStream> = [];
+    return streams;
+});
+
+vi.mock("node:fs", async (importOriginal) => {
+    const original = await importOriginal<typeof import("node:fs")>();
+
+    return {
+        ...original,
+        createReadStream: (...args: Parameters<typeof original.createReadStream>): ReadStream => {
+            const stream = original.createReadStream(...args);
+            openedStreams.push(stream);
+            return stream;
+        },
+    };
+});
+
+afterEach(() => {
+    openedStreams.splice(0);
+});
 
 const ACCOUNT_ID = "0123456789abcdef0123456789abcdef";
 
@@ -115,6 +138,20 @@ describe("createR2FileStorage cancellation", () => {
         });
 
         await expect(run).rejects.toMatchObject({ name: "AbortError" });
+        await rm(workDirectory, { recursive: true, force: true });
+    });
+
+    it("closes the local file when the run was cancelled before the upload", async () => {
+        const workDirectory = await mkdtemp(path.join(tmpdir(), "nelcota-r2-"));
+        const localFile = path.join(workDirectory, "thumbnail.jpg");
+        await writeFile(localFile, "a frame");
+
+        const run = storage.storeLocalFile("videos/abc/thumbnail.jpg", localFile, {
+            signal: AbortSignal.abort(),
+        });
+
+        await expect(run).rejects.toMatchObject({ name: "AbortError" });
+        expect(openedStreams.map((stream) => stream.destroyed)).toEqual([true]);
         await rm(workDirectory, { recursive: true, force: true });
     });
 });
