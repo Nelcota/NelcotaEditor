@@ -56,7 +56,7 @@ const baseEnvironmentSchema = z.object({
     TRUSTED_PROXY_IP_HEADER: optionalTextSchema.pipe(
         z.string().toLowerCase().regex(HEADER_NAME_PATTERN).optional(),
     ),
-    // Both unset: sign-up and sign-in work without the Cloudflare Turnstile check.
+    // Both unset (development and tests only): sign-up and sign-in skip the Turnstile check.
     TURNSTILE_SITE_KEY: optionalTextSchema,
     TURNSTILE_SECRET_KEY: optionalTextSchema,
     WHISPER_URL: z.url(),
@@ -97,20 +97,30 @@ function checkAuthUrl(environment: BaseEnvironment, context: z.RefinementCtx): v
     }
 }
 
-/** One key without the other would either break sign-up or skip the check silently. */
+const TURNSTILE_VARIABLE_NAMES = ["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"] as const;
+
+/**
+ * Without both keys sign-up and sign-in skip the captcha, so production refuses to start rather
+ * than run unprotected. Development and tests may leave both unset; one key without the other
+ * would either break sign-up or skip the check silently.
+ */
 function checkTurnstileKeys(environment: BaseEnvironment, context: z.RefinementCtx): void {
     const siteKey = environment.TURNSTILE_SITE_KEY;
     const secretKey = environment.TURNSTILE_SECRET_KEY;
 
-    if ((siteKey === undefined) === (secretKey === undefined)) {
+    if (siteKey !== undefined && secretKey !== undefined) {
         return;
     }
 
-    for (const variableName of ["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"]) {
+    if (environment.NODE_ENV !== PRODUCTION && siteKey === undefined && secretKey === undefined) {
+        return;
+    }
+
+    for (const variableName of TURNSTILE_VARIABLE_NAMES) {
         context.addIssue({
             code: "custom",
             path: [variableName],
-            message: "Set both Turnstile keys or neither",
+            message: "Set both Turnstile keys (required in production)",
         });
     }
 }
@@ -151,18 +161,22 @@ export class InvalidEnvironmentError extends Error {
 
 let cachedEnvironment: Environment | null = null;
 
-export function getEnvironment(): Environment {
-    if (cachedEnvironment !== null) {
-        return cachedEnvironment;
-    }
-
-    const result = environmentSchema.safeParse(process.env);
+export function parseEnvironment(variables: Record<string, string | undefined>): Environment {
+    const result = environmentSchema.safeParse(variables);
 
     if (result.success === false) {
         const variableNames = result.error.issues.map((issue) => issue.path.join("."));
         throw new InvalidEnvironmentError(variableNames);
     }
 
-    cachedEnvironment = result.data;
+    return result.data;
+}
+
+export function getEnvironment(): Environment {
+    if (cachedEnvironment !== null) {
+        return cachedEnvironment;
+    }
+
+    cachedEnvironment = parseEnvironment(process.env);
     return cachedEnvironment;
 }
