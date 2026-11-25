@@ -10,6 +10,7 @@ import {
 import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
+import { AccountCreatedCard } from "#/modules/auth/ui/components/account-created-card";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
 import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
 import { CheckEmailCard } from "#/modules/auth/ui/components/check-email-card";
@@ -39,9 +40,14 @@ const SERVER_ERROR_FIELDS = new Map<string, (typeof FIELD_NAMES)[number]>([
 interface SignUpScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
     captchaSiteKey: string | null;
+    /** Off when an admin turned the email-verification switch off: the account opens right away. */
+    isEmailVerificationRequired: boolean;
 }
 
-export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
+export function SignUpScreen({
+    captchaSiteKey,
+    isEmailVerificationRequired,
+}: SignUpScreenProps): ReactNode {
     const track = useTrackPromise();
     const captcha = useCaptcha(captchaSiteKey);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -82,6 +88,10 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
             setErrorMessage(failure);
         },
     });
+
+    if (sentToEmail !== null && isEmailVerificationRequired === false) {
+        return <AccountCreatedCard />;
+    }
 
     if (sentToEmail !== null) {
         return <CheckEmailCard email={sentToEmail} />;
