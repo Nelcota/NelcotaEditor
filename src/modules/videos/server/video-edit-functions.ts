@@ -56,8 +56,7 @@ async function findOwnedFailedClipId(videoId: string, clipId: string): Promise<s
 }
 
 /**
- * Puts one failed clip back in the queue. The pipeline keeps every finished step, so the worker
- * only renders the clips that are not done yet.
+ * Puts the selected failed clip back in the queue and keeps the earlier processing results.
  */
 export const retryClip = createServerFn({ method: "POST" })
     .middleware([authMiddleware])

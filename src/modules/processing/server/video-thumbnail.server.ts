@@ -1,7 +1,7 @@
-import { stat } from "node:fs/promises";
 import path from "node:path";
-import { eq, sql } from "drizzle-orm";
-import { db } from "#/db/database.server";
+import { eq } from "drizzle-orm";
+import { storeProcessedVideoFile } from "#/modules/processing/server/store-processed-video-file.server";
+import { runVideoStorageTransaction } from "#/modules/processing/server/video-storage-transaction.server";
 import type { Video } from "#/modules/video-records/video-records.schema";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { localFileInput } from "#/shared/server/local-media-input.server";
@@ -28,6 +28,7 @@ function pickThumbnailSecond(durationSeconds: number): number {
 interface ThumbnailSource {
     video: Video;
     localSourcePath: string;
+    sourceBytes: number;
     durationSeconds: number;
     /** The run's folder; the frame is written here and then stored. */
     workDirectory: string;
@@ -39,23 +40,29 @@ interface StoredThumbnail {
     thumbnailBytes: number;
 }
 
-/**
- * The source size counts "the original video and its thumbnail", so the quota sees the frame
- * too. Added in place, since the source was just saved with its own size alone.
- */
-async function recordThumbnail(videoId: string, thumbnail: StoredThumbnail): Promise<void> {
+async function recordThumbnail(input: ThumbnailSource, thumbnail: StoredThumbnail): Promise<void> {
+    const { video, sourceBytes } = input;
     const { thumbnailPath, thumbnailBytes } = thumbnail;
+    const totalBytes = sourceBytes + thumbnailBytes;
+    const previousBytes = Math.max(sourceBytes, video.sourceBytes ?? 0);
 
-    await db
-        .update(videos)
-        .set({
-            thumbnailPath,
-            sourceBytes: sql`coalesce(${videos.sourceBytes}, 0) + ${thumbnailBytes}`,
-        })
-        .where(eq(videos.id, videoId));
+    await runVideoStorageTransaction(
+        { userId: video.userId, byteDelta: totalBytes - previousBytes },
+        async (transaction) => {
+            const rows = await transaction
+                .update(videos)
+                .set({ thumbnailPath, sourceBytes: totalBytes })
+                .where(eq(videos.id, video.id))
+                .returning({ id: videos.id });
+
+            if (rows.length === 0) {
+                throw new Error(`Video ${video.id} disappeared before its thumbnail was recorded`);
+            }
+        },
+    );
 }
 
-async function createThumbnail(input: ThumbnailSource): Promise<StoredThumbnail> {
+async function createThumbnail(input: ThumbnailSource): Promise<void> {
     const { video, localSourcePath, durationSeconds, workDirectory, signal } = input;
     const thumbnailPath = path.posix.join(getVideoDirectory(video.id), THUMBNAIL_FILE_NAME);
     const localThumbnailPath = path.join(workDirectory, THUMBNAIL_FILE_NAME);
@@ -77,30 +84,26 @@ async function createThumbnail(input: ThumbnailSource): Promise<StoredThumbnail>
         ],
         { signal },
     );
-    const thumbnailStats = await stat(localThumbnailPath);
-    await getFileStorage().storeLocalFile(thumbnailPath, localThumbnailPath, { signal });
-    return { thumbnailPath, thumbnailBytes: thumbnailStats.size };
+    await storeProcessedVideoFile(
+        { key: thumbnailPath, localPath: localThumbnailPath, signal },
+        (thumbnailBytes) => recordThumbnail(input, { thumbnailPath, thumbnailBytes }),
+    );
 }
 
-/** A frame an earlier run saved; this run has just stored the source size without it. */
-async function measureStoredThumbnail(thumbnailPath: string): Promise<StoredThumbnail> {
-    const thumbnailBytes = await getFileStorage().measureFile(thumbnailPath);
-    return { thumbnailPath, thumbnailBytes };
-}
+async function saveThumbnail(input: ThumbnailSource): Promise<void> {
+    const thumbnailPath = input.video.thumbnailPath;
 
-async function obtainThumbnail(input: ThumbnailSource): Promise<StoredThumbnail> {
-    const storedThumbnailPath = input.video.thumbnailPath;
-
-    if (storedThumbnailPath !== null) {
-        return measureStoredThumbnail(storedThumbnailPath);
+    if (thumbnailPath !== null) {
+        const thumbnailBytes = await getFileStorage().measureFile(thumbnailPath);
+        await recordThumbnail(input, { thumbnailPath, thumbnailBytes });
+        return;
     }
 
     return createThumbnail(input);
 }
 
 /**
- * Saves one frame as the video's thumbnail, once, and counts its size. It runs right after every
- * run saves the source with its size alone, so a frame from an earlier run is counted again here.
+ * Saves one frame as the video's thumbnail and counts it with the source.
  * A thumbnail is a nice-to-have, so a failure is logged and the pipeline goes on; the screen
  * falls back to the mascot. Cancellation is not a failure: it stops the run.
  */
@@ -109,8 +112,7 @@ export async function ensureVideoThumbnail(input: ThumbnailSource): Promise<void
     const signal = input.signal;
 
     try {
-        const thumbnail = await obtainThumbnail(input);
-        await recordThumbnail(videoId, thumbnail);
+        await saveThumbnail(input);
     } catch (error) {
         if (signal.aborted === true) {
             throw error;

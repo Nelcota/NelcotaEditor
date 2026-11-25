@@ -77,8 +77,8 @@ both drivers read the same rows. With `r2`:
 - File routes check the owner as always, then redirect to a signed link (an hour for the owner, ten
   minutes for a shared clip), so the bytes go from R2 to the browser, never through the app.
 - Uploads go straight from the browser to a signed PUT link that only takes the declared size. The
-  bucket's CORS rule allows `PUT` with `content-type` from the app's origin; add each origin that
-  serves the app (`cf r2 buckets cors update`).
+  bucket's CORS rule allows `PUT` with `content-type` and `if-none-match` from the app's origin.
+  Add each origin that serves the app (`cf r2 buckets cors update`).
 - The CSP allows the account's `r2.cloudflarestorage.com` endpoint; signed links do not work on a
   custom domain.
 

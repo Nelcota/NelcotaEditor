@@ -58,14 +58,19 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
         reason: "The browser starts and ends impersonation straight through Better Auth, so only its session hooks, fixed at import, see it",
     },
     {
-        from: "src/modules/processing/server/save-downloaded-source.server.ts",
+        from: "src/modules/processing/server/video-storage-transaction.server.ts",
         to: "src/modules/videos/server/storage-quota.server",
-        reason: "A download's size is only known in the worker, which checks it against the same quota",
+        reason: "The worker checks each new file against the same quota as incoming uploads",
     },
     {
-        from: "src/modules/processing/server/save-downloaded-source.server.ts",
+        from: "src/modules/processing/server/video-storage-transaction.server.ts",
         to: "src/modules/videos/server/video-start-transaction.server",
-        reason: "The download is saved under the same per-user lock as uploads, so both see each other",
+        reason: "The worker records files under the same per-user lock as uploads",
+    },
+    {
+        from: "src/modules/processing/server/video-storage-transaction.server.ts",
+        to: "src/modules/videos/server/pending-uploads.server",
+        reason: "Worker output must leave enough space for pending uploads to finish",
     },
 ];
 

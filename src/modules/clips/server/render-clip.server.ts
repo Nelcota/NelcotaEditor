@@ -19,7 +19,6 @@ import type { Clip } from "#/modules/clips/clips.schema";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
-import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { getVideoDirectory } from "#/shared/server/storage.server";
 
 const TIME_DECIMALS = 3;
@@ -185,36 +184,30 @@ async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Pro
     }
 }
 
-/**
- * Stores the render and points the clip at it. A stored file no row points at would take space
- * the quota never sees, so it is deleted when the row cannot be updated.
- */
-async function saveRenderedClip(
-    clip: Clip,
-    workspace: ClipWorkspace,
-    signal: AbortSignal,
-): Promise<void> {
-    const outputPath = workspace.outputPath;
-    const storage = getFileStorage();
-    const outputBytes = await storage.storeLocalFile(
-        outputPath,
-        path.join(workspace.workingDirectory, workspace.outputFileName),
-        { signal },
-    );
+interface RenderedClipFile {
+    outputPath: string;
+    localPath: string;
+}
 
-    try {
-        await db
-            .update(clips)
-            .set(buildRenderedClipUpdate(outputPath, outputBytes))
-            .where(eq(clips.id, clip.id));
-    } catch (error) {
-        await storage.deleteFile(outputPath);
-        throw error;
+export async function recordRenderedClip(
+    clipId: string,
+    output: { outputPath: string; outputBytes: number },
+    executor: Pick<typeof db, "update">,
+): Promise<void> {
+    const { outputPath, outputBytes } = output;
+    const rows = await executor
+        .update(clips)
+        .set(buildRenderedClipUpdate(outputPath, outputBytes))
+        .where(eq(clips.id, clipId))
+        .returning({ id: clips.id });
+
+    if (rows.length === 0) {
+        throw new Error(`Clip ${clipId} disappeared before its render could be recorded`);
     }
 }
 
-/** Renders one clip in its chosen shape with burned-in captions (unless the style is none) and stores its relative path and size. */
-export async function renderClip(input: RenderClipInput): Promise<void> {
+/** Encodes one clip in the local workspace in its chosen shape and caption style. */
+export async function renderClip(input: RenderClipInput): Promise<RenderedClipFile> {
     const clip = input.clip;
     assertValidRange(clip);
     const workspace = createClipWorkspace(clip, input.workDirectory);
@@ -222,7 +215,10 @@ export async function renderClip(input: RenderClipInput): Promise<void> {
     await mkdir(workspace.workingDirectory, { recursive: true });
     await writeSubtitles(input, workspace);
     await encodeClip(input, workspace);
-    await saveRenderedClip(clip, workspace, input.signal);
+    return {
+        outputPath: workspace.outputPath,
+        localPath: path.join(workspace.workingDirectory, workspace.outputFileName),
+    };
 }
 
 export async function setClipStatus(clipId: string, status: ClipStatus): Promise<void> {

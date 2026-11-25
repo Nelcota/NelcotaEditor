@@ -32,6 +32,7 @@ class InvalidJobPayloadError extends Error {
 interface ProcessVideoJob {
     id: string;
     data: unknown;
+    signal: AbortSignal;
 }
 
 /** The status the video ended in; a video deleted while processing has none. */
@@ -49,12 +50,12 @@ async function readFinalStatus(videoId: string): Promise<string> {
  * Ids and timing only: titles, links and transcripts are the person's data. The job and video ids
  * come from the log context around the job.
  */
-async function processVideoWithLogs(videoId: string): Promise<void> {
+async function processVideoWithLogs(videoId: string, signal: AbortSignal): Promise<void> {
     const startedAt = Date.now();
     logger.info({}, "Job started");
 
     try {
-        await processVideo(videoId);
+        await processVideo(videoId, signal);
     } catch (error) {
         // pg-boss only marks the job failed; this line is the one record of why.
         logger.error({ durationMs: Date.now() - startedAt, error }, "Job threw");
@@ -78,7 +79,9 @@ async function handleJob(job: ProcessVideoJob): Promise<void> {
     }
 
     const videoId = result.data.videoId;
-    await withLogContext({ jobId: job.id, videoId }, () => processVideoWithLogs(videoId));
+    await withLogContext({ jobId: job.id, videoId }, () =>
+        processVideoWithLogs(videoId, job.signal),
+    );
 }
 
 /**

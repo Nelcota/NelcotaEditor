@@ -15,6 +15,7 @@ import {
 import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 import { ensureVideoThumbnail } from "#/modules/processing/server/video-thumbnail.server";
 import { saveDownloadedSource } from "#/modules/processing/server/save-downloaded-source.server";
+import { storeProcessedVideoFile } from "#/modules/processing/server/store-processed-video-file.server";
 import { toStoredVideoTitle } from "#/modules/video-records/model/video-title";
 import type { Video } from "#/modules/video-records/video-records.schema";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
@@ -25,12 +26,16 @@ import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const UNREADABLE_FILE_MESSAGE =
     "Não foi possível ler este arquivo. Exporte o vídeo de novo em MP4 e envie outra vez.";
+// Keep one visible point for probing, storing and preparing the thumbnail.
+const TRANSFER_STAGE_SHARE = 0.95;
+const COMPLETED_STAGE_PERCENT = 100;
 
 export interface VideoSource {
     /** The stored file's key, kept on the video row. */
     sourcePath: string;
     /** A copy ffmpeg can read during this run; it goes with the workspace. */
     localSourcePath: string;
+    sourceBytes: number;
     durationSeconds: number;
 }
 
@@ -51,7 +56,7 @@ function saveDownloadProgress(run: VideoRun, downloadPercent: number): Promise<v
 async function downloadSource(video: Video, context: SourceContext): Promise<DownloadedVideo> {
     const run = toVideoRun(video);
     const saveProgress = (downloadPercent: number): Promise<void> =>
-        saveDownloadProgress(run, downloadPercent);
+        saveDownloadProgress(run, downloadPercent * TRANSFER_STAGE_SHARE);
 
     await saveProgress(0);
     const downloaded = await runWithProgress(
@@ -140,7 +145,7 @@ async function fetchStoredSource(
 ): Promise<string> {
     const run = toVideoRun(video);
     const saveProgress = (downloadPercent: number): Promise<void> =>
-        saveDownloadProgress(run, downloadPercent);
+        saveDownloadProgress(run, downloadPercent * TRANSFER_STAGE_SHARE);
 
     await saveProgress(0);
     return runWithProgress(
@@ -162,7 +167,7 @@ async function prepareStoredSource(
     const localSourcePath = await fetchStoredSource(video, sourcePath, context);
     const checkedSource = await inspectSource(localSourcePath, context.signal);
     await saveVideoSource(video.id, { sourcePath, ...checkedSource });
-    return { sourcePath, localSourcePath, durationSeconds: checkedSource.durationSeconds };
+    return { sourcePath, localSourcePath, ...checkedSource };
 }
 
 /** Stored under the video's folder with the name yt-dlp gave it ("source.mp4"). */
@@ -180,23 +185,19 @@ async function prepareDownloadedSource(video: Video, context: SourceContext): Pr
     const localSourcePath = downloaded.localPath;
     const checkedSource = await inspectSource(localSourcePath, context.signal);
     const sourcePath = toDownloadedSourcePath(video.id, localSourcePath);
-    const storage = getFileStorage();
+    await storeProcessedVideoFile(
+        { key: sourcePath, localPath: localSourcePath, signal: context.signal },
+        (sourceBytes) =>
+            saveDownloadedSource({
+                videoId: video.id,
+                userId: video.userId,
+                sourcePath,
+                sourceBytes,
+                durationSeconds: checkedSource.durationSeconds,
+            }),
+    );
 
-    await storage.storeLocalFile(sourcePath, localSourcePath, { signal: context.signal });
-
-    try {
-        await saveDownloadedSource({
-            videoId: video.id,
-            userId: video.userId,
-            sourcePath,
-            ...checkedSource,
-        });
-    } catch (error) {
-        await storage.deleteFile(sourcePath);
-        throw error;
-    }
-
-    return { sourcePath, localSourcePath, durationSeconds: checkedSource.durationSeconds };
+    return { sourcePath, localSourcePath, ...checkedSource };
 }
 
 async function obtainSource(video: Video, context: SourceContext): Promise<VideoSource> {
@@ -218,9 +219,12 @@ export async function prepareVideoSource(
     await ensureVideoThumbnail({
         video,
         localSourcePath: source.localSourcePath,
+        sourceBytes: source.sourceBytes,
         durationSeconds: source.durationSeconds,
         workDirectory: context.workDirectory,
         signal: context.signal,
     });
+    context.signal.throwIfAborted();
+    await saveDownloadProgress(toVideoRun(video), COMPLETED_STAGE_PERCENT);
     return source;
 }

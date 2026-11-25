@@ -1,5 +1,10 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import {
+    FORMATS_MARKER,
+    PROGRESS_MARKER,
+    createYoutubeDownloadProgressParser,
+} from "#/modules/processing/server/youtube-download-progress.server";
 import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/model/video-status";
 import type { Video } from "#/modules/video-records/video-records.schema";
 import { getEnvironment } from "#/shared/server/env.server";
@@ -13,8 +18,6 @@ const FORMAT_SORT = "vcodec:h264,res:1080,acodec:m4a";
 const CONCURRENT_FRAGMENTS = "4";
 const TITLE_MARKER = "NELCOTA_TITLE ";
 const FILE_MARKER = "NELCOTA_FILE ";
-const PROGRESS_MARKER = "NELCOTA_PROGRESS ";
-const PERCENT_PATTERN = /(\d+(?:\.\d+)?)%/;
 const OUTPUT_FILE_TEMPLATE = "source.%(ext)s";
 const MERGE_OUTPUT_FORMAT = "mp4";
 const COOKIES_FILE_NAME = "youtube-cookies.txt";
@@ -74,7 +77,9 @@ export function buildYtDlpArguments(
         "--progress",
         "--newline",
         "--progress-template",
-        `download:${PROGRESS_MARKER}%(progress._percent_str)s`,
+        `download:${PROGRESS_MARKER}[%(info.format_id)j,%(progress._percent)j]`,
+        "--print",
+        `before_dl:${FORMATS_MARKER}%(requested_formats.:.format_id,format_id)j`,
         "--print",
         `after_move:${TITLE_MARKER}%(title)s`,
         "--print",
@@ -82,32 +87,6 @@ export function buildYtDlpArguments(
         "--",
         url,
     ];
-}
-
-/** yt-dlp downloads video and audio one after the other; showing the maximum keeps the bar monotonic. */
-function createProgressParser(onProgress: (percent: number) => void): (line: string) => void {
-    let highestPercent = 0;
-
-    return (line: string) => {
-        if (line.includes(PROGRESS_MARKER) === false) {
-            return;
-        }
-
-        const match = PERCENT_PATTERN.exec(line);
-
-        if (match === null) {
-            return;
-        }
-
-        const percent = Number(match[1]);
-
-        if (Number.isFinite(percent) === false || percent <= highestPercent) {
-            return;
-        }
-
-        highestPercent = percent;
-        onProgress(percent);
-    };
 }
 
 /**
@@ -136,7 +115,7 @@ async function runYtDlp(url: string, options: DownloadOptions): Promise<string> 
     try {
         return await runCommand("yt-dlp", buildYtDlpArguments(url, outputTemplate, cookiesPath), {
             signal: options.signal,
-            onOutputLine: createProgressParser(options.onProgress),
+            onOutputLine: createYoutubeDownloadProgressParser(options.onProgress),
         });
     } catch (error) {
         if (error instanceof CommandFailedError) {

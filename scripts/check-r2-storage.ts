@@ -9,6 +9,7 @@ const SAMPLE_BYTES = 4096;
 const RANGE_END = 99;
 const HTTP_OK = 200;
 const HTTP_PARTIAL_CONTENT = 206;
+const HTTP_PRECONDITION_FAILED = 412;
 const REQUEST_TIMEOUT_MILLISECONDS = 30_000;
 const DOWNLOAD_DISPOSITION = 'attachment; filename="corte.mp4"';
 
@@ -40,6 +41,7 @@ async function followRedirect(key: string, headers: Headers): Promise<string> {
 async function putBody(uploadUrl: string, byteCount: number): Promise<number> {
     const response = await fetch(uploadUrl, {
         method: "PUT",
+        headers: { "If-None-Match": "*" },
         body: new Uint8Array(byteCount),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MILLISECONDS),
     });
@@ -103,6 +105,11 @@ async function checkSignedUpload(key: string): Promise<void> {
 
     const exactStatus = await putBody(uploadUrl, SAMPLE_BYTES);
     expectCheck(exactStatus === HTTP_OK, "takes an upload of the signed size");
+    const repeatedStatus = await putBody(uploadUrl, SAMPLE_BYTES);
+    expectCheck(
+        repeatedStatus === HTTP_PRECONDITION_FAILED,
+        "keeps the original on a repeated PUT",
+    );
     expectCheck(
         (await getR2FileStorage().measureFile(key)) === SAMPLE_BYTES,
         "stores the uploaded body",

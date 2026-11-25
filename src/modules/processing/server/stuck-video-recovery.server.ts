@@ -1,17 +1,14 @@
 import { inArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { releaseRenderingClips } from "#/modules/clips/server/release-rendering-clips.server";
 import { countFailedRunJobs } from "#/modules/processing/server/count-failed-run-jobs.server";
 import { findVideosWithoutJob } from "#/modules/processing/server/find-videos-without-job.server";
 import type { VideoWithoutJob } from "#/modules/processing/server/find-videos-without-job.server";
+import { finishStoppedVideo } from "#/modules/processing/server/finish-stopped-video.server";
+import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
-import {
-    markVideoCancelled,
-    markVideoFailed,
-    toVideoRun,
-} from "#/modules/video-records/server/video-progress.server";
+import { toVideoRun } from "#/modules/video-records/server/video-progress.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { getJobQueue } from "#/shared/server/job-queue.server";
 import { logger } from "#/shared/server/logger.server";
@@ -36,15 +33,14 @@ async function failUnprocessableVideo(
 ): Promise<void> {
     const videoId = video.id;
 
-    await releaseRenderingClips(videoId, "failed");
-    await markVideoFailed(toVideoRun(video), UNPROCESSABLE_VIDEO_MESSAGE);
+    await finishStoppedVideo(toVideoRun(video), UNPROCESSABLE_VIDEO_MESSAGE);
     logger.warn({ videoId, failedJobCount }, "Video failed after its jobs kept dying");
 }
 
 /** Queued again with its owner as the group, so one person's videos still run one at a time. */
 async function resumeStuckVideo(video: VideoWithoutJob): Promise<void> {
     if (video.cancelRequested === true) {
-        await markVideoCancelled(toVideoRun(video));
+        await finishStoppedVideo(toVideoRun(video), null);
         return;
     }
 
@@ -61,7 +57,7 @@ async function resumeStuckVideo(video: VideoWithoutJob): Promise<void> {
 /** Cancels, fails or queues again each video whose job died; one at a time, the list is capped. */
 export async function resumeStuckVideos(stuckVideos: Array<VideoWithoutJob>): Promise<void> {
     for (const video of stuckVideos) {
-        await resumeStuckVideo(video);
+        await runWithVideoProcessingLock(video.id, () => resumeStuckVideo(video));
     }
 }
 

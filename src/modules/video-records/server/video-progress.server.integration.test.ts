@@ -148,6 +148,18 @@ describe("markVideoCancelled", () => {
 });
 
 describe("markVideoFailed", () => {
+    test("preserves cancellation requested just before a stage fails", async () => {
+        const run = await insertRenderingVideo(new Date(), new Date());
+        await requestVideoCancellation(run.videoId);
+
+        const isFailed = await markVideoFailed(run, "Falhou");
+        const video = await readVideo(run.videoId);
+
+        assert.equal(isFailed, false);
+        assert.equal(video.cancelRequested, true);
+        assert.equal(video.errorMessage, null);
+    });
+
     test("leaves a video that a newer run took", async () => {
         const run = await insertQueuedVideo();
         await requestVideoCancellation(run.videoId);
