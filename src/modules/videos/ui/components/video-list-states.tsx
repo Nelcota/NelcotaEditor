@@ -45,14 +45,21 @@ const CREW_STEPS: ReadonlyArray<{ status: VideoStatus; task: string }> = [
     { status: "rendering", task: "faz os cortes" },
 ];
 
-function CrewSteps() {
+function CrewSteps(): ReactNode {
     return (
-        <ol className="relative mt-5 mb-3 grid w-full max-w-2xl grid-cols-2 gap-y-5 sm:grid-cols-4 sm:before:absolute sm:before:inset-x-1/8 sm:before:top-5.5 sm:before:border-t sm:before:border-dashed sm:before:border-input">
+        <ol
+            aria-label="Etapas do processamento"
+            className="relative mt-5 mb-3 grid w-full max-w-2xl list-decimal grid-cols-2 gap-x-2 gap-y-5 sm:grid-cols-4 sm:before:absolute sm:before:inset-x-1/8 sm:before:top-5.5 sm:before:border-t sm:before:border-dashed sm:before:border-input"
+        >
             {CREW_STEPS.map(({ status, task }) => (
-                <li key={status} className="relative grid justify-items-center">
-                    <Mascot index={STAGE_CREW[status]} className="mb-2 size-11 bg-muted" />
-                    <span className="font-semibold">{CREW_NAMES[status]}</span>
-                    <span className="text-meta text-muted-foreground">{task}</span>
+                <li key={status} className="relative min-w-0 marker:text-transparent">
+                    <div className="grid justify-items-center">
+                        <Mascot index={STAGE_CREW[status]} className="mb-2 size-11 bg-muted" />
+                        <span className="font-semibold">{CREW_NAMES[status]}</span>
+                        <span className="text-meta text-muted-foreground [overflow-wrap:anywhere]">
+                            {task}
+                        </span>
+                    </div>
                 </li>
             ))}
         </ol>
