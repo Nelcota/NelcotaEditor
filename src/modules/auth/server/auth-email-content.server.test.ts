@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "vitest";
-import { AUTH_EMAIL_KINDS, buildAuthEmail } from "#/modules/auth/server/auth-email-content.server";
+import {
+    AUTH_EMAIL_KINDS,
+    buildAuthEmail,
+    pickGreetingName,
+} from "#/modules/auth/server/auth-email-content.server";
 
 const LINK = "https://cortes.nelcota.com/api/auth/verify-email?token=abc&callbackURL=%2Fsign-in";
 
@@ -19,7 +23,7 @@ describe("buildAuthEmail", () => {
         const name = '<a href="https://evil.example">Clique</a>';
 
         const email = buildAuthEmail({
-            kind: "verify-email",
+            kind: "reset-password",
             to: "a@example.com",
             name,
             url: LINK,
@@ -38,5 +42,41 @@ describe("buildAuthEmail", () => {
         });
 
         assert.ok(email.text.startsWith("Olá, Ana."));
+    });
+
+    it("greets without a name when there is none", () => {
+        const email = buildAuthEmail({
+            kind: "existing-account",
+            to: "a@example.com",
+            name: null,
+            url: LINK,
+        });
+
+        assert.ok(email.text.startsWith("Olá."));
+    });
+
+    it("never puts the typed name in the verification email", () => {
+        const email = buildAuthEmail({
+            kind: "verify-email",
+            to: "a@example.com",
+            name: "Visite golpe.example",
+            url: LINK,
+        });
+
+        assert.equal(email.text.includes("golpe.example"), false);
+        assert.equal(email.html.includes("golpe.example"), false);
+    });
+});
+
+describe("pickGreetingName", () => {
+    it("uses the name of an account whose email is confirmed", () => {
+        assert.equal(pickGreetingName({ name: "Ana", emailVerified: true }), "Ana");
+    });
+
+    it("leaves out the name of an account whose email was never confirmed", () => {
+        assert.equal(
+            pickGreetingName({ name: "Visite golpe.example", emailVerified: false }),
+            null,
+        );
     });
 });

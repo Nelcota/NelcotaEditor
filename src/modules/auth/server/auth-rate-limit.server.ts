@@ -19,12 +19,13 @@ const STRICT_RULES = {
 };
 
 /**
- * Always on (Better Auth only enables it in production by default). Memory storage is enough
- * while one web process serves the app; a second instance would need "database" storage.
+ * Always on (Better Auth only enables it in production by default). Database storage keeps the
+ * counters across restarts and deploys, which would otherwise hand every IP a fresh budget, and
+ * shares them between web instances.
  */
 export const AUTH_RATE_LIMIT: BetterAuthOptions["rateLimit"] = {
     enabled: true,
-    storage: "memory",
+    storage: "database",
     window: DEFAULT_WINDOW_SECONDS,
     max: DEFAULT_MAX_REQUESTS,
     customRules: STRICT_RULES,

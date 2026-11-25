@@ -1,4 +1,5 @@
 import type { User } from "better-auth";
+import { pickGreetingName } from "#/modules/auth/server/auth-email-content.server";
 import { enqueueAuthEmail } from "#/modules/auth/server/auth-email-queue.server";
 import { getEnvironment, InvalidEnvironmentError } from "#/shared/server/env.server";
 
@@ -11,11 +12,16 @@ interface EmailLink {
 }
 
 export async function queueVerificationEmail({ user, url }: EmailLink): Promise<void> {
-    await enqueueAuthEmail({ kind: "verify-email", to: user.email, name: user.name, url });
+    await enqueueAuthEmail({ kind: "verify-email", to: user.email, name: null, url });
 }
 
 export async function queueResetPasswordEmail({ user, url }: EmailLink): Promise<void> {
-    await enqueueAuthEmail({ kind: "reset-password", to: user.email, name: user.name, url });
+    await enqueueAuthEmail({
+        kind: "reset-password",
+        to: user.email,
+        name: pickGreetingName(user),
+        url,
+    });
 }
 
 /**
@@ -30,5 +36,10 @@ export async function queueExistingAccountEmail({ user }: { user: User }): Promi
     }
 
     const url = new URL(FORGOT_PASSWORD_PATH, authUrl).toString();
-    await enqueueAuthEmail({ kind: "existing-account", to: user.email, name: user.name, url });
+    await enqueueAuthEmail({
+        kind: "existing-account",
+        to: user.email,
+        name: pickGreetingName(user),
+        url,
+    });
 }

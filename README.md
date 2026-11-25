@@ -154,8 +154,9 @@ but cannot create, alter or drop anything. Media lives in R2; no port but Traefi
 
 Set these in the service's environment: `POSTGRES_PASSWORD`, `APP_DATABASE_PASSWORD`,
 `BETTER_AUTH_URL` (the https origin), `BETTER_AUTH_SECRET`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
-`R2_SECRET_ACCESS_KEY`, `R2_BUCKET` and `DEEPSEEK_API_KEY`. Optional: `TURNSTILE_SITE_KEY` with
-`TURNSTILE_SECRET_KEY`, `WHISPER_MODEL`, `WHISPER_LANGUAGE`, `WORKER_CONCURRENCY` (default 1)
+`R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `DEEPSEEK_API_KEY`, `TURNSTILE_SITE_KEY` and
+`TURNSTILE_SECRET_KEY` (the web server refuses to start in production without them). Optional:
+`WHISPER_MODEL`, `WHISPER_LANGUAGE`, `WORKER_CONCURRENCY` (default 1)
 and `STORAGE_QUOTA_GIGABYTES`. Generate passwords and the secret with `openssl rand -hex 32`.
 
 The app reads the client address from `CF-Connecting-IP`, so web traffic reaches the server only

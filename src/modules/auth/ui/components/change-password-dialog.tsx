@@ -51,6 +51,9 @@ const DONE_INDEX = 2;
 const CURRENT_PASSWORD_MISSING = "Digite a senha que você usa hoje.";
 
 const CURRENT_PASSWORD_REJECTED = toAuthErrorMessage("INVALID_PASSWORD");
+const NEW_PASSWORD_TOO_SHORT = toAuthErrorMessage("PASSWORD_TOO_SHORT");
+const NEW_PASSWORD_TOO_LONG = toAuthErrorMessage("PASSWORD_TOO_LONG");
+const NEW_PASSWORD_INPUT_ID = "new-password";
 
 interface ChangePasswordCallbacks {
     onChanged: () => void;
@@ -65,15 +68,22 @@ function useChangePasswordForm(callbacks: ChangePasswordCallbacks) {
     const form = useForm({
         defaultValues: { currentPassword: "", newPassword: "" },
         validators: { onSubmit: changePasswordSchema },
-        onSubmit: async ({ value }) => {
+        onSubmit: async ({ value, formApi }) => {
             setErrorMessage(null);
             const failure = await runAuthRequest(() =>
                 authClient.changePassword({ ...value, revokeOtherSessions: true }),
             );
 
             if (failure === CURRENT_PASSWORD_REJECTED) {
-                setErrorMessage(failure);
+                // The field's step opens and focuses it, so the error is read with the field.
+                formApi.setErrorMap({ onSubmit: { fields: { currentPassword: failure } } });
                 onCurrentPasswordRejected();
+                return;
+            }
+
+            if (failure === NEW_PASSWORD_TOO_SHORT || failure === NEW_PASSWORD_TOO_LONG) {
+                formApi.setErrorMap({ onSubmit: { fields: { newPassword: failure } } });
+                document.getElementById(NEW_PASSWORD_INPUT_ID)?.focus();
                 return;
             }
 
@@ -225,7 +235,7 @@ function ChangePasswordSteps({ onChanged }: { onChanged: () => void }): ReactNod
                     <form.Field name="newPassword">
                         {(field) => (
                             <TextField
-                                id="new-password"
+                                id={NEW_PASSWORD_INPUT_ID}
                                 label="Senha nova"
                                 type="password"
                                 autoComplete="new-password"

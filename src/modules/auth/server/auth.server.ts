@@ -20,6 +20,7 @@ import {
     ADMIN_ROLE,
     USER_ROLE,
     account,
+    rateLimit,
     session,
     user,
     verification,
@@ -37,6 +38,10 @@ import {
 import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
 import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
+import {
+    isHoneypotFilledInRequest,
+    rejectHoneypotSignUp,
+} from "#/modules/auth/server/sign-up-honeypot.server";
 import {
     AccountHasWorkingVideosError,
     deleteAccountWithFiles,
@@ -113,6 +118,27 @@ async function trimNameWithinLimit(fields: {
     return { data: { name: trimmedName } };
 }
 
+/** The name is checked first, so a caught bot with a bad name gets the same error as a person. */
+async function checkNewUser(
+    newUser: { name?: unknown },
+    context: { path?: string; body?: unknown } | null,
+): Promise<{ data: { name: string } } | undefined> {
+    const result = await trimNameWithinLimit(newUser);
+    rejectHoneypotSignUp(context);
+    return result;
+}
+
+async function notifyOwnerOfSignUpAttempt(
+    attempt: { user: User },
+    request: Request | undefined,
+): Promise<void> {
+    if ((await isHoneypotFilledInRequest(request)) === true) {
+        return;
+    }
+
+    await queueExistingAccountEmail(attempt);
+}
+
 const DELETE_USER_PATH = "/delete-user";
 
 const deleteUserBodySchema = z.object({ password: z.string().min(1) });
@@ -121,16 +147,20 @@ const deleteUserBodySchema = z.object({ password: z.string().min(1) });
  * Better Auth skips the password on /delete-user when the session is under a day old, so anyone
  * at an unlocked computer could erase the account. The password is required every time.
  */
-const requirePasswordToDeleteUser = createAuthMiddleware(async (ctx) => {
-    if (ctx.path !== DELETE_USER_PATH) {
-        return;
-    }
-
-    const result = deleteUserBodySchema.safeParse(ctx.body);
+function requirePasswordToDeleteUser(body: unknown): void {
+    const result = deleteUserBodySchema.safeParse(body);
 
     if (result.success === false) {
         throw new APIError("BAD_REQUEST", { message: "Digite sua senha para excluir a conta." });
     }
+}
+
+const runBeforeAuthHooks = createAuthMiddleware(async (ctx) => {
+    if (ctx.path === DELETE_USER_PATH) {
+        requirePasswordToDeleteUser(ctx.body);
+    }
+
+    return undefined;
 });
 
 const adminPlugin = admin({
@@ -162,7 +192,7 @@ export const auth = betterAuth({
     secret: readAuthSecret(),
     database: drizzleAdapter(db, {
         provider: "pg",
-        schema: { user, session, account, verification },
+        schema: { user, session, account, verification, rateLimit },
     }),
     emailAndPassword: {
         enabled: true,
@@ -172,7 +202,7 @@ export const auth = betterAuth({
         requireEmailVerification: true,
         sendResetPassword: queueResetPasswordEmail,
         revokeSessionsOnPasswordReset: true,
-        onExistingUserSignUp: queueExistingAccountEmail,
+        onExistingUserSignUp: notifyOwnerOfSignUpAttempt,
     },
     emailVerification: {
         sendVerificationEmail: queueVerificationEmail,
@@ -182,9 +212,9 @@ export const auth = betterAuth({
         autoSignInAfterVerification: true,
     },
     session: {
-        // Every server function and every video range request reads the session; a signed cookie
-        // answers that for 5 minutes instead of the database. Trade-off (decided 2026-11-21): a
-        // session ended elsewhere keeps working here for up to 5 minutes.
+        // Every video range request reads the session; a signed cookie answers that for 5 minutes
+        // instead of the database. Trade-off (decided 2026-11-21): a session ended elsewhere keeps
+        // streaming media for up to 5 minutes. Server functions skip the cache (authMiddleware).
         cookieCache: { enabled: true, maxAge: SESSION_COOKIE_CACHE_SECONDS },
     },
     user: {
@@ -195,7 +225,7 @@ export const auth = betterAuth({
         },
     },
     hooks: {
-        before: requirePasswordToDeleteUser,
+        before: runBeforeAuthHooks,
     },
     rateLimit: AUTH_RATE_LIMIT,
     advanced: {
@@ -203,7 +233,7 @@ export const auth = betterAuth({
     },
     databaseHooks: {
         user: {
-            create: { before: trimNameWithinLimit },
+            create: { before: checkNewUser },
             update: { before: trimNameWithinLimit },
         },
         session: {
@@ -217,5 +247,5 @@ export const auth = betterAuth({
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
     // The admin plugin comes first: after the captcha spread, TypeScript would lose the fields it
     // adds to the user and session types.
-    plugins: [adminPlugin, ...buildCaptchaPlugins(), tanstackStartCookies()],
+    plugins: [adminPlugin, ...buildCaptchaPlugins(environment), tanstackStartCookies()],
 });
