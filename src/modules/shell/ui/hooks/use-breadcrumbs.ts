@@ -31,6 +31,7 @@ const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
     "/admin": [ADMIN_CRUMB, { label: "Visão geral" }],
     "/admin/users": [ADMIN_CRUMB, { label: "Usuários" }],
     "/admin/videos": [ADMIN_CRUMB, { label: "Vídeos" }],
+    "/admin/features": [ADMIN_CRUMB, { label: "Recursos" }],
 };
 
 /** "/videos/" and "/videos" are the same page. */
