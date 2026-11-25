@@ -2,8 +2,10 @@ import SearchXIcon from "~icons/lucide/search-x";
 import type { ReactNode } from "react";
 import type { LibraryClip } from "#/modules/videos/model/video-views";
 import type { ClipOrder } from "#/modules/videos/model/clip-order";
+import type { ClipViewMode } from "#/modules/videos/model/clip-view-mode";
 import { ClipsToolbar } from "#/modules/videos/ui/components/clips-toolbar";
 import { ClipCard } from "#/modules/videos/ui/components/clip-card";
+import { ClipTable } from "#/modules/videos/ui/components/clip-table";
 import { pluralize } from "#/shared/ui/pluralize";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
@@ -26,8 +28,8 @@ interface ClipLibraryProps {
     /** Every clip that matches the search, loaded or not. */
     totalCount: number;
     search: { draft: string; setDraft: (value: string) => void };
-    order: ClipOrder;
-    onOrderChange: (order: ClipOrder) => void;
+    order: { value: ClipOrder; onChange: (order: ClipOrder) => void };
+    view: { value: ClipViewMode; onChange: (view: ClipViewMode) => void };
     nextPage: NextPage;
 }
 
@@ -96,9 +98,9 @@ function LoadMoreClips({ nextPage }: { nextPage: NextPage }): ReactNode {
     );
 }
 
-/** The ready clips, searched by their title or their video's, newest or best first. */
+/** The ready clips, searched by their title or their video's, newest or best first, as cards or rows. */
 export function ClipLibrary(props: ClipLibraryProps) {
-    const { items, totalCount, search, order, onOrderChange, nextPage } = props;
+    const { items, totalCount, search, order, view, nextPage } = props;
 
     return (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
@@ -106,13 +108,14 @@ export function ClipLibrary(props: ClipLibraryProps) {
                 query={search.draft}
                 onQueryChange={search.setDraft}
                 order={order}
-                onOrderChange={onOrderChange}
+                view={view}
                 countLabel={describeCount(items.length, totalCount)}
             />
             {items.length === 0 && (
                 <NoClipMatch query={search.draft} onClear={() => search.setDraft("")} />
             )}
-            {items.length > 0 && <ClipGrid items={items} />}
+            {items.length > 0 && view.value === "grid" && <ClipGrid items={items} />}
+            {items.length > 0 && view.value === "table" && <ClipTable items={items} />}
             <LoadMoreClips nextPage={nextPage} />
         </div>
     );
