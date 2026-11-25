@@ -4,14 +4,15 @@ Nelcota turns long videos into vertical short clips with captions. Since 2026-11
 owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
 (the owner asked for nothing bluish) and blue as the one action colour (it was the brand green until
 2026-11-23). The frame holds the
-sidebar: the lowercase logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
+sidebar: the NELCOTA logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
 the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
 (used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
 rounded panel holds the breadcrumb bar (theme toggle trailing) and the page; page titles live in the
 breadcrumb and stay for screen readers only. Light stays available through the toggle.
 
-- **Início** is the reference's Copilot: a greeting from Nel, a box to paste a YouTube link (it starts
-  the video with the saved preferences, shown as pills; the plus opens the full form), and shortcuts.
+- **Início** opens with a greeting from Nel beside the brand mascot (40px on phones, 56px from
+  `sm`), a box to paste a YouTube link (it starts the video with the saved preferences, shown as
+  pills; the plus opens the full form), and shortcuts.
 - **Vídeos** is a table (status pill, source, clips, progress with the stage, date), columns by a
   container query so a narrow panel falls back to compact rows.
 - **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
@@ -80,8 +81,11 @@ Each drawing has one meaning only:
 
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
-  It floats in the app frame. In the expanded sidebar, its eyes also follow the pointer or keyboard
-  focus and blink at irregular intervals while the tab is visible.
+  It floats in the app frame and makes one gentle hop beside the home greeting. In the expanded
+  sidebar and on Home, its eyes follow the pointer, taps or keyboard focus. It blinks at irregular
+  intervals in the sidebar and once during the greeting on Home. On Home the eyes travel farther
+  across the face, and Nel smiles at rest and up close or looks curious when following something
+  farther away.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
   (`src/modules/videos/model/video-mascot.ts`). Gallery cards and the video header.
 - **Objects (16–31) are the crew**, one per stage (`src/modules/videos/model/stage-crew.ts`):
@@ -174,8 +178,8 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
       22px icons. Boxes 10px in (new video card, rows, storage card, account), icon column centred
       at 33, labels at 56, trailing line 22px in (counts, the upload glyph, the account menu glyph,
       the storage card's numbers). The two cards pad 11px to take back their 1px border, so their
-      content starts on the icons' leading edge (22). The brand's 26px ghost centres on the icon
-      column and its name starts on the label line; the 30px photo centres on the icon column too.
+      content starts on the icons' leading edge (22). The brand header pairs the 40px ghost tile
+      with the uppercase NELCOTA wordmark. The 30px photo centres on the icon column.
     - Panel: the breadcrumb and every plain page's content share one text line, 32px in (16px on
       phones). The page bar's trailing icon buttons sit 24px in, so their glyph ends on the page's
       trailing line. The page bar and the sidebar's first row share one centre line.
