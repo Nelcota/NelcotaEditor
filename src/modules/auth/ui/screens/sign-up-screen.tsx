@@ -196,7 +196,7 @@ export function SignUpScreen({
                         <Button
                             type="submit"
                             size="lg"
-                            className="h-12 justify-between font-semibold"
+                            className="h-12 font-semibold"
                             isLoading={isSubmitting}
                             loadingLabel="Criando conta…"
                         >

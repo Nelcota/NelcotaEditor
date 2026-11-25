@@ -114,13 +114,12 @@ export function SignInScreen({
     return (
         <AuthEntryLayout
             title={title}
-            layout="centered"
             accountLink={{ text: "Ainda não tem conta?", label: "Criar conta", to: "/sign-up" }}
         >
             <form
                 method="post"
                 noValidate
-                className="grid gap-6 [&_[data-slot=alert]]:text-base"
+                className="grid gap-5"
                 onSubmit={(event) => {
                     event.preventDefault();
                     track(form.handleSubmit());
@@ -139,7 +138,7 @@ export function SignInScreen({
                             spellCheck={false}
                             autoCapitalize="none"
                             enterKeyHint="next"
-                            fieldSize="large"
+                            className="h-12"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -147,26 +146,29 @@ export function SignInScreen({
                         />
                     )}
                 </form.Field>
-                <form.Field name="password">
-                    {(field) => (
-                        <TextField
-                            id="password"
-                            name="password"
-                            label="Senha"
-                            type="password"
-                            autoComplete="current-password"
-                            required
-                            enterKeyHint="go"
-                            fieldSize="large"
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onValueChange={field.handleChange}
-                            errors={toErrorMessages(field.state.meta.errors)}
-                        />
-                    )}
-                </form.Field>
-                <div className="justify-self-end">
-                    <Link to="/forgot-password" className={cn(textLinkClass, "text-lg")}>
+                <div className="grid gap-2">
+                    <form.Field name="password">
+                        {(field) => (
+                            <TextField
+                                id="password"
+                                name="password"
+                                label="Senha"
+                                type="password"
+                                autoComplete="current-password"
+                                required
+                                enterKeyHint="go"
+                                className="h-12"
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onValueChange={field.handleChange}
+                                errors={toErrorMessages(field.state.meta.errors)}
+                            />
+                        )}
+                    </form.Field>
+                    <Link
+                        to="/forgot-password"
+                        className={cn(textLinkClass, "justify-self-end text-sm")}
+                    >
                         Esqueci minha senha
                     </Link>
                 </div>
@@ -177,12 +179,12 @@ export function SignInScreen({
                         <Button
                             type="submit"
                             size="lg"
-                            className="h-auto min-h-15 justify-between py-3 text-lg font-semibold"
+                            className="h-12 font-semibold"
                             isLoading={isSubmitting}
                             loadingLabel="Entrando…"
                         >
                             Entrar
-                            <ArrowRightIcon aria-hidden="true" className="size-5" />
+                            <ArrowRightIcon aria-hidden="true" className="size-4" />
                         </Button>
                     )}
                 </form.Subscribe>

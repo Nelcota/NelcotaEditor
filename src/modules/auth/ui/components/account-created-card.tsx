@@ -10,8 +10,10 @@ import { Button } from "#/shared/ui/button";
 export function AccountCreatedCard(): ReactNode {
     return (
         <AuthEntryLayout title="Tudo pronto">
-            <p className="text-muted-foreground">Entre com seu email e senha para começar.</p>
-            <Button asChild size="lg">
+            <p className="text-center text-muted-foreground">
+                Entre com seu email e senha para começar.
+            </p>
+            <Button asChild size="lg" className="h-12 font-semibold">
                 <Link to="/sign-in">Entrar</Link>
             </Button>
         </AuthEntryLayout>

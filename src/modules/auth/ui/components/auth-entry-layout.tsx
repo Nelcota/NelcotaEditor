@@ -1,111 +1,65 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { AuthEntryShowcase } from "#/modules/auth/ui/components/auth-entry-showcase";
 import { BrandLogo } from "#/shared/ui/brand-logo";
 import { textLinkClass } from "#/shared/ui/button";
-import { cn } from "#/shared/ui/cn";
 
 interface AuthEntryLayoutProps {
     title: string;
-    layout?: "centered" | "showcase";
+    /** One line under the title, for screens that need to say what happens next. */
+    description?: string;
     accountLink?: {
         text: string;
         label: string;
-        to: "/sign-in" | "/sign-up";
+        to: "/sign-in" | "/sign-up" | "/forgot-password";
     };
     children: ReactNode;
 }
 
+/**
+ * The frame of every way into the app (sign in, sign up, password reset, email confirmation): one
+ * centred column with
+ * the logo, the title, the form and, below a rule, the way to support.
+ */
 export function AuthEntryLayout({
     title,
-    layout = "showcase",
+    description,
     accountLink,
     children,
 }: AuthEntryLayoutProps): ReactNode {
     return (
-        <main
-            className={cn(
-                "grid min-h-dvh bg-frame text-foreground",
-                layout === "centered" && "place-items-center px-6 py-8",
-                layout === "showcase" && "lg:grid-cols-[minmax(22rem,2fr)_minmax(0,3fr)]",
-            )}
-        >
-            <div
-                className={cn(
-                    "grid",
-                    layout === "centered" && "w-full max-w-lg justify-items-center gap-9 sm:gap-10",
-                    layout === "showcase" &&
-                        "grid-rows-[auto_1fr_auto] gap-10 px-6 py-6 sm:px-10 sm:py-8",
-                )}
-            >
+        <main className="grid min-h-dvh place-items-center bg-frame px-6 py-10 text-foreground">
+            <div className="grid w-full max-w-md justify-items-center gap-10">
                 <header className="min-w-0">
-                    <BrandLogo
-                        className={cn(
-                            layout === "centered" &&
-                                "gap-3 text-3xl whitespace-normal sm:text-4xl [&>svg]:h-9 sm:[&>svg]:h-10",
-                            layout === "showcase" && "text-logo",
-                        )}
-                    />
+                    <BrandLogo className="gap-3 text-3xl whitespace-normal [&>svg]:h-9" />
                 </header>
-                <section
-                    aria-labelledby="auth-entry-title"
-                    className={cn(
-                        "grid w-full min-w-0 self-center justify-self-center",
-                        layout === "centered" && "gap-8",
-                        layout === "showcase" && "max-w-sm gap-7",
-                    )}
-                >
-                    <h1
-                        id="auth-entry-title"
-                        className={cn(
-                            "font-extrabold tracking-display",
-                            layout === "centered" && "text-center text-display sm:text-5xl",
-                            layout === "showcase" && "text-4xl",
+                <section aria-labelledby="auth-entry-title" className="grid w-full min-w-0 gap-8">
+                    <div className="grid gap-3 text-center">
+                        <h1
+                            id="auth-entry-title"
+                            className="text-center text-display font-extrabold tracking-display text-balance"
+                        >
+                            {title}
+                        </h1>
+                        {description !== undefined && (
+                            <p className="text-pretty text-muted-foreground">{description}</p>
                         )}
-                    >
-                        {title}
-                    </h1>
+                    </div>
                     {children}
                     {accountLink !== undefined && (
-                        <p
-                            className={cn(
-                                "flex flex-wrap items-baseline gap-x-2 gap-y-1 text-muted-foreground",
-                                layout === "centered" && "justify-center text-base sm:text-lg",
-                                layout === "showcase" && "text-sm",
-                            )}
-                        >
+                        <p className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1 text-muted-foreground">
                             {accountLink.text}
-                            <Link
-                                to={accountLink.to}
-                                className={cn(
-                                    textLinkClass,
-                                    layout === "centered" && "text-base sm:text-lg",
-                                )}
-                            >
+                            <Link to={accountLink.to} className={textLinkClass}>
                                 {accountLink.label}
                             </Link>
                         </p>
                     )}
                 </section>
-                <footer
-                    className={cn(
-                        "border-t border-border",
-                        layout === "centered" && "w-full pt-5 text-center",
-                        layout === "showcase" && "pt-4",
-                    )}
-                >
-                    <Link
-                        to="/contact"
-                        className={cn(
-                            textLinkClass,
-                            layout === "centered" && "text-base sm:text-lg",
-                        )}
-                    >
+                <footer className="w-full border-t border-border pt-5 text-center">
+                    <Link to="/contact" className={textLinkClass}>
                         Fale com o suporte
                     </Link>
                 </footer>
             </div>
-            {layout === "showcase" && <AuthEntryShowcase />}
         </main>
     );
 }

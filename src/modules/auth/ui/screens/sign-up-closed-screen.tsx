@@ -9,7 +9,9 @@ export function SignUpClosedScreen(): ReactNode {
             title="Cadastros fechados"
             accountLink={{ text: "Já tem conta?", label: "Entrar", to: "/sign-in" }}
         >
-            <p className="text-muted-foreground">{SIGN_UP_CLOSED_MESSAGE} Volte mais tarde.</p>
+            <p className="text-center text-muted-foreground">
+                {SIGN_UP_CLOSED_MESSAGE} Volte mais tarde.
+            </p>
         </AuthEntryLayout>
     );
 }

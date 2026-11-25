@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { NEW_PASSWORD_HINT, resetPasswordSchema } from "#/modules/auth/model/auth-forms";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
-import { AuthCard } from "#/modules/auth/ui/components/auth-card";
+import { AuthEntryLayout } from "#/modules/auth/ui/components/auth-entry-layout";
 import { Alert } from "#/shared/ui/alert";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -17,9 +17,8 @@ import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 const FIELD_NAMES = ["newPassword"] as const;
 
-const CARD_TEXT = {
-    eyebrow: "Nova senha",
-    title: { lead: "Escolha uma", emphasis: "nova senha" },
+const ENTRY_TEXT = {
+    title: "Escolha uma nova senha",
     description: "Depois de salvar, entre com a nova senha em todos os aparelhos.",
 } as const;
 
@@ -30,16 +29,16 @@ interface ResetPasswordScreenProps {
 
 function ExpiredLinkNotice(): ReactNode {
     return (
-        <AuthCard
-            {...CARD_TEXT}
-            footer={{
+        <AuthEntryLayout
+            {...ENTRY_TEXT}
+            accountLink={{
                 text: "Precisa de outro?",
-                linkLabel: "Pedir novo link",
-                linkTo: "/forgot-password",
+                label: "Pedir novo link",
+                to: "/forgot-password",
             }}
         >
             <Alert tone="danger">Este link expirou ou já foi usado.</Alert>
-        </AuthCard>
+        </AuthEntryLayout>
     );
 }
 
@@ -68,13 +67,13 @@ function ResetPasswordForm({ token }: { token: string }): ReactNode {
     });
 
     return (
-        <AuthCard
-            {...CARD_TEXT}
-            footer={{ text: "Lembrou a senha?", linkLabel: "Entrar", linkTo: "/sign-in" }}
+        <AuthEntryLayout
+            {...ENTRY_TEXT}
+            accountLink={{ text: "Lembrou a senha?", label: "Entrar", to: "/sign-in" }}
         >
             <form
                 noValidate
-                className="grid gap-4"
+                className="grid gap-5"
                 onSubmit={(event) => {
                     event.preventDefault();
                     track(form.handleSubmit());
@@ -89,6 +88,7 @@ function ResetPasswordForm({ token }: { token: string }): ReactNode {
                             autoComplete="new-password"
                             enterKeyHint="go"
                             hint={NEW_PASSWORD_HINT}
+                            className="h-12"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -102,7 +102,7 @@ function ResetPasswordForm({ token }: { token: string }): ReactNode {
                         <Button
                             type="submit"
                             size="lg"
-                            className="h-11"
+                            className="h-12 font-semibold"
                             disabled={isSubmitting}
                             aria-busy={isSubmitting}
                         >
@@ -112,7 +112,7 @@ function ResetPasswordForm({ token }: { token: string }): ReactNode {
                     )}
                 </form.Subscribe>
             </form>
-        </AuthCard>
+        </AuthEntryLayout>
     );
 }
 
