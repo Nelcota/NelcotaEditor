@@ -1,11 +1,12 @@
 import RotateCwIcon from "~icons/lucide/rotate-cw";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useId } from "react";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useDeferredValue, useId, useState } from "react";
 import type { ReactNode } from "react";
 import { myTicketsQueryOptions } from "#/modules/support/model/support-queries";
 import { TicketTable } from "#/modules/support/ui/components/ticket-table";
 import { TopicChoice } from "#/modules/support/ui/components/topic-choice";
 import { AsyncButton } from "#/shared/ui/async-button";
+import { SearchField } from "#/shared/ui/search-field";
 import { Skeleton } from "#/shared/ui/skeleton";
 
 const SKELETON_ROW_COUNT = 3;
@@ -24,15 +25,29 @@ function ConversationsLoading(): ReactNode {
 /** Below the doors: the person's conversations with their states, or one line when none yet. */
 function Conversations(): ReactNode {
     const headingId = useId();
-    const ticketsQuery = useInfiniteQuery(myTicketsQueryOptions());
+    const [search, setSearch] = useState("");
+    // Typing stays responsive; the list follows once the text settles.
+    const query = useDeferredValue(search.trim());
+    const ticketsQuery = useInfiniteQuery({
+        ...myTicketsQueryOptions(query),
+        placeholderData: keepPreviousData,
+    });
     const pages = ticketsQuery.data?.pages ?? [];
     const tickets = pages.flatMap((page) => page.rows);
 
     return (
         <section aria-labelledby={headingId} className="grid gap-3">
-            <h2 id={headingId} className="text-lg font-bold">
-                Suas conversas
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 id={headingId} className="text-lg font-bold">
+                    Suas conversas
+                </h2>
+                <SearchField
+                    label="Buscar nas suas conversas"
+                    placeholder="Buscar"
+                    value={search}
+                    onValueChange={setSearch}
+                />
+            </div>
             {ticketsQuery.isPending === true && <ConversationsLoading />}
             {ticketsQuery.isError === true && pages.length === 0 && (
                 <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-card-border p-4">
@@ -45,9 +60,14 @@ function Conversations(): ReactNode {
                     </AsyncButton>
                 </div>
             )}
-            {ticketsQuery.isSuccess === true && tickets.length === 0 && (
+            {ticketsQuery.isSuccess === true && tickets.length === 0 && query.length === 0 && (
                 <p className="text-muted-foreground">
                     Nenhuma conversa ainda. Escolha uma área acima para começar.
+                </p>
+            )}
+            {ticketsQuery.isSuccess === true && tickets.length === 0 && query.length > 0 && (
+                <p role="status" className="text-muted-foreground">
+                    Nenhuma conversa com “{query}”.
                 </p>
             )}
             {tickets.length > 0 && (

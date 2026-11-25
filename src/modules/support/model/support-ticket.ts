@@ -78,6 +78,13 @@ export type TicketCursor = z.infer<typeof ticketCursorSchema>;
 
 export const ticketListInputSchema = z.object({ cursor: ticketCursorSchema.nullable() });
 
+/** The person's own list also searches: words in the subject or the conversation's number. */
+export const myTicketListInputSchema = ticketListInputSchema.extend({
+    query: z.string().trim().max(MAX_SUBJECT_LENGTH).default(""),
+});
+
+export type MyTicketListRequest = z.output<typeof myTicketListInputSchema>;
+
 /** "Relatar problema" on a failed video brings its id; anything else in the URL is ignored. */
 export const newTicketSearchSchema = z.object({
     videoId: z.uuid().optional().catch(undefined),

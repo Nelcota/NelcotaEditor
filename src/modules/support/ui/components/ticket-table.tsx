@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { TICKET_TOPIC_LABELS } from "#/modules/support/model/support-ticket";
-import { describeTicketStatus, formatTicketNumber } from "#/modules/support/model/ticket-display";
+import { formatTicketNumber } from "#/modules/support/model/ticket-display";
 import type { CustomerTicketRow } from "#/modules/support/model/support-views";
+import { TicketStatusPill } from "#/modules/support/ui/components/ticket-status-pill";
 import { TicketTopicIcon } from "#/modules/support/ui/components/ticket-topic-icon";
 import { Button } from "#/shared/ui/button";
 import { formatDateTime } from "#/shared/ui/format";
-import { StatusBadge } from "#/shared/ui/status-badge";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 
 export interface NextTicketPage {
@@ -20,7 +20,6 @@ const HEAD_CELL_CLASS = "px-4 py-2.5 text-start text-xs font-medium text-muted-f
 
 /** The whole row opens the conversation; the dot and its spoken words mark an unread answer. */
 function TicketTableRow({ ticket }: { ticket: CustomerTicketRow }): ReactNode {
-    const status = describeTicketStatus(ticket.status);
     const topicLabel = TICKET_TOPIC_LABELS[ticket.topic];
 
     return (
@@ -45,7 +44,7 @@ function TicketTableRow({ ticket }: { ticket: CustomerTicketRow }): ReactNode {
                     {formatTicketNumber(ticket.number)} · {topicLabel}
                 </span>
                 <span className="mt-2 flex sm:hidden">
-                    <StatusBadge tone={status.tone} label={status.label} />
+                    <TicketStatusPill status={ticket.status} />
                 </span>
             </td>
             <td className="px-4 py-3 text-meta text-muted-foreground max-md:hidden">
@@ -55,7 +54,7 @@ function TicketTableRow({ ticket }: { ticket: CustomerTicketRow }): ReactNode {
                 </span>
             </td>
             <td className="px-4 py-3 max-sm:hidden">
-                <StatusBadge tone={status.tone} label={status.label} />
+                <TicketStatusPill status={ticket.status} />
             </td>
             <td className="px-4 py-3 text-meta whitespace-nowrap text-muted-foreground tabular-nums max-sm:hidden">
                 <time dateTime={ticket.lastMessageAt}>{formatDateTime(ticket.lastMessageAt)}</time>

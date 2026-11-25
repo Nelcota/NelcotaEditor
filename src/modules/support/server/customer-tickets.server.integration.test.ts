@@ -64,7 +64,7 @@ describe("openTicket", () => {
         });
 
         const ticket = await findCustomerTicket({ userId, ticketId });
-        const page = await listCustomerTickets(userId, null);
+        const page = await listCustomerTickets(userId, { cursor: null, query: "" });
         expect(ticket?.topic).toBe("editor");
         expect(page.rows.map((row) => row.topic)).toEqual(["editor"]);
     });
@@ -125,6 +125,40 @@ describe("openTicket", () => {
     });
 });
 
+describe("listCustomerTickets search", () => {
+    it("finds conversations by words in the subject", async () => {
+        const userId = await createTestAccount();
+        await openSimpleTicket(userId, "Legenda sumiu");
+        await openSimpleTicket(userId, "Vídeo travou");
+
+        const page = await listCustomerTickets(userId, { cursor: null, query: "legenda" });
+
+        expect(page.rows.map((row) => row.subject)).toEqual(["Legenda sumiu"]);
+    });
+
+    it("finds a conversation by its number", async () => {
+        const userId = await createTestAccount();
+        const ticketId = await openSimpleTicket(userId);
+        const ticket = await findCustomerTicket({ userId, ticketId });
+
+        const page = await listCustomerTickets(userId, {
+            cursor: null,
+            query: `#${ticket?.number}`,
+        });
+
+        expect(page.rows.map((row) => row.id)).toEqual([ticketId]);
+    });
+
+    it("treats LIKE wildcards as plain text", async () => {
+        const userId = await createTestAccount();
+        await openSimpleTicket(userId, "Vídeo travou");
+
+        const page = await listCustomerTickets(userId, { cursor: null, query: "%" });
+
+        expect(page.rows).toEqual([]);
+    });
+});
+
 describe("another person's ticket", () => {
     it("is not found", async () => {
         const ticketId = await openSimpleTicket(await createTestAccount());
@@ -154,7 +188,7 @@ describe("another person's ticket", () => {
         await openSimpleTicket(await createTestAccount());
         const userId = await createTestAccount();
 
-        expect((await listCustomerTickets(userId, null)).rows).toEqual([]);
+        expect((await listCustomerTickets(userId, { cursor: null, query: "" })).rows).toEqual([]);
     });
 });
 

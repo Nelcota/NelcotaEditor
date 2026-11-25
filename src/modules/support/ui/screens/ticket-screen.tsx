@@ -1,7 +1,6 @@
 import CheckIcon from "~icons/lucide/check";
 import ChevronLeftIcon from "~icons/lucide/chevron-left";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
-import SquarePlayIcon from "~icons/lucide/square-play";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -10,14 +9,16 @@ import {
     invalidateSupportQueries,
     myTicketQueryOptions,
 } from "#/modules/support/model/support-queries";
-import { TICKET_TOPIC_LABELS, messageBodySchema } from "#/modules/support/model/support-ticket";
+import { TICKET_TOPIC_LABELS } from "#/modules/support/model/support-ticket";
 import type { CustomerTicketDetails } from "#/modules/support/model/support-views";
-import { describeTicketStatus, formatTicketNumber } from "#/modules/support/model/ticket-display";
+import { formatTicketNumber } from "#/modules/support/model/ticket-display";
 import {
     closeMyTicket,
     markMyTicketRead,
     replyToMyTicket,
 } from "#/modules/support/server/support-functions";
+import { TicketReplyCard } from "#/modules/support/ui/components/ticket-reply-card";
+import { TicketStatusPill } from "#/modules/support/ui/components/ticket-status-pill";
 import { TicketTimeline } from "#/modules/support/ui/components/ticket-timeline";
 import { TicketTopicIcon } from "#/modules/support/ui/components/ticket-topic-icon";
 import { AsyncButton } from "#/shared/ui/async-button";
@@ -26,8 +27,6 @@ import { EmptyState } from "#/shared/ui/empty-state";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { formatDateTime } from "#/shared/ui/format";
 import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
-import { ReplyForm } from "#/shared/ui/reply-form";
-import { StatusBadge } from "#/shared/ui/status-badge";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 
 const CLOSE_FAILED_MESSAGE = "Não foi possível marcar como resolvida. Tente de novo.";
@@ -59,8 +58,6 @@ function ResolveButton({ ticketId }: { ticketId: string }): ReactNode {
 }
 
 function TicketMeta({ ticket }: { ticket: CustomerTicketDetails }): ReactNode {
-    const video = ticket.video;
-
     return (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-meta text-muted-foreground">
             <span className="grid size-8 place-items-center rounded-lg bg-secondary text-foreground [&>svg]:size-4">
@@ -70,23 +67,11 @@ function TicketMeta({ ticket }: { ticket: CustomerTicketDetails }): ReactNode {
                 {formatTicketNumber(ticket.number)} · {TICKET_TOPIC_LABELS[ticket.topic]} · aberta
                 em {formatDateTime(ticket.createdAt)}
             </span>
-            {video !== null && (
-                <Link
-                    to="/videos/$videoId"
-                    params={{ videoId: video.id }}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-0.5 font-semibold text-foreground outline-none hover:bg-accent focus-visible:ring-4 focus-visible:ring-ring [&>svg]:size-4"
-                >
-                    <SquarePlayIcon aria-hidden="true" />
-                    {video.title}
-                </Link>
-            )}
         </div>
     );
 }
 
 function TicketHeader({ ticket }: { ticket: CustomerTicketDetails }): ReactNode {
-    const status = describeTicketStatus(ticket.status);
-
     return (
         <header className="grid gap-3">
             <Link
@@ -102,7 +87,7 @@ function TicketHeader({ ticket }: { ticket: CustomerTicketDetails }): ReactNode 
                     {ticket.subject}
                 </h1>
                 <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge tone={status.tone} label={status.label} />
+                    <TicketStatusPill status={ticket.status} />
                     {ticket.status !== "closed" && <ResolveButton ticketId={ticket.id} />}
                 </div>
             </div>
@@ -134,18 +119,14 @@ function TicketConversation({ ticket }: { ticket: CustomerTicketDetails }): Reac
     return (
         <div className="grid max-w-3xl grid-cols-[minmax(0,1fr)] gap-8">
             <TicketHeader ticket={ticket} />
-            <TicketTimeline messages={ticket.messages} />
-            <div className="rounded-2xl border border-card-border bg-card p-4 sm:p-5">
-                <ReplyForm
-                    messageSchema={messageBodySchema}
-                    label="Responder"
-                    hint={hint}
-                    onSend={async (message) => {
-                        await replyToMyTicket({ data: { ticketId, message } });
-                        await invalidateSupportQueries(queryClient);
-                    }}
-                />
-            </div>
+            <TicketTimeline messages={ticket.messages} video={ticket.video} />
+            <TicketReplyCard
+                hint={hint}
+                onSend={async (message) => {
+                    await replyToMyTicket({ data: { ticketId, message } });
+                    await invalidateSupportQueries(queryClient);
+                }}
+            />
         </div>
     );
 }

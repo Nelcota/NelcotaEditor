@@ -12,6 +12,9 @@ const TOPIC_DESCRIPTIONS: Readonly<Record<TicketTopic, string>> = {
     clips: "Meus cortes, Painel, vídeos que travaram.",
 };
 
+/** The board's lead door: Editor Oculto is the main product. */
+const LEAD_TOPIC: TicketTopic = "editor";
+
 interface TopicChoiceProps {
     /** A video the conversation is about, kept when the person picks the area. */
     videoId?: string;
@@ -27,14 +30,15 @@ export function TopicChoice({ videoId, selected }: TopicChoiceProps): ReactNode 
                 <li
                     key={topic}
                     className={cn(
-                        "relative flex items-center gap-4 rounded-2xl border border-card-border bg-card p-4 transition-[border-color] hover:border-input",
-                        selected === topic && "border-primary hover:border-primary",
+                        "group relative flex items-center gap-4 rounded-2xl border border-card-border bg-card p-4 transition-[border-color] hover:border-primary",
+                        (selected ?? LEAD_TOPIC) === topic && "border-primary",
                     )}
                 >
                     <span
                         className={cn(
-                            "grid size-11 shrink-0 place-items-center rounded-xl bg-secondary [&>svg]:size-5",
-                            selected === topic && "bg-primary-solid text-primary-foreground",
+                            "grid size-11 shrink-0 place-items-center rounded-xl bg-secondary transition-colors group-hover:bg-primary-solid group-hover:text-primary-foreground [&>svg]:size-5",
+                            (selected ?? LEAD_TOPIC) === topic &&
+                                "bg-primary-solid text-primary-foreground",
                         )}
                     >
                         <TicketTopicIcon topic={topic} />

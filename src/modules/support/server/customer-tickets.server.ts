@@ -1,4 +1,5 @@
-import { and, count, desc, eq, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, ne, or, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "#/db/database.server";
 import { assertFeatureEnabled } from "#/modules/app-switches/server/app-switches.server";
@@ -11,7 +12,7 @@ import {
     SUPPORT_PAGE_SIZE,
 } from "#/modules/support/model/support-ticket";
 import type {
-    TicketCursor,
+    MyTicketListRequest,
     TicketStatus,
     TicketTopic,
     newTicketSchema,
@@ -35,6 +36,7 @@ import {
 import { supportTickets } from "#/modules/support/support.schema";
 import { findOwnedVideoOrNull } from "#/modules/video-records/server/find-owned-video.server";
 import { videos } from "#/modules/video-records/video-records.schema";
+import { toContainsPattern } from "#/shared/server/like-pattern.server";
 
 type NewTicket = z.output<typeof newTicketSchema>;
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -139,10 +141,30 @@ export async function openTicket(userId: string, ticket: NewTicket): Promise<str
     });
 }
 
+const TICKET_NUMBER_PATTERN = /^#?(\d{1,9})$/u;
+
+/** "#1004" or "1004" finds that conversation; any other text searches the subjects. */
+function toTicketSearchCondition(query: string): SQL | undefined {
+    if (query.length === 0) {
+        return undefined;
+    }
+
+    const subjectMatch = ilike(supportTickets.subject, toContainsPattern(query));
+    const digits = TICKET_NUMBER_PATTERN.exec(query)?.[1];
+
+    if (digits === undefined) {
+        return subjectMatch;
+    }
+
+    return or(subjectMatch, eq(supportTickets.number, Number(digits)));
+}
+
 export async function listCustomerTickets(
     userId: string,
-    cursor: TicketCursor | null,
+    request: MyTicketListRequest,
 ): Promise<TicketPage<CustomerTicketRow>> {
+    const { cursor, query } = request;
+
     const rows = await db
         .select({
             id: supportTickets.id,
@@ -156,7 +178,13 @@ export async function listCustomerTickets(
         })
         .from(supportTickets)
         .leftJoin(videos, eq(videos.id, supportTickets.videoId))
-        .where(and(eq(supportTickets.userId, userId), afterTicketCursor(cursor, "newest")))
+        .where(
+            and(
+                eq(supportTickets.userId, userId),
+                toTicketSearchCondition(query),
+                afterTicketCursor(cursor, "newest"),
+            ),
+        )
         .orderBy(desc(supportTickets.lastMessageAt), desc(supportTickets.id))
         .limit(SUPPORT_PAGE_SIZE + 1);
     const { pageRows, nextCursor } = splitTicketPage(rows, SUPPORT_PAGE_SIZE);
