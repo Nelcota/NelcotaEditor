@@ -2,7 +2,10 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { resolveUploadTitle } from "#/modules/videos/model/resolve-upload-title";
 import type { StartVideoUploadInput } from "#/modules/videos/model/video-upload-input";
-import { summarizePendingUploads } from "#/modules/videos/server/pending-uploads.server";
+import {
+    UPLOAD_RESERVATION_MILLISECONDS,
+    summarizePendingUploads,
+} from "#/modules/videos/server/pending-uploads.server";
 import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
@@ -16,8 +19,6 @@ import { getVideoDirectory } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const SOURCE_FILE_NAME = "source";
-// Long enough for 5 GB on a slow connection; an abandoned upload holds its slot no longer.
-const RESERVATION_MILLISECONDS = 6 * 60 * 60 * 1000;
 
 export class UploadTooLargeError extends UserFacingError {
     constructor() {
@@ -91,7 +92,7 @@ export async function reserveVideoUpload(
                 requestedClipCount: input.clipCount,
                 clipLength: input.clipLength,
                 transcriptionLanguage: input.language,
-                expiresAt: new Date(Date.now() + RESERVATION_MILLISECONDS),
+                expiresAt: new Date(Date.now() + UPLOAD_RESERVATION_MILLISECONDS),
             })
             .returning();
         const upload = rows[0];

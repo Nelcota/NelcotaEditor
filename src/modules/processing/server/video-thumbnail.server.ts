@@ -31,6 +31,7 @@ interface ThumbnailSource {
     durationSeconds: number;
     /** The run's folder; the frame is written here and then stored. */
     workDirectory: string;
+    signal: AbortSignal;
 }
 
 interface StoredThumbnail {
@@ -55,25 +56,29 @@ async function recordThumbnail(videoId: string, thumbnail: StoredThumbnail): Pro
 }
 
 async function createThumbnail(input: ThumbnailSource): Promise<StoredThumbnail> {
-    const { video, localSourcePath, durationSeconds, workDirectory } = input;
+    const { video, localSourcePath, durationSeconds, workDirectory, signal } = input;
     const thumbnailPath = path.posix.join(getVideoDirectory(video.id), THUMBNAIL_FILE_NAME);
     const localThumbnailPath = path.join(workDirectory, THUMBNAIL_FILE_NAME);
 
-    await runCommand("ffmpeg", [
-        "-y",
-        "-ss",
-        pickThumbnailSecond(durationSeconds).toFixed(2),
-        ...localFileInput(localSourcePath),
-        "-frames:v",
-        "1",
-        "-vf",
-        `scale=${THUMBNAIL_WIDTH}:-2`,
-        "-q:v",
-        JPEG_QUALITY,
-        localThumbnailPath,
-    ]);
+    await runCommand(
+        "ffmpeg",
+        [
+            "-y",
+            "-ss",
+            pickThumbnailSecond(durationSeconds).toFixed(2),
+            ...localFileInput(localSourcePath),
+            "-frames:v",
+            "1",
+            "-vf",
+            `scale=${THUMBNAIL_WIDTH}:-2`,
+            "-q:v",
+            JPEG_QUALITY,
+            localThumbnailPath,
+        ],
+        { signal },
+    );
     const thumbnailStats = await stat(localThumbnailPath);
-    await getFileStorage().storeLocalFile(thumbnailPath, localThumbnailPath);
+    await getFileStorage().storeLocalFile(thumbnailPath, localThumbnailPath, { signal });
     return { thumbnailPath, thumbnailBytes: thumbnailStats.size };
 }
 
@@ -97,15 +102,20 @@ async function obtainThumbnail(input: ThumbnailSource): Promise<StoredThumbnail>
  * Saves one frame as the video's thumbnail, once, and counts its size. It runs right after every
  * run saves the source with its size alone, so a frame from an earlier run is counted again here.
  * A thumbnail is a nice-to-have, so a failure is logged and the pipeline goes on; the screen
- * falls back to the mascot.
+ * falls back to the mascot. Cancellation is not a failure: it stops the run.
  */
 export async function ensureVideoThumbnail(input: ThumbnailSource): Promise<void> {
     const videoId = input.video.id;
+    const signal = input.signal;
 
     try {
         const thumbnail = await obtainThumbnail(input);
         await recordThumbnail(videoId, thumbnail);
     } catch (error) {
+        if (signal.aborted === true) {
+            throw error;
+        }
+
         logger.warn({ videoId, error }, "Could not create the video thumbnail");
     }
 }

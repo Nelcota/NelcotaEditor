@@ -1,7 +1,8 @@
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 // Better Auth core tables (https://www.better-auth.com/docs/concepts/database#core-schema), plus
-// the admin plugin's fields (https://www.better-auth.com/docs/plugins/admin#schema).
+// the admin plugin's fields (https://www.better-auth.com/docs/plugins/admin#schema) and the rate
+// limit table (https://www.better-auth.com/docs/concepts/rate-limit).
 
 export const USER_ROLE = "user";
 export const ADMIN_ROLE = "admin";
@@ -84,4 +85,18 @@ export const verification = pgTable(
             .notNull(),
     },
     (table) => [index("verification_identifier_idx").on(table.identifier)],
+);
+
+/** Better Auth's rate limit counters: one row per client IP and path, so limits survive restarts. */
+export const rateLimit = pgTable(
+    "rate_limit",
+    {
+        id: text("id").primaryKey(),
+        key: text("key").notNull().unique(),
+        count: integer("count").notNull(),
+        // Milliseconds since the epoch, as Better Auth writes it.
+        lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+    },
+    // Better Auth deletes expired rows by this column.
+    (table) => [index("rate_limit_last_request_idx").on(table.lastRequest)],
 );

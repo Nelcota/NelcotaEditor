@@ -1,6 +1,6 @@
-// Vitest setup for the integration project. Its environment comes from .env.test, but Vite also
-// reads .env, so a missing .env.test would leave the development DATABASE_URL in place and the
-// tests would write to it. Stop before any test connects.
+// Vitest setup for the integration project. Its environment comes from .env.test, but the app's
+// settings also read .env, so a missing .env.test would leave the development DATABASE_URL in place
+// and the tests would write to it. Stop before any test connects.
 const TEST_DATABASE_SUFFIX = "/nelcota_test";
 
 const databaseUrl = process.env.DATABASE_URL ?? "";

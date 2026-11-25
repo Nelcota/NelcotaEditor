@@ -21,10 +21,8 @@ import {
     findOwnedVideoOrNull,
 } from "#/modules/video-records/server/find-owned-video.server";
 import { assertVideoStartAllowed } from "#/modules/videos/server/video-start-limits.server";
-import {
-    deleteStoppedVideo,
-    requestVideoCancellation,
-} from "#/modules/video-records/server/stop-video.server";
+import { requestVideoCancellation } from "#/modules/video-records/server/stop-video.server";
+import { deleteVideoCoveringUploadLink } from "#/modules/videos/server/delete-video.server";
 import { restartVideo } from "#/modules/videos/server/restart-video.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import {
@@ -174,5 +172,5 @@ export const deleteVideo = createServerFn({ method: "POST" })
     .validator(videoIdInputSchema)
     .handler(async ({ context, data }): Promise<void> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
-        await deleteStoppedVideo(video.id);
+        await deleteVideoCoveringUploadLink(video);
     });

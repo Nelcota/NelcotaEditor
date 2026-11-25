@@ -22,7 +22,7 @@ export const HOST_NAME = "Nel";
 /** "done" and "failed" speak about the result instead, so they have no fixed line. */
 const WORKING_LINES: Record<Exclude<VideoStatus, "done" | "failed">, string> = {
     queued: "Luna está guardando seu lugar na fila",
-    downloading: "Faísca está trazendo o vídeo do YouTube",
+    downloading: "Faísca está trazendo o vídeo",
     transcribing: "Tinta está escrevendo cada palavra",
     selecting: "Brilho está escolhendo os melhores momentos",
     rendering: "Brasa está montando os cortes",

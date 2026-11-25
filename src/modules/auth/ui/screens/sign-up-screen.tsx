@@ -2,12 +2,18 @@ import ArrowRightIcon from "~icons/lucide/arrow-right";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { NEW_PASSWORD_HINT, signUpSchema } from "#/modules/auth/model/auth-forms";
+import {
+    NEW_PASSWORD_HINT,
+    SIGN_UP_HONEYPOT_FIELD,
+    signUpSchema,
+} from "#/modules/auth/model/auth-forms";
+import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
 import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
 import { CheckEmailCard } from "#/modules/auth/ui/components/check-email-card";
+import { HoneypotField } from "#/modules/auth/ui/components/honeypot-field";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -20,6 +26,16 @@ import { useTrackPromise } from "#/shared/ui/use-track-promise";
 const FIELD_NAMES = ["name", "email", "password"] as const;
 const SIGN_IN_PATH = "/sign-in";
 
+/**
+ * Server rejections that belong to one field show on it. A taken email never lands here: sign-up
+ * answers it as a success, so nobody learns which addresses have accounts.
+ */
+const SERVER_ERROR_FIELDS = new Map<string, (typeof FIELD_NAMES)[number]>([
+    [toAuthErrorMessage("INVALID_EMAIL"), "email"],
+    [toAuthErrorMessage("PASSWORD_TOO_SHORT"), "password"],
+    [toAuthErrorMessage("PASSWORD_TOO_LONG"), "password"],
+]);
+
 interface SignUpScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
     captchaSiteKey: string | null;
@@ -31,10 +47,10 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [sentToEmail, setSentToEmail] = useState<string | null>(null);
     const form = useForm({
-        defaultValues: { name: "", email: "", password: "" },
+        defaultValues: { name: "", email: "", password: "", [SIGN_UP_HONEYPOT_FIELD]: "" },
         validators: { onSubmit: signUpSchema },
         onSubmitInvalid: ({ formApi }) => focusFirstInvalidField(FIELD_NAMES, formApi),
-        onSubmit: async ({ value }) => {
+        onSubmit: async ({ value, formApi }) => {
             setErrorMessage(null);
 
             if (captcha.isWaitingForToken() === true) {
@@ -49,13 +65,21 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
                 authClient.signUp.email({ ...value, callbackURL: SIGN_IN_PATH, fetchOptions }),
             );
 
-            if (failure !== null) {
-                captcha.renew();
-                setErrorMessage(failure);
+            if (failure === null) {
+                setSentToEmail(value.email);
                 return;
             }
 
-            setSentToEmail(value.email);
+            captcha.renew();
+            const fieldName = SERVER_ERROR_FIELDS.get(failure);
+
+            if (fieldName !== undefined) {
+                formApi.setErrorMap({ onSubmit: { fields: { [fieldName]: failure } } });
+                focusFirstInvalidField(FIELD_NAMES, formApi);
+                return;
+            }
+
+            setErrorMessage(failure);
         },
     });
 
@@ -123,6 +147,15 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
                             errors={toErrorMessages(field.state.meta.errors)}
+                        />
+                    )}
+                </form.Field>
+                <form.Field name={SIGN_UP_HONEYPOT_FIELD}>
+                    {(field) => (
+                        <HoneypotField
+                            name={field.name}
+                            value={field.state.value}
+                            onValueChange={field.handleChange}
                         />
                     )}
                 </form.Field>

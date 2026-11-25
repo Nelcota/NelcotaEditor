@@ -14,9 +14,12 @@ import {
 import type { ListObjectsV2CommandOutput } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { contentTypeForKey } from "#/shared/server/file-storage/content-type-for-key";
+import { trackTransferProgress } from "#/shared/server/file-storage/track-transfer-progress";
 import type {
     FileStorage,
+    LocalFileOptions,
     ServedFile,
+    TransferOptions,
     UploadSlot,
 } from "#/shared/server/file-storage/file-storage";
 
@@ -100,6 +103,30 @@ function smallRequestSignal(): { abortSignal: AbortSignal } {
     return { abortSignal: AbortSignal.timeout(SMALL_REQUEST_TIMEOUT_MILLISECONDS) };
 }
 
+/** The run's cancellation, when there is one, also stops the transfer before its own deadline. */
+function transferSignal(options: TransferOptions): AbortSignal {
+    const deadline = AbortSignal.timeout(TRANSFER_TIMEOUT_MILLISECONDS);
+    const runSignal = options.signal;
+
+    if (runSignal === undefined) {
+        return deadline;
+    }
+
+    return AbortSignal.any([deadline, runSignal]);
+}
+
+function withProgress(
+    stream: ReadableStream<Uint8Array>,
+    totalBytes: number,
+    onProgress: ((percent: number) => void) | undefined,
+): ReadableStream<Uint8Array> {
+    if (onProgress === undefined) {
+        return stream;
+    }
+
+    return stream.pipeThrough(trackTransferProgress(totalBytes, onProgress));
+}
+
 function listedKeys(page: ListObjectsV2CommandOutput): Array<string> {
     const objects = page.Contents ?? [];
 
@@ -119,20 +146,33 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
     const client = createR2Client(settings);
     const bucket = settings.bucket;
 
-    async function storeLocalFile(key: string, localPath: string): Promise<number> {
+    async function storeLocalFile(
+        key: string,
+        localPath: string,
+        options: TransferOptions = {},
+    ): Promise<number> {
         assertValidKey(key);
         const fileStats = await stat(localPath);
-        // R2 refuses a body without a length, so the size goes with it.
-        await client.send(
-            new PutObjectCommand({
-                Bucket: bucket,
-                Key: key,
-                Body: createReadStream(localPath),
-                ContentLength: fileStats.size,
-                ContentType: contentTypeForKey(key),
-            }),
-            { abortSignal: AbortSignal.timeout(TRANSFER_TIMEOUT_MILLISECONDS) },
-        );
+        const body = createReadStream(localPath);
+
+        // On abort the SDK only ends the request and never touches the body, which would keep the
+        // file open (and its disk space held after the workspace is removed) until a restart.
+        try {
+            // R2 refuses a body without a length, so the size goes with it.
+            await client.send(
+                new PutObjectCommand({
+                    Bucket: bucket,
+                    Key: key,
+                    Body: body,
+                    ContentLength: fileStats.size,
+                    ContentType: contentTypeForKey(key),
+                }),
+                { abortSignal: transferSignal(options) },
+            );
+        } finally {
+            body.destroy();
+        }
+
         return fileStats.size;
     }
 
@@ -169,13 +209,17 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
         }
     }
 
-    async function getLocalFile(key: string, workDirectory: string): Promise<string> {
+    async function getLocalFile(
+        key: string,
+        workDirectory: string,
+        options: LocalFileOptions = {},
+    ): Promise<string> {
         assertValidKey(key);
         const localPath = path.join(
             workDirectory,
             `${DOWNLOADED_FILE_PREFIX}${path.posix.basename(key)}`,
         );
-        const abortSignal = AbortSignal.timeout(TRANSFER_TIMEOUT_MILLISECONDS);
+        const abortSignal = transferSignal(options);
         const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }), {
             abortSignal,
         });
@@ -185,7 +229,12 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
             throw new StoredFileUnreadableError(key);
         }
 
-        await writeFile(localPath, body.transformToWebStream(), { signal: abortSignal });
+        const download = withProgress(
+            body.transformToWebStream(),
+            response.ContentLength ?? 0,
+            options.onProgress,
+        );
+        await writeFile(localPath, download, { signal: abortSignal });
         return localPath;
     }
 

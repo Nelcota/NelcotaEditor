@@ -1,4 +1,5 @@
-import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { check, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import type { ADMIN_ROLE, USER_ROLE } from "#/modules/auth/auth.schema";
 
 export const ADMIN_AUDIT_ACTIONS = [
@@ -21,13 +22,33 @@ export type AdminAuditDetails = {
     readonly banReasonLength?: number;
 };
 
-export const adminAuditLog = pgTable("admin_audit_log", {
-    id: uuid("id").primaryKey().defaultRandom(),
-    // Plain ids without foreign keys: the record must outlive the admin, account and video it names.
-    adminId: text("admin_id").notNull(),
-    action: text("action", { enum: ADMIN_AUDIT_ACTIONS }).notNull(),
-    targetUserId: text("target_user_id"),
-    videoId: uuid("video_id"),
-    details: jsonb("details").$type<AdminAuditDetails>(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+/** Constant values written into the CHECK; never user input. */
+const ADMIN_AUDIT_ACTION_LIST = ADMIN_AUDIT_ACTIONS.map((action) => `'${action}'`).join(", ");
+
+export const adminAuditLog = pgTable(
+    "admin_audit_log",
+    {
+        // Only new rows get UUID v7 ids; existing rows keep theirs.
+        id: uuid("id")
+            .primaryKey()
+            .default(sql`uuidv7()`),
+        // Plain ids without foreign keys: the record must outlive the admin, account and video it
+        // names.
+        adminId: text("admin_id").notNull(),
+        action: text("action", { enum: ADMIN_AUDIT_ACTIONS }).notNull(),
+        targetUserId: text("target_user_id"),
+        videoId: uuid("video_id"),
+        details: jsonb("details").$type<AdminAuditDetails>(),
+        createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { withTimezone: true })
+            .defaultNow()
+            .$onUpdate(() => new Date())
+            .notNull(),
+    },
+    (table) => [
+        check(
+            "admin_audit_log_action_known",
+            sql`${table.action} in (${sql.raw(ADMIN_AUDIT_ACTION_LIST)})`,
+        ),
+    ],
+);

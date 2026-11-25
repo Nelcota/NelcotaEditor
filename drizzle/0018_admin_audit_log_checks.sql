@@ -1,0 +1,3 @@
+ALTER TABLE "admin_audit_log" ALTER COLUMN "id" SET DEFAULT uuidv7();--> statement-breakpoint
+ALTER TABLE "admin_audit_log" ADD COLUMN "updated_at" timestamp with time zone DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "admin_audit_log" ADD CONSTRAINT "admin_audit_log_action_known" CHECK ("admin_audit_log"."action" in ('ban-user', 'unban-user', 'set-role', 'revoke-sessions', 'delete-user', 'start-impersonation', 'stop-impersonation', 'cancel-video', 'delete-video'));

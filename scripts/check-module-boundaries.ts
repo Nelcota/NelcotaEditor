@@ -48,6 +48,11 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
         reason: "Better Auth's delete-user hooks are fixed when the auth instance is built at import",
     },
     {
+        from: "src/modules/video-records/server/delete-user-videos.server.ts",
+        to: "src/modules/videos/server/pending-uploads.server",
+        reason: "Every caller of account deletion sits below videos (auth's hooks too), and the upload links of its videos must be held in the same transaction that deletes them",
+    },
+    {
         from: "src/modules/auth/server/auth.server.ts",
         to: "src/modules/admin/server/record-admin-action.server",
         reason: "The browser starts and ends impersonation straight through Better Auth, so only its session hooks, fixed at import, see it",
@@ -64,13 +69,15 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
     },
 ];
 
-// Routes only route: the router, React, module screens and handlers, and the API wrapper.
+// Routes only route: the router, React, module screens and handlers, the API wrapper and the
+// health check.
 const ROUTE_IMPORT_PREFIXES = [
     "@tanstack/react-router",
     "@tanstack/react-query",
     "react",
     "#/modules/",
     "#/shared/server/handle-api-route.server",
+    "#/shared/server/health-check.server",
     "#/styles.css?url",
 ];
 

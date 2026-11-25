@@ -18,6 +18,16 @@ export interface UploadSlot {
     lifetimeSeconds: number;
 }
 
+export interface TransferOptions {
+    /** Aborting stops the transfer; the promise then rejects and leaves no partial file. */
+    signal?: AbortSignal;
+}
+
+export interface LocalFileOptions extends TransferOptions {
+    /** How much of the file has arrived (0 to 100); only a store that downloads reports it. */
+    onProgress?: (percent: number) => void;
+}
+
 /**
  * Where stored files live. Keys are storage-relative paths with forward slashes
  * ("videos/<id>/source.mp4"), the same values the database keeps, so the app and the worker agree
@@ -25,7 +35,7 @@ export interface UploadSlot {
  */
 export interface FileStorage {
     /** Copies a finished local file in and returns its size; the caller keeps the local file. */
-    storeLocalFile: (key: string, localPath: string) => Promise<number>;
+    storeLocalFile: (key: string, localPath: string, options?: TransferOptions) => Promise<number>;
     /**
      * A link the browser can PUT the file to directly, or null when the store cannot take it
      * (the disk), and the file must go through the app.
@@ -37,7 +47,11 @@ export interface FileStorage {
      * A local path ffmpeg can read the file from. A store that is not on this disk downloads it
      * into `workDirectory`, which the caller removes when done.
      */
-    getLocalFile: (key: string, workDirectory: string) => Promise<string>;
+    getLocalFile: (
+        key: string,
+        workDirectory: string,
+        options?: LocalFileOptions,
+    ) => Promise<string>;
     /** The file's size; 0 when it is gone, which is the space it takes. */
     measureFile: (key: string) => Promise<number>;
     deleteFile: (key: string) => Promise<void>;

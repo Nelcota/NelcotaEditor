@@ -1,14 +1,13 @@
 import { writeFileSync } from "node:fs";
 import { execa } from "execa";
+import { EXTERNAL_SERVICES_OFF, TEST_ENV_FILE } from "./test-environment";
 
 // Tests write and delete rows freely, so they get their own database in the same container and
 // never touch the one the app uses. The values are local and hold no secret.
-const TEST_ENV_FILE = ".env.test";
 const TEST_DATABASE = "nelcota_test";
 const DATABASE_USER = "nelcota";
 const TEST_DATABASE_URL = `postgresql://${DATABASE_USER}:nelcota@127.0.0.1:5436/${TEST_DATABASE}`;
-// The end-to-end app runs on its own port. Keys left empty on purpose: Bun also reads .env, and an
-// empty value here keeps its Turnstile and DeepSeek keys out of the tests.
+// The end-to-end app runs on its own port.
 const E2E_APP_URL = "http://localhost:3299";
 const TEST_ENV_LINES = [
     "# Written by scripts/prepare-test-database.ts; edits are replaced on the next run.",
@@ -17,12 +16,10 @@ const TEST_ENV_LINES = [
     "BETTER_AUTH_SECRET=test-only-secret-never-used-outside-local-tests",
     // Each end-to-end test sends its own address here, so the sign-up limit counts per test.
     "TRUSTED_PROXY_IP_HEADER=x-real-ip",
-    "TURNSTILE_SITE_KEY=",
-    "TURNSTILE_SECRET_KEY=",
-    "DEEPSEEK_API_KEY=",
     "STORAGE_DIR=storage-test",
     "WHISPER_URL=http://127.0.0.1:1",
     "WHISPER_MODEL=test-model",
+    ...Object.entries(EXTERNAL_SERVICES_OFF).map(([name, value]) => `${name}=${value}`),
 ];
 
 function writeTestEnvFile(): void {

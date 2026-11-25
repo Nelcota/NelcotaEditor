@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import {
@@ -64,10 +64,12 @@ export async function findVideoById(videoId: string): Promise<Video | null> {
 }
 
 export async function updateVideoStage(
-    videoId: string,
+    run: VideoRun,
     status: VideoStatus,
     progressPercent: number,
 ): Promise<void> {
+    const videoId = run.videoId;
+
     if (Number.isFinite(progressPercent) === false) {
         throw new InvalidVideoProgressError(videoId, "progress percent", progressPercent);
     }
@@ -76,18 +78,57 @@ export async function updateVideoStage(
         Math.min(MAX_PERCENT, Math.max(MIN_PERCENT, progressPercent)),
     );
 
-    // A late progress update must not bring back a video that was cancelled or finished meanwhile.
+    // A late progress update must not bring back a video that was cancelled or finished meanwhile,
+    // nor move a video that a newer run took.
     await db
         .update(videos)
         .set({ status, progressPercent: boundedPercent, errorMessage: null })
-        .where(and(eq(videos.id, videoId), canMoveVideoTo(status)));
+        .where(and(eq(videos.id, videoId), isCurrentRun(run), canMoveVideoTo(status)));
 }
 
-export async function isCancelRequested(videoId: string): Promise<boolean> {
+/**
+ * One run of the pipeline over a video. A retry or a Studio render starts a new run with a new
+ * processingStartedAt, so a run that outlived its turn (a cancel while it was still starting, then
+ * a retry) can tell, and its late writes never touch the new run's video.
+ */
+export interface VideoRun {
+    videoId: string;
+    processingStartedAt: Date | null;
+}
+
+export function toVideoRun(video: Pick<Video, "id" | "processingStartedAt">): VideoRun {
+    return { videoId: video.id, processingStartedAt: video.processingStartedAt };
+}
+
+function isSameRunStart(storedStart: Date | null, runStart: Date | null): boolean {
+    if (storedStart === null || runStart === null) {
+        return storedStart === runStart;
+    }
+
+    return storedStart.getTime() === runStart.getTime();
+}
+
+/** The WHERE condition that keeps a write to the run that read the video. */
+function isCurrentRun(run: VideoRun): SQL {
+    const runStart = run.processingStartedAt;
+
+    if (runStart === null) {
+        return isNull(videos.processingStartedAt);
+    }
+
+    // Truncated like the JavaScript Date the run read, which keeps only milliseconds.
+    return sql`date_trunc('milliseconds', ${videos.processingStartedAt}) = ${sql.param(runStart, videos.processingStartedAt)}`;
+}
+
+/** Whether the run must stop: the user asked to cancel, deleted the video, or a new run took it. */
+export async function shouldStopVideoRun(run: VideoRun): Promise<boolean> {
     const rows = await db
-        .select({ cancelRequested: videos.cancelRequested })
+        .select({
+            cancelRequested: videos.cancelRequested,
+            processingStartedAt: videos.processingStartedAt,
+        })
         .from(videos)
-        .where(eq(videos.id, videoId))
+        .where(eq(videos.id, run.videoId))
         .limit(1);
     const row = rows[0];
 
@@ -96,10 +137,18 @@ export async function isCancelRequested(videoId: string): Promise<boolean> {
         return true;
     }
 
-    return row.cancelRequested;
+    if (row.cancelRequested === true) {
+        return true;
+    }
+
+    return isSameRunStart(row.processingStartedAt, run.processingStartedAt) === false;
 }
 
-export async function markVideoCancelled(videoId: string): Promise<void> {
+/**
+ * Only a cancel the user asked for, and only for the run it was asked of: a run that stops late
+ * must not cancel a video the user retried in the meantime.
+ */
+export async function markVideoCancelled(run: VideoRun): Promise<void> {
     await db
         .update(videos)
         .set({
@@ -108,21 +157,29 @@ export async function markVideoCancelled(videoId: string): Promise<void> {
             errorMessage: null,
             finishedAt: new Date(),
         })
-        .where(and(eq(videos.id, videoId), canMoveVideoTo("cancelled")));
+        .where(
+            and(
+                eq(videos.id, run.videoId),
+                eq(videos.cancelRequested, true),
+                isCurrentRun(run),
+                canMoveVideoTo("cancelled"),
+            ),
+        );
 }
 
-export async function markVideoFailed(videoId: string, errorMessage: string): Promise<void> {
+export async function markVideoFailed(run: VideoRun, errorMessage: string): Promise<void> {
     await db
         .update(videos)
         .set({ status: "failed", errorMessage, cancelRequested: false, finishedAt: new Date() })
-        .where(and(eq(videos.id, videoId), canMoveVideoTo("failed")));
+        .where(and(eq(videos.id, run.videoId), isCurrentRun(run), canMoveVideoTo("failed")));
 }
 
 /**
- * Returns false when the video was not marked done: it was cancelled, deleted, or the user asked to
- * cancel right as the last step ended. The caller then records the cancel instead.
+ * Returns false when the video was not marked done: it was cancelled, deleted, taken by a newer
+ * run, or the user asked to cancel right as the last step ended. The caller then records the
+ * cancel, which only applies in that last case.
  */
-export async function markVideoDone(videoId: string): Promise<boolean> {
+export async function markVideoDone(run: VideoRun): Promise<boolean> {
     const finishedAt = new Date();
     const doneRows = await db
         .update(videos)
@@ -138,7 +195,12 @@ export async function markVideoDone(videoId: string): Promise<boolean> {
             firstFinishedAt: sql`coalesce(${videos.firstFinishedAt}, case when ${videos.processingStartedAt} < ${videos.createdAt} + ${FIRST_RUN_START_WINDOW} then ${finishedAt.toISOString()}::timestamptz end)`,
         })
         .where(
-            and(eq(videos.id, videoId), eq(videos.cancelRequested, false), canMoveVideoTo("done")),
+            and(
+                eq(videos.id, run.videoId),
+                eq(videos.cancelRequested, false),
+                isCurrentRun(run),
+                canMoveVideoTo("done"),
+            ),
         )
         .returning({ id: videos.id });
 

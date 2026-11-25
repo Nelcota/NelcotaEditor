@@ -9,8 +9,10 @@ import type { DownloadedVideo } from "#/modules/processing/server/download-youtu
 import {
     renameVideo,
     saveVideoSource,
+    toVideoRun,
     updateVideoStage,
 } from "#/modules/video-records/server/video-progress.server";
+import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 import { ensureVideoThumbnail } from "#/modules/processing/server/video-thumbnail.server";
 import { saveDownloadedSource } from "#/modules/processing/server/save-downloaded-source.server";
 import { toStoredVideoTitle } from "#/modules/video-records/model/video-title";
@@ -38,9 +40,18 @@ interface SourceContext {
     workDirectory: string;
 }
 
+/**
+ * Bringing the source in, from YouTube or from the store, is the "downloading" step; without it
+ * the video sits on "queued" while gigabytes move.
+ */
+function saveDownloadProgress(run: VideoRun, downloadPercent: number): Promise<void> {
+    return updateVideoStage(run, "downloading", toOverallPercent("downloading", downloadPercent));
+}
+
 async function downloadSource(video: Video, context: SourceContext): Promise<DownloadedVideo> {
+    const run = toVideoRun(video);
     const saveProgress = (downloadPercent: number): Promise<void> =>
-        updateVideoStage(video.id, "downloading", toOverallPercent("downloading", downloadPercent));
+        saveDownloadProgress(run, downloadPercent);
 
     await saveProgress(0);
     const downloaded = await runWithProgress(
@@ -62,11 +73,18 @@ async function downloadSource(video: Video, context: SourceContext): Promise<Dow
     return downloaded;
 }
 
-/** ffprobe fails on damaged or unusual files; the person can fix that by exporting again. */
-async function probeSourceMedia(localPath: string): Promise<MediaInfo> {
+/**
+ * ffprobe fails on damaged or unusual files; the person can fix that by exporting again.
+ * A cancelled run is not a broken file.
+ */
+async function probeSourceMedia(localPath: string, signal: AbortSignal): Promise<MediaInfo> {
     try {
-        return await probeMedia(localPath);
+        return await probeMedia(localPath, signal);
     } catch (error) {
+        if (signal.aborted === true) {
+            throw error;
+        }
+
         throw new UserFacingError(UNREADABLE_FILE_MESSAGE, { cause: error });
     }
 }
@@ -77,8 +95,8 @@ interface CheckedSource {
 }
 
 /** Refuses files the pipeline cannot use and reads what is saved with the path. */
-async function inspectSource(localPath: string): Promise<CheckedSource> {
-    const mediaInfo = await probeSourceMedia(localPath);
+async function inspectSource(localPath: string, signal: AbortSignal): Promise<CheckedSource> {
+    const mediaInfo = await probeSourceMedia(localPath, signal);
 
     if (mediaInfo.hasVideo === false) {
         throw new UserFacingError(
@@ -114,14 +132,35 @@ async function inspectSource(localPath: string): Promise<CheckedSource> {
     return { durationSeconds, sourceBytes: fileStats.size };
 }
 
+/** The disk store reads the file in place and reports nothing; R2 reports as bytes arrive. */
+async function fetchStoredSource(
+    video: Video,
+    sourcePath: string,
+    context: SourceContext,
+): Promise<string> {
+    const run = toVideoRun(video);
+    const saveProgress = (downloadPercent: number): Promise<void> =>
+        saveDownloadProgress(run, downloadPercent);
+
+    await saveProgress(0);
+    return runWithProgress(
+        (onProgress) =>
+            getFileStorage().getLocalFile(sourcePath, context.workDirectory, {
+                signal: context.signal,
+                onProgress,
+            }),
+        saveProgress,
+    );
+}
+
 /** An upload, or a download a previous run already saved. */
 async function prepareStoredSource(
     video: Video,
     sourcePath: string,
     context: SourceContext,
 ): Promise<VideoSource> {
-    const localSourcePath = await getFileStorage().getLocalFile(sourcePath, context.workDirectory);
-    const checkedSource = await inspectSource(localSourcePath);
+    const localSourcePath = await fetchStoredSource(video, sourcePath, context);
+    const checkedSource = await inspectSource(localSourcePath, context.signal);
     await saveVideoSource(video.id, { sourcePath, ...checkedSource });
     return { sourcePath, localSourcePath, durationSeconds: checkedSource.durationSeconds };
 }
@@ -139,11 +178,11 @@ function toDownloadedSourcePath(videoId: string, localPath: string): string {
 async function prepareDownloadedSource(video: Video, context: SourceContext): Promise<VideoSource> {
     const downloaded = await downloadSource(video, context);
     const localSourcePath = downloaded.localPath;
-    const checkedSource = await inspectSource(localSourcePath);
+    const checkedSource = await inspectSource(localSourcePath, context.signal);
     const sourcePath = toDownloadedSourcePath(video.id, localSourcePath);
     const storage = getFileStorage();
 
-    await storage.storeLocalFile(sourcePath, localSourcePath);
+    await storage.storeLocalFile(sourcePath, localSourcePath, { signal: context.signal });
 
     try {
         await saveDownloadedSource({
@@ -181,6 +220,7 @@ export async function prepareVideoSource(
         localSourcePath: source.localSourcePath,
         durationSeconds: source.durationSeconds,
         workDirectory: context.workDirectory,
+        signal: context.signal,
     });
     return source;
 }
