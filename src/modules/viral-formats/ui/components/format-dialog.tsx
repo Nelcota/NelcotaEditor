@@ -52,7 +52,7 @@ function ConnectFirst(): ReactNode {
 
 /**
  * A format up close: its layout on one side, what it does and the way on beside it. Editing
- * happens in the person's Claude, so choosing a format hands them the request to paste there.
+ * happens in the person's Claude; choosing a format opens a batch for the raw videos.
  */
 export function FormatDialog({ format, isClaudeConnected, onClose }: FormatDialogProps): ReactNode {
     function closeOnDismiss(isOpen: boolean): void {
@@ -90,7 +90,7 @@ export function FormatDialog({ format, isClaudeConnected, onClose }: FormatDialo
                     </div>
                     {isClaudeConnected === false && <ConnectFirst />}
                     {isClaudeConnected === true && (
-                        <ChooseFormatButton formatName={format.name}>
+                        <ChooseFormatButton format={format}>
                             <BackButton />
                         </ChooseFormatButton>
                     )}

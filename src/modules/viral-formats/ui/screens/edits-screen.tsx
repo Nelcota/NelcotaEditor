@@ -5,7 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { myEditsQueryOptions } from "#/modules/viral-formats/model/edit-queries";
+import type { EditSessionSummary } from "#/modules/viral-formats/model/edit-session";
+import { myEditSessionsQueryOptions } from "#/modules/viral-formats/model/edit-session-queries";
+import type { EditView } from "#/modules/viral-formats/model/edit-view";
 import { EditList } from "#/modules/viral-formats/ui/components/edit-list";
+import { EditSessionList } from "#/modules/viral-formats/ui/components/edit-session-list";
 import { useFinishedEditsAnnouncement } from "#/modules/viral-formats/ui/hooks/use-finished-edits-announcement";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { Button } from "#/shared/ui/button";
@@ -30,7 +34,7 @@ function NoEditsYet(): ReactNode {
         <EmptyState
             art={<LayersIcon aria-hidden="true" className="size-10 text-primary-ink" />}
             title="Você ainda não editou nenhum vídeo"
-            description="Conecte o seu Claude e peça a edição de um vídeo num dos formatos."
+            description="Escolha um formato e suba seus vídeos brutos."
             action={
                 <Button asChild className="font-bold">
                     <Link to="/formats">
@@ -43,17 +47,59 @@ function NoEditsYet(): ReactNode {
     );
 }
 
+interface EditsListsProps {
+    sessions: ReadonlyArray<EditSessionSummary>;
+    edits: ReadonlyArray<EditView>;
+}
+
+function EditsLists({ sessions, edits }: EditsListsProps): ReactNode {
+    if (sessions.length === 0 && edits.length === 0) {
+        return <NoEditsYet />;
+    }
+
+    return (
+        <div className="grid gap-8">
+            {sessions.length > 0 && (
+                <section aria-labelledby="edit-sessions" className="grid gap-3">
+                    <h2 id="edit-sessions" className="text-lg font-bold">
+                        Lotes
+                    </h2>
+                    <EditSessionList sessions={sessions} />
+                </section>
+            )}
+            {edits.length > 0 && (
+                <section aria-labelledby="edited-videos" className="grid gap-3">
+                    <h2 id="edited-videos" className="text-lg font-bold">
+                        Vídeos editados
+                    </h2>
+                    <EditList edits={edits} />
+                </section>
+            )}
+        </div>
+    );
+}
+
 function EditsContent(): ReactNode {
     const editsQuery = useQuery(myEditsQueryOptions());
+    const sessionsQuery = useQuery(myEditSessionsQueryOptions());
     const editList = editsQuery.data;
+    const sessions = sessionsQuery.data;
 
-    if (editsQuery.isError === true && editList === undefined) {
+    if (
+        (editsQuery.isError === true && editList === undefined) ||
+        (sessionsQuery.isError === true && sessions === undefined)
+    ) {
         return (
             <div className="grid justify-items-start gap-3">
                 <p className="text-muted-foreground">
                     Não foi possível carregar suas edições. Confira sua conexão.
                 </p>
-                <AsyncButton variant="secondary" onAction={() => editsQuery.refetch()}>
+                <AsyncButton
+                    variant="secondary"
+                    onAction={async () => {
+                        await Promise.all([editsQuery.refetch(), sessionsQuery.refetch()]);
+                    }}
+                >
                     <RotateCwIcon aria-hidden="true" />
                     Tentar de novo
                 </AsyncButton>
@@ -61,15 +107,11 @@ function EditsContent(): ReactNode {
         );
     }
 
-    if (editList === undefined) {
+    if (editList === undefined || sessions === undefined) {
         return <EditsLoading />;
     }
 
-    if (editList.length === 0) {
-        return <NoEditsYet />;
-    }
-
-    return <EditList edits={editList} />;
+    return <EditsLists sessions={sessions} edits={editList} />;
 }
 
 /** Minhas edições: what the person's Claude edited in the formats, while and after it renders. */
@@ -90,7 +132,7 @@ export function EditsScreen(): ReactNode {
                     Minhas edições
                 </h1>
                 <p className="max-w-xl text-pretty text-muted-foreground">
-                    Os vídeos que o seu Claude editou nos Formatos Virais ficam aqui.
+                    Seus lotes de vídeos brutos e o que o seu Claude já editou ficam aqui.
                 </p>
             </header>
             <EditsContent />

@@ -1,29 +1,35 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { invalidateEditSessionQueries } from "#/modules/viral-formats/model/edit-session-queries";
+import type { EditFormat } from "#/modules/viral-formats/model/edit-status";
+import { isEditFormat } from "#/modules/viral-formats/model/edit-status";
+import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
+import { createMyEditSession } from "#/modules/viral-formats/server/edit-session-functions";
 import { Button } from "#/shared/ui/button";
+import { FormAlert } from "#/shared/ui/form-alert";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 
-const COPIED_MESSAGE = "Pedido copiado. Cole no seu Claude e diga qual vídeo editar.";
-const FAILED_MESSAGE = "Não deu para copiar. Peça ao seu Claude:";
+const FALLBACK_ERROR_MESSAGE = "Não foi possível abrir a edição. Tente de novo.";
 
 interface ChooseFormatButtonProps {
-    formatName: string;
+    format: ViralFormat;
     /** Shown beside it, such as the dialog's Voltar. */
     children?: ReactNode;
 }
 
-function toClaudeRequest(formatName: string): string {
-    return `Use o Editor Oculto para editar meu vídeo no formato ${formatName}.`;
-}
-
-/**
- * Choosing a format means asking the person's Claude, which does the editing: the button copies
- * a ready request to paste there, and says so.
- */
-export function ChooseFormatButton({ formatName, children }: ChooseFormatButtonProps): ReactNode {
-    const request = toClaudeRequest(formatName);
-    const copy = useMutation({
-        mutationFn: async () => await navigator.clipboard.writeText(request),
+/** Choosing a format opens a new batch for it, where the raw videos go in. */
+function OpenSessionButton(props: { format: EditFormat; children?: ReactNode }): ReactNode {
+    const { format, children } = props;
+    const queryClient = useQueryClient();
+    const navigate = useNavigate();
+    const open = useMutation({
+        mutationFn: async () => await createMyEditSession({ data: { format } }),
+        onSuccess: async ({ sessionId }) => {
+            await invalidateEditSessionQueries(queryClient);
+            await navigate({ to: "/edits/$sessionId", params: { sessionId } });
+        },
     });
 
     return (
@@ -33,19 +39,36 @@ export function ChooseFormatButton({ formatName, children }: ChooseFormatButtonP
                     type="button"
                     size="lg"
                     className="font-bold"
-                    disabled={copy.isPending}
-                    aria-busy={copy.isPending}
-                    onClick={() => copy.mutate()}
+                    disabled={open.isPending}
+                    aria-busy={open.isPending}
+                    onClick={() => open.mutate()}
                 >
                     Escolher formato
                     <ArrowRightIcon aria-hidden="true" className="size-4" />
                 </Button>
                 {children}
             </div>
-            <p role="status" className="text-sm text-muted-foreground empty:hidden">
-                {copy.isSuccess === true && COPIED_MESSAGE}
-                {copy.isError === true && `${FAILED_MESSAGE} "${request}"`}
+            {open.isError === true && (
+                <FormAlert message={toErrorMessage(open.error, FALLBACK_ERROR_MESSAGE)} />
+            )}
+        </div>
+    );
+}
+
+/** The way on from a format: a new batch, or word that it is not open yet. */
+export function ChooseFormatButton({ format, children }: ChooseFormatButtonProps): ReactNode {
+    const formatId = format.id;
+
+    if (isEditFormat(formatId) === true) {
+        return <OpenSessionButton format={formatId}>{children}</OpenSessionButton>;
+    }
+
+    return (
+        <div className="grid gap-3">
+            <p className="text-sm text-muted-foreground">
+                Este formato chega em breve. Por enquanto, edite na Tela dividida.
             </p>
+            <div className="flex flex-wrap gap-2">{children}</div>
         </div>
     );
 }

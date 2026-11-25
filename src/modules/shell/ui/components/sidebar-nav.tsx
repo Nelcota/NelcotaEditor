@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import {
     ADMIN_SECTION,
     ADMIN_SUB_SECTIONS,
+    EDITS_SECTION,
     GENERAL_NAV_GROUP,
     GETTING_STARTED_SECTION,
     SECTION_LINK_ACTIVE_OPTIONS,
@@ -19,10 +20,19 @@ import { useGettingStartedChecklist } from "#/modules/shell/ui/hooks/use-getting
 import { useQuery } from "@tanstack/react-query";
 import { supportWaitingQueryOptions } from "#/modules/admin/model/admin-queries";
 import { supportReplyQueryOptions } from "#/modules/support/model/support-queries";
+import { myEditSessionsQueryOptions } from "#/modules/viral-formats/model/edit-session-queries";
 import { cn } from "#/shared/ui/cn";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
 const appRoute = getRouteApi("/_app");
+
+/** The newest batches under Minhas edições; the page lists the rest. */
+const MAX_SIDEBAR_SESSIONS = 5;
+
+// The line runs down the icon column (33px), so the rows read as the section's own.
+const SUB_LIST_CLASS =
+    "relative mt-0.5 grid gap-0.5 ps-8 before:absolute before:inset-y-1 before:start-[1.375rem] before:w-px before:bg-foreground/15 before:content-['']";
+const SUB_ITEM_CLASS = cn(SIDEBAR_ITEM_CLASS, "h-10 ps-3.5 font-normal");
 
 interface SectionLinkProps {
     section: NavSection;
@@ -132,11 +142,7 @@ function AdminGroup({ pathname }: { pathname: string }): ReactNode {
                 />
             </button>
             {isOpen === true && (
-                // The line runs down the icon column (33px), so the pages read as Admin's own.
-                <ul
-                    id={listId}
-                    className="relative mt-0.5 grid gap-0.5 ps-8 before:absolute before:inset-y-1 before:start-[1.375rem] before:w-px before:bg-foreground/15 before:content-['']"
-                >
+                <ul id={listId} className={SUB_LIST_CLASS}>
                     {ADMIN_SUB_SECTIONS.map((subSection) => (
                         <li key={subSection.path}>
                             <Link
@@ -147,7 +153,7 @@ function AdminGroup({ pathname }: { pathname: string }): ReactNode {
                                 aria-current={toAriaCurrent(
                                     isAdminSubSectionCurrent(subSection, pathname),
                                 )}
-                                className={cn(SIDEBAR_ITEM_CLASS, "h-10 ps-3.5 font-normal")}
+                                className={SUB_ITEM_CLASS}
                             >
                                 <span className="flex-1">{subSection.label}</span>
                                 {subSection.path === "/admin/support" && <WaitingTicketsBadge />}
@@ -160,7 +166,36 @@ function AdminGroup({ pathname }: { pathname: string }): ReactNode {
     );
 }
 
-/** One link of a group: the two with a mark of their own get it, the rest are plain. */
+/** Minhas edições, with the person's newest batches under it, like the prototype's tree. */
+function EditsLink({ pathname }: { pathname: string }): ReactNode {
+    const { data: sessions } = useQuery(myEditSessionsQueryOptions());
+    const newestSessions = (sessions ?? []).slice(0, MAX_SIDEBAR_SESSIONS);
+
+    return (
+        <>
+            <SectionLink section={EDITS_SECTION} pathname={pathname} />
+            {newestSessions.length > 0 && (
+                <li>
+                    <ul aria-label={EDITS_SECTION.label} className={SUB_LIST_CLASS}>
+                        {newestSessions.map((session) => (
+                            <li key={session.id}>
+                                <Link
+                                    to="/edits/$sessionId"
+                                    params={{ sessionId: session.id }}
+                                    className={SUB_ITEM_CLASS}
+                                >
+                                    <span className="flex-1 truncate">{session.title}</span>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </li>
+            )}
+        </>
+    );
+}
+
+/** One link of a group: the ones with a mark or rows of their own get them, the rest are plain. */
 function GroupSectionLink({ section, pathname }: { section: NavSection; pathname: string }) {
     if (section === GETTING_STARTED_SECTION) {
         return <GettingStartedLink pathname={pathname} />;
@@ -168,6 +203,10 @@ function GroupSectionLink({ section, pathname }: { section: NavSection; pathname
 
     if (section === SUPPORT_SECTION) {
         return <SupportLink pathname={pathname} />;
+    }
+
+    if (section === EDITS_SECTION) {
+        return <EditsLink pathname={pathname} />;
     }
 
     return <SectionLink section={section} pathname={pathname} />;

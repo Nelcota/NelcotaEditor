@@ -7,6 +7,7 @@ import { videoDetailsQueryOptions } from "#/modules/videos/model/video-queries";
 
 export type CrumbPath =
     | "/getting-started"
+    | "/edits"
     | "/clips-getting-started"
     | "/clips"
     | "/videos"
@@ -28,10 +29,12 @@ const MY_CLIPS_CRUMB: Crumb = { label: "Meus cortes", to: "/clips" };
 const VIDEOS_CRUMB: Crumb = { label: "Vídeos", to: "/videos" };
 const ADMIN_CRUMB: Crumb = { label: "Admin", to: "/admin" };
 const SUPPORT_CRUMB: Crumb = { label: "Suporte", to: "/support" };
+const EDITS_CRUMB: Crumb = { label: "Minhas edições", to: "/edits" };
 const ADMIN_SUPPORT_CRUMB: Crumb = { label: "Suporte", to: "/admin/support" };
 const TICKET_PAGE_PATTERN = /^\/support\/[^/]+\/?$/;
 const ADMIN_TICKET_PATTERN = /^\/admin\/support\/[^/]+\/?$/;
 const VIDEO_PAGE_PATTERN = /^\/videos\/([^/]+)\/?$/;
+const EDIT_SESSION_PATTERN = /^\/edits\/[^/]+\/?$/;
 const ADMIN_USER_PATTERN = /^\/admin\/users\/[^/]+\/?$/;
 
 const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
@@ -110,6 +113,10 @@ export function useBreadcrumbs(): ReadonlyArray<Crumb> {
 
     if (videoMatch !== null) {
         return [MY_CLIPS_CRUMB, VIDEOS_CRUMB, { label: videoTitle ?? "Vídeo" }];
+    }
+
+    if (EDIT_SESSION_PATTERN.test(pathname) === true) {
+        return [EDITOR_CRUMB, EDITS_CRUMB, { label: "Lote" }];
     }
 
     if (ADMIN_TICKET_PATTERN.test(pathname) === true) {
