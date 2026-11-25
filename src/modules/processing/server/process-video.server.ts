@@ -40,9 +40,21 @@ function saveStageProgress(
     return (stagePercent) => updateVideoStage(run, status, toOverallPercent(status, stagePercent));
 }
 
+/** Marks the run done, unless a cancel arrived after its last step: that still wins over "done". */
+async function finishVideo(run: VideoRun, videoId: string): Promise<void> {
+    if ((await markVideoDone(run)) === false) {
+        // Records nothing unless this run was the one the user cancelled.
+        await finishStoppedVideo(run, null);
+        return;
+    }
+
+    logger.info({ videoId }, "Video processing completed");
+}
+
 /**
- * The whole pipeline: source → transcript → highlights → clips.
- * Every step skips work that is already saved, so running it again resumes where it stopped.
+ * The whole pipeline: source → transcript → highlights → clips (a format video stops after the
+ * transcript). Every step skips work that is already saved, so running it again resumes where it
+ * stopped.
  */
 async function runStages(video: Video, workDirectory: string, signal: AbortSignal): Promise<void> {
     const videoId = video.id;
@@ -62,6 +74,14 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
             saveProgress: saveStageProgress(run, "transcribing"),
         }),
     );
+
+    // A raw video for a format edit stops here: the person's Claude plans its edit from the
+    // transcript, so no highlights or clips are made (and no DeepSeek call is spent).
+    if (video.purpose === "format") {
+        signal.throwIfAborted();
+        await finishVideo(run, videoId);
+        return;
+    }
 
     signal.throwIfAborted();
     const clips = await measureVideoStage({ videoId, name: "highlights" }, () =>
@@ -87,15 +107,7 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
         }),
     );
     signal.throwIfAborted();
-
-    // A cancel that arrived after the last step still wins over "done".
-    if ((await markVideoDone(run)) === false) {
-        // Records nothing unless this run was the one the user cancelled.
-        await finishStoppedVideo(run, null);
-        return;
-    }
-
-    logger.info({ videoId }, "Video processing completed");
+    await finishVideo(run, videoId);
 }
 
 async function runPipeline(video: Video, signal: AbortSignal): Promise<void> {

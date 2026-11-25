@@ -184,6 +184,8 @@ export async function listUserVideosPage(
     const { query, filter, sort, cursor, limit } = input;
     const matching = and(
         eq(videos.userId, userId),
+        // Raw videos for a format edit live in their edit, not in the clips library.
+        eq(videos.purpose, "clips"),
         FILTER_CONDITIONS[filter](),
         matchesSearch(query),
     );
@@ -215,7 +217,7 @@ export async function countUserVideos(userId: string): Promise<VideoCounts> {
     const rows = await db
         .select({ status: videos.status, total: count() })
         .from(videos)
-        .where(eq(videos.userId, userId))
+        .where(and(eq(videos.userId, userId), eq(videos.purpose, "clips")))
         .groupBy(videos.status);
     const counts: VideoCounts = { all: 0, processing: 0, done: 0, failed: 0, cancelled: 0 };
 

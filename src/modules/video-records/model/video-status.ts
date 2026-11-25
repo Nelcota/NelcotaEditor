@@ -15,6 +15,14 @@ export const VIDEO_SOURCES = ["upload", "youtube"] as const;
 
 export type VideoSource = (typeof VIDEO_SOURCES)[number];
 
+/**
+ * clips: the video becomes short clips (transcribed, highlights picked, clips rendered). format: a
+ * raw video for a Formatos Virais edit, only stored and transcribed; the person's Claude edits it.
+ */
+export const VIDEO_PURPOSES = ["clips", "format"] as const;
+
+export type VideoPurpose = (typeof VIDEO_PURPOSES)[number];
+
 export const MIN_CLIP_COUNT = 1;
 export const MAX_CLIP_COUNT = 10;
 export const DEFAULT_CLIP_COUNT = 5;

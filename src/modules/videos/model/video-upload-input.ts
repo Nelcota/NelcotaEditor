@@ -28,3 +28,9 @@ export const startedVideoUploadSchema = z.object({
 });
 
 export type StartedVideoUpload = z.infer<typeof startedVideoUploadSchema>;
+
+/** A raw video for a format edit: it is only stored and transcribed, so no clip choices. */
+export const startFormatVideoUploadInputSchema = z.object({
+    fileName: z.string().trim().min(1).max(MAX_FILE_NAME_LENGTH),
+    sizeBytes: z.number().int().positive(),
+});

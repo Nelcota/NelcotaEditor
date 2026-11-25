@@ -38,6 +38,7 @@ export async function listFinishedVideos(
         .where(
             and(
                 eq(videos.userId, userId),
+                eq(videos.purpose, "clips"),
                 inArray(videos.status, FINISHED_VIDEO_STATUSES),
                 or(gte(videos.createdAt, since), gte(videos.firstFinishedAt, since)),
             ),
@@ -65,12 +66,19 @@ export async function listClipStatuses(
 
 export async function countVideos(userId: string): Promise<{ total: number; inProgress: number }> {
     const [totalRows, inProgressRows] = await Promise.all([
-        db.select({ total: count() }).from(videos).where(eq(videos.userId, userId)),
+        db
+            .select({ total: count() })
+            .from(videos)
+            .where(and(eq(videos.userId, userId), eq(videos.purpose, "clips"))),
         db
             .select({ inProgress: count() })
             .from(videos)
             .where(
-                and(eq(videos.userId, userId), notInArray(videos.status, FINISHED_VIDEO_STATUSES)),
+                and(
+                    eq(videos.userId, userId),
+                    eq(videos.purpose, "clips"),
+                    notInArray(videos.status, FINISHED_VIDEO_STATUSES),
+                ),
             ),
     ]);
 
