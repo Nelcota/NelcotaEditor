@@ -50,7 +50,17 @@ function arePanelsInOrder(panels: ReadonlyArray<SplitScreenPanel>): boolean {
  */
 export const splitScreenPlanSchema = z
     .object({
-        videoId: z.uuid().describe("The raw talking-head video to edit, from list_my_videos."),
+        videoId: z
+            .uuid()
+            .describe(
+                "The raw talking-head video to edit, from list_edit_queue or list_my_videos.",
+            ),
+        sessionId: z
+            .uuid()
+            .optional()
+            .describe(
+                "The batch from list_edit_queue the video belongs to. Leave it out for a video the person named in the chat.",
+            ),
         title: z.string().trim().min(1).max(MAX_EDIT_TITLE_LENGTH),
         takes: z.array(takeSchema).min(1).max(MAX_TAKES),
         panels: z.array(panelSchema).min(1).max(MAX_PANELS),

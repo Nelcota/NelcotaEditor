@@ -3,6 +3,8 @@ import type { EditFormat, EditStatus } from "#/modules/viral-formats/model/edit-
 /** An edit as Minhas edições and the person's Claude see it; dates cross as ISO strings. */
 export interface EditView {
     id: string;
+    /** The raw video it was made from. */
+    videoId: string;
     title: string;
     format: EditFormat;
     status: EditStatus;

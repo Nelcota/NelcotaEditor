@@ -6,6 +6,7 @@ import { edits } from "#/modules/viral-formats/viral-formats.schema";
 
 const EDIT_VIEW_COLUMNS = {
     id: edits.id,
+    videoId: edits.videoId,
     title: edits.title,
     format: edits.format,
     status: edits.status,
@@ -64,4 +65,19 @@ export async function findUserEditFile(
     }
 
     return { title: row.title, outputPath: row.outputPath };
+}
+
+/** The edits Claude made from one batch of the person's, oldest first like the batch. */
+export async function listSessionEdits(
+    userId: string,
+    sessionId: string,
+): Promise<Array<EditView>> {
+    const rows = await db
+        .select(EDIT_VIEW_COLUMNS)
+        .from(edits)
+        .where(and(eq(edits.userId, userId), eq(edits.sessionId, sessionId)))
+        .orderBy(edits.createdAt)
+        .limit(MAX_LISTED_EDITS);
+
+    return rows.map(toEditView);
 }

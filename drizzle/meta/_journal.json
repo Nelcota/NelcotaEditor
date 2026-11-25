@@ -218,6 +218,13 @@
       "when": 1795646600917,
       "tag": "0030_format_videos",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795646790821,
+      "tag": "0031_edit_sessions",
+      "breakpoints": true
     }
   ]
 }

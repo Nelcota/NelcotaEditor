@@ -8,7 +8,11 @@ import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors"
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
 import { assertFormatAvailable } from "#/modules/viral-formats/server/assert-format-available.server";
 import { enqueueEditRender } from "#/modules/viral-formats/server/edit-render-queue.server";
-import { edits } from "#/modules/viral-formats/viral-formats.schema";
+import {
+    editSessionVideos,
+    editSessions,
+    edits,
+} from "#/modules/viral-formats/viral-formats.schema";
 
 /** Transcripts round times; a take may end a hair past the measured duration. */
 const DURATION_TOLERANCE_SECONDS = 0.05;
@@ -83,6 +87,41 @@ function assertExamplesInside(plan: SplitScreenPlan, planVideos: Map<string, Pla
     }
 }
 
+/** A plan from the queue must name one of the person's queued batches and a video in it. */
+async function assertVideoInQueuedSession(userId: string, plan: SplitScreenPlan): Promise<void> {
+    const sessionId = plan.sessionId;
+
+    if (sessionId === undefined) {
+        return;
+    }
+
+    const rows = await db
+        .select({ status: editSessions.status })
+        .from(editSessions)
+        .innerJoin(editSessionVideos, eq(editSessionVideos.sessionId, editSessions.id))
+        .where(
+            and(
+                eq(editSessions.id, sessionId),
+                eq(editSessions.userId, userId),
+                eq(editSessionVideos.videoId, plan.videoId),
+            ),
+        )
+        .limit(1);
+    const session = rows[0];
+
+    if (session === undefined) {
+        throw new InvalidEditPlanError(
+            "That video is not in that batch. Use the ids from list_edit_queue.",
+        );
+    }
+
+    if (session.status !== "queued") {
+        throw new InvalidEditPlanError(
+            "The person has not sent that batch to edit yet. Ask them to click Começar a editar.",
+        );
+    }
+}
+
 /**
  * Checks a Tela dividida plan against the person's own videos and queues its render. The raw
  * video needs its transcript, since the captions come from it.
@@ -99,6 +138,7 @@ export async function createSplitScreenEdit(
     const rawVideo = requireUsableVideo(planVideos, plan.videoId);
     assertTakesInside(plan, rawVideo.durationSeconds);
     assertExamplesInside(plan, planVideos);
+    await assertVideoInQueuedSession(userId, plan);
 
     if ((await findTranscriptWords(plan.videoId)) === null) {
         throw new InvalidEditPlanError(
@@ -112,6 +152,7 @@ export async function createSplitScreenEdit(
             .values({
                 userId,
                 videoId: plan.videoId,
+                sessionId: plan.sessionId ?? null,
                 title: plan.title,
                 format: "split-screen",
                 plan,

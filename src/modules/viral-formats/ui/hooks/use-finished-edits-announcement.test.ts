@@ -8,6 +8,7 @@ import { useFinishedEditsAnnouncement } from "#/modules/viral-formats/ui/hooks/u
 function edit(id: string, title: string, status: EditStatus): EditView {
     return {
         id,
+        videoId: `video-${id}`,
         title,
         format: "split-screen",
         status,

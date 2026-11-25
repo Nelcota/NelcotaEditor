@@ -12,6 +12,7 @@ import { splitScreenPlanSchema } from "#/modules/viral-formats/model/split-scree
 import { VIRAL_FORMATS } from "#/modules/viral-formats/model/viral-formats";
 import { createSplitScreenEdit } from "#/modules/viral-formats/server/create-split-screen-edit.server";
 import { findUserEdit, listUserEdits } from "#/modules/viral-formats/server/edit-queries.server";
+import { listQueuedEditSessions } from "#/modules/viral-formats/server/edit-session-queries.server";
 
 const SERVER_NAME = "editor-oculto";
 const SERVER_VERSION = "1.0.0";
@@ -39,7 +40,15 @@ const SPLIT_SCREEN_GUIDE = [
     "Panels: change the top panel at the start of a sentence. Use an example (another of the person's videos from list_my_videos, at a moment that matches what is being said) for most sentences.",
     "Use fullscreen for the turning-point sentence, a short joke or reaction, and the final call to action.",
     "Times in panels are seconds of the edited video (the takes played one after the other), starting at 0.",
+    "Batches the person sent from Editor Oculto come from list_edit_queue: follow their adjustments in every video and pass the batch's sessionId.",
     "The render runs in the background; check it with get_edit.",
+].join(" ");
+
+const EDIT_QUEUE_GUIDE = [
+    "Lists the batches the person prepared in Editor Oculto and sent to edit (they clicked Começar a editar), oldest first.",
+    "Each batch has a format, the person's adjustments (apply them to every video of the batch) and its raw videos.",
+    "Edit each video that is transcribed and has no edit yet: read its transcript with get_video_transcript, then call the format's edit tool with the batch's sessionId.",
+    "A video that is not transcribed yet is still being prepared; edit it on a later call.",
 ].join(" ");
 
 const editIdInputSchema = z.object({
@@ -181,6 +190,16 @@ function registerEditTools(server: McpServer, userId: string): void {
             annotations: { readOnlyHint: true },
         },
         async () => toJsonResult(await listUserEdits(userId)),
+    );
+
+    server.registerTool(
+        "list_edit_queue",
+        {
+            title: "Fila de edições",
+            description: EDIT_QUEUE_GUIDE,
+            annotations: { readOnlyHint: true },
+        },
+        async () => toJsonResult(await listQueuedEditSessions(userId)),
     );
 }
 
