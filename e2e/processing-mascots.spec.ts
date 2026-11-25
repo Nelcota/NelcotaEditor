@@ -90,6 +90,13 @@ test("the home mascot tracks the pointer, changes expression and blinks", async 
         eyes.evaluate((element) => Number.parseFloat(getComputedStyle(element).translate));
 
     await expect(gaze).toHaveCSS("visibility", "hidden");
+    await lids.evaluate((element) => {
+        element.addEventListener(
+            "animationstart",
+            () => element.setAttribute("data-observed-blink", "true"),
+            { once: true },
+        );
+    });
     await page.bringToFront();
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await expect(gaze).toHaveCSS("visibility", "visible");
@@ -105,12 +112,7 @@ test("the home mascot tracks the pointer, changes expression and blinks", async 
     await mascot.hover({ force: true });
     await expect(smile).toHaveCSS("opacity", "1");
     await expect(curious).toHaveCSS("opacity", "0");
-    await expect
-        .poll(() => lids.evaluate((element) => getComputedStyle(element).animationName), {
-            intervals: [35],
-            timeout: 5000,
-        })
-        .toBe("brand-blink");
+    await expect(lids).toHaveAttribute("data-observed-blink", "true");
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await expect(gaze).toHaveCSS("visibility", "hidden");

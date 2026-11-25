@@ -82,9 +82,10 @@ Each drawing has one meaning only:
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
   It floats in the app frame and makes one gentle hop beside the home greeting. In the expanded
-  sidebar and on Home, its eyes follow the pointer, taps or keyboard focus and blink at irregular
-  intervals while the tab is visible. On Home the eyes travel farther across the face, and Nel
-  smiles at rest and up close or looks curious when following something farther away.
+  sidebar and on Home, its eyes follow the pointer, taps or keyboard focus. It blinks at irregular
+  intervals in the sidebar and once during the greeting on Home. On Home the eyes travel farther
+  across the face, and Nel smiles at rest and up close or looks curious when following something
+  farther away.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
   (`src/modules/videos/model/video-mascot.ts`). Gallery cards and the video header.
 - **Objects (16–31) are the crew**, one per stage (`src/modules/videos/model/stage-crew.ts`):

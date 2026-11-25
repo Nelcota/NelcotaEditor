@@ -64,9 +64,15 @@ function subscribeToBlink(
     signal: AbortSignal,
 ): void {
     let timer: number | null = null;
+    const blinksOnce = overlay.dataset.hasExpressions === "true";
+    let hasBlinked = false;
 
     function canBlink(): boolean {
-        return motion.matches && document.hidden === false;
+        return (
+            motion.matches &&
+            document.hidden === false &&
+            (blinksOnce === false || hasBlinked === false)
+        );
     }
 
     function blink(): void {
@@ -78,6 +84,11 @@ function subscribeToBlink(
 
         if (overlay.getClientRects().length > 0) {
             overlay.dataset.isBlinking = "true";
+            hasBlinked = true;
+        }
+
+        if (blinksOnce === true && hasBlinked === true) {
+            return;
         }
 
         const delay =
@@ -138,6 +149,11 @@ function subscribeToGaze(overlay: SVGSVGElement): () => void {
     function resetGaze(): void {
         pendingPoint = null;
         paintGaze(overlay, null);
+
+        if (frame !== null) {
+            window.cancelAnimationFrame(frame);
+            frame = null;
+        }
     }
 
     function trackPointer(event: PointerEvent): void {
@@ -183,10 +199,6 @@ function subscribeToGaze(overlay: SVGSVGElement): () => void {
     return () => {
         controller.abort();
         resetGaze();
-
-        if (frame !== null) {
-            window.cancelAnimationFrame(frame);
-        }
     };
 }
 

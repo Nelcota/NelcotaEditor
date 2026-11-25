@@ -54,10 +54,12 @@ export function HomeScreen({ linkComposer }: { linkComposer: ReactNode }): React
 
     return (
         <div className="grid min-h-[calc(100dvh-12rem)] grid-cols-[minmax(0,1fr)] place-content-center justify-items-center gap-5 pb-16">
-            <div className="grid justify-items-center gap-3 pb-3 text-center">
-                <h1 className="flex items-center gap-3.5 text-[2.5rem] leading-tight font-semibold tracking-[-0.04em] max-sm:text-[1.875rem]">
+            <div className="grid min-w-0 justify-items-center gap-3 pb-3 text-center">
+                <h1 className="flex min-w-0 items-center gap-3.5 text-[2.5rem] leading-tight font-semibold tracking-[-0.04em] max-sm:text-[1.875rem]">
                     <BrandGaze className="mascot-animation-once sm:size-14" hasExpressions />
-                    {greeting}, {firstName}.
+                    <span className="min-w-0 [overflow-wrap:anywhere]">
+                        {greeting}, {firstName}.
+                    </span>
                 </h1>
                 <p className="max-w-[44ch] text-base text-muted-foreground">
                     Cole um link e eu faço o resto: cortes verticais com legenda, prontos para
