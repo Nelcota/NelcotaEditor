@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 
 const MAIN_ELEMENT_ID = "main";
 
+const HIDDEN_ANCESTOR_SELECTOR = '[aria-hidden="true"]';
+
 /**
  * After a client-side page change, focus moves to the page's `<main>`: otherwise it stays on the
  * sidebar link and a screen reader never hears that a new page opened. Search changes (tabs,
@@ -23,6 +25,12 @@ export function useFocusMainOnNavigate(isFocusLayout: boolean): void {
         const main = document.getElementById(MAIN_ELEMENT_ID);
 
         if (main === null) {
+            return;
+        }
+
+        // A modal opened by this same navigation (Novo vídeo from another page) already holds
+        // focus and hid the page from assistive technology; taking focus back would trap it there.
+        if (main.closest(HIDDEN_ANCESTOR_SELECTOR) !== null) {
             return;
         }
 
