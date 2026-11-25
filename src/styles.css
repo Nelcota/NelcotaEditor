@@ -8,6 +8,16 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
+@custom-variant crew-motion {
+    @media (prefers-reduced-motion: no-preference) {
+        @slot;
+    }
+
+    &:where(.crew-motion-requested) {
+        @slot;
+    }
+}
+
 /*
  * Window system (2026-11-23, from the owner's reference): a frame holds the sidebar; one rounded panel
  * holds the page, with the breadcrumb on top. Greys carry no hue (the owner asked for nothing bluish);
@@ -519,11 +529,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *,
+    *:where(:not(.crew-motion-requested)),
     ::before,
     ::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
+    }
+
+    *,
+    ::before,
+    ::after {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }

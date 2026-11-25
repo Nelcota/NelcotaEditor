@@ -94,7 +94,22 @@ test("replays the active mascot and respects pause and reduced motion", async ({
     await expect.poll(() => countAnimations(download)).toBe(1);
 
     await page.emulateMedia({ reducedMotion: "reduce" });
+    await openPage(page, `/videos/${videoId}`);
+
+    const play = page.getByRole("button", { name: "Animar mascotes" });
+    await expect(play).toBeVisible();
     await expect(pause).toBeHidden();
+    await expect.poll(() => countAnimations(download)).toBe(0);
+
+    await play.click();
+    await expect(pause).toBeVisible();
+    await expect.poll(() => countAnimations(download)).toBe(1);
+    await expect.poll(() => countAnimations(download)).toBe(0);
+    expect(await readNextGesture(download)).toBe("crew-download");
+    await expect.poll(() => countAnimations(transcription)).toBe(0);
+
+    await pause.click();
+    await expect(play).toBeVisible();
     await expect.poll(() => countAnimations(download)).toBe(0);
     await page.getByRole("button", { name: "Cancelar", exact: true }).hover();
     await expectNoAccessibilityViolations(page);

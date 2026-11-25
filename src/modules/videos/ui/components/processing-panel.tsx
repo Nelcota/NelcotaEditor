@@ -15,6 +15,7 @@ import { formatTimeLeft } from "#/shared/ui/format";
 import { Progress } from "#/shared/ui/progress";
 
 type StepState = "done" | "current" | "upcoming";
+type MascotMotion = "system" | "paused" | "playing";
 
 const STEP_ORDER: Array<VideoStatus> = [
     "queued",
@@ -57,14 +58,16 @@ interface StepCrewProps {
     status: VideoStatus;
     state: StepState;
     isMotionEnabled: boolean;
+    isMotionRequested: boolean;
 }
 
-function StepCrew({ status, state, isMotionEnabled }: StepCrewProps): ReactNode {
+function StepCrew({ status, state, isMotionEnabled, isMotionRequested }: StepCrewProps): ReactNode {
     return (
         <span className="relative shrink-0">
             <StageCrewMascot
                 status={status}
                 isWorking={state === "current" && isMotionEnabled}
+                isMotionRequested={isMotionRequested}
                 context="panel"
                 className={cn("size-8", STEP_MASCOT_STYLES[state])}
             />
@@ -115,9 +118,11 @@ function StageHeadline({ video }: { video: VideoSummary }) {
 function ProcessingSteps({
     status,
     isMotionEnabled,
+    isMotionRequested,
 }: {
     status: VideoStatus;
     isMotionEnabled: boolean;
+    isMotionRequested: boolean;
 }): ReactNode {
     return (
         <ol className="grid gap-3 sm:auto-cols-fr sm:grid-flow-col">
@@ -134,6 +139,7 @@ function ProcessingSteps({
                             status={step.status}
                             state={state}
                             isMotionEnabled={isMotionEnabled}
+                            isMotionRequested={isMotionRequested}
                         />
                         <span className={STEP_LABEL_STYLES[state]}>{step.label}</span>
                     </li>
@@ -143,9 +149,49 @@ function ProcessingSteps({
     );
 }
 
+function MascotMotionButton({
+    motion,
+    onToggle,
+}: {
+    motion: MascotMotion;
+    onToggle: () => void;
+}): ReactNode {
+    return (
+        <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-9 text-muted-foreground"
+            onClick={onToggle}
+        >
+            {motion === "system" && (
+                <>
+                    <span className="motion-safe:hidden">Animar mascotes</span>
+                    <span className="hidden motion-safe:inline">Pausar mascotes</span>
+                </>
+            )}
+            {motion === "paused" && "Animar mascotes"}
+            {motion === "playing" && "Pausar mascotes"}
+        </Button>
+    );
+}
+
 export function ProcessingPanel({ video }: { video: VideoSummary }): ReactNode {
     const { status, progressPercent, isCancelling } = video;
-    const [isMotionPaused, setMotionPaused] = useState(false);
+    const [mascotMotion, setMascotMotion] = useState<MascotMotion>("system");
+
+    function toggleMascotMotion(): void {
+        if (
+            mascotMotion === "playing" ||
+            (mascotMotion === "system" &&
+                window.matchMedia("(prefers-reduced-motion: no-preference)").matches)
+        ) {
+            setMascotMotion("paused");
+            return;
+        }
+
+        setMascotMotion("playing");
+    }
 
     return (
         <section className="grid gap-5 rounded-2xl border bg-popover p-4 sm:p-5">
@@ -153,7 +199,8 @@ export function ProcessingPanel({ video }: { video: VideoSummary }): ReactNode {
             <Progress value={progressPercent} aria-label="Progresso do processamento" />
             <ProcessingSteps
                 status={status}
-                isMotionEnabled={isMotionPaused === false && isCancelling === false}
+                isMotionEnabled={mascotMotion !== "paused" && isCancelling === false}
+                isMotionRequested={mascotMotion === "playing"}
             />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">
@@ -162,16 +209,7 @@ export function ProcessingPanel({ video }: { video: VideoSummary }): ReactNode {
                 </p>
                 <div className="flex flex-wrap items-start gap-2 sm:justify-end">
                     {isVideoWorking(status) === true && isCancelling === false && (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="hidden h-9 text-muted-foreground motion-safe:inline-flex"
-                            onClick={() => setMotionPaused((previous) => previous === false)}
-                        >
-                            {isMotionPaused === true && "Animar mascotes"}
-                            {isMotionPaused === false && "Pausar mascotes"}
-                        </Button>
+                        <MascotMotionButton motion={mascotMotion} onToggle={toggleMascotMotion} />
                     )}
                     <CancelVideoButton video={video} />
                 </div>
