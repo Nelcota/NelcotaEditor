@@ -139,7 +139,10 @@ export function AppLayout({
                         tabIndex={-1}
                         className={cn(
                             "relative grid min-h-0 min-w-0 flex-1 content-start grid-cols-[minmax(0,1fr)] outline-none md:overflow-y-auto",
-                            isVideoPage === false && "gap-6 px-4 pt-2 pb-28 md:px-8 md:pb-10",
+                            // Pages sit centred in the panel: in a column of at most 72rem, each
+                            // at its own width, so wide screens keep no empty strip on one side.
+                            isVideoPage === false &&
+                                "grid-cols-[minmax(0,72rem)] justify-center justify-items-center gap-6 px-4 pt-2 pb-28 md:px-8 md:pb-10 [&>*]:w-full",
                             isVideoPage === true && "pb-24 md:overflow-hidden md:pb-0",
                         )}
                     >
