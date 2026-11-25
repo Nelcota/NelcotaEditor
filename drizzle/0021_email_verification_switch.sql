@@ -1,0 +1,2 @@
+ALTER TABLE "app_switches" DROP CONSTRAINT "app_switches_key_known";--> statement-breakpoint
+ALTER TABLE "app_switches" ADD CONSTRAINT "app_switches_key_known" CHECK ("app_switches"."key" in ('sign-up', 'email-verification', 'youtube-links', 'file-uploads', 'clip-sharing', 'video-processing', 'maintenance-mode'));

@@ -11,7 +11,12 @@ interface EmailLink {
     url: string;
 }
 
+/** An account created while the email-verification switch was off is already confirmed. */
 export async function queueVerificationEmail({ user, url }: EmailLink): Promise<void> {
+    if (user.emailVerified === true) {
+        return;
+    }
+
     await enqueueAuthEmail({ kind: "verify-email", to: user.email, name: null, url });
 }
 

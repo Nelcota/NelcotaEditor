@@ -21,17 +21,26 @@ export const Route = createFileRoute("/sign-up")({
             context.queryClient.fetchQuery({ ...appSwitchStatesQueryOptions(), staleTime: 0 }),
         ]);
 
-        return { captchaSiteKey, isSignUpOpen: switches["sign-up"] };
+        return {
+            captchaSiteKey,
+            isSignUpOpen: switches["sign-up"],
+            isEmailVerificationRequired: switches["email-verification"],
+        };
     },
     component: SignUpPage,
 });
 
 function SignUpPage(): ReactNode {
-    const { captchaSiteKey, isSignUpOpen } = Route.useLoaderData();
+    const { captchaSiteKey, isSignUpOpen, isEmailVerificationRequired } = Route.useLoaderData();
 
     if (isSignUpOpen === false) {
         return <SignUpClosedScreen />;
     }
 
-    return <SignUpScreen captchaSiteKey={captchaSiteKey} />;
+    return (
+        <SignUpScreen
+            captchaSiteKey={captchaSiteKey}
+            isEmailVerificationRequired={isEmailVerificationRequired}
+        />
+    );
 }
