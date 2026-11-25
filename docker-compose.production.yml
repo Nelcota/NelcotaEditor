@@ -13,7 +13,17 @@ x-logging: &logging
 services:
     postgres:
         image: postgres:18.7-alpine
-        command: ["postgres", "-c", "log_min_duration_statement=500"]
+        # Slow queries are logged without their bound values, which hold emails and tokens.
+        command:
+            [
+                "postgres",
+                "-c",
+                "log_min_duration_statement=500",
+                "-c",
+                "log_parameter_max_length=0",
+                "-c",
+                "log_parameter_max_length_on_error=0",
+            ]
         environment:
             POSTGRES_USER: nelcota
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
@@ -67,6 +77,23 @@ services:
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
         expose:
             - "3000"
+        # The slim Bun image has no curl or wget; Bun's fetch exits non-zero on a 503 or no answer.
+        # /health queries through the same database pool as the app, so a busy pool can make it
+        # slow or fail for a moment. Once the container is unhealthy, Traefik stops routing to it and
+        # every visitor gets an error, so it takes five failures in a row (over a minute) to get
+        # there, not one load spike.
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "bun",
+                    "-e",
+                    "const response = await fetch('http://localhost:3000/health', { signal: AbortSignal.timeout(8000) }); process.exit(Number(response.status !== 200))",
+                ]
+            interval: 15s
+            timeout: 10s
+            retries: 5
+            start_period: 60s
         depends_on:
             migrate:
                 condition: service_completed_successfully

@@ -1,4 +1,3 @@
-import { loadEnv } from "vite";
 import type { Plugin, PluginOption } from "vite";
 import { configDefaults, defineConfig } from "vitest/config";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
@@ -8,6 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import icons from "unplugin-icons/vite";
 import { icons as lucideIcons } from "@iconify-json/lucide";
+import { EXTERNAL_SERVICES_OFF, readTestEnvironment } from "./scripts/test-environment.ts";
 
 const LUCIDE_VIEW_BOX_SIZE = 24;
 const LUCIDE_DEFAULT_STROKE = 'stroke-width="2"';
@@ -77,7 +77,7 @@ function appServerPlugins(): Array<PluginOption> {
 }
 
 /** Integration tests read .env.test, never .env: they write to their own database. */
-const TEST_ENVIRONMENT = loadEnv("test", process.cwd(), "");
+const TEST_ENVIRONMENT = readTestEnvironment();
 
 export default defineConfig({
     resolve: { tsconfigPaths: true },
@@ -90,6 +90,7 @@ export default defineConfig({
                     include: ["src/**/*.test.{ts,tsx}"],
                     exclude: [...configDefaults.exclude, "src/**/*.integration.test.ts"],
                     environment: "node",
+                    env: EXTERNAL_SERVICES_OFF,
                 },
             },
             {
