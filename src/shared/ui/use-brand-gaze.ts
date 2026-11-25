@@ -6,8 +6,9 @@ interface GazePoint {
     y: number;
 }
 
-const MAX_TRAVEL_PERCENT = 7;
-const FULL_TRAVEL_IN_MARK_WIDTHS = 3;
+const SIDEBAR_GAZE_TRAVEL = { horizontalPercent: 7, verticalPercent: 7, markWidths: 3 };
+const EXPRESSIVE_GAZE_TRAVEL = { horizontalPercent: 14, verticalPercent: 8, markWidths: 1.75 };
+const NEAR_IN_MARK_WIDTHS = 1.25;
 const EYE_LINE_RATIO = 37 / 80;
 const LOOK_X_PROPERTY = "--brand-look-x";
 const LOOK_Y_PROPERTY = "--brand-look-y";
@@ -22,6 +23,7 @@ function paintGaze(overlay: SVGSVGElement, point: GazePoint | null): void {
 
     if (point === null) {
         delete overlay.dataset.hasGaze;
+        delete overlay.dataset.isNear;
         style.removeProperty(LOOK_X_PROPERTY);
         style.removeProperty(LOOK_Y_PROPERTY);
         return;
@@ -33,14 +35,27 @@ function paintGaze(overlay: SVGSVGElement, point: GazePoint | null): void {
         return;
     }
 
+    let travel = SIDEBAR_GAZE_TRAVEL;
+
+    if (overlay.dataset.hasExpressions === "true") {
+        travel = EXPRESSIVE_GAZE_TRAVEL;
+    }
+
     const horizontal = point.x - left - width / 2;
     const vertical = point.y - top - height * EYE_LINE_RATIO;
-    const distance = Math.max(Math.hypot(horizontal, vertical), width * FULL_TRAVEL_IN_MARK_WIDTHS);
-    const travel = MAX_TRAVEL_PERCENT / distance;
+    const distance = Math.hypot(horizontal, vertical);
+    const distanceForTravel = Math.max(distance, width * travel.markWidths);
 
     overlay.dataset.hasGaze = "true";
-    style.setProperty(LOOK_X_PROPERTY, `${horizontal * travel}%`);
-    style.setProperty(LOOK_Y_PROPERTY, `${vertical * travel}%`);
+    overlay.toggleAttribute("data-is-near", distance <= width * NEAR_IN_MARK_WIDTHS);
+    style.setProperty(
+        LOOK_X_PROPERTY,
+        `${(horizontal / distanceForTravel) * travel.horizontalPercent}%`,
+    );
+    style.setProperty(
+        LOOK_Y_PROPERTY,
+        `${(vertical / distanceForTravel) * travel.verticalPercent}%`,
+    );
 }
 
 function subscribeToBlink(
@@ -112,7 +127,7 @@ function subscribeToGaze(overlay: SVGSVGElement): () => void {
     }
 
     function scheduleGaze(point: GazePoint | null): void {
-        if (motion.matches === false) {
+        if (motion.matches === false || document.hidden === true) {
             return;
         }
 
@@ -133,6 +148,18 @@ function subscribeToGaze(overlay: SVGSVGElement): () => void {
         scheduleGaze({ x: event.clientX, y: event.clientY });
     }
 
+    function trackTouch(event: PointerEvent): void {
+        if (event.pointerType === "touch") {
+            scheduleGaze({ x: event.clientX, y: event.clientY });
+        }
+    }
+
+    function resetPointerGaze(event: PointerEvent): void {
+        if (event.pointerType !== "touch") {
+            resetGaze();
+        }
+    }
+
     function trackFocus(event: FocusEvent): void {
         const element = event.target;
 
@@ -146,8 +173,10 @@ function subscribeToGaze(overlay: SVGSVGElement): () => void {
 
     subscribeToBlink(overlay, motion, signal);
     window.addEventListener("pointermove", trackPointer, { signal, passive: true });
-    document.documentElement.addEventListener("pointerleave", resetGaze, { signal });
+    window.addEventListener("pointerdown", trackTouch, { signal, passive: true });
+    document.documentElement.addEventListener("pointerleave", resetPointerGaze, { signal });
     document.addEventListener("focusin", trackFocus, { signal });
+    document.addEventListener("visibilitychange", resetGaze, { signal });
     window.addEventListener("blur", resetGaze, { signal });
     motion.addEventListener("change", resetGaze, { signal });
 

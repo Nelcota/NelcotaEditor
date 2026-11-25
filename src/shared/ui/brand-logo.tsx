@@ -24,7 +24,6 @@ export function BrandMark({
     );
 }
 
-/** Ghost plus the lowercase wordmark, set tight and bold like the reference's logo. */
 export function BrandLogo({ className }: { className?: string }): ReactNode {
     return (
         <span
@@ -34,7 +33,7 @@ export function BrandLogo({ className }: { className?: string }): ReactNode {
             )}
         >
             <BrandGaze />
-            nelcota
+            NELCOTA
         </span>
     );
 }
