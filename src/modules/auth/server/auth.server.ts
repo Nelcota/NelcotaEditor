@@ -187,7 +187,6 @@ const signUpResponseSchema = z.object({
         email: z.string(),
         image: z.string().nullish(),
         createdAt: z.date(),
-        updatedAt: z.date(),
     }),
 });
 
@@ -209,6 +208,7 @@ const normalizeSignUpResponse = createAuthMiddleware((context) => {
             token: null,
             user: {
                 ...signedUpUser,
+                updatedAt: signedUpUser.createdAt,
                 name: signedUpUser.name.trim(),
                 image: signedUpUser.image ?? null,
                 emailVerified: false,
