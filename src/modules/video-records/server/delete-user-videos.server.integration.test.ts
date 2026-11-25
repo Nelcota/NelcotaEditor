@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, test } from "vitest";
 import { eq } from "drizzle-orm";
 import { Client } from "pg";
+import { z } from "zod";
 import { db } from "#/db/database.server";
 import { ADMIN_ROLE, USER_ROLE, user } from "#/modules/auth/auth.schema";
 import { LastAdminError } from "#/modules/auth/model/last-admin-error";
@@ -16,6 +17,13 @@ import { getEnvironment } from "#/shared/server/env.server";
 // Runs against the test database from .env.test: bun run test:integration
 
 const WAIT_FOR_LOCK_MILLISECONDS = 300;
+const UPLOADED_BYTES = 2_000_000;
+
+// video_uploads belongs to the videos module, so this file reads it without importing its table.
+const heldUploadSchema = z.object({
+    user_id: z.string().nullable(),
+    cancelled_at: z.date().nullable(),
+});
 
 async function createTestUser(): Promise<string> {
     const userId = randomUUID();
@@ -58,6 +66,32 @@ async function insertVideoInOpenTransaction(client: Client, userId: string): Pro
     );
 
     return videoId;
+}
+
+async function insertUploadedVideo(userId: string, createdAt: Date): Promise<string> {
+    const videoId = randomUUID();
+    await db.insert(videos).values({
+        id: videoId,
+        userId,
+        title: "Upload",
+        source: "upload",
+        sourcePath: `videos/${videoId}/source.mp4`,
+        sourceBytes: UPLOADED_BYTES,
+        status: "done",
+        requestedClipCount: 3,
+        createdAt,
+    });
+
+    return videoId;
+}
+
+async function readHeldUploads(videoId: string): Promise<Array<z.infer<typeof heldUploadSchema>>> {
+    const result = await db.$client.query(
+        "select user_id, cancelled_at from video_uploads where id = $1",
+        [videoId],
+    );
+
+    return result.rows.map((row: unknown) => heldUploadSchema.parse(row));
 }
 
 describe("deleteUserAccountRecords", () => {
@@ -121,5 +155,26 @@ describe("deleteUserAccountRecords", () => {
 
         assert.equal(results.filter((result) => result.status === "rejected").length, 1);
         assert.equal(await countAdmins(), 1);
+    });
+
+    test("leaves a cancelled reservation for a recent upload, so the sweep deletes a late file", async () => {
+        const userId = await createTestUser();
+        const videoId = await insertUploadedVideo(userId, new Date());
+
+        await deleteUserAccountRecords(userId);
+
+        const heldUploads = await readHeldUploads(videoId);
+        assert.equal(heldUploads.length, 1);
+        assert.equal(heldUploads[0]?.user_id, null);
+        assert.notEqual(heldUploads[0]?.cancelled_at, null);
+    });
+
+    test("leaves no reservation for an upload whose link has already expired", async () => {
+        const userId = await createTestUser();
+        const videoId = await insertUploadedVideo(userId, new Date("2020-01-01T00:00:00Z"));
+
+        await deleteUserAccountRecords(userId);
+
+        assert.equal((await readHeldUploads(videoId)).length, 0);
     });
 });

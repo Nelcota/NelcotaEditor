@@ -8,7 +8,7 @@ import { clipLengthEnum } from "#/modules/video-records/video-records.schema";
 
 /**
  * An upload the browser is sending straight to storage. The row holds the space and the processing
- * slot it was granted until the upload is confirmed (then it becomes a video) or expires. Its id is
+ * slot it was granted until the upload is confirmed (then it becomes a video), cancelled or expires. Its id is
  * the id the video will have, so the file is stored under the video's folder from the start.
  */
 export const videoUploads = pgTable(
@@ -28,6 +28,10 @@ export const videoUploads = pgTable(
         // "" means "detect automatically", as on the video row.
         transcriptionLanguage: text("transcription_language").notNull(),
         expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+        // Set when the upload is cancelled or its video deleted. The upload link may still write
+        // the file until expires_at, so the row frees the processing slot but keeps holding the
+        // space, and the sweep deletes whatever arrived once it expires.
+        cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
         createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
         updatedAt: timestamp("updated_at", { withTimezone: true })
             .defaultNow()

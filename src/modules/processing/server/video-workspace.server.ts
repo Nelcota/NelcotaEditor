@@ -1,5 +1,6 @@
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, readdir, rm } from "node:fs/promises";
 import path from "node:path";
+import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { getVideoDirectory } from "#/shared/server/storage.server";
 
@@ -35,7 +36,27 @@ export async function removeVideoWorkspace(videoId: string): Promise<void> {
     await rm(resolveVideoWorkspace(videoId), { recursive: true, force: true });
 }
 
-/** On start no run is in progress, so anything left belongs to a run that died with the worker. */
-export async function removeAllVideoWorkspaces(): Promise<void> {
-    await rm(resolveWorkspacesRoot(), { recursive: true, force: true });
+/** Folders are named after their video, so the name is also the video's processing lock key. */
+async function removeWorkspaceUnlessProcessing(
+    workspacesRoot: string,
+    name: string,
+): Promise<void> {
+    await runWithVideoProcessingLock(name, async () => {
+        await rm(path.join(workspacesRoot, name), { recursive: true, force: true });
+    });
+}
+
+/**
+ * On start, removes what runs that died with a worker left behind. Replicas may share WORK_DIR, so
+ * a workspace whose video another worker is processing (it holds the lock) stays.
+ */
+export async function removeAbandonedVideoWorkspaces(): Promise<void> {
+    const workspacesRoot = resolveWorkspacesRoot();
+
+    await mkdir(workspacesRoot, { recursive: true });
+    const names = await readdir(workspacesRoot);
+
+    for (const name of names) {
+        await removeWorkspaceUnlessProcessing(workspacesRoot, name);
+    }
 }

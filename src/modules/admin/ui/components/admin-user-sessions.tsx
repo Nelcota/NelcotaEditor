@@ -33,7 +33,15 @@ function describeSession(session: AdminSessionView): string {
     return parts.join(" · ");
 }
 
-export function AdminUserSessions({ sessions }: { sessions: Array<AdminSessionView> }): ReactNode {
+interface AdminUserSessionsProps {
+    sessions: Array<AdminSessionView>;
+    activeSessionCount: number;
+}
+
+export function AdminUserSessions({
+    sessions,
+    activeSessionCount,
+}: AdminUserSessionsProps): ReactNode {
     if (sessions.length === 0) {
         return (
             <p className="rounded-2xl border border-dashed px-4 py-6 text-sm text-muted-foreground">
@@ -42,6 +50,19 @@ export function AdminUserSessions({ sessions }: { sessions: Array<AdminSessionVi
         );
     }
 
+    return (
+        <div className="grid gap-2">
+            <SessionList sessions={sessions} />
+            {activeSessionCount > sessions.length && (
+                <p className="text-sm text-muted-foreground tabular-nums">
+                    Mostrando as {sessions.length} mais recentes de {activeSessionCount}.
+                </p>
+            )}
+        </div>
+    );
+}
+
+function SessionList({ sessions }: { sessions: Array<AdminSessionView> }): ReactNode {
     return (
         <ul className="rounded-2xl border bg-popover px-4 sm:px-5">
             {sessions.map((session) => (

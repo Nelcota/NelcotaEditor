@@ -21,10 +21,14 @@ export const signInSchema = z.object({
     password: z.string().min(1, "Digite sua senha."),
 });
 
+/** Off screen for people; a bot that fills every input fills this one too. */
+export const SIGN_UP_HONEYPOT_FIELD = "website";
+
 export const signUpSchema = z.object({
     name: nameSchema,
     email: emailSchema,
     password: newPasswordSchema,
+    [SIGN_UP_HONEYPOT_FIELD]: z.string(),
 });
 
 export const forgotPasswordSchema = z.object({ email: emailSchema });

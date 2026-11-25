@@ -8,7 +8,8 @@ export type AuthEmailKind = (typeof AUTH_EMAIL_KINDS)[number];
 export const authEmailJobSchema = z.object({
     kind: z.enum(AUTH_EMAIL_KINDS),
     to: z.email(),
-    name: z.string().trim().min(1),
+    // Null for accounts whose address was never confirmed: whoever typed that name may not own it.
+    name: z.string().trim().min(1).nullable(),
     url: z.url({ protocol: /^https?$/ }),
 });
 
@@ -28,12 +29,37 @@ interface AuthEmailCopy {
 }
 
 const LINK_LIFETIME_NOTE = "O link vale por 1 hora.";
+const NEUTRAL_GREETING = "Olá.";
 
-const AUTH_EMAIL_COPY: Record<AuthEmailKind, (name: string) => AuthEmailCopy> = {
-    "verify-email": (name) => ({
+function greet(name: string | null): string {
+    if (name === null) {
+        return NEUTRAL_GREETING;
+    }
+
+    return `Olá, ${name}.`;
+}
+
+/**
+ * Anyone can sign up with someone else's address and a name like "visit scam.example", so a name
+ * reaches an inbox only after its owner confirmed the address.
+ */
+export function pickGreetingName(recipient: {
+    name: string;
+    emailVerified: boolean;
+}): string | null {
+    if (recipient.emailVerified === false) {
+        return null;
+    }
+
+    return recipient.name;
+}
+
+const AUTH_EMAIL_COPY: Record<AuthEmailKind, (name: string | null) => AuthEmailCopy> = {
+    // Always sent before the address is confirmed, so it never carries the typed name.
+    "verify-email": () => ({
         subject: "Confirme seu email no Nelcota",
         paragraphs: [
-            `Olá, ${name}.`,
+            NEUTRAL_GREETING,
             `Para ativar sua conta, confirme seu email. ${LINK_LIFETIME_NOTE}`,
         ],
         buttonLabel: "Confirmar email",
@@ -42,7 +68,7 @@ const AUTH_EMAIL_COPY: Record<AuthEmailKind, (name: string) => AuthEmailCopy> = 
     "reset-password": (name) => ({
         subject: "Redefina sua senha do Nelcota",
         paragraphs: [
-            `Olá, ${name}.`,
+            greet(name),
             `Recebemos um pedido para redefinir sua senha. ${LINK_LIFETIME_NOTE}`,
         ],
         buttonLabel: "Escolher nova senha",
@@ -51,7 +77,7 @@ const AUTH_EMAIL_COPY: Record<AuthEmailKind, (name: string) => AuthEmailCopy> = 
     "existing-account": (name) => ({
         subject: "Tentativa de cadastro com seu email",
         paragraphs: [
-            `Olá, ${name}.`,
+            greet(name),
             "Alguém tentou criar uma conta no Nelcota com este email, mas você já tem uma. Se foi você e esqueceu a senha, redefina pelo link abaixo.",
         ],
         buttonLabel: "Redefinir senha",

@@ -3,6 +3,7 @@ import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import type { AdminUserListInput } from "#/modules/admin/model/admin-search";
 import { ADMIN_PAGE_SIZE } from "#/modules/admin/model/admin-search";
+import { MAX_LISTED_SESSIONS } from "#/modules/admin/model/admin-views";
 import type {
     AdminSessionView,
     AdminUserDetails,
@@ -43,12 +44,24 @@ export async function listAdminUsers(input: AdminUserListInput): Promise<AdminUs
     return { users, totalCount };
 }
 
-async function listActiveSessions(userId: string): Promise<Array<AdminSessionView>> {
+function isActiveSessionOf(userId: string): SQL | undefined {
+    return and(eq(session.userId, userId), gt(session.expiresAt, new Date()));
+}
+
+async function listLatestActiveSessions(userId: string): Promise<Array<AdminSessionView>> {
     const rows = await db
-        .select()
+        .select({
+            id: session.id,
+            userAgent: session.userAgent,
+            ipAddress: session.ipAddress,
+            createdAt: session.createdAt,
+            expiresAt: session.expiresAt,
+            impersonatedBy: session.impersonatedBy,
+        })
         .from(session)
-        .where(and(eq(session.userId, userId), gt(session.expiresAt, new Date())))
-        .orderBy(desc(session.createdAt));
+        .where(isActiveSessionOf(userId))
+        .orderBy(desc(session.createdAt))
+        .limit(MAX_LISTED_SESSIONS);
 
     return rows.map((row) => ({
         id: row.id,
@@ -58,6 +71,12 @@ async function listActiveSessions(userId: string): Promise<Array<AdminSessionVie
         expiresAt: row.expiresAt.toISOString(),
         isImpersonation: row.impersonatedBy !== null,
     }));
+}
+
+async function countActiveSessions(userId: string): Promise<number> {
+    const rows = await db.select({ total: count() }).from(session).where(isActiveSessionOf(userId));
+
+    return rows[0]?.total ?? 0;
 }
 
 async function countVideoActivity(userId: string): Promise<{ ready: number; working: number }> {
@@ -101,11 +120,12 @@ export async function findAdminUserDetails(
     request: UserDetailsRequest,
 ): Promise<AdminUserDetails | null> {
     const userId = request.userId;
-    const [rows, banDetails, activity, sessions] = await Promise.all([
+    const [rows, banDetails, activity, sessions, activeSessionCount] = await Promise.all([
         selectAdminUserRows({ where: eq(user.id, userId), orderBy: "newest", limit: 1, offset: 0 }),
         findBanDetails(userId),
         countVideoActivity(userId),
-        listActiveSessions(userId),
+        listLatestActiveSessions(userId),
+        countActiveSessions(userId),
     ]);
     const userRow = rows[0];
 
@@ -121,6 +141,7 @@ export async function findAdminUserDetails(
         workingVideoCount: activity.working,
         storageQuotaBytes: getStorageQuotaBytes(),
         sessions,
+        activeSessionCount,
         isCurrentAdmin: userId === request.adminId,
     };
 }

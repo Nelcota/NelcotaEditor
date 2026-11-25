@@ -111,7 +111,10 @@ function UserDetails({ details }: { details: AdminUserDetails }): ReactNode {
                 <AdminUserVideos userId={details.user.id} />
             </Section>
             <Section title="Sessões ativas">
-                <AdminUserSessions sessions={details.sessions} />
+                <AdminUserSessions
+                    sessions={details.sessions}
+                    activeSessionCount={details.activeSessionCount}
+                />
             </Section>
         </div>
     );

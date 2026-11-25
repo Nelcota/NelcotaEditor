@@ -39,6 +39,9 @@ export interface AdminUserPage {
     totalCount: number;
 }
 
+/** A script can open sessions without end; the details page lists only the latest ones. */
+export const MAX_LISTED_SESSIONS = 20;
+
 export interface AdminSessionView {
     id: string;
     userAgent: string | null;
@@ -56,6 +59,7 @@ export interface AdminUserDetails {
     workingVideoCount: number;
     storageQuotaBytes: number;
     sessions: Array<AdminSessionView>;
+    activeSessionCount: number;
     isCurrentAdmin: boolean;
 }
 
