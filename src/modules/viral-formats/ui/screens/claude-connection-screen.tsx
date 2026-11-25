@@ -65,7 +65,7 @@ export function ClaudeConnectionScreen(): ReactNode {
     const connectedAt = connection?.connectedAt ?? null;
 
     return (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
+        <div className="@container grid grid-cols-[minmax(0,1fr)] gap-8">
             <header className="grid max-w-2xl gap-2">
                 <p className="text-xs font-bold tracking-eyebrow text-primary-ink uppercase">
                     Etapa 1
@@ -78,7 +78,7 @@ export function ClaudeConnectionScreen(): ReactNode {
                     e pronto. Os Cortes funcionam mesmo sem essa etapa.
                 </p>
             </header>
-            <div className="grid items-start gap-6 lg:grid-cols-2">
+            <div className="grid items-start gap-6 @4xl:grid-cols-2">
                 <ConnectionPicture isConnected={connectedAt !== null} />
                 <section
                     aria-labelledby="how-to-connect"
