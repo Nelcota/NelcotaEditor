@@ -1,7 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { appSwitchStatesQueryOptions } from "#/modules/app-switches/model/app-switch-queries";
 import { getCaptchaSiteKey } from "#/modules/auth/server/captcha-functions";
 import { getCurrentUser } from "#/modules/auth/server/get-current-user";
+import { SignUpClosedScreen } from "#/modules/auth/ui/screens/sign-up-closed-screen";
 import { SignUpScreen } from "#/modules/auth/ui/screens/sign-up-screen";
 
 export const Route = createFileRoute("/sign-up")({
@@ -13,12 +15,23 @@ export const Route = createFileRoute("/sign-up")({
             throw redirect({ to: "/overview" });
         }
     },
-    loader: async () => ({ captchaSiteKey: await getCaptchaSiteKey() }),
+    loader: async ({ context }) => {
+        const [captchaSiteKey, switches] = await Promise.all([
+            getCaptchaSiteKey(),
+            context.queryClient.fetchQuery({ ...appSwitchStatesQueryOptions(), staleTime: 0 }),
+        ]);
+
+        return { captchaSiteKey, isSignUpOpen: switches["sign-up"] };
+    },
     component: SignUpPage,
 });
 
 function SignUpPage(): ReactNode {
-    const { captchaSiteKey } = Route.useLoaderData();
+    const { captchaSiteKey, isSignUpOpen } = Route.useLoaderData();
+
+    if (isSignUpOpen === false) {
+        return <SignUpClosedScreen />;
+    }
 
     return <SignUpScreen captchaSiteKey={captchaSiteKey} />;
 }

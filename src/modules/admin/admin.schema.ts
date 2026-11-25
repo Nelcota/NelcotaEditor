@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { check, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import type { AppSwitchKey } from "#/modules/app-switches/model/app-switch";
 import type { ADMIN_ROLE, USER_ROLE } from "#/modules/auth/auth.schema";
 
 export const ADMIN_AUDIT_ACTIONS = [
@@ -12,6 +13,7 @@ export const ADMIN_AUDIT_ACTIONS = [
     "stop-impersonation",
     "cancel-video",
     "delete-video",
+    "set-app-switch",
 ] as const;
 
 export type AdminAuditAction = (typeof ADMIN_AUDIT_ACTIONS)[number];
@@ -20,6 +22,8 @@ export type AdminAuditAction = (typeof ADMIN_AUDIT_ACTIONS)[number];
 export type AdminAuditDetails = {
     readonly role?: typeof ADMIN_ROLE | typeof USER_ROLE;
     readonly banReasonLength?: number;
+    readonly switchKey?: AppSwitchKey;
+    readonly isEnabled?: boolean;
 };
 
 /** Constant values written into the CHECK; never user input. */

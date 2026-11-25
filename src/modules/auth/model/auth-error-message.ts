@@ -1,7 +1,12 @@
+import { FEATURE_TURNED_OFF_MESSAGES } from "#/modules/app-switches/model/feature-turned-off-error";
 import { MIN_PASSWORD_LENGTH } from "#/modules/auth/model/auth-forms";
 import { LAST_ADMIN_CODE, LAST_ADMIN_DELETE_MESSAGE } from "#/modules/auth/model/last-admin-error";
 
 export const VIDEOS_STILL_PROCESSING_CODE = "VIDEOS_STILL_PROCESSING";
+
+export const SIGN_UP_CLOSED_CODE = "SIGN_UP_CLOSED";
+
+export const SIGN_UP_CLOSED_MESSAGE = FEATURE_TURNED_OFF_MESSAGES["sign-up"];
 
 export const BANNED_USER_MESSAGE =
     "Esta conta foi bloqueada. Fale com o suporte se achar que é um engano.";
@@ -17,6 +22,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     CREDENTIAL_ACCOUNT_NOT_FOUND: "Esta conta não tem senha para trocar.",
     [VIDEOS_STILL_PROCESSING_CODE]: "Cancele os vídeos em processamento antes de excluir a conta.",
     [LAST_ADMIN_CODE]: LAST_ADMIN_DELETE_MESSAGE,
+    [SIGN_UP_CLOSED_CODE]: SIGN_UP_CLOSED_MESSAGE,
     MISSING_RESPONSE: "Aguarde a verificação de segurança terminar e tente de novo.",
     BANNED_USER: BANNED_USER_MESSAGE,
     VERIFICATION_FAILED: "A verificação de segurança falhou. Tente de novo.",

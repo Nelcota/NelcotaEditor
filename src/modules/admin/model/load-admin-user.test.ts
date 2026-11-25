@@ -11,6 +11,7 @@ vi.mock("#/modules/admin/server/admin-user-functions", () => ({
     getAdminUsers: vi.fn(),
 }));
 vi.mock("#/modules/admin/server/admin-video-functions", () => ({}));
+vi.mock("#/modules/admin/server/admin-app-switch-functions", () => ({}));
 
 const USER_ID = "user-1";
 

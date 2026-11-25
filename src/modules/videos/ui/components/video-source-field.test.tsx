@@ -8,6 +8,11 @@ import { VideoSourceField } from "#/modules/videos/ui/components/video-source-fi
 
 // Server functions are the network calls; outside the app's build they load the server's
 // environment.
+vi.mock("#/modules/app-switches/server/app-switch-functions", async () => {
+    const { DEFAULT_APP_SWITCH_STATES } = await import("#/modules/app-switches/model/app-switch");
+
+    return { getAppSwitchStates: async () => DEFAULT_APP_SWITCH_STATES };
+});
 vi.mock("#/modules/videos/server/youtube-preview-functions", () => ({
     getYoutubePreview: vi.fn(),
 }));

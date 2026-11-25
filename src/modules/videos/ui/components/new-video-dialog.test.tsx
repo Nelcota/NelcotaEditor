@@ -13,6 +13,11 @@ import { NewVideoDialog } from "#/modules/videos/ui/components/new-video-dialog"
 
 // Server functions are the network calls; outside the app's build they load the server's
 // environment. The wizard only navigates after a success, which these tests never reach.
+vi.mock("#/modules/app-switches/server/app-switch-functions", async () => {
+    const { DEFAULT_APP_SWITCH_STATES } = await import("#/modules/app-switches/model/app-switch");
+
+    return { getAppSwitchStates: async () => DEFAULT_APP_SWITCH_STATES };
+});
 vi.mock("#/modules/preferences/server/preferences-functions", () => ({ getPreferences: vi.fn() }));
 vi.mock("#/modules/videos/server/video-functions", () => ({ createYoutubeVideo: vi.fn() }));
 vi.mock("#/modules/videos/server/video-upload-functions", () => ({}));
