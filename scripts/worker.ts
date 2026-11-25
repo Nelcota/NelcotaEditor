@@ -1,3 +1,4 @@
+import type { JobWithMetadata } from "pg-boss";
 import { startAuthEmailWorker } from "#/modules/auth/server/auth-email-queue.server";
 import { backfillStoredBytes } from "#/modules/processing/server/backfill-stored-bytes.server";
 import { processVideo } from "#/modules/processing/server/process-video.server";
@@ -33,12 +34,6 @@ class InvalidJobPayloadError extends Error {
     }
 }
 
-interface ProcessVideoJob {
-    id: string;
-    data: unknown;
-    signal: AbortSignal;
-}
-
 /** The status the video ended in; a video deleted while processing has none. */
 async function readFinalStatus(videoId: string): Promise<string> {
     const video = await findVideoById(videoId);
@@ -54,37 +49,44 @@ async function readFinalStatus(videoId: string): Promise<string> {
  * Ids and timing only: titles, links and transcripts are the person's data. The job and video ids
  * come from the log context around the job.
  */
-async function processVideoWithLogs(videoId: string, signal: AbortSignal): Promise<void> {
-    const startedAt = Date.now();
-    logger.info({}, "Job started");
+async function processVideoWithLogs(
+    videoId: string,
+    signal: AbortSignal,
+    queueWaitMs: number,
+): Promise<void> {
+    const startedAt = performance.now();
+    logger.info({ queueWaitMs }, "Job started");
 
     try {
         await processVideo(videoId, signal);
     } catch (error) {
         // pg-boss only marks the job failed; this line is the one record of why.
-        logger.error({ durationMs: Date.now() - startedAt, error }, "Job threw");
+        logger.error({ durationMs: Math.round(performance.now() - startedAt), error }, "Job threw");
         throw error;
     }
 
     const status = await readFinalStatus(videoId);
-    logger.info({ status, durationMs: Date.now() - startedAt }, "Job ended");
+    logger.info({ status, durationMs: Math.round(performance.now() - startedAt) }, "Job ended");
 }
 
-async function handleJob(job: ProcessVideoJob): Promise<void> {
-    const result = processVideoJobSchema.safeParse(job.data);
+async function handleJob(job: JobWithMetadata<unknown>): Promise<void> {
+    const { id: jobId, data: payload, signal, createdOn, startAfter, startedOn } = job;
+    const result = processVideoJobSchema.safeParse(payload);
 
     // Throwing makes pg-boss record the job as failed instead of silently completing it.
     if (result.success === false) {
         logger.error(
-            { jobId: job.id, issueCount: result.error.issues.length },
+            { jobId, issueCount: result.error.issues.length },
             "Rejecting a job with an invalid payload",
         );
         throw new InvalidJobPayloadError(result.error.issues.length);
     }
 
     const videoId = result.data.videoId;
-    await withLogContext({ jobId: job.id, videoId }, () =>
-        processVideoWithLogs(videoId, job.signal),
+    const eligibleAt = Math.max(createdOn.getTime(), startAfter.getTime());
+    const queueWaitMs = Math.max(0, startedOn.getTime() - eligibleAt);
+    await withLogContext({ jobId, videoId }, () =>
+        processVideoWithLogs(videoId, signal, queueWaitMs),
     );
 }
 
@@ -107,7 +109,11 @@ async function startVideoWork(): Promise<void> {
     // groupConcurrency is tracked in the database, so "one video per person" holds across replicas.
     await jobQueue.work(
         PROCESS_VIDEO_QUEUE,
-        { localConcurrency: workerConcurrency, groupConcurrency: VIDEOS_PER_USER_AT_ONCE },
+        {
+            includeMetadata: true,
+            localConcurrency: workerConcurrency,
+            groupConcurrency: VIDEOS_PER_USER_AT_ONCE,
+        },
         async (jobs) => {
             for (const job of jobs) {
                 await handleJob(job);
@@ -156,7 +162,13 @@ function scheduleVideoWorkSync(): void {
 async function startWorker(): Promise<void> {
     setJobQueueRole("worker");
     await ensureProcessVideoQueue();
-    const workerConcurrency = getEnvironment().WORKER_CONCURRENCY;
+    const {
+        WORKER_CONCURRENCY: workerConcurrency,
+        CLIP_RENDER_CONCURRENCY: renderConcurrency,
+        CLIP_RENDER_THREADS: renderThreads,
+        CLIP_RENDER_MAX_FPS: renderMaxFramesPerSecond,
+        TRANSCRIPTION_CONCURRENCY: transcriptionConcurrency,
+    } = getEnvironment();
 
     // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
     // their video's lock is free, so a start never touches the active runs of other replicas.
@@ -168,7 +180,16 @@ async function startWorker(): Promise<void> {
     await startStuckVideoRecovery();
     await startExpiredUploadSweep();
     await startAuthEmailWorker();
-    logger.info({ workerConcurrency }, "Worker ready");
+    logger.info(
+        {
+            workerConcurrency,
+            renderConcurrency,
+            renderThreads,
+            renderMaxFramesPerSecond: renderMaxFramesPerSecond ?? null,
+            transcriptionConcurrency,
+        },
+        "Worker ready",
+    );
 
     process.once("SIGTERM", stopWorker);
     process.once("SIGINT", stopWorker);
