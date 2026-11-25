@@ -2,8 +2,8 @@ import ScissorsIcon from "~icons/lucide/scissors";
 import UploadIcon from "~icons/lucide/upload";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useId, useState } from "react";
-import type { FormEvent, ReactNode } from "react";
+import { useId, useRef, useState } from "react";
+import type { FormEvent, ReactNode, RefObject } from "react";
 import { readSwitchState } from "#/modules/app-switches/model/app-switch";
 import { appSwitchStatesQueryOptions } from "#/modules/app-switches/model/app-switch-queries";
 import { FEATURE_TURNED_OFF_MESSAGES } from "#/modules/app-switches/model/feature-turned-off-error";
@@ -88,13 +88,14 @@ function PausedLinkNotice(): ReactNode {
 
 interface LinkFieldProps {
     id: string;
+    inputRef: RefObject<HTMLInputElement | null>;
     value: string;
     problem: string | null;
     isBusy: boolean;
     onChange: (text: string) => void;
 }
 
-function LinkField({ id, value, problem, isBusy, onChange }: LinkFieldProps): ReactNode {
+function LinkField({ id, inputRef, value, problem, isBusy, onChange }: LinkFieldProps): ReactNode {
     return (
         <div className="grid gap-1.5">
             <label htmlFor={`${id}-input`} className="text-sm font-medium">
@@ -106,6 +107,7 @@ function LinkField({ id, value, problem, isBusy, onChange }: LinkFieldProps): Re
                     className="size-5 shrink-0 text-muted-foreground"
                 />
                 <input
+                    ref={inputRef}
                     id={`${id}-input`}
                     type="url"
                     inputMode="url"
@@ -132,6 +134,7 @@ function LinkField({ id, value, problem, isBusy, onChange }: LinkFieldProps): Re
 /** The card itself, once the saved preferences are known: they are the starting choices. */
 function ClipMakerForm({ preferences }: { preferences: Preferences }): ReactNode {
     const problemId = useId();
+    const linkRef = useRef<HTMLInputElement>(null);
     const [text, setText] = useState("");
     const [clipCount, setClipCount] = useState(preferences.defaultClipCount);
     const [clipLength, setClipLength] = useState(preferences.defaultClipLength);
@@ -151,7 +154,12 @@ function ClipMakerForm({ preferences }: { preferences: Preferences }): ReactNode
         event.preventDefault();
         setIsSubmitAttempted(true);
 
-        if (isReady === false || isBusy === true) {
+        if (isBusy === true) {
+            return;
+        }
+
+        if (isReady === false) {
+            linkRef.current?.focus();
             return;
         }
 
@@ -168,6 +176,7 @@ function ClipMakerForm({ preferences }: { preferences: Preferences }): ReactNode
         <form noValidate onSubmit={submit} className={CARD_CLASS}>
             <LinkField
                 id={problemId}
+                inputRef={linkRef}
                 value={text}
                 problem={problem}
                 isBusy={isBusy}
@@ -177,7 +186,7 @@ function ClipMakerForm({ preferences }: { preferences: Preferences }): ReactNode
                     setText(next);
                 }}
             />
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid items-start gap-5 md:grid-cols-2">
                 <ClipCountPicker value={clipCount} onValueChange={setClipCount} />
                 <ClipLengthPicker value={clipLength} onValueChange={setClipLength} />
             </div>
