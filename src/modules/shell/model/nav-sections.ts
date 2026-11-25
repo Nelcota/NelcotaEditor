@@ -15,7 +15,7 @@ export interface NavSection {
     icon: IconComponent;
 }
 
-export type AdminSubPath = "/admin" | "/admin/users" | "/admin/videos";
+export type AdminSubPath = "/admin" | "/admin/users" | "/admin/videos" | "/admin/features";
 
 export interface AdminSubSection {
     path: AdminSubPath;
@@ -62,6 +62,7 @@ export const ADMIN_SUB_SECTIONS: ReadonlyArray<AdminSubSection> = [
     { path: "/admin", label: "Visão geral" },
     { path: "/admin/users", label: "Usuários" },
     { path: "/admin/videos", label: "Vídeos" },
+    { path: "/admin/features", label: "Recursos" },
 ];
 
 /** Every section fits the phone tab bar; Admin stays a desktop page. */
