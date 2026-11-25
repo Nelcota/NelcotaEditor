@@ -1,6 +1,7 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { getFreshSessionUser } from "#/modules/auth/server/get-session-user.server";
+import { logger } from "#/shared/server/logger.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 /**
@@ -16,6 +17,7 @@ export const adminMiddleware = createMiddleware({ type: "function" }).server(asy
     }
 
     if (user.isAdmin === false) {
+        logger.warn({ userId: user.id }, "Non-admin called an admin function");
         throw new UserFacingError("Esta área é só para administradores.");
     }
 

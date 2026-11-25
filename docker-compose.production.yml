@@ -63,8 +63,8 @@ services:
             # Cloudflare sits in front; without it every visitor would share Traefik's address and
             # one sign-in rate limit.
             TRUSTED_PROXY_IP_HEADER: cf-connecting-ip
-            TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
-            TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+            TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:?}
+            TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:?}
             STORAGE_DIR: /app/storage
             STORAGE_DRIVER: r2
             R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:?}
