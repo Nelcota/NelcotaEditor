@@ -59,4 +59,9 @@ export interface StorageUsage {
     clipBytes: number;
     /** Everything else: the original video and its thumbnail (audio is deleted after use). */
     sourceBytes: number;
+    /**
+     * Uploads still on their way, and cancelled ones whose link may still write, until the link
+     * expires. New uploads are refused against this space too, so the total counts it.
+     */
+    reservedBytes: number;
 }

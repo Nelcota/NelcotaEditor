@@ -6,6 +6,7 @@ import EyeIcon from "~icons/lucide/eye";
 import EyeOffIcon from "~icons/lucide/eye-off";
 import FilmIcon from "~icons/lucide/film";
 import ScissorsIcon from "~icons/lucide/scissors";
+import UploadIcon from "~icons/lucide/upload";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -76,13 +77,17 @@ function StorageRow(props: StorageRowProps): ReactNode {
 interface StorageDetailsProps {
     sourceBytes: number;
     clipBytes: number;
+    reservedBytes: number;
     totalBytes: number;
     isHidden: boolean;
 }
 
-/** The split between originals and clips, and the ways to the full usage. */
+/**
+ * The split between originals, clips and the space uploads hold, and the ways to the full usage.
+ * A cancelled upload keeps its space for a few hours, so the row shows why the total is higher.
+ */
 function StorageDetails(props: StorageDetailsProps): ReactNode {
-    const { sourceBytes, clipBytes, totalBytes, isHidden } = props;
+    const { sourceBytes, clipBytes, reservedBytes, totalBytes, isHidden } = props;
 
     return (
         <>
@@ -102,6 +107,16 @@ function StorageDetails(props: StorageDetailsProps): ReactNode {
                 barClass="bg-primary"
                 isHidden={isHidden}
             />
+            {reservedBytes > 0 && (
+                <StorageRow
+                    icon={UploadIcon}
+                    label="Reservado para envios"
+                    bytes={reservedBytes}
+                    totalBytes={totalBytes}
+                    barClass="bg-muted-foreground"
+                    isHidden={isHidden}
+                />
+            )}
             <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-1.5">
                 <Button asChild variant="secondary" size="sm">
                     <Link to="/account">Ver uso</Link>
@@ -200,7 +215,7 @@ export function StorageCard(): ReactNode {
                     {isHidden === false && <EyeIcon aria-hidden="true" className="size-4" />}
                 </CardTool>
                 {isCollapsed === false && (
-                    <CardTool label="O espaço dos seus vídeos originais e dos cortes prontos">
+                    <CardTool label="O espaço dos originais, dos cortes e dos envios. Um envio cancelado fica reservado por até 6 horas.">
                         <CircleHelpIcon aria-hidden="true" className="size-4" />
                     </CardTool>
                 )}
@@ -223,6 +238,7 @@ export function StorageCard(): ReactNode {
                     <StorageDetails
                         sourceBytes={storage.sourceBytes}
                         clipBytes={storage.clipBytes}
+                        reservedBytes={storage.reservedBytes}
                         totalBytes={totalBytes}
                         isHidden={isHidden}
                     />

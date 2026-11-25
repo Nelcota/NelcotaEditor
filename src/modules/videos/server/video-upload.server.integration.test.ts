@@ -25,7 +25,7 @@ import {
     reserveVideoUpload,
 } from "#/modules/videos/server/reserve-video-upload.server";
 import { storeVideoUpload } from "#/modules/videos/server/store-video-upload.server";
-import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
+import { getStorageQuotaBytes, summarizeUsage } from "#/modules/videos/server/usage-summary.server";
 import { videoUploads } from "#/modules/videos/videos.schema";
 import type { VideoUpload } from "#/modules/videos/videos.schema";
 import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
@@ -387,5 +387,17 @@ describe("video uploads", () => {
         expect(await getFileStorage().measureFile(`videos/${videoId}/source.mp4`)).toBe(
             SMALL_UPLOAD_BYTES,
         );
+    });
+
+    it("shows the space a cancelled upload still holds in the usage", async () => {
+        const userId = await createTestUser();
+        await insertStoredVideo(userId, FITTING_UPLOAD_BYTES);
+        const cancelled = await reserveVideoUpload(userId, uploadInput(FITTING_UPLOAD_BYTES));
+        await discardPendingUpload(cancelled.id);
+
+        const usage = await summarizeUsage(userId);
+
+        expect(usage.storage.reservedBytes).toBe(FITTING_UPLOAD_BYTES);
+        expect(usage.storage.totalBytes).toBe(FITTING_UPLOAD_BYTES * 2);
     });
 });
