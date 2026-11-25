@@ -28,6 +28,25 @@ describe("keepImpersonatedSessionExpiry", () => {
         assert.equal(result, undefined);
     });
 
+    test("blocks renewal of an impersonated session with a null expiry", async () => {
+        const context = contextFor({ impersonatedBy: "admin-1", expiresAt: null });
+
+        const result = await keepImpersonatedSessionExpiry({ expiresAt: RENEWED_EXPIRY }, context);
+
+        assert.equal(result, false);
+    });
+
+    test("accepts a serialized expiry without changing the end of the visit", async () => {
+        const context = contextFor({
+            impersonatedBy: "admin-1",
+            expiresAt: VISIT_ENDS_AT.toISOString(),
+        });
+
+        const result = await keepImpersonatedSessionExpiry({ expiresAt: RENEWED_EXPIRY }, context);
+
+        assert.deepEqual(result, { data: { expiresAt: VISIT_ENDS_AT } });
+    });
+
     test("leaves updates without an expiry alone", async () => {
         const context = contextFor({ impersonatedBy: "admin-1", expiresAt: VISIT_ENDS_AT });
 

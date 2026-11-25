@@ -40,6 +40,7 @@ async function insertFailedVideoWithClips(clipStatuses: Array<ClipStatus>): Prom
             endSeconds: 30,
             score: 80,
             status,
+            outputPath: `videos/${videoId}/clips/${position}.mp4`,
         })),
     );
 

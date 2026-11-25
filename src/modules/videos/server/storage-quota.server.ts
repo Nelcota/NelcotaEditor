@@ -4,6 +4,7 @@ import {
     measureUserStorage,
 } from "#/modules/videos/server/usage-summary.server";
 import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
+import { UserFacingError } from "#/shared/server/user-facing-error";
 
 interface StorageRequest {
     userId: string;
@@ -39,7 +40,15 @@ export async function assertStorageAvailable(
     assertValidByteCount("reserved", reservedBytes);
 
     const storage = await measureUserStorage(userId, executor);
-    const usedBytes = storage.totalBytes + reservedBytes;
+    const totalBytes = storage.totalBytes;
+
+    if (totalBytes === null) {
+        throw new UserFacingError(
+            "Estamos calculando o espaço usado. Tente novamente em alguns minutos.",
+        );
+    }
+
+    const usedBytes = totalBytes + reservedBytes;
     const quotaBytes = getStorageQuotaBytes();
 
     if (usedBytes >= quotaBytes || usedBytes + incomingBytes > quotaBytes) {

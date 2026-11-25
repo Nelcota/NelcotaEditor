@@ -169,6 +169,13 @@
       "when": 1795613775477,
       "tag": "0023_clip_poster_path",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795617782168,
+      "tag": "0024_null_integrity",
+      "breakpoints": true
     }
   ]
 }

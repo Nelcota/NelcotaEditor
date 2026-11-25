@@ -153,6 +153,23 @@ describe("createR2FileStorage respondWithFile", () => {
     });
 });
 
+describe("createR2FileStorage measureFile", () => {
+    it("distinguishes a missing length from a measured empty object", async () => {
+        const key = "videos/abc/source.mp4";
+        const send = vi.spyOn(S3Client.prototype, "send");
+        send.mockImplementationOnce(() => ({})).mockImplementationOnce(() => ({
+            ContentLength: 0,
+        }));
+
+        try {
+            await expect(storage.measureFile(key)).rejects.toThrow("valid content length");
+            await expect(storage.measureFile(key)).resolves.toBe(0);
+        } finally {
+            send.mockRestore();
+        }
+    });
+});
+
 describe("createR2FileStorage createUploadUrl", () => {
     it("signs a PUT that only creates a new object of the declared size", async () => {
         const uploadUrl = await storage.createUploadUrl("videos/abc/source.mp4", {

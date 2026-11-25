@@ -1,6 +1,6 @@
 import type { JobWithMetadata } from "pg-boss";
 import { startAuthEmailWorker } from "#/modules/auth/server/auth-email-queue.server";
-import { backfillStoredBytes } from "#/modules/processing/server/backfill-stored-bytes.server";
+import { startStoredBytesBackfill } from "#/modules/processing/server/backfill-stored-bytes.server";
 import { processVideo } from "#/modules/processing/server/process-video.server";
 import {
     requeueInterruptedVideos,
@@ -93,18 +93,6 @@ async function handleJob(job: JobWithMetadata<unknown>): Promise<void> {
     );
 }
 
-/**
- * A backfill is no reason to stay down: with the file store unreachable at boot, throwing here
- * would restart the worker in a loop and stop every video. The next start tries again.
- */
-async function backfillStoredBytesWithoutBlocking(): Promise<void> {
-    try {
-        await backfillStoredBytes();
-    } catch (error) {
-        logger.error({ error }, "Could not backfill stored file sizes");
-    }
-}
-
 async function startVideoWork(): Promise<void> {
     const jobQueue = await getJobQueue();
     const workerConcurrency = getEnvironment().WORKER_CONCURRENCY;
@@ -175,7 +163,7 @@ async function startWorker(): Promise<void> {
     // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
     // their video's lock is free, so a start never touches the active runs of other replicas.
     await removeAbandonedVideoWorkspaces();
-    await backfillStoredBytesWithoutBlocking();
+    await startStoredBytesBackfill();
     await requeueInterruptedVideos();
     await syncVideoWork();
     scheduleVideoWorkSync();

@@ -6,6 +6,7 @@ import type { ClipView } from "#/modules/clips/model/clip-view";
 import { readStoredDraft } from "#/modules/studio/server/clip-studio.server";
 import { findClipOfVideo } from "#/modules/clips/server/find-clip-of-video.server";
 import { toClipView } from "#/modules/clips/server/clip-views.server";
+import { readStoredCaptionCues } from "#/modules/clips/server/read-stored-caption-cues.server";
 import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
 
 /**
@@ -43,7 +44,7 @@ export const getClipStudioSnapshot = createServerFn({ method: "GET" })
                 captionPosition: clip.captionPosition,
                 captionFont: clip.captionFont,
             },
-            appliedCues: clip.captionCues,
+            appliedCues: readStoredCaptionCues(clip),
             draft: readStoredDraft(clip),
             draftVersion: clip.studioDraftVersion,
             videoDurationSeconds: video.durationSeconds,

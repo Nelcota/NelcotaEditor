@@ -54,11 +54,12 @@ export interface UsageSummary {
 
 /** Disk used by the user's videos, split by what the space holds. */
 export interface StorageUsage {
-    totalBytes: number;
+    /** Null while a stored file has yet to be measured. */
+    totalBytes: number | null;
     /** Rendered clips. */
-    clipBytes: number;
+    clipBytes: number | null;
     /** Everything else: the original video and its thumbnail (audio is deleted after use). */
-    sourceBytes: number;
+    sourceBytes: number | null;
     /**
      * Uploads still on their way, and cancelled ones whose link may still write, until the link
      * expires. New uploads are refused against this space too, so the total counts it.

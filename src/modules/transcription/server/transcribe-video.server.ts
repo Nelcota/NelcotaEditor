@@ -80,6 +80,9 @@ export async function ensureTranscript(request: TranscriptRequest): Promise<Arra
     await ensureWhisperModel(request.signal);
 
     const transcription = await transcribeAudio(request);
-    await db.insert(transcripts).values({ videoId, ...transcription });
+    await db
+        .insert(transcripts)
+        .values({ videoId, ...transcription })
+        .onConflictDoUpdate({ target: transcripts.videoId, set: transcription });
     return transcription.words;
 }

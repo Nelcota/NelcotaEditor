@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { afterAll, describe, test } from "vitest";
+import { afterAll, describe, expect, test } from "vitest";
+import { eq, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
 import { listReadyClipsSince } from "#/modules/clips/server/clip-views.server";
+import { readStoredCaptionCues } from "#/modules/clips/server/read-stored-caption-cues.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 
@@ -43,6 +45,7 @@ async function insertVideoWithReadyClip(userId: string, status: VideoStatus): Pr
         endSeconds: 30,
         score: 80,
         status: "done",
+        outputPath: `videos/${videoId}/clips/test.mp4`,
     });
 
     return videoId;
@@ -64,5 +67,38 @@ describe("listReadyClipsSince", () => {
             rows.map((row) => row.videoId),
             [finishedVideoId],
         );
+    });
+
+    test("rejects a ready clip without an output and captions with null cues", async () => {
+        const userId = await createTestUser();
+        const videoId = await insertVideoWithReadyClip(userId, "done");
+        const forVideo = eq(clips.videoId, videoId);
+
+        await expect(
+            db.update(clips).set({ outputPath: null }).where(forVideo),
+        ).rejects.toMatchObject({
+            cause: { constraint: "clips_done_has_output" },
+        });
+        await expect(
+            db
+                .update(clips)
+                .set({ captionCues: sql`'[null]'::jsonb` })
+                .where(forVideo),
+        ).rejects.toMatchObject({ cause: { constraint: "clips_caption_cues_array" } });
+    });
+
+    test("falls back to the transcript when saved captions contain an invalid word", async () => {
+        const userId = await createTestUser();
+        const videoId = await insertVideoWithReadyClip(userId, "done");
+        const [clip] = await db
+            .update(clips)
+            .set({
+                captionCues: sql`'[{"startSeconds": 0, "endSeconds": 1, "words": [null]}]'::jsonb`,
+            })
+            .where(eq(clips.videoId, videoId))
+            .returning({ id: clips.id, captionCues: clips.captionCues });
+
+        assert.ok(clip);
+        assert.equal(readStoredCaptionCues(clip), null);
     });
 });

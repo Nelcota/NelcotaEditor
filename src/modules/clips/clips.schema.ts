@@ -83,6 +83,14 @@ export const clips = pgTable(
         // Its leading column also serves every "clips of this video" query.
         uniqueIndex("clips_video_id_position_idx").on(table.videoId, table.position),
         check(
+            "clips_done_has_output",
+            sql`${table.status} <> 'done' or ${table.outputPath} is not null`,
+        ),
+        check(
+            "clips_caption_cues_array",
+            sql`${table.captionCues} is null or (jsonb_typeof(${table.captionCues}) = 'array' and not ${table.captionCues} @> '[null]'::jsonb)`,
+        ),
+        check(
             "clips_output_bytes_positive",
             sql`${table.outputBytes} is null or ${table.outputBytes} >= 0`,
         ),
