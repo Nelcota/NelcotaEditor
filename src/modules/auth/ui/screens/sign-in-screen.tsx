@@ -32,12 +32,21 @@ interface SignInScreenProps {
     redirectTarget: string;
     /** Set by the link that brought the person here (email confirmation, password reset). */
     search: SignInSearch;
+    /**
+     * Signing in to let an app (the person's Claude) in: Better Auth resumes that request and the
+     * auth client follows its redirect, so the page does not navigate on its own.
+     */
+    isAuthorizingApp?: boolean;
 }
+
+const SIGN_IN_TITLE = { lead: "Que bom", emphasis: "te ver de novo" };
+const CONNECT_CLAUDE_TITLE = { lead: "Entre para", emphasis: "conectar o Claude" };
 
 export function SignInScreen({
     captchaSiteKey,
     search,
     redirectTarget,
+    isAuthorizingApp = false,
 }: SignInScreenProps): ReactNode {
     const notice = toSignInNotice(search);
     const track = useTrackPromise();
@@ -73,14 +82,25 @@ export function SignInScreen({
 
             // A session that expired in this tab may have left another account's videos cached.
             queryClient.clear();
+
+            if (isAuthorizingApp === true) {
+                return;
+            }
+
             await router.navigate({ href: redirectTarget });
         },
     });
 
+    let title = SIGN_IN_TITLE;
+
+    if (isAuthorizingApp === true) {
+        title = CONNECT_CLAUDE_TITLE;
+    }
+
     return (
         <AuthCard
             eyebrow="Entrar"
-            title={{ lead: "Que bom", emphasis: "te ver de novo" }}
+            title={title}
             description="Seus vídeos e cortes estão te esperando."
             footer={{ text: "Ainda não tem conta?", linkLabel: "Criar conta", linkTo: "/sign-up" }}
         >

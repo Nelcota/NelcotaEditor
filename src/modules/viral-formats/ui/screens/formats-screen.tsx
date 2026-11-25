@@ -1,8 +1,10 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
 import PlayIcon from "~icons/lucide/play";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { claudeConnectionQueryOptions } from "#/modules/auth/model/claude-connection-queries";
 import { VIRAL_FORMATS } from "#/modules/viral-formats/model/viral-formats";
 import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
 import { FormatCard } from "#/modules/viral-formats/ui/components/format-card";
@@ -82,6 +84,9 @@ function FeaturedFormat({ format, onOpen }: FeaturedFormatProps): ReactNode {
 
 /** Formatos Virais: the formats Editor Oculto edits into, each opening its own details. */
 export function FormatsScreen(): ReactNode {
+    const connectionQuery = useQuery(claudeConnectionQueryOptions());
+    // Shown only once the answer is known, so a connected person never sees it flash.
+    const isClaudeMissing = connectionQuery.data?.connectedAt === null;
     const [openFormat, setOpenFormat] = useState<ViralFormat | null>(null);
     const featured = VIRAL_FORMATS[FEATURED_INDEX];
 
@@ -99,7 +104,7 @@ export function FormatsScreen(): ReactNode {
                     escolhido.
                 </p>
             </header>
-            <ConnectClaudeNotice />
+            {isClaudeMissing === true && <ConnectClaudeNotice />}
             {featured !== undefined && <FeaturedFormat format={featured} onOpen={setOpenFormat} />}
             <section aria-labelledby="all-formats" className="grid gap-4">
                 <h2 id="all-formats" className="flex items-baseline gap-2 text-lg font-bold">

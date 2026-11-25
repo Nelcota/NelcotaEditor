@@ -2,7 +2,8 @@ import { betterAuth } from "better-auth";
 import type { User } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { admin } from "better-auth/plugins";
+import { admin, jwt } from "better-auth/plugins";
+import { mcp } from "@better-auth/mcp";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { z } from "zod";
 import { db } from "#/db/database.server";
@@ -23,6 +24,14 @@ import {
     ADMIN_ROLE,
     USER_ROLE,
     account,
+    jwks,
+    oauthAccessToken,
+    oauthClient,
+    oauthClientAssertion,
+    oauthClientResource,
+    oauthConsent,
+    oauthRefreshToken,
+    oauthResource,
     rateLimit,
     session,
     user,
@@ -33,6 +42,12 @@ import {
     recordImpersonationStop,
 } from "#/modules/admin/server/record-admin-action.server";
 import { buildCaptchaPlugins } from "#/modules/auth/server/auth-captcha.server";
+import {
+    CLAUDE_CONNECT_PATH,
+    CLAUDE_CONSENT_PATH,
+    MCP_SCOPES,
+    toMcpResource,
+} from "#/modules/auth/model/mcp-connection";
 import {
     queueExistingAccountEmail,
     queueResetPasswordEmail,
@@ -65,6 +80,38 @@ function readAuthSecret(): string {
 
     return secret;
 }
+
+function readAuthUrl(): string {
+    const authUrl = environment.BETTER_AUTH_URL;
+
+    if (authUrl === undefined) {
+        throw new InvalidEnvironmentError(["BETTER_AUTH_URL"]);
+    }
+
+    return authUrl;
+}
+
+/**
+ * A person's Claude signs in to Editor Oculto through OAuth and gets a token bound to /api/mcp.
+ * Claude registers itself on first connect (claude.ai's "Register automatically"), so registration
+ * is open; each registered client gets only the scopes below, and the person still approves it on
+ * the consent page. Session JWTs are off: they would share the access tokens' signing key.
+ */
+const jwtPlugin = jwt({ disableSettingJwtHeader: true });
+
+/** The audience every MCP access token carries; /api/mcp checks it on each request. */
+export const MCP_RESOURCE = toMcpResource(readAuthUrl());
+
+const mcpPlugin = mcp({
+    loginPage: CLAUDE_CONNECT_PATH,
+    consentPage: CLAUDE_CONSENT_PATH,
+    resource: MCP_RESOURCE,
+    scopes: [...MCP_SCOPES],
+    allowDynamicClientRegistration: true,
+    allowUnauthenticatedClientRegistration: true,
+    clientRegistrationDefaultScopes: [...MCP_SCOPES],
+    clientRegistrationDefaultApplicationType: "infer",
+});
 
 /**
  * Deletes the account in the same transaction as its videos, so a video started meanwhile cannot
@@ -271,6 +318,8 @@ const PATHS_CLOSED_TO_THE_BROWSER = [
         .map((endpoint) => endpoint.path)
         .filter((path) => ADMIN_PATHS_FOR_THE_BROWSER.includes(path) === false),
     "/verify-password",
+    // The JWT plugin's session token route; MCP clients get tokens from /oauth2/token instead.
+    "/token",
 ];
 
 export const auth = betterAuth({
@@ -279,7 +328,21 @@ export const auth = betterAuth({
     secret: readAuthSecret(),
     database: drizzleAdapter(db, {
         provider: "pg",
-        schema: { user, session, account, verification, rateLimit },
+        schema: {
+            user,
+            session,
+            account,
+            verification,
+            rateLimit,
+            jwks,
+            oauthClient,
+            oauthResource,
+            oauthClientResource,
+            oauthRefreshToken,
+            oauthAccessToken,
+            oauthConsent,
+            oauthClientAssertion,
+        },
     }),
     emailAndPassword: {
         enabled: true,
@@ -335,5 +398,11 @@ export const auth = betterAuth({
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
     // The admin plugin comes first: after the captcha spread, TypeScript would lose the fields it
     // adds to the user and session types.
-    plugins: [adminPlugin, ...buildCaptchaPlugins(environment), tanstackStartCookies()],
+    plugins: [
+        adminPlugin,
+        ...buildCaptchaPlugins(environment),
+        jwtPlugin,
+        mcpPlugin,
+        tanstackStartCookies(),
+    ],
 });

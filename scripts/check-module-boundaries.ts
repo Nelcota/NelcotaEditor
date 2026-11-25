@@ -21,7 +21,8 @@ const MODULE_LAYOUT_HINT =
 
 const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>>> = {
     "app-switches": [],
-    "viral-formats": [],
+    "viral-formats": ["auth"],
+    mcp: ["auth", "video-records", "transcription", "videos", "viral-formats"],
     auth: ["app-switches"],
     "video-records": ["auth"],
     preferences: ["auth", "video-records"],

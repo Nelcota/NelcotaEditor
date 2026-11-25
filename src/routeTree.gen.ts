@@ -17,6 +17,7 @@ import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as DotwellKnownSplatRouteImport } from './routes/[.]well-known/$'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
@@ -30,7 +31,10 @@ import { Route as AppGettingStartedRouteImport } from './routes/_app/getting-sta
 import { Route as AppOverviewRouteImport } from './routes/_app/overview'
 import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
 import { Route as AppUsageRouteImport } from './routes/_app/usage'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as CTokenRouteImport } from './routes/c.$token'
+import { Route as OauthConsentRouteImport } from './routes/oauth.consent'
+import { Route as OauthSignInRouteImport } from './routes/oauth.sign-in'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppAdminFeaturesRouteImport } from './routes/_app/admin/features'
 import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
@@ -92,6 +96,11 @@ const SignInRoute = SignInRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownSplatRoute = DotwellKnownSplatRouteImport.update({
+  id: '/.well-known/$',
+  path: '/.well-known/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -159,9 +168,24 @@ const AppUsageRoute = AppUsageRouteImport.update({
   path: '/usage',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CTokenRoute = CTokenRouteImport.update({
   id: '/c/$token',
   path: '/c/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthConsentRoute = OauthConsentRouteImport.update({
+  id: '/oauth/consent',
+  path: '/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthSignInRoute = OauthSignInRouteImport.update({
+  id: '/oauth/sign-in',
+  path: '/oauth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
@@ -293,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
   '/$': typeof AppSplatRoute
   '/account': typeof AppAccountRoute
   '/admin': typeof AppAdminRouteWithChildren
@@ -305,7 +330,10 @@ export interface FileRoutesByFullPath {
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/c/$token': typeof CTokenRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/oauth/sign-in': typeof OauthSignInRoute
   '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/support': typeof AppAdminSupportRouteWithChildren
   '/admin/videos': typeof AppAdminVideosRoute
@@ -338,6 +366,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
   '/$': typeof AppSplatRoute
   '/account': typeof AppAccountRoute
   '/claude': typeof AppClaudeRoute
@@ -349,7 +378,10 @@ export interface FileRoutesByTo {
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/c/$token': typeof CTokenRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/oauth/sign-in': typeof OauthSignInRoute
   '/': typeof AppIndexRoute
   '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/videos': typeof AppAdminVideosRoute
@@ -384,6 +416,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
   '/_app/$': typeof AppSplatRoute
   '/_app/account': typeof AppAccountRoute
   '/_app/admin': typeof AppAdminRouteWithChildren
@@ -396,7 +429,10 @@ export interface FileRoutesById {
   '/_app/overview': typeof AppOverviewRoute
   '/_app/preferences': typeof AppPreferencesRoute
   '/_app/usage': typeof AppUsageRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/c/$token': typeof CTokenRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/oauth/sign-in': typeof OauthSignInRoute
   '/_app/': typeof AppIndexRoute
   '/_app/admin/features': typeof AppAdminFeaturesRoute
   '/_app/admin/support': typeof AppAdminSupportRouteWithChildren
@@ -433,6 +469,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/.well-known/$'
     | '/$'
     | '/account'
     | '/admin'
@@ -445,7 +482,10 @@ export interface FileRouteTypes {
     | '/overview'
     | '/preferences'
     | '/usage'
+    | '/api/mcp'
     | '/c/$token'
+    | '/oauth/consent'
+    | '/oauth/sign-in'
     | '/admin/features'
     | '/admin/support'
     | '/admin/videos'
@@ -478,6 +518,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/.well-known/$'
     | '/$'
     | '/account'
     | '/claude'
@@ -489,7 +530,10 @@ export interface FileRouteTypes {
     | '/overview'
     | '/preferences'
     | '/usage'
+    | '/api/mcp'
     | '/c/$token'
+    | '/oauth/consent'
+    | '/oauth/sign-in'
     | '/'
     | '/admin/features'
     | '/admin/videos'
@@ -523,6 +567,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/.well-known/$'
     | '/_app/$'
     | '/_app/account'
     | '/_app/admin'
@@ -535,7 +580,10 @@ export interface FileRouteTypes {
     | '/_app/overview'
     | '/_app/preferences'
     | '/_app/usage'
+    | '/api/mcp'
     | '/c/$token'
+    | '/oauth/consent'
+    | '/oauth/sign-in'
     | '/_app/'
     | '/_app/admin/features'
     | '/_app/admin/support'
@@ -571,7 +619,11 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  DotwellKnownSplatRoute: typeof DotwellKnownSplatRoute
+  ApiMcpRoute: typeof ApiMcpRoute
   CTokenRoute: typeof CTokenRoute
+  OauthConsentRoute: typeof OauthConsentRoute
+  OauthSignInRoute: typeof OauthSignInRoute
   ApiAccountAvatarRoute: typeof ApiAccountAvatarRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiShareTokenRoute: typeof ApiShareTokenRoute
@@ -640,6 +692,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/$': {
+      id: '/.well-known/$'
+      path: '/.well-known/$'
+      fullPath: '/.well-known/$'
+      preLoaderRoute: typeof DotwellKnownSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -733,11 +792,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUsageRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/c/$token': {
       id: '/c/$token'
       path: '/c/$token'
       fullPath: '/c/$token'
       preLoaderRoute: typeof CTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/consent': {
+      id: '/oauth/consent'
+      path: '/oauth/consent'
+      fullPath: '/oauth/consent'
+      preLoaderRoute: typeof OauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/sign-in': {
+      id: '/oauth/sign-in'
+      path: '/oauth/sign-in'
+      fullPath: '/oauth/sign-in'
+      preLoaderRoute: typeof OauthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/admin/': {
@@ -993,7 +1073,11 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  DotwellKnownSplatRoute: DotwellKnownSplatRoute,
+  ApiMcpRoute: ApiMcpRoute,
   CTokenRoute: CTokenRoute,
+  OauthConsentRoute: OauthConsentRoute,
+  OauthSignInRoute: OauthSignInRoute,
   ApiAccountAvatarRoute: ApiAccountAvatarRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiShareTokenRoute: ApiShareTokenRoute,
