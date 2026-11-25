@@ -3,11 +3,11 @@ import CircleHelpIcon from "~icons/lucide/circle-help";
 import ClapperboardIcon from "~icons/lucide/clapperboard";
 import LayersIcon from "~icons/lucide/layers";
 import PlayIcon from "~icons/lucide/play";
-import PlugIcon from "~icons/lucide/plug";
 import ScissorsIcon from "~icons/lucide/scissors";
 import ShieldIcon from "~icons/lucide/shield";
 import UserRoundIcon from "~icons/lucide/user-round";
 import type { ActiveOptions } from "@tanstack/react-router";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 import type { IconComponent } from "#/shared/ui/icon-component";
 
 export type SectionPath =
@@ -76,7 +76,7 @@ export const GETTING_STARTED_SECTION: NavSection = {
 export const CLAUDE_SECTION: NavSection = {
     path: "/claude",
     label: "Etapa 1 · Conectar Claude",
-    icon: PlugIcon,
+    icon: ClaudeLogo,
 };
 
 export const FORMATS_SECTION: NavSection = {

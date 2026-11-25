@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Alert } from "#/shared/ui/alert";
 import { BrandMark } from "#/shared/ui/brand-logo";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 
 const CONNECTION_STEPS: ReadonlyArray<{ id: string; text: ReactNode }> = [
     {
@@ -48,8 +49,8 @@ function ConnectionPicture(): ReactNode {
                 <BrandMark className="h-6" />
             </span>
             <span className="h-0.5 w-16 rounded-full border-t-2 border-dashed border-foreground/25" />
-            <span className="grid size-16 place-items-center rounded-2xl bg-secondary text-2xl font-bold text-foreground">
-                ✳
+            <span className="grid size-16 place-items-center rounded-2xl bg-secondary">
+                <ClaudeLogo className="size-9" />
             </span>
         </div>
     );

@@ -1,5 +1,4 @@
 import PlayIcon from "~icons/lucide/play";
-import PlugIcon from "~icons/lucide/plug";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -10,6 +9,7 @@ import { FormatCover } from "#/modules/viral-formats/ui/components/format-cover"
 import { FormatDialog } from "#/modules/viral-formats/ui/components/format-dialog";
 import { Alert } from "#/shared/ui/alert";
 import { Button } from "#/shared/ui/button";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 
 const FEATURED_INDEX = 0;
 
@@ -17,7 +17,7 @@ function ConnectClaudeNotice(): ReactNode {
     return (
         <Alert
             tone="info"
-            icon={PlugIcon}
+            icon={ClaudeLogo}
             action={
                 <Button asChild variant="secondary" size="sm">
                     <Link to="/claude">Conectar</Link>

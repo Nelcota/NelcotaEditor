@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { CLAUDE_LINKS } from "#/modules/shell/model/getting-started";
 import type { ChecklistEntry } from "#/modules/shell/ui/hooks/use-getting-started-checklist";
 import { Button } from "#/shared/ui/button";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 import { cn } from "#/shared/ui/cn";
 import { Progress } from "#/shared/ui/progress";
 
@@ -66,7 +67,10 @@ function ClaudeLinks(): ReactNode {
                         rel="noopener noreferrer"
                         className="flex h-11 items-center justify-between gap-3 rounded-xl border border-card-border px-3.5 text-sm font-semibold outline-none transition-[border-color,scale] hover:border-input focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-99"
                     >
-                        {link.label}
+                        <span className="flex items-center gap-2.5">
+                            <ClaudeLogo className="size-4 shrink-0" />
+                            {link.label}
+                        </span>
                         <ExternalLinkIcon
                             aria-hidden="true"
                             className="size-4 text-muted-foreground"
