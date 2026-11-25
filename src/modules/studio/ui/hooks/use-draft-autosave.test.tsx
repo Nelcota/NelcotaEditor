@@ -202,6 +202,17 @@ describe("useDraftAutosave", () => {
                 fetch: expect.any(Function),
             });
         });
+        const browserFetch = vi.fn<typeof fetch>().mockResolvedValue(new Response(null));
+        vi.stubGlobal("fetch", browserFetch);
+        const sentFetch = vi.mocked(saveClipDraft).mock.calls.at(-1)?.[0]?.fetch;
+
+        if (sentFetch === undefined) {
+            throw new Error("The save was sent without its own fetch");
+        }
+
+        await sentFetch("/_serverFn/save", { method: "POST" });
+
+        expect(browserFetch.mock.calls.at(-1)?.[1]?.keepalive).toBe(true);
     });
 
     it("forgets the browser backup once the server's draft is taken", () => {
