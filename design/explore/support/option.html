@@ -183,23 +183,28 @@
                 throw new Error("Use ?o=a|b|c&v=thread|new|phone");
             }
 
-            const VIEWS = new Map([
-                ["thread", option.thread],
-                ["new", option.new],
-                ["phone", option.phone],
-            ]);
+            // Fixed comparisons, so the query string never names the function that runs.
             const view = params.get("v");
-            const renderView = VIEWS.get(view);
+            let markup = null;
 
-            if (renderView === undefined) {
-                throw new Error("Use ?o=a|b|c&v=thread|new|phone");
+            if (view === "thread") {
+                markup = option.thread();
+            }
+
+            if (view === "new") {
+                markup = option.new();
             }
 
             if (view === "phone") {
+                markup = option.phone();
                 document.body.classList.add("is-phone");
             }
 
-            document.getElementById("root").innerHTML = `<div class="panel">${renderView()}</div>`;
+            if (markup === null) {
+                throw new Error("Use ?o=a|b|c&v=thread|new|phone");
+            }
+
+            document.getElementById("root").innerHTML = `<div class="panel">${markup}</div>`;
         </script>
     </body>
 </html>
