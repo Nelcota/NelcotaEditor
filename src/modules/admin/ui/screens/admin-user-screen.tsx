@@ -10,6 +10,7 @@ import { AdminUserActions } from "#/modules/admin/ui/components/admin-user-actio
 import { AdminUserBadges } from "#/modules/admin/ui/components/admin-user-badges";
 import { AdminUserSessions } from "#/modules/admin/ui/components/admin-user-sessions";
 import { AdminUserVideos } from "#/modules/admin/ui/components/admin-user-videos";
+import { toAdminAvatarPath } from "#/modules/admin/model/admin-avatar-path";
 import { toAvatar } from "#/modules/auth/model/avatar";
 import { UserAvatar } from "#/shared/ui/user-avatar";
 import { formatBytes, formatDate, formatDateTime } from "#/shared/ui/format";
@@ -43,7 +44,7 @@ function ProfileHeader({ details }: { details: AdminUserDetails }): ReactNode {
         <div className="flex flex-wrap items-center gap-4">
             <UserAvatar
                 name={user.name}
-                avatar={toAvatar(user.image)}
+                avatar={toAvatar(user.image, toAdminAvatarPath(user.id))}
                 className="size-16 text-xl"
             />
             <div className="grid min-w-0 flex-[1_1_16rem] gap-1">

@@ -11,9 +11,12 @@ import { logger } from "#/shared/server/logger.server";
  * Called after the action succeeded. The log line goes first, so the action stays on record even
  * when the insert fails; that failure still reaches the caller.
  */
-export async function recordAdminAction(entry: AdminAuditEntry): Promise<void> {
+export async function recordAdminAction(
+    entry: AdminAuditEntry,
+    writer: Pick<typeof db, "insert"> = db,
+): Promise<void> {
     logger.info(entry, "Admin action");
-    await db.insert(adminAuditLog).values(entry);
+    await writer.insert(adminAuditLog).values(entry);
 }
 
 /** Better Auth's session create hook. */

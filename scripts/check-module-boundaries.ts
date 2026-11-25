@@ -27,6 +27,7 @@ const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>
     transcription: ["auth", "video-records"],
     clips: ["app-switches", "auth", "video-records", "transcription"],
     highlights: ["video-records", "transcription", "clips"],
+    support: ["app-switches", "auth", "video-records"],
     processing: ["app-switches", "video-records", "transcription", "clips", "highlights"],
     videos: [
         "app-switches",
@@ -39,8 +40,8 @@ const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>
     ],
     studio: ["auth", "video-records", "transcription", "clips", "processing", "videos"],
     overview: ["auth", "video-records", "transcription", "clips", "videos"],
-    shell: ["app-switches", "auth", "video-records", "preferences", "videos"],
-    admin: ["app-switches", "auth", "video-records", "clips", "videos"],
+    shell: ["admin", "app-switches", "support", "auth", "video-records", "preferences", "videos"],
+    admin: ["app-switches", "support", "auth", "video-records", "clips", "videos"],
 };
 
 interface AllowedException {

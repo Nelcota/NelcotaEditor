@@ -7,6 +7,7 @@ import {
     ADMIN_SUB_SECTIONS,
     NAV_SECTIONS,
     SECTION_LINK_ACTIVE_OPTIONS,
+    SUPPORT_SECTION,
     VIDEOS_PATH,
     getSectionState,
     isAdminSubSectionCurrent,
@@ -15,6 +16,8 @@ import type { NavSection } from "#/modules/shell/model/nav-sections";
 import { SIDEBAR_ITEM_CLASS } from "#/modules/shell/ui/components/sidebar-item-class";
 import { useQuery } from "@tanstack/react-query";
 import { videoCountsQueryOptions } from "#/modules/videos/model/video-queries";
+import { supportWaitingQueryOptions } from "#/modules/admin/model/admin-queries";
+import { supportReplyQueryOptions } from "#/modules/support/model/support-queries";
 import { cn } from "#/shared/ui/cn";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
@@ -32,7 +35,14 @@ function useVideoCount(section: NavSection): number | null {
     return counts.all;
 }
 
-function SectionLink({ section, pathname }: { section: NavSection; pathname: string }): ReactNode {
+interface SectionLinkProps {
+    section: NavSection;
+    pathname: string;
+    /** A mark after the label, such as the dot for an unread answer. */
+    trailing?: ReactNode;
+}
+
+function SectionLink({ section, pathname, trailing }: SectionLinkProps): ReactNode {
     const state = getSectionState(section, pathname);
     const count = useVideoCount(section);
     const Icon = section.icon;
@@ -53,8 +63,41 @@ function SectionLink({ section, pathname }: { section: NavSection; pathname: str
                         {count}
                     </span>
                 )}
+                {trailing}
             </Link>
         </li>
+    );
+}
+
+/** Suporte, with a dot while an answer from the team waits unread. */
+function SupportLink({ pathname }: { pathname: string }): ReactNode {
+    const { data: hasUnreadReply } = useQuery(supportReplyQueryOptions());
+    let trailing: ReactNode = null;
+
+    if (hasUnreadReply === true) {
+        trailing = (
+            <span className="size-2 shrink-0 rounded-full bg-primary">
+                <span className="sr-only">Resposta nova</span>
+            </span>
+        );
+    }
+
+    return <SectionLink section={SUPPORT_SECTION} pathname={pathname} trailing={trailing} />;
+}
+
+/** How many tickets wait for an answer; nothing when none do. */
+function WaitingTicketsBadge(): ReactNode {
+    const { data: waitingCount } = useQuery(supportWaitingQueryOptions());
+
+    if (waitingCount === undefined || waitingCount === 0) {
+        return null;
+    }
+
+    return (
+        <span className="rounded-lg bg-primary/20 px-1.5 text-xs font-bold text-primary-ink tabular-nums">
+            {waitingCount}
+            <span className="sr-only"> esperando resposta</span>
+        </span>
     );
 }
 
@@ -76,6 +119,7 @@ function AdminGroup({ pathname }: { pathname: string }): ReactNode {
             >
                 <Icon aria-hidden="true" />
                 <span className="flex-1 text-start">{ADMIN_SECTION.label}</span>
+                <WaitingTicketsBadge />
                 <ChevronDownIcon
                     aria-hidden="true"
                     className={cn(
@@ -102,7 +146,8 @@ function AdminGroup({ pathname }: { pathname: string }): ReactNode {
                                 )}
                                 className={cn(SIDEBAR_ITEM_CLASS, "h-10 ps-3.5 font-normal")}
                             >
-                                {subSection.label}
+                                <span className="flex-1">{subSection.label}</span>
+                                {subSection.path === "/admin/support" && <WaitingTicketsBadge />}
                             </Link>
                         </li>
                     ))}
@@ -124,6 +169,7 @@ export function SidebarNav(): ReactNode {
                 {NAV_SECTIONS.map((section) => (
                     <SectionLink key={section.path} section={section} pathname={pathname} />
                 ))}
+                <SupportLink pathname={pathname} />
                 {user.isAdmin === true && <AdminGroup pathname={pathname} />}
             </ul>
         </nav>

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { AdminUserRow } from "#/modules/admin/model/admin-views";
 import { AdminUserBadges } from "#/modules/admin/ui/components/admin-user-badges";
+import { toAdminAvatarPath } from "#/modules/admin/model/admin-avatar-path";
 import { toAvatar } from "#/modules/auth/model/avatar";
 import { UserAvatar } from "#/shared/ui/user-avatar";
 import { formatBytes, formatDate } from "#/shared/ui/format";
@@ -24,7 +25,11 @@ function UserItem({ user }: { user: AdminUserRow }): ReactNode {
                 params={{ userId: user.id }}
                 className="-mx-2 my-1 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-2 py-2.5 outline-none transition-[background-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
             >
-                <UserAvatar name={user.name} avatar={toAvatar(user.image)} className="size-10" />
+                <UserAvatar
+                    name={user.name}
+                    avatar={toAvatar(user.image, toAdminAvatarPath(user.id))}
+                    className="size-10"
+                />
                 <span className="grid min-w-0 gap-0.5">
                     <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span className="font-medium [overflow-wrap:anywhere]">{user.name}</span>

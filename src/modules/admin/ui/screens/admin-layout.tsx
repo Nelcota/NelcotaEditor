@@ -2,12 +2,13 @@ import ChartColumnBigIcon from "~icons/lucide/chart-column-big";
 import UsersRoundIcon from "~icons/lucide/users-round";
 import SquarePlayIcon from "~icons/lucide/square-play";
 import ToggleRightIcon from "~icons/lucide/toggle-right";
+import CircleHelpIcon from "~icons/lucide/circle-help";
 import { Link, Outlet } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { PageHeader } from "#/shared/ui/page-header";
 
-type AdminPath = "/admin" | "/admin/users" | "/admin/videos" | "/admin/features";
+type AdminPath = "/admin" | "/admin/users" | "/admin/videos" | "/admin/support" | "/admin/features";
 
 interface AdminTab {
     path: AdminPath;
@@ -21,6 +22,7 @@ const ADMIN_TABS: ReadonlyArray<AdminTab> = [
     { path: "/admin", label: "Visão geral", icon: ChartColumnBigIcon, isExact: true },
     { path: "/admin/users", label: "Usuários", icon: UsersRoundIcon, isExact: false },
     { path: "/admin/videos", label: "Vídeos", icon: SquarePlayIcon, isExact: false },
+    { path: "/admin/support", label: "Suporte", icon: CircleHelpIcon, isExact: false },
     { path: "/admin/features", label: "Recursos", icon: ToggleRightIcon, isExact: false },
 ];
 
@@ -61,7 +63,7 @@ export function AdminLayout(): ReactNode {
             <div className="grid gap-6">
                 <PageHeader
                     title="Admin"
-                    description="Contas, vídeos, recursos e a saúde do processamento em todo o Nelcota."
+                    description="Contas, vídeos, suporte, recursos e a saúde do processamento em todo o Nelcota."
                 />
                 <AdminNav />
             </div>

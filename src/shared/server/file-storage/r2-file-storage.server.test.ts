@@ -2,6 +2,7 @@ import type { ReadStream } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { NoSuchKey, S3Client } from "@aws-sdk/client-s3";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
     InvalidStorageKeyError,
@@ -85,6 +86,56 @@ describe("createR2FileStorage respondWithFile", () => {
         const { response } = await redirectFor(new Headers());
 
         expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    });
+
+    it("serves a proxied object directly with the supplied headers", async () => {
+        const photo = new Uint8Array([1, 2, 3]);
+        const send = vi.spyOn(S3Client.prototype, "send");
+        send.mockImplementationOnce(() => ({
+            Body: { transformToWebStream: () => new Blob([photo]).stream() },
+        }));
+        const headers = new Headers({
+            "Content-Type": "image/png",
+            "Cache-Control": "private, no-store",
+        });
+
+        try {
+            const response = await storage.respondWithFile(request, {
+                key: "avatars/user.png",
+                headers,
+                linkLifetimeSeconds: 600,
+                shouldProxy: true,
+            });
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get("Location")).toBeNull();
+            expect(response.headers.get("Content-Type")).toBe("image/png");
+            expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+            expect(new Uint8Array(await response.arrayBuffer())).toEqual(photo);
+        } finally {
+            send.mockRestore();
+        }
+    });
+
+    it("returns a 404 without issuing a signed URL when a proxied object is gone", async () => {
+        const send = vi.spyOn(S3Client.prototype, "send");
+        send.mockRejectedValueOnce(new NoSuchKey({ message: "Object not found", $metadata: {} }));
+        const headers = new Headers({ "Cache-Control": "private, no-store" });
+
+        try {
+            const response = await storage.respondWithFile(request, {
+                key: "avatars/user.png",
+                headers,
+                linkLifetimeSeconds: 600,
+                shouldProxy: true,
+            });
+
+            expect(response.status).toBe(404);
+            expect(response.headers.get("Location")).toBeNull();
+            expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+        } finally {
+            send.mockRestore();
+        }
     });
 
     it("refuses a key that climbs out of its folder", async () => {

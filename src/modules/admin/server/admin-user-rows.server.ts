@@ -1,7 +1,6 @@
 import { count, desc, eq, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
-import { readPhotoExtension } from "#/modules/auth/model/avatar";
 import { ADMIN_ROLE, user } from "#/modules/auth/auth.schema";
 import type { AdminUserRow } from "#/modules/admin/model/admin-views";
 import { clips } from "#/modules/clips/clips.schema";
@@ -65,21 +64,12 @@ interface SelectedUserRow {
     createdAt: Date;
 }
 
-/** Photos are served to their owner only, so the admin sees initials instead of a broken image. */
-function toVisibleImage(image: string | null): string | null {
-    if (readPhotoExtension(image) !== null) {
-        return null;
-    }
-
-    return image;
-}
-
 function toAdminUserRow(row: SelectedUserRow): AdminUserRow {
     return {
         id: row.id,
         name: row.name,
         email: row.email,
-        image: toVisibleImage(row.image),
+        image: row.image,
         isAdmin: row.role === ADMIN_ROLE,
         isBanned: row.banned,
         videoCount: row.videoCount,
