@@ -1,6 +1,7 @@
 import { setInterval } from "node:timers/promises";
 import { isFailureWorthLogging } from "#/modules/processing/server/failure-log-throttle";
-import { isCancelRequested } from "#/modules/video-records/server/video-progress.server";
+import { shouldStopVideoRun } from "#/modules/video-records/server/video-progress.server";
+import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 import { logger } from "#/shared/server/logger.server";
 
 const POLL_INTERVAL_MILLISECONDS = 2_000;
@@ -19,16 +20,17 @@ export interface CancellationWatch {
 }
 
 interface PollTarget {
-    videoId: string;
+    run: VideoRun;
     controller: AbortController;
 }
 
 /** One poll; a failed check is logged (throttled) and the next tick tries again. */
 async function checkOnce(target: PollTarget, consecutiveFailures: number): Promise<number> {
-    const { videoId, controller } = target;
+    const { run, controller } = target;
+    const videoId = run.videoId;
 
     try {
-        if ((await isCancelRequested(videoId)) === true) {
+        if ((await shouldStopVideoRun(run)) === true) {
             controller.abort(new VideoCancelledError(videoId));
         }
 
@@ -69,17 +71,17 @@ async function pollUntilStopped(target: PollTarget, stopSignal: AbortSignal): Pr
 }
 
 /**
- * Polls the video's cancel flag and aborts the returned signal when the user cancels.
- * Every long step (download, ffmpeg, Whisper, DeepSeek) listens to this signal.
+ * Polls the video and aborts the returned signal when the user cancels or deletes it, or when a
+ * retry starts a newer run. Every long step (download, ffmpeg, Whisper, DeepSeek) listens to it.
  */
-export function watchForCancellation(videoId: string): CancellationWatch {
-    if (videoId.trim().length === 0) {
+export function watchForCancellation(run: VideoRun): CancellationWatch {
+    if (run.videoId.trim().length === 0) {
         throw new RangeError("Cannot watch cancellation of a video without an id");
     }
 
     const controller = new AbortController();
     const stopController = new AbortController();
-    const polling = pollUntilStopped({ videoId, controller }, stopController.signal);
+    const polling = pollUntilStopped({ run, controller }, stopController.signal);
 
     const stop = async (): Promise<void> => {
         stopController.abort();

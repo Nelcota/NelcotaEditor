@@ -1,8 +1,10 @@
 import { setTimeout as delay } from "node:timers/promises";
+import { releaseRenderingClips } from "#/modules/clips/server/release-rendering-clips.server";
 import { ensureHighlights } from "#/modules/highlights/server/select-highlights.server";
 import { watchForCancellation } from "#/modules/processing/server/cancellation-watch.server";
 import { renderPendingClips } from "#/modules/processing/server/render-pending-clips.server";
 import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
+import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import { ensureTranscript } from "#/modules/transcription/server/transcribe-video.server";
 import { prepareVideoSource } from "#/modules/processing/server/prepare-video-source.server";
 import {
@@ -15,8 +17,10 @@ import {
     markVideoCancelled,
     markVideoDone,
     markVideoFailed,
+    toVideoRun,
     updateVideoStage,
 } from "#/modules/video-records/server/video-progress.server";
+import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import type { Video } from "#/modules/video-records/video-records.schema";
@@ -30,11 +34,10 @@ import { logger } from "#/shared/server/logger.server";
  * so the stage modules never depend on processing.
  */
 function saveStageProgress(
-    videoId: string,
+    run: VideoRun,
     status: VideoStatus,
 ): (stagePercent: number) => Promise<void> {
-    return (stagePercent) =>
-        updateVideoStage(videoId, status, toOverallPercent(status, stagePercent));
+    return (stagePercent) => updateVideoStage(run, status, toOverallPercent(status, stagePercent));
 }
 
 /**
@@ -43,6 +46,7 @@ function saveStageProgress(
  */
 async function runStages(video: Video, workDirectory: string, signal: AbortSignal): Promise<void> {
     const videoId = video.id;
+    const run = toVideoRun(video);
     const source = await prepareVideoSource(video, { signal, workDirectory });
     const localSourcePath = source.localSourcePath;
     const words = await ensureTranscript({
@@ -51,33 +55,28 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
         workDirectory,
         language: video.transcriptionLanguage,
         signal,
-        saveProgress: saveStageProgress(videoId, "transcribing"),
+        saveProgress: saveStageProgress(run, "transcribing"),
     });
     const clips = await ensureHighlights({
         video,
         words,
         durationSeconds: source.durationSeconds,
         signal,
-        saveProgress: saveStageProgress(videoId, "selecting"),
+        saveProgress: saveStageProgress(run, "selecting"),
     });
 
-    await renderPendingClips({ videoId, localSourcePath, workDirectory, clips, words, signal });
+    await renderPendingClips({ run, localSourcePath, workDirectory, clips, words, signal });
     signal.throwIfAborted();
 
     // A cancel that arrived after the last step still wins over "done".
-    if ((await markVideoDone(videoId)) === false) {
-        await markVideoCancelled(videoId);
+    if ((await markVideoDone(run)) === false) {
+        // Records nothing unless this run was the one the user cancelled.
+        await markVideoCancelled(run);
     }
 }
 
-async function runPipeline(videoId: string, signal: AbortSignal): Promise<void> {
-    const video = await findVideoById(videoId);
-
-    // Finished or cancelled while waiting in the queue: nothing to do.
-    if (video === null || isVideoFinished(video.status) === true) {
-        return;
-    }
-
+async function runPipeline(video: Video, signal: AbortSignal): Promise<void> {
+    const videoId = video.id;
     const workDirectory = await createVideoWorkspace(videoId);
 
     try {
@@ -101,26 +100,31 @@ async function removeFilesOfDeletedVideo(videoId: string): Promise<void> {
     await getFileStorage().deleteFolder(getVideoDirectory(videoId));
 }
 
+const LOCKED_VIDEO_RETRY_SECONDS = 60;
 const RECORD_STOP_ATTEMPTS = 3;
 const RECORD_STOP_RETRY_DELAY_MILLISECONDS = 2_000;
 
-async function writeStop(videoId: string, error: unknown, signal: AbortSignal): Promise<void> {
+/**
+ * An aborted run records a cancel, which applies only when the user asked for it: a run aborted
+ * because a retry took the video leaves it to the new run.
+ */
+async function writeStop(run: VideoRun, error: unknown, signal: AbortSignal): Promise<void> {
+    const videoId = run.videoId;
+
     if (signal.aborted === true) {
-        await markVideoCancelled(videoId);
+        await releaseRenderingClips(videoId, "pending");
+        await markVideoCancelled(run);
         return;
     }
 
-    await markVideoFailed(videoId, toUserMessage(error));
+    await releaseRenderingClips(videoId, "failed");
+    await markVideoFailed(run, toUserMessage(error));
 }
 
 /** Returns the database error instead of throwing it, so the caller can retry. */
-async function tryWriteStop(
-    videoId: string,
-    error: unknown,
-    signal: AbortSignal,
-): Promise<unknown> {
+async function tryWriteStop(run: VideoRun, error: unknown, signal: AbortSignal): Promise<unknown> {
     try {
-        await writeStop(videoId, error, signal);
+        await writeStop(run, error, signal);
         return null;
     } catch (writeError) {
         return writeError;
@@ -130,11 +134,13 @@ async function tryWriteStop(
 /**
  * Records why the run stopped, retrying a database that is briefly away: without this write the
  * video would look stuck in its last stage. After the last attempt the error propagates, the job
- * fails, and the next worker start queues the video again.
+ * fails, and the stuck video recovery queues the video again.
  */
-async function recordStop(videoId: string, error: unknown, signal: AbortSignal): Promise<void> {
+async function recordStop(run: VideoRun, error: unknown, signal: AbortSignal): Promise<void> {
+    const videoId = run.videoId;
+
     if (signal.aborted === true) {
-        logger.info({ videoId }, "Video cancelled");
+        logger.info({ videoId }, "Video run stopped");
     }
 
     if (signal.aborted === false) {
@@ -143,7 +149,7 @@ async function recordStop(videoId: string, error: unknown, signal: AbortSignal):
     }
 
     for (let attempt = 1; attempt <= RECORD_STOP_ATTEMPTS; attempt += 1) {
-        const writeError = await tryWriteStop(videoId, error, signal);
+        const writeError = await tryWriteStop(run, error, signal);
 
         if (writeError === null) {
             return;
@@ -167,25 +173,59 @@ async function recordStop(videoId: string, error: unknown, signal: AbortSignal):
     }
 }
 
-async function runAndRecord(videoId: string): Promise<void> {
-    const cancellation = watchForCancellation(videoId);
+async function runAndRecord(video: Video): Promise<void> {
+    const run = toVideoRun(video);
+    const cancellation = watchForCancellation(run);
 
     try {
-        await runPipeline(videoId, cancellation.signal);
+        await runPipeline(video, cancellation.signal);
     } catch (error) {
-        await recordStop(videoId, error, cancellation.signal);
+        await recordStop(run, error, cancellation.signal);
     } finally {
         await cancellation.stop();
     }
 
-    await removeFilesOfDeletedVideo(videoId);
+    await removeFilesOfDeletedVideo(video.id);
+}
+
+/**
+ * Read under the lock, after any earlier run let go of the video, so this run carries the start
+ * time of the request it serves.
+ */
+async function runIfStillQueued(videoId: string): Promise<void> {
+    const video = await findVideoById(videoId);
+
+    // Finished, cancelled or deleted while waiting in the queue: nothing to do.
+    if (video === null || isVideoFinished(video.status) === true) {
+        return;
+    }
+
+    await runAndRecord(video);
+}
+
+/**
+ * Another run holds the lock, maybe a stale one that never lets go. A job waits a while and tries
+ * again, so an unfinished video always has one; once the holder finishes it, that job is a no-op.
+ */
+async function retryWhenLockIsFree(videoId: string): Promise<void> {
+    const video = await findVideoById(videoId);
+
+    if (video === null || isVideoFinished(video.status) === true) {
+        return;
+    }
+
+    await enqueueVideoProcessing(
+        { videoId, userId: video.userId, startAfterSeconds: LOCKED_VIDEO_RETRY_SECONDS },
+        null,
+    );
+    logger.info({ videoId }, "Video already processing in another run, retrying later");
 }
 
 /** Two workers (replicas, an overlapping restart) never process the same video at once. */
 export async function processVideo(videoId: string): Promise<void> {
-    const hasRun = await runWithVideoProcessingLock(videoId, () => runAndRecord(videoId));
+    const hasRun = await runWithVideoProcessingLock(videoId, () => runIfStillQueued(videoId));
 
     if (hasRun === false) {
-        logger.info({ videoId }, "Video already processing in another worker");
+        await retryWhenLockIsFree(videoId);
     }
 }

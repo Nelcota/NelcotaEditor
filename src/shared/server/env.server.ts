@@ -35,8 +35,8 @@ const baseEnvironmentSchema = z.object({
     NODE_ENV: z.string().optional(),
     DATABASE_URL: z.string().min(1),
     STORAGE_DIR: z.string().min(1),
-    // The worker's scratch space (downloads, audio chunks, renders before they are stored). Each
-    // worker needs its own: it is wiped when the worker starts.
+    // The worker's scratch space (downloads, audio chunks, renders before they are stored).
+    // Replicas may share it: a worker start removes only workspaces no worker is processing.
     WORK_DIR: optionalTextSchema.transform(
         (workDirectory) => workDirectory ?? DEFAULT_WORK_DIRECTORY,
     ),
