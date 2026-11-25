@@ -7,6 +7,7 @@ import {
     GetObjectCommand,
     HeadObjectCommand,
     ListObjectsV2Command,
+    NoSuchKey,
     NotFound,
     PutObjectCommand,
     S3Client,
@@ -22,6 +23,7 @@ import type {
     TransferOptions,
     UploadSlot,
 } from "#/shared/server/file-storage/file-storage";
+import { HTTP_NOT_FOUND } from "#/shared/server/http-response";
 
 const CONNECTION_TIMEOUT_MILLISECONDS = 10_000;
 // A socket with no bytes for this long is dead; long transfers that keep moving are not cut.
@@ -302,13 +304,38 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
         } while (continuationToken !== undefined);
     }
 
-    /**
-     * The browser fetches the bytes from R2 itself, so they never pass through the app (or the
-     * Cloudflare proxy in front of it). Signing happens locally; no request is made here.
-     */
-    async function respondWithFile(_request: Request, file: ServedFile): Promise<Response> {
+    async function proxyFile(request: Request, file: ServedFile): Promise<Response> {
+        const { key, headers } = file;
+        const abortSignal = AbortSignal.any([request.signal, smallRequestSignal().abortSignal]);
+
+        try {
+            const object = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }), {
+                abortSignal,
+            });
+            const body = object.Body;
+
+            if (body === undefined) {
+                throw new StoredFileUnreadableError(key);
+            }
+
+            return new Response(body.transformToWebStream(), { headers });
+        } catch (error) {
+            if (error instanceof NoSuchKey || error instanceof NotFound) {
+                return new Response(null, { status: HTTP_NOT_FOUND, headers });
+            }
+
+            throw error;
+        }
+    }
+
+    async function respondWithFile(request: Request, file: ServedFile): Promise<Response> {
         const key = file.key;
         assertValidKey(key);
+
+        if (file.shouldProxy === true) {
+            return proxyFile(request, file);
+        }
+
         const headers = file.headers;
         const signedUrl = await getSignedUrl(
             client,

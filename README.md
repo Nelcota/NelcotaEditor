@@ -141,9 +141,40 @@ What makes it fast:
   fetch 4 fragments at once.
 - Two clips render at the same time.
 
-If your machine has a different number of cores, tune `WHISPER__NUM_WORKERS` and
-`WHISPER__CPU_THREADS` (workers x threads ≈ cores) and `TRANSCRIPTION_CONCURRENCY` in
-`src/modules/transcription/server/transcribe-video.server.ts`.
+Use the Compose environment to tune the worker for the server's CPU budget.
+
+| Setting                                           | Default                            | What it controls                                                                                       |
+| ------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `WORKER_CONCURRENCY`                              | 1 in production, 2 locally         | Videos per worker. Each account can process one video at a time across replicas.                       |
+| `CLIP_RENDER_CONCURRENCY`                         | 2                                  | Clips rendered at once per video.                                                                      |
+| `CLIP_RENDER_THREADS`                             | 2                                  | Video decoder and encoder threads per FFmpeg process. The filter chain uses one thread.                |
+| `CLIP_RENDER_MAX_FPS`                             | Empty                              | Set to `30` to cap exports at 30 fps. Leave empty to use the source frame rate.                        |
+| `TRANSCRIPTION_CONCURRENCY`                       | 3                                  | Audio chunks submitted at once per video.                                                              |
+| `WHISPER__NUM_WORKERS` and `WHISPER__CPU_THREADS` | 3 × 2 in production, 4 × 2 locally | How the Whisper service divides CPU threads across requests.                                           |
+| `WHISPER__USE_BATCHED_MODE`                       | `false`                            | Switches Whisper to batched inference. Validate word error rate and caption timing before enabling it. |
+
+On six logical CPUs, the `small` model in `int8` took 19 seconds with three workers and two
+threads each, versus 46 seconds with two workers and three threads each. Both had a 6.85% word
+error rate on 24 Brazilian Portuguese recordings from the [Google FLEURS test
+split](https://huggingface.co/datasets/google/fleurs/blob/main/data/pt_br/test.tsv).
+Batched inference raised the word error rate to 11.78%, with differences in word timestamps.
+
+On the same CPU budget, two simultaneous renders produced four 10-second vertical clips with
+subtitles in 7.4 seconds at 60 fps and 5.5 seconds with the optional 30 fps cap. A single render
+lane took 12.3 seconds at 60 fps. The test used a synthetic 1080p60 source and local files.
+
+With two videos waiting, concurrent processing finished the pair in 57 to 61 seconds versus
+66 to 78 seconds one at a time. It took 49 to 53 seconds to produce the first clip of the first
+video, versus 32 to 34 seconds one at a time. The test used the same Whisper samples, a simulated
+highlight selection delay, and local rendering. Compare these trade-offs with production traffic
+before tuning the number of worker slots.
+
+Use the worker's JSON logs to compare settings under comparable load. `Job started` records
+the wait after the job became eligible in `queueWaitMs`. `First clip ready` records the time
+from requesting processing to storing the first clip in `timeToFirstClipMs`.
+`Clip rendered and stored` separates FFmpeg's `encodeDurationMs` from the storage driver's
+`storageDurationMs`. Compare the 95th percentile of first-clip latency and count
+`Video processing completed` events per hour before increasing video concurrency.
 
 ## Production
 

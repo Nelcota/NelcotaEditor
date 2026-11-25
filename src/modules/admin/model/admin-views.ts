@@ -25,7 +25,6 @@ export interface AdminUserRow {
     id: string;
     name: string;
     email: string;
-    /** Only mascots: an uploaded photo is served to its owner alone. */
     image: string | null;
     isAdmin: boolean;
     isBanned: boolean;

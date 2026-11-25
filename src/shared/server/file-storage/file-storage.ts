@@ -10,6 +10,8 @@ export interface ServedFile {
      * video; turning sharing off takes this long to cut a link already handed out.
      */
     linkLifetimeSeconds: number;
+    /** Keep authorization at the application boundary, even for remote storage. */
+    shouldProxy?: boolean;
 }
 
 export interface UploadSlot {
@@ -59,7 +61,7 @@ export interface FileStorage {
     deleteFolder: (prefix: string) => Promise<void>;
     /**
      * Serves the file to a reader the caller already authorized: the disk streams it (ranges for
-     * seeking, 404 when gone), a remote store redirects to a short-lived signed link.
+     * seeking, 404 when gone), a remote store can redirect to a short-lived signed link.
      */
     respondWithFile: (request: Request, file: ServedFile) => Promise<Response>;
 }

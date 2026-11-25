@@ -34,7 +34,10 @@ export function readPhotoExtension(image: string | null): AvatarPhotoExtension |
     return extension ?? null;
 }
 
-export function toAvatar(image: string | null): Avatar {
+const OWN_PHOTO_PATH = "/api/account/avatar";
+
+/** `photoPath` serves the photo; another user's photo comes from a route that checks access. */
+export function toAvatar(image: string | null, photoPath: string = OWN_PHOTO_PATH): Avatar {
     const value = image ?? "";
     const mascotMatch = MASCOT_PATTERN.exec(value);
 
@@ -50,7 +53,7 @@ export function toAvatar(image: string | null): Avatar {
 
     if (photoMatch !== null) {
         // The version busts the browser cache whenever a new photo is uploaded.
-        return { kind: "photo", url: `/api/account/avatar?v=${photoMatch[2]}` };
+        return { kind: "photo", url: `${photoPath}?v=${photoMatch[2]}` };
     }
 
     return { kind: "initials" };

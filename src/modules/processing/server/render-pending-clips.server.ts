@@ -11,12 +11,11 @@ import { runVideoStorageTransaction } from "#/modules/processing/server/video-st
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
 import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
+import { getEnvironment } from "#/shared/server/env.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { logger } from "#/shared/server/logger.server";
 
-/** Clips rendered at once; ffmpeg already uses several cores, so more lanes stop paying off. */
-const RENDER_CONCURRENCY = 2;
 const PERCENT = 100;
 
 interface RenderPendingClipsInput {
@@ -33,20 +32,28 @@ interface RenderPendingClipsInput {
 
 async function renderAndStoreClip(clip: Clip, input: RenderPendingClipsInput): Promise<void> {
     const { userId, localSourcePath, workDirectory, words, signal } = input;
-    const { outputPath, localPath } = await renderClip({
+    const { id: clipId, outputBytes: previousOutputBytes } = clip;
+    const { outputPath, localPath, encodeDurationMs } = await renderClip({
         clip,
         localSourcePath,
         workDirectory,
         words,
         signal,
     });
-    const replacedBytes = clip.outputBytes ?? 0;
-
-    await storeProcessedVideoFile({ key: outputPath, localPath, signal }, (outputBytes) =>
-        runVideoStorageTransaction(
-            { userId, byteDelta: outputBytes - replacedBytes },
-            (transaction) => recordRenderedClip(clip.id, { outputPath, outputBytes }, transaction),
-        ),
+    const replacedBytes = previousOutputBytes ?? 0;
+    const { STORAGE_DRIVER: storageDriver } = getEnvironment();
+    const { bytes: outputBytes, storageDurationMs } = await storeProcessedVideoFile(
+        { key: outputPath, localPath, signal },
+        (bytes) =>
+            runVideoStorageTransaction(
+                { userId, byteDelta: bytes - replacedBytes },
+                (transaction) =>
+                    recordRenderedClip(clipId, { outputPath, outputBytes: bytes }, transaction),
+            ),
+    );
+    logger.info(
+        { clipId, encodeDurationMs, storageDurationMs, storageDriver, outputBytes },
+        "Clip rendered and stored",
     );
 }
 
@@ -80,16 +87,29 @@ async function renderAll(
     onProgress: (percent: number) => void,
 ): Promise<number> {
     const clips = input.clips.filter((clip) => clip.status === "pending");
-    const readyCount = input.clips.filter((clip) => clip.status === "done").length;
+    const { processingStartedAt } = input.run;
+    const { CLIP_RENDER_CONCURRENCY: concurrency } = getEnvironment();
+    let readyCount = input.clips.filter((clip) => clip.status === "done").length;
     let finishedCount = 0;
-    const outcomes = await runLanesToTheEnd(clips, RENDER_CONCURRENCY, async (clip) => {
+
+    await runLanesToTheEnd(clips, concurrency, async (clip): Promise<void> => {
         const isRendered = await renderOneClip(clip, input);
         finishedCount += 1;
         onProgress((finishedCount / clips.length) * PERCENT);
-        return isRendered;
+
+        if (isRendered === false) {
+            return;
+        }
+
+        readyCount += 1;
+
+        if (readyCount === 1 && processingStartedAt !== null) {
+            const timeToFirstClipMs = Math.max(0, Date.now() - processingStartedAt.getTime());
+            logger.info({ clipId: clip.id, timeToFirstClipMs }, "First clip ready");
+        }
     });
 
-    return readyCount + outcomes.filter((isRendered) => isRendered === true).length;
+    return readyCount;
 }
 
 /** Renders the pending clips selected for this run and keeps previously completed outputs. */

@@ -14,6 +14,8 @@ export const ADMIN_AUDIT_ACTIONS = [
     "cancel-video",
     "delete-video",
     "set-app-switch",
+    "reply-ticket",
+    "close-ticket",
 ] as const;
 
 export type AdminAuditAction = (typeof ADMIN_AUDIT_ACTIONS)[number];
@@ -24,6 +26,7 @@ export type AdminAuditDetails = {
     readonly banReasonLength?: number;
     readonly switchKey?: AppSwitchKey;
     readonly isEnabled?: boolean;
+    readonly ticketId?: string;
 };
 
 /** Constant values written into the CHECK; never user input. */

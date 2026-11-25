@@ -121,14 +121,32 @@ async function trimNameWithinLimit(fields: {
     return { data: { name: trimmedName } };
 }
 
-/** The name is checked first, so a caught bot with a bad name gets the same error as a person. */
+interface NewUserChanges {
+    name?: string;
+    emailVerified?: boolean;
+}
+
+/**
+ * The name is checked first, so a caught bot with a bad name gets the same error as a person.
+ * With the email-verification switch off, the account starts confirmed: Better Auth keeps
+ * requireEmailVerification, so sign-up still answers the same for a taken email.
+ */
 async function checkNewUser(
     newUser: { name?: unknown },
     context: { path?: string; body?: unknown } | null,
-): Promise<{ data: { name: string } } | undefined> {
+): Promise<{ data: NewUserChanges } | undefined> {
     const result = await trimNameWithinLimit(newUser);
     rejectHoneypotSignUp(context);
-    return result;
+
+    if (context?.path !== SIGN_UP_PATH) {
+        return result;
+    }
+
+    if ((await isAppSwitchEnabled("email-verification")) === true) {
+        return result;
+    }
+
+    return { data: { ...result?.data, emailVerified: true } };
 }
 
 async function notifyOwnerOfSignUpAttempt(
@@ -159,6 +177,49 @@ function requirePasswordToDeleteUser(body: unknown): void {
 }
 
 const SIGN_UP_PATH = "/sign-up/email";
+const signUpBodySchema = z.object({ name: z.string() });
+
+const signUpResponseSchema = z.object({
+    token: z.null(),
+    user: z.object({
+        id: z.string(),
+        name: z.string(),
+        email: z.string(),
+        image: z.string().nullish(),
+        createdAt: z.date(),
+    }),
+});
+
+const normalizeSignUpResponse = createAuthMiddleware((context) => {
+    if (context.path !== SIGN_UP_PATH) {
+        return Promise.resolve(undefined);
+    }
+
+    const result = signUpResponseSchema.safeParse(context.context.returned);
+
+    if (result.success === false) {
+        return Promise.resolve(undefined);
+    }
+
+    // A public sign-up exposes the same fields for a new, existing or rejected account.
+    const { user: signedUpUser } = result.data;
+    return Promise.resolve(
+        context.json({
+            token: null,
+            user: {
+                ...signedUpUser,
+                updatedAt: signedUpUser.createdAt,
+                name: signedUpUser.name.trim(),
+                image: signedUpUser.image ?? null,
+                emailVerified: false,
+                role: USER_ROLE,
+                banned: false,
+                banReason: null,
+                banExpires: null,
+            },
+        }),
+    );
+});
 
 /**
  * Runs before the captcha and the email lookup, so a closed sign-up answers the same for every
@@ -179,6 +240,11 @@ const runBeforeAuthHooks = createAuthMiddleware(async (ctx) => {
 
     if (ctx.path === SIGN_UP_PATH) {
         await rejectSignUpWhileClosed();
+        const signUp = signUpBodySchema.safeParse(ctx.body);
+
+        if (signUp.success === true) {
+            await trimNameWithinLimit(signUp.data);
+        }
     }
 
     return undefined;
@@ -247,6 +313,7 @@ export const auth = betterAuth({
     },
     hooks: {
         before: runBeforeAuthHooks,
+        after: normalizeSignUpResponse,
     },
     rateLimit: AUTH_RATE_LIMIT,
     advanced: {

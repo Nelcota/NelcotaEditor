@@ -1,5 +1,6 @@
 import PlayIcon from "~icons/lucide/play";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
+import { Link } from "@tanstack/react-router";
 import type { ReactNode, RefObject } from "react";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -84,14 +85,24 @@ export function ResumePanel({ video, mascotRef }: ResumePanelProps): ReactNode {
                     <FormAlert message={toErrorMessage(resume.error, RESUME_FALLBACK_MESSAGE)} />
                 )}
             </div>
-            <Button
-                onClick={() => resume.mutate()}
-                disabled={resume.isPending}
-                aria-busy={resume.isPending}
-            >
-                <ActionIcon aria-hidden="true" />
-                {copy.actionLabel}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+                <Button
+                    onClick={() => resume.mutate()}
+                    disabled={resume.isPending}
+                    aria-busy={resume.isPending}
+                >
+                    <ActionIcon aria-hidden="true" />
+                    {copy.actionLabel}
+                </Button>
+                {/* The ticket starts with this video picked, so the team sees what failed. */}
+                {video.status === "failed" && (
+                    <Button asChild variant="outline">
+                        <Link to="/support/new" search={{ videoId: video.id }}>
+                            Relatar problema
+                        </Link>
+                    </Button>
+                )}
+            </div>
         </section>
     );
 }

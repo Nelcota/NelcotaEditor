@@ -8,6 +8,7 @@ import { transcripts } from "#/modules/transcription/transcription.schema";
 import { extractAudioChunks } from "#/modules/transcription/server/extract-audio-chunks.server";
 import { findTranscriptWords } from "#/modules/transcription/server/find-transcript-words.server";
 import { ensureWhisperModel } from "#/modules/transcription/server/whisper-client.server";
+import { getEnvironment } from "#/shared/server/env.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { logger } from "#/shared/server/logger.server";
@@ -30,6 +31,7 @@ interface TranscriptRequest {
 /** Splits the audio, transcribes it and always removes the WAV chunks, which can be large. */
 async function transcribeAudio(request: TranscriptRequest): Promise<Transcription> {
     const { videoId, localSourcePath, workDirectory, language, signal, saveProgress } = request;
+    const { TRANSCRIPTION_CONCURRENCY: concurrency } = getEnvironment();
     const audioDirectory = path.join(workDirectory, AUDIO_DIRECTORY_NAME);
 
     try {
@@ -44,7 +46,7 @@ async function transcribeAudio(request: TranscriptRequest): Promise<Transcriptio
         const extractDurationMs = Math.round(performance.now() - extractStartedAt);
         const startedAt = performance.now();
         const transcription = await runWithProgress(
-            (onProgress) => transcribeChunks({ chunks, language, signal }, onProgress),
+            (onProgress) => transcribeChunks({ chunks, concurrency, language, signal }, onProgress),
             saveProgress,
         );
         const durationMs = Math.round(performance.now() - startedAt);
