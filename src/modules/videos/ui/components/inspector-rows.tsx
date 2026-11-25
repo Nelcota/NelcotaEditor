@@ -8,7 +8,7 @@ const ROW_CLASS =
     "flex min-h-14 w-full items-center gap-3 px-4 py-2 text-start text-base outline-none [&>svg:first-child]:size-5 [&>svg:first-child]:shrink-0";
 
 const ACTION_ROW_CLASS =
-    "transition-colors hover:bg-foreground/[0.03] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
+    "transition-[background-color,scale] hover:bg-foreground/[0.03] motion-safe:not-disabled:active:scale-[0.99] focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
 
 interface RowContentProps {
     icon: IconComponent;
@@ -88,7 +88,7 @@ export function InspectorGroup({ title, children }: InspectorGroupProps): ReactN
     return (
         <section aria-label={title} className="grid gap-2">
             <h3 className="px-1 text-sm text-muted-foreground">{title}</h3>
-            <ul className="divide-y overflow-hidden rounded-2xl border bg-background shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
+            <ul className="divide-y overflow-hidden rounded-2xl border bg-background">
                 {children}
             </ul>
         </section>

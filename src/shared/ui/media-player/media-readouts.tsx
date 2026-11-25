@@ -69,7 +69,7 @@ export function VolumeSlider({
             aria-label="Volume"
             style={trackStyle}
             className={cn(
-                "range-media w-16 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring",
+                "range-media w-16 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring",
                 className,
             )}
         />

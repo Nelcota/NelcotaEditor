@@ -6,7 +6,6 @@ import { cn } from "#/shared/ui/cn";
 import { Mascot } from "#/shared/ui/mascot";
 
 const STAGE_MOTION: Partial<Record<VideoStatus, string>> = {
-    queued: "motion-safe:animate-crew-work",
     downloading: "motion-safe:animate-crew-download",
     transcribing: "motion-safe:origin-bottom motion-safe:animate-crew-transcribe",
     selecting: "motion-safe:animate-crew-select",

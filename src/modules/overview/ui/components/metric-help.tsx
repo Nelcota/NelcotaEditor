@@ -17,7 +17,7 @@ export function MetricHelp({ label, help }: { label: string; help: string }): Re
                     side="top"
                     sideOffset={6}
                     collisionPadding={12}
-                    className="z-50 max-w-64 origin-(--radix-popover-content-transform-origin) rounded-xl border bg-popover px-3 py-2 text-sm text-popover-foreground shadow-md outline-none data-[state=closed]:animate-out data-[state=closed]:duration-100 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-96"
+                    className="z-50 max-w-64 origin-(--radix-popover-content-transform-origin) rounded-xl border bg-popover px-3 py-2 text-sm text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-96"
                 >
                     {help}
                 </Popover.Content>

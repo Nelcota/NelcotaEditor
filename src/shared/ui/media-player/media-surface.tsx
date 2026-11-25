@@ -26,7 +26,7 @@ function BigPlayButton({ player, size }: { player: MediaPlayer; size: "md" | "sm
             aria-label="Tocar"
             onClick={player.togglePlay}
             className={cn(
-                "absolute top-1/2 left-1/2 z-10 grid -translate-1/2 place-items-center rounded-full border border-white/20 bg-black/65 text-white outline-none transition-[scale,background-color] hover:scale-105 hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
+                "absolute top-1/2 left-1/2 z-10 grid -translate-1/2 place-items-center rounded-full border border-white/20 bg-black/65 text-white outline-none transition-[scale,background-color] hover:bg-black/80 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
                 size === "md" && "size-18 [&>svg]:size-8",
                 size === "sm" && "size-12 [&>svg]:size-5",
             )}
@@ -132,8 +132,7 @@ export function MediaSurface({
             {media.isPlaying === true && media.isWaiting === true && (
                 <Spinner className="pointer-events-none absolute top-1/2 left-1/2 size-12 -translate-1/2 text-white" />
             )}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent transition-opacity duration-300 group-data-[idle=true]/player:opacity-0 group-has-[:focus-visible]/player:opacity-100!" />
-            <div className="absolute inset-x-0 bottom-0 z-20 transition-opacity duration-300 group-data-[idle=true]/player:pointer-events-none group-data-[idle=true]/player:opacity-0 has-[:focus-visible]:pointer-events-auto! has-[:focus-visible]:opacity-100!">
+            <div className="absolute inset-x-0 bottom-0 z-20 bg-black/60 transition-opacity duration-300 group-data-[idle=true]/player:pointer-events-none group-data-[idle=true]/player:opacity-0 has-[:focus-visible]:pointer-events-auto! has-[:focus-visible]:opacity-100!">
                 {controls}
             </div>
             <IdleProgress player={player} />

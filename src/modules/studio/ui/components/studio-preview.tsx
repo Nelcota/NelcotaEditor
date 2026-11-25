@@ -60,7 +60,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
     }
 
     return (
-        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 bg-linear-to-t from-black/75 to-transparent px-2 pt-8 pb-2 text-white">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 bg-black/60 p-2 text-white">
             <button
                 type="button"
                 aria-label={label}
@@ -80,7 +80,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
                 step={1 / TENTHS_PER_SECOND}
                 value={currentSeconds}
                 onChange={(event) => playback.seek(Number(event.target.value))}
-                className="range-media min-w-0 flex-1 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring"
+                className="range-media min-w-0 flex-1 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring"
             />
         </div>
     );

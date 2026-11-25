@@ -126,7 +126,7 @@ export function SeekBar(props: SeekBarProps): ReactNode {
                 onChange={(event) => onSeek(Number(event.target.value))}
                 aria-label={label}
                 aria-valuetext={`${formatClock(currentSeconds)} de ${formatClock(durationSeconds)}`}
-                className="absolute inset-0 z-20 size-full cursor-pointer opacity-0"
+                className="absolute inset-0 z-20 size-full opacity-0"
             />
             {hoverSeconds !== null && (
                 <HoverPreview

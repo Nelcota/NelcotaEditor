@@ -65,7 +65,7 @@ function PasswordVisibilityToggle({
                     setHasToggled(true);
                     onToggle();
                 }}
-                className="absolute inset-y-1 right-1 inline-flex items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-[color,background-color,transform] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
+                className="absolute inset-y-1 right-1 inline-flex items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-[color,background-color,scale] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
             >
                 <VisibilityIcon isPasswordVisible={isPasswordVisible} />
                 {copy.buttonText}
