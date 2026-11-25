@@ -9,7 +9,6 @@ const COVER_PHOTOS = {
     "comparison-hot": { width: 224, height: 704 },
     "comparison-iced": { width: 224, height: 704 },
     "generic-presenter": { width: 448, height: 704 },
-    "app-destination": { width: 288, height: 352 },
 } as const;
 
 const RANKING_ITEMS = [
@@ -70,22 +69,6 @@ function RankingCover({ loading }: CoverLayoutProps): ReactNode {
     );
 }
 
-function AppCover({ loading }: CoverLayoutProps): ReactNode {
-    return (
-        <div className="mx-auto grid h-full w-3/4 grid-rows-[auto_minmax(0,1fr)] gap-1.5 rounded-xl border-2 border-stage-foreground/35 bg-stage p-1.5">
-            <div className="mx-auto h-1 w-1/3 rounded-full bg-stage-foreground/35" />
-            <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-md bg-white text-primary-foreground">
-                <span className="px-2 py-2 text-xs leading-tight font-bold">Dolomitas</span>
-                <FormatPhoto name="app-destination" loading={loading} />
-                <div className="grid gap-0.5 p-2 text-xs leading-tight">
-                    <span className="font-bold">Lago di Braies</span>
-                    <span className="text-primary-foreground/75">Rota circular</span>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 const COVER_LAYOUTS: Record<ViralFormatId, (props: CoverLayoutProps) => ReactNode> = {
     "split-screen": ({ loading }) => (
         <div className="grid size-full grid-rows-2 gap-1.5">
@@ -115,7 +98,6 @@ const COVER_LAYOUTS: Record<ViralFormatId, (props: CoverLayoutProps) => ReactNod
             </div>
         </div>
     ),
-    app: AppCover,
 };
 
 interface FormatCoverProps {

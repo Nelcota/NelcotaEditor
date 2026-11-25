@@ -1,4 +1,4 @@
-export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "generic" | "app";
+export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "generic";
 
 /** Free formats are open to everyone; each month a new one arrives for subscribers only. */
 export type FormatAccess = "free" | "subscriber";
@@ -63,19 +63,6 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
             "Remove gaguejos, pausas e repetições",
             "Zoom nos trechos de ênfase",
             "Legenda grande e fácil de ler no celular",
-        ],
-    },
-    {
-        id: "app",
-        access: "free",
-        name: "App",
-        tagline: "Demonstração de tela de app ou site.",
-        description:
-            "Mostra a gravação de tela do app ou site dentro de um celular, com você narrando por cima. Perfeito para tutoriais e demonstrações.",
-        highlights: [
-            "Gravação de tela dentro de um mockup de celular",
-            "Zoom no ponto onde você toca",
-            "Bom para tutoriais e vendas de produto digital",
         ],
     },
 ];

@@ -32,8 +32,8 @@ breadcrumb and for screen readers only. Light stays available through the toggle
 ## Format previews
 
 The featured format, gallery cards and format dialogs share the same stills. Each preview uses its
-own editing layout, such as stacked shots, a ranked list, side-by-side options, a burned-in caption
-or a phone mockup. The cropped WebP files in `public/viral-formats/` use the
+own editing layout, such as stacked shots, a ranked list, side-by-side options or a burned-in caption.
+The cropped WebP files in `public/viral-formats/` use the
 [Pexels license](https://www.pexels.com/license/).
 
 | Preview      | Photo credits                                                                                                                                                                                                    |
@@ -42,7 +42,6 @@ or a phone mockup. The cropped WebP files in `public/viral-formats/` use the
 | Ranking      | [Ben Khatry](https://www.pexels.com/photo/young-man-engaging-in-a-podcast-recording-36917949/)                                                                                                                   |
 | Contrast     | [minchephoto photography](https://www.pexels.com/photo/a-hot-coffee-on-a-ceramic-cup-7491911/), [Khadijah Karaca](https://www.pexels.com/photo/close-up-of-milk-being-poured-into-a-glass-with-coffee-17497896/) |
 | Generic      | [SHVETS production](https://www.pexels.com/photo/young-woman-filming-video-in-light-apartment-7516247/)                                                                                                          |
-| App          | [Nadin Romanova](https://www.pexels.com/photo/scenic-alpine-lake-and-majestic-mountains-31567332/)                                                                                                               |
 
 ## Principles
 
