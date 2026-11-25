@@ -18,6 +18,7 @@ import { createVideoWorkSync } from "#/modules/processing/server/video-work-swit
 import { startIdleTicketClosing } from "#/modules/support/server/close-idle-tickets.server";
 import { startSupportEmailWorker } from "#/modules/support/server/support-email-queue.server";
 import { findVideoById } from "#/modules/video-records/server/video-progress.server";
+import { startEditRenderWorker } from "#/modules/viral-formats/server/run-edit-render.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { getClipRenderCapacity } from "#/shared/server/clip-render-capacity.server";
 import { getJobQueue, setJobQueueRole } from "#/shared/server/job-queue.server";
@@ -175,6 +176,7 @@ async function startWorker(): Promise<void> {
     await startIdleTicketClosing();
     await startExpiredUploadSweep();
     await startAuthEmailWorker();
+    await startEditRenderWorker();
     logger.info(
         {
             workerConcurrency,

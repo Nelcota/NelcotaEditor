@@ -52,6 +52,7 @@ import { Route as AppAdminSupportTicketIdRouteImport } from './routes/_app/admin
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ApiClipsClipIdFileRouteImport } from './routes/api/clips/$clipId/file'
+import { Route as ApiEditsEditIdFileRouteImport } from './routes/api/edits/$editId/file'
 import { Route as ApiShareTokenPosterRouteImport } from './routes/api/share/$token_.poster'
 import { Route as ApiVideosVideoIdCaptionsRouteImport } from './routes/api/videos/$videoId/captions'
 import { Route as ApiVideosVideoIdSourceRouteImport } from './routes/api/videos/$videoId/source'
@@ -273,6 +274,11 @@ const ApiClipsClipIdFileRoute = ApiClipsClipIdFileRouteImport.update({
   path: '/api/clips/$clipId/file',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEditsEditIdFileRoute = ApiEditsEditIdFileRouteImport.update({
+  id: '/api/edits/$editId/file',
+  path: '/api/edits/$editId/file',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiShareTokenPosterRoute = ApiShareTokenPosterRouteImport.update({
   id: '/api/share/$token_/poster',
   path: '/api/share/$token/poster',
@@ -349,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
+  '/api/edits/$editId/file': typeof ApiEditsEditIdFileRoute
   '/api/share/$token/poster': typeof ApiShareTokenPosterRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -397,6 +404,7 @@ export interface FileRoutesByTo {
   '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
+  '/api/edits/$editId/file': typeof ApiEditsEditIdFileRoute
   '/api/share/$token/poster': typeof ApiShareTokenPosterRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -449,6 +457,7 @@ export interface FileRoutesById {
   '/_app/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
+  '/api/edits/$editId/file': typeof ApiEditsEditIdFileRoute
   '/api/share/$token_/poster': typeof ApiShareTokenPosterRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
     | '/admin/support/$ticketId'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
+    | '/api/edits/$editId/file'
     | '/api/share/$token/poster'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
@@ -549,6 +559,7 @@ export interface FileRouteTypes {
     | '/admin/support/$ticketId'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
+    | '/api/edits/$editId/file'
     | '/api/share/$token/poster'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/_app/admin/support/$ticketId'
     | '/_app/admin/users/$userId'
     | '/api/clips/$clipId/file'
+    | '/api/edits/$editId/file'
     | '/api/share/$token_/poster'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
@@ -628,6 +640,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiShareTokenRoute: typeof ApiShareTokenRoute
   ApiClipsClipIdFileRoute: typeof ApiClipsClipIdFileRoute
+  ApiEditsEditIdFileRoute: typeof ApiEditsEditIdFileRoute
   ApiShareTokenPosterRoute: typeof ApiShareTokenPosterRoute
   ApiVideosVideoIdCaptionsRoute: typeof ApiVideosVideoIdCaptionsRoute
   ApiVideosVideoIdSourceRoute: typeof ApiVideosVideoIdSourceRoute
@@ -939,6 +952,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiClipsClipIdFileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/edits/$editId/file': {
+      id: '/api/edits/$editId/file'
+      path: '/api/edits/$editId/file'
+      fullPath: '/api/edits/$editId/file'
+      preLoaderRoute: typeof ApiEditsEditIdFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/share/$token_/poster': {
       id: '/api/share/$token_/poster'
       path: '/api/share/$token/poster'
@@ -1082,6 +1102,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiShareTokenRoute: ApiShareTokenRoute,
   ApiClipsClipIdFileRoute: ApiClipsClipIdFileRoute,
+  ApiEditsEditIdFileRoute: ApiEditsEditIdFileRoute,
   ApiShareTokenPosterRoute: ApiShareTokenPosterRoute,
   ApiVideosVideoIdCaptionsRoute: ApiVideosVideoIdCaptionsRoute,
   ApiVideosVideoIdSourceRoute: ApiVideosVideoIdSourceRoute,

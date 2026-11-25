@@ -6,7 +6,12 @@ import { findTranscriptWords } from "#/modules/transcription/server/find-transcr
 import { ALL_FILTER } from "#/modules/videos/model/video-list-filter";
 import { DEFAULT_VIDEO_SORT } from "#/modules/videos/model/video-sort";
 import { listUserVideosPage } from "#/modules/videos/server/video-queries.server";
+import { MCP_RESOURCE } from "#/modules/auth/server/auth.server";
+import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
+import { splitScreenPlanSchema } from "#/modules/viral-formats/model/split-screen-plan";
 import { VIRAL_FORMATS } from "#/modules/viral-formats/model/viral-formats";
+import { createSplitScreenEdit } from "#/modules/viral-formats/server/create-split-screen-edit.server";
+import { findUserEdit, listUserEdits } from "#/modules/viral-formats/server/edit-queries.server";
 
 const SERVER_NAME = "editor-oculto";
 const SERVER_VERSION = "1.0.0";
@@ -22,6 +27,23 @@ const listVideosInputSchema = z.object({
         .max(MAX_LISTED_VIDEOS)
         .default(DEFAULT_LISTED_VIDEOS)
         .describe("How many of the most recent videos to return."),
+});
+
+/** Where the person sees and downloads their edits. */
+const EDITS_PAGE_URL = new URL("/edits", MCP_RESOURCE).toString();
+
+const SPLIT_SCREEN_GUIDE = [
+    "Edits a raw talking-head video in the Tela dividida format: an example video in the top panel, the presenter in the bottom one, one-word captions on the seam.",
+    "Before calling: read the transcript with get_video_transcript.",
+    "Takes: keep only the last clean take of each sentence, drop restarts and false starts, and cut pauses longer than about 0.28 s; list the takes in the order they play.",
+    "Panels: change the top panel at the start of a sentence. Use an example (another of the person's videos from list_my_videos, at a moment that matches what is being said) for most sentences.",
+    "Use fullscreen for the turning-point sentence, a short joke or reaction, and the final call to action.",
+    "Times in panels are seconds of the edited video (the takes played one after the other), starting at 0.",
+    "The render runs in the background; check it with get_edit.",
+].join(" ");
+
+const editIdInputSchema = z.object({
+    editId: z.uuid().describe("The edit's id, from create_split_screen_edit or list_my_edits."),
 });
 
 const transcriptInputSchema = z.object({
@@ -109,6 +131,59 @@ function registerVideoTools(server: McpServer, userId: string): void {
     );
 }
 
+function registerEditTools(server: McpServer, userId: string): void {
+    server.registerTool(
+        "create_split_screen_edit",
+        {
+            title: "Editar em Tela dividida",
+            description: SPLIT_SCREEN_GUIDE,
+            inputSchema: splitScreenPlanSchema,
+        },
+        async (plan) => {
+            try {
+                const editId = await createSplitScreenEdit(userId, plan);
+                return toJsonResult({ editId, status: "queued", editsPage: EDITS_PAGE_URL });
+            } catch (error) {
+                if (error instanceof InvalidEditPlanError) {
+                    return toErrorResult(error.message);
+                }
+
+                throw error;
+            }
+        },
+    );
+
+    server.registerTool(
+        "get_edit",
+        {
+            title: "Andamento da edição",
+            description:
+                "Returns one edit's status (queued, rendering, done or failed). A done edit is watched and downloaded on the edits page.",
+            inputSchema: editIdInputSchema,
+            annotations: { readOnlyHint: true },
+        },
+        async ({ editId }) => {
+            const edit = await findUserEdit(userId, editId);
+
+            if (edit === null) {
+                return toErrorResult("Edit not found.");
+            }
+
+            return toJsonResult({ ...edit, editsPage: EDITS_PAGE_URL });
+        },
+    );
+
+    server.registerTool(
+        "list_my_edits",
+        {
+            title: "Minhas edições",
+            description: "Lists the person's latest edits, newest first, with their status.",
+            annotations: { readOnlyHint: true },
+        },
+        async () => toJsonResult(await listUserEdits(userId)),
+    );
+}
+
 /**
  * The MCP server a person's Claude talks to, built per request for the person the access token
  * names. Every tool reads only that person's data.
@@ -121,5 +196,6 @@ export function buildMcpServer(userId: string): McpServer {
     const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION });
     registerFormatTools(server);
     registerVideoTools(server, userId);
+    registerEditTools(server, userId);
     return server;
 }
