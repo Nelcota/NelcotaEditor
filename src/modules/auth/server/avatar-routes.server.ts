@@ -133,6 +133,17 @@ function buildPhotoHeaders(extension: AvatarPhotoExtension): Headers {
     });
 }
 
+/** The user's uploaded photo, or 404 when they have none. Callers check who may see it. */
+export async function respondWithUserAvatar(request: Request, userId: string): Promise<Response> {
+    const extension = readPhotoExtension(await findUserImage(userId));
+
+    if (extension === null) {
+        return new Response(null, { status: HTTP_NOT_FOUND });
+    }
+
+    return respondWithAvatarPhoto(request, { userId, extension }, buildPhotoHeaders(extension));
+}
+
 /** GET /api/account/avatar — the signed-in user's own photo. */
 export async function serveAvatar(request: Request): Promise<Response> {
     const user = await getSessionUser(request.headers);
@@ -141,15 +152,5 @@ export async function serveAvatar(request: Request): Promise<Response> {
         return new Response(null, { status: HTTP_UNAUTHORIZED });
     }
 
-    const extension = readPhotoExtension(await findUserImage(user.id));
-
-    if (extension === null) {
-        return new Response(null, { status: HTTP_NOT_FOUND });
-    }
-
-    return respondWithAvatarPhoto(
-        request,
-        { userId: user.id, extension },
-        buildPhotoHeaders(extension),
-    );
+    return respondWithUserAvatar(request, user.id);
 }
