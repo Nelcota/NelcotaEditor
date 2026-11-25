@@ -1,4 +1,5 @@
 import { captcha } from "better-auth/plugins";
+import { pickTurnstileAllowedHostnames } from "#/modules/auth/server/turnstile-allowed-hostnames";
 import { InvalidEnvironmentError } from "#/shared/server/env.server";
 import type { Environment } from "#/shared/server/env.server";
 
@@ -29,19 +30,12 @@ export function buildCaptchaPlugins(environment: Environment): Array<ReturnType<
         return [];
     }
 
-    // A token solved on another site with the same key must not count here.
-    const allowedHostnames: Array<string> = [];
-
-    if (authUrl !== undefined) {
-        allowedHostnames.push(new URL(authUrl).hostname);
-    }
-
     return [
         captcha({
             provider: "cloudflare-turnstile",
             secretKey,
             endpoints: CAPTCHA_ENDPOINTS,
-            allowedHostnames,
+            allowedHostnames: pickTurnstileAllowedHostnames(secretKey, authUrl),
         }),
     ];
 }
