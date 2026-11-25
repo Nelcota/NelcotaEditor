@@ -58,7 +58,7 @@ export function ClipsGettingStartedScreen(): ReactNode {
                 <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                     Comece por aqui
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="max-w-xl text-pretty text-muted-foreground">
                     Veja como transformar um vídeo longo em vários cortes prontos para postar.
                 </p>
             </header>

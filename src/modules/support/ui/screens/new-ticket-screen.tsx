@@ -20,7 +20,9 @@ export function NewTicketScreen({ topic, videoId }: NewTicketScreenProps): React
                 <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                     Conte o que está acontecendo
                 </h1>
-                <p className="text-muted-foreground">A equipe responde aqui e avisa por e-mail.</p>
+                <p className="max-w-xl text-pretty text-muted-foreground">
+                    A equipe responde aqui e avisa por e-mail.
+                </p>
             </header>
             {topic === null && <TopicChoice videoId={videoId ?? undefined} />}
             {topic !== null && <NewTicketForm key={topic} draft={{ topic, videoId }} />}

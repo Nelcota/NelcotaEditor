@@ -58,7 +58,7 @@ function FeaturedFormat({ format, onOpen }: FeaturedFormatProps): ReactNode {
                 <p className="text-xs font-bold tracking-eyebrow text-primary-ink uppercase">
                     Formato em destaque
                 </p>
-                <h2 id="featured-format" className="text-title font-extrabold">
+                <h2 id="featured-format" className="text-title font-extrabold tracking-[-0.02em]">
                     {format.name}
                 </h2>
                 <p className="text-muted-foreground">{format.description}</p>
@@ -102,7 +102,7 @@ export function FormatsScreen({ subscriptionPanel }: { subscriptionPanel: ReactN
                 <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                     Formatos Virais
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="max-w-xl text-pretty text-muted-foreground">
                     Suba um ou vários vídeos brutos e o Editor Oculto edita todos no formato
                     escolhido.
                 </p>

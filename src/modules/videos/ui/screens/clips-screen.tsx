@@ -93,7 +93,7 @@ export function ClipsScreen(props: ClipsScreenProps) {
                     <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                         Cole um link. O Editor corta.
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="max-w-xl text-pretty text-muted-foreground">
                         Transforme um vídeo longo em vários cortes verticais com legenda, prontos
                         para postar.
                     </p>

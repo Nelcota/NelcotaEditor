@@ -17,7 +17,7 @@ export function GettingStartedScreen(): ReactNode {
                 <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                     Boas-vindas ao Editor Oculto
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="max-w-xl text-pretty text-muted-foreground">
                     Antes de editar seu primeiro vídeo, assista à aula. Ela mostra como criar sua
                     conta no Claude, instalar no computador e ativar o plano Pro.
                 </p>

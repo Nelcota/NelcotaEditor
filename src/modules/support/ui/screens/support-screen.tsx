@@ -99,7 +99,7 @@ export function SupportScreen(): ReactNode {
                 <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                     Como podemos ajudar?
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="max-w-xl text-pretty text-muted-foreground">
                     Escolha a área. A conversa vai direto para quem cuida dela.
                 </p>
             </header>

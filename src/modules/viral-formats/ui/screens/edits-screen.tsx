@@ -82,7 +82,7 @@ export function EditsScreen(): ReactNode {
                 <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                     Minhas edições
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="max-w-xl text-pretty text-muted-foreground">
                     Os vídeos que o seu Claude editou nos Formatos Virais ficam aqui.
                 </p>
             </header>

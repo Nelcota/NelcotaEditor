@@ -73,7 +73,7 @@ export function ClaudeConnectionScreen(): ReactNode {
                 <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
                     Conecte o seu Claude
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="max-w-xl text-pretty text-muted-foreground">
                     Os Formatos Virais usam o seu Claude para editar os vídeos. Você conecta uma vez
                     e pronto. Os Cortes funcionam mesmo sem essa etapa.
                 </p>
