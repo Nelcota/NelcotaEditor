@@ -8,15 +8,7 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@custom-variant crew-motion {
-    @media (prefers-reduced-motion: no-preference) {
-        @slot;
-    }
-
-    &:where(.crew-motion-requested) {
-        @slot;
-    }
-}
+@custom-variant mascot-motion (&:where([data-mascot-animations="true"] *));
 
 /*
  * Window system (2026-11-23, from the owner's reference): a frame holds the sidebar; one rounded panel
@@ -189,10 +181,28 @@
     --radius-xl: 0.625rem;
     --radius-2xl: 0.875rem;
 
-    --animate-crew-download: crew-download 780ms ease-in-out;
-    --animate-crew-transcribe: crew-transcribe 940ms ease-in-out;
-    --animate-crew-select: crew-select 1000ms ease-in-out;
-    --animate-crew-render: crew-render 1180ms ease-in-out;
+    --animate-crew-download: crew-download 1.65s ease-in-out infinite;
+    --animate-crew-transcribe: crew-transcribe 1.85s ease-in-out infinite;
+    --animate-crew-select: crew-select 2s ease-in-out infinite;
+    --animate-crew-render: crew-render 2.15s ease-in-out infinite;
+    --animate-crew-idle: crew-idle 3s ease-in-out infinite;
+    --animate-brand-float: brand-float 2.8s ease-in-out infinite;
+
+    @keyframes crew-idle {
+        50% {
+            transform: translateY(-5%) rotate(-3deg);
+        }
+    }
+
+    @keyframes brand-float {
+        45% {
+            transform: translateY(-12%) rotate(-6deg) scale(1.04);
+        }
+
+        78% {
+            transform: scale(1.05, 0.94);
+        }
+    }
 
     @keyframes crew-download {
         18% {
@@ -432,6 +442,34 @@
     }
 }
 
+@keyframes mascot-opacity {
+    50% {
+        opacity: 0.78;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-mascot-animations="true"] .mascot-animation {
+        animation: mascot-opacity 2.8s ease-in-out infinite;
+    }
+}
+
+[data-mascot-paused="true"] .mascot-animation {
+    animation-play-state: paused;
+}
+
+.processing-crew > :nth-child(2) .mascot-animation {
+    animation-delay: -650ms;
+}
+
+.processing-crew > :nth-child(3) .mascot-animation {
+    animation-delay: -1300ms;
+}
+
+.processing-crew > :nth-child(4) .mascot-animation {
+    animation-delay: -1950ms;
+}
+
 .brand-gaze {
     visibility: hidden;
 }
@@ -529,7 +567,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *:where(:not(.crew-motion-requested)),
+    *:where(:not(.mascot-animation)),
     ::before,
     ::after {
         animation-duration: 0.01ms !important;

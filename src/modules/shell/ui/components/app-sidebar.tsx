@@ -29,7 +29,7 @@ export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactN
                     aria-label="Nelcota, ir para o início"
                     className="me-auto flex h-11 items-center rounded-xl pe-2 outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
-                    <BrandLogo className="gap-2.5 text-[1.3125rem] [&>*:first-child]:size-[1.625rem]" />
+                    <BrandLogo className="gap-2.5 text-[1.3125rem]" />
                 </Link>
                 <ActivityBell />
                 <HintTooltip label={HIDE_LABEL}>

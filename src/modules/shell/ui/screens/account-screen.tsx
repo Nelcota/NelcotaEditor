@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
+import { MascotAnimationSetting } from "#/modules/shell/ui/components/mascot-animation-setting";
 import { useFirstName } from "#/modules/shell/ui/hooks/use-first-name";
 import { CREW_NAMES } from "#/modules/videos/model/crew-lines";
 import { PageHeader } from "#/shared/ui/page-header";
 import { SettingsGroup } from "#/shared/ui/settings-group";
 
 /**
- * Conta as one column of grouped rows (direction C): Perfil, Seus cortes and Uso, each name on
+ * Conta as one column of grouped rows, each name on
  * the leading side and its control trailing, then the way out in its own red box.
  */
 interface AccountScreenProps {
@@ -31,6 +32,9 @@ export function AccountScreen({
                 description={`Oi, ${firstName}! A turma trabalha do jeito que você deixar aqui.`}
             />
             <SettingsGroup title="Perfil">{profileRows}</SettingsGroup>
+            <SettingsGroup title="Aparência">
+                <MascotAnimationSetting />
+            </SettingsGroup>
             <SettingsGroup
                 title="Seus cortes"
                 description={`${CREW_NAMES.selecting} segue isto em cada vídeo novo.`}

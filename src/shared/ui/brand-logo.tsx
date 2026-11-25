@@ -4,8 +4,24 @@ import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
 import { cn } from "#/shared/ui/cn";
 
 /** The green ghost is Nelcota's mark. It is reserved: no video or crew member uses it. */
-export function BrandMark({ className }: { className?: string }) {
-    return <Mascot index={BRAND_MASCOT_INDEX} className={cn("size-8", className)} />;
+export function BrandMark({
+    className,
+    isAnimated = false,
+}: {
+    className?: string;
+    isAnimated?: boolean;
+}): ReactNode {
+    return (
+        <Mascot
+            index={BRAND_MASCOT_INDEX}
+            className={cn(
+                "size-8",
+                isAnimated === true &&
+                    "mascot-animation origin-bottom mascot-motion:motion-safe:animate-brand-float",
+                className,
+            )}
+        />
+    );
 }
 
 /** Ghost plus the lowercase wordmark, set tight and bold like the reference's logo. */
