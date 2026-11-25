@@ -171,9 +171,24 @@
             };
 
             const params = new URLSearchParams(location.search);
-            const option = { a: A, b: B, c: C }[params.get("o")];
+            // Only known options and views are rendered; the query string picks among them.
+            const OPTIONS = new Map([
+                ["a", A],
+                ["b", B],
+                ["c", C],
+            ]);
+            const VIEWS = new Set(["thread", "new", "phone"]);
+            const option = OPTIONS.get(params.get("o"));
             const view = params.get("v");
-            if (view === "phone") document.body.classList.add("is-phone");
+
+            if (option === undefined || VIEWS.has(view) === false) {
+                throw new Error("Use ?o=a|b|c&v=thread|new|phone");
+            }
+
+            if (view === "phone") {
+                document.body.classList.add("is-phone");
+            }
+
             document.getElementById("root").innerHTML =
                 `<div class="panel">${option[view]()}</div>`;
         </script>

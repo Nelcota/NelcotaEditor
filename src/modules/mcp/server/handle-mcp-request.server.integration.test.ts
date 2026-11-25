@@ -1,4 +1,4 @@
-import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomInt, randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -17,14 +17,16 @@ const APP_ORIGIN = new URL(MCP_RESOURCE).origin;
 const HTTP_FOUND = 302;
 const HTTP_UNAUTHORIZED = 401;
 const SSE_DATA_PREFIX = "data: ";
-const BYTE_VALUES = 256;
+// randomInt excludes its upper bound, so 255 is never drawn.
+const LAST_HOST_OCTET = 255;
 const [CLIENT_IP_HEADER = "x-forwarded-for"] = getClientIpHeaders();
 
 /** Each call from its own address, so the auth rate limits stay on without the tests sharing one. */
 function uniqueClientIp(): string {
     const [first = 1, second = 1] = randomBytes(2);
 
-    return `10.${first % BYTE_VALUES}.${second % BYTE_VALUES}.${1 + (first % 200)}`;
+    // The last octet keeps clear of 0 and 255, which are not host addresses.
+    return `10.${first}.${second}.${randomInt(1, LAST_HOST_OCTET)}`;
 }
 
 interface SignedInPerson {

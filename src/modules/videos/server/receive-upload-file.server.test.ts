@@ -10,6 +10,8 @@ process.env.R2_ACCESS_KEY_ID = "test-access-key";
 process.env.R2_SECRET_ACCESS_KEY = "test-secret-key";
 process.env.R2_BUCKET = "nelcota-media";
 process.env.BETTER_AUTH_SECRET = "test-auth-secret-0123456789abcdef";
+// Auth builds its MCP resource address from this when it is imported.
+process.env.BETTER_AUTH_URL = "http://localhost:3299";
 
 const { receiveUploadFile } = await import("#/modules/videos/server/receive-upload-file.server");
 
