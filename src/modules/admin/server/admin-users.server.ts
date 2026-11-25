@@ -10,7 +10,7 @@ import type {
     AdminUserPage,
 } from "#/modules/admin/model/admin-views";
 import { selectAdminUserRows } from "#/modules/admin/server/admin-user-rows.server";
-import { toContainsPattern } from "#/modules/admin/server/like-pattern.server";
+import { toContainsPattern } from "#/shared/server/like-pattern.server";
 import { session, user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
 import { getStorageQuotaBytes } from "#/modules/videos/server/usage-summary.server";
