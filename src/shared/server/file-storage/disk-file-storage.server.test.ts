@@ -93,6 +93,21 @@ describe("diskFileStorage", () => {
         await rm(localDirectory, { recursive: true, force: true });
     });
 
+    it("stops copying a local file in when the run is cancelled", async () => {
+        const localDirectory = await mkdtemp(path.join(tmpdir(), "nelcota-local-"));
+        const localFile = path.join(localDirectory, "clip.mp4");
+        await writeFile(localFile, "a whole clip");
+        const run = diskFileStorage.storeLocalFile("videos/e/clips/clip.mp4", localFile, {
+            signal: AbortSignal.abort(),
+        });
+
+        await expect(run).rejects.toMatchObject({ name: "AbortError" });
+        expect(await fileExists(path.join(storageDirectory, "videos/e/clips/clip.mp4"))).toBe(
+            false,
+        );
+        await rm(localDirectory, { recursive: true, force: true });
+    });
+
     it("measures a missing file as 0", async () => {
         expect(await diskFileStorage.measureFile("videos/missing/source.mp4")).toBe(0);
     });

@@ -189,12 +189,17 @@ async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Pro
  * Stores the render and points the clip at it. A stored file no row points at would take space
  * the quota never sees, so it is deleted when the row cannot be updated.
  */
-async function saveRenderedClip(clip: Clip, workspace: ClipWorkspace): Promise<void> {
+async function saveRenderedClip(
+    clip: Clip,
+    workspace: ClipWorkspace,
+    signal: AbortSignal,
+): Promise<void> {
     const outputPath = workspace.outputPath;
     const storage = getFileStorage();
     const outputBytes = await storage.storeLocalFile(
         outputPath,
         path.join(workspace.workingDirectory, workspace.outputFileName),
+        { signal },
     );
 
     try {
@@ -217,7 +222,7 @@ export async function renderClip(input: RenderClipInput): Promise<void> {
     await mkdir(workspace.workingDirectory, { recursive: true });
     await writeSubtitles(input, workspace);
     await encodeClip(input, workspace);
-    await saveRenderedClip(clip, workspace);
+    await saveRenderedClip(clip, workspace, input.signal);
 }
 
 export async function setClipStatus(clipId: string, status: ClipStatus): Promise<void> {

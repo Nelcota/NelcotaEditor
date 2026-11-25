@@ -42,21 +42,25 @@ function parseProbeOutput(output: string, absolutePath: string): ProbeOutput {
     return result.data;
 }
 
-export async function probeMedia(absolutePath: string): Promise<MediaInfo> {
+export async function probeMedia(absolutePath: string, signal: AbortSignal): Promise<MediaInfo> {
     // A relative path such as "-i" would be read by ffprobe as an option.
     if (path.isAbsolute(absolutePath) === false) {
         throw new MediaProbeError(absolutePath);
     }
 
-    const output = await runCommand("ffprobe", [
-        "-v",
-        "error",
-        "-show_entries",
-        "format=duration:stream=codec_type",
-        "-of",
-        "json",
-        ...localFileInput(absolutePath),
-    ]);
+    const output = await runCommand(
+        "ffprobe",
+        [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration:stream=codec_type",
+            "-of",
+            "json",
+            ...localFileInput(absolutePath),
+        ],
+        { signal },
+    );
     const probe = parseProbeOutput(output, absolutePath);
     const streamTypes = probe.streams.map((stream) => stream.codec_type);
 
