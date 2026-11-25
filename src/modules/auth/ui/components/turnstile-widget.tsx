@@ -14,9 +14,12 @@ interface TurnstileRenderOptions {
     callback: (token: string) => void;
     "expired-callback": () => void;
     "error-callback": () => void;
+    "before-interactive-callback": () => void;
+    "after-interactive-callback": () => void;
     theme: "dark";
     language: string;
     size: "flexible";
+    appearance: "interaction-only";
 }
 
 interface TurnstileApi {
@@ -76,11 +79,15 @@ interface TurnstileWidgetProps {
     onTokenChange: (token: string | null) => void;
 }
 
-/** Cloudflare Turnstile; reports a fresh token, or null while there is none to send. */
+/**
+ * Cloudflare Turnstile; reports a fresh token, or null while there is none to send. Most people
+ * pass without seeing it: the box only takes space in the form while Cloudflare asks for a click.
+ */
 export function TurnstileWidget({ siteKey, onTokenChange }: TurnstileWidgetProps): ReactNode {
     const track = useTrackPromise();
     const containerRef = useRef<HTMLDivElement>(null);
     const [hasLoadFailed, setHasLoadFailed] = useState(false);
+    const [isAskingForClick, setIsAskingForClick] = useState(false);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -104,9 +111,12 @@ export function TurnstileWidget({ siteKey, onTokenChange }: TurnstileWidgetProps
                     callback: onTokenChange,
                     "expired-callback": () => onTokenChange(null),
                     "error-callback": () => onTokenChange(null),
+                    "before-interactive-callback": () => setIsAskingForClick(true),
+                    "after-interactive-callback": () => setIsAskingForClick(false),
                     theme: "dark",
                     language: "pt-br",
                     size: "flexible",
+                    appearance: "interaction-only",
                 });
             } catch (error) {
                 reportClientProblem("Could not show the Turnstile check", error);
@@ -130,5 +140,10 @@ export function TurnstileWidget({ siteKey, onTokenChange }: TurnstileWidgetProps
         return <FormAlert message={LOAD_FAILED_MESSAGE} />;
     }
 
-    return <div ref={containerRef} className="min-h-[65px]" />;
+    // Hidden from layout while Turnstile works on its own, so the form keeps no empty gap.
+    if (isAskingForClick === false) {
+        return <div ref={containerRef} className="hidden" />;
+    }
+
+    return <div ref={containerRef} />;
 }
