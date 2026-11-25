@@ -375,7 +375,7 @@
      * clear of it (WCAG 2.4.11). From md there is no tab bar and each pane scrolls on its own.
      */
     html {
-        scroll-padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+        scroll-padding-bottom: 4rem;
     }
 
     @media (width >= 48rem) {
