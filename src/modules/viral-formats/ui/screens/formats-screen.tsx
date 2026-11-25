@@ -1,3 +1,4 @@
+import ArrowRightIcon from "~icons/lucide/arrow-right";
 import PlayIcon from "~icons/lucide/play";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -7,26 +8,36 @@ import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
 import { FormatCard } from "#/modules/viral-formats/ui/components/format-card";
 import { FormatCover } from "#/modules/viral-formats/ui/components/format-cover";
 import { FormatDialog } from "#/modules/viral-formats/ui/components/format-dialog";
-import { Alert } from "#/shared/ui/alert";
 import { Button } from "#/shared/ui/button";
 import { ClaudeLogo } from "#/shared/ui/claude-logo";
 
 const FEATURED_INDEX = 0;
 
+/** Editing needs the person's Claude: a quiet row with the way to Etapa 1, not a warning. */
 function ConnectClaudeNotice(): ReactNode {
     return (
-        <Alert
-            tone="info"
-            icon={ClaudeLogo}
-            action={
-                <Button asChild size="sm" className="font-bold">
-                    <Link to="/claude">Conectar</Link>
-                </Button>
-            }
+        <section
+            aria-labelledby="connect-claude"
+            className="flex flex-wrap items-center gap-4 rounded-2xl border border-card-border bg-card p-4 sm:flex-nowrap sm:px-5"
         >
-            Seu Claude ainda não está conectado. Você pode ver os formatos, mas precisa concluir a
-            Etapa 1 para editar.
-        </Alert>
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-secondary">
+                <ClaudeLogo className="size-6" />
+            </span>
+            <div className="grid min-w-0 flex-1 gap-0.5">
+                <h2 id="connect-claude" className="font-bold">
+                    Conecte o seu Claude para editar
+                </h2>
+                <p className="text-meta text-muted-foreground">
+                    Você já pode ver os formatos. Para editar, conclua a Etapa 1.
+                </p>
+            </div>
+            <Button asChild className="font-bold max-sm:w-full">
+                <Link to="/claude">
+                    Conectar
+                    <ArrowRightIcon aria-hidden="true" className="size-4" />
+                </Link>
+            </Button>
+        </section>
     );
 }
 
