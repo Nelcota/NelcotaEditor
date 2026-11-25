@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
 import { ChooseFormatButton } from "#/modules/viral-formats/ui/components/choose-format-button";
-import { FormatCover } from "#/modules/viral-formats/ui/components/format-cover";
+import { FormatPreview } from "#/modules/viral-formats/ui/components/format-preview";
 import { Button } from "#/shared/ui/button";
 import {
     Dialog,
@@ -66,10 +66,7 @@ export function FormatDialog({ format, isClaudeConnected, onClose }: FormatDialo
     return (
         <Dialog open onOpenChange={closeOnDismiss}>
             <DialogContent className="gap-0 p-0 [--dialog-padding:--spacing(5)] sm:max-w-3xl sm:grid-cols-2">
-                <FormatCover
-                    formatId={format.id}
-                    className="rounded-none max-sm:hidden sm:aspect-auto sm:h-full sm:min-h-96"
-                />
+                <FormatPreview format={format} />
                 <div className="grid grid-rows-[1fr_auto] gap-8 p-6 sm:p-8">
                     <div className="grid content-start gap-4">
                         <p className="text-xs font-bold tracking-eyebrow text-primary-ink uppercase">

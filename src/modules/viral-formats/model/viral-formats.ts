@@ -3,6 +3,14 @@ export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "gener
 /** Free formats are open to everyone; each month a new one arrives for subscribers only. */
 export type FormatAccess = "free" | "subscriber";
 
+/** A finished edit in the format, played in its dialog. */
+export interface FormatExample {
+    videoUrl: string;
+    posterUrl: string;
+    /** WebVTT captions of what is said, in Portuguese. */
+    captionsUrl: string;
+}
+
 export interface ViralFormat {
     id: ViralFormatId;
     access: FormatAccess;
@@ -10,6 +18,7 @@ export interface ViralFormat {
     tagline: string;
     description: string;
     highlights: ReadonlyArray<string>;
+    example?: FormatExample;
 }
 
 export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
@@ -51,6 +60,11 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
             "Marcação de certo e errado",
             "Bom para comparar produtos, hábitos e estratégias",
         ],
+        example: {
+            videoUrl: "/viral-formats/contrast-example.mp4",
+            posterUrl: "/viral-formats/contrast-example-poster.webp",
+            captionsUrl: "/viral-formats/contrast-example.vtt",
+        },
     },
     {
         id: "generic",
