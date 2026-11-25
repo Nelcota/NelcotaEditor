@@ -1,6 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { logAuthSecurityEvent } from "#/modules/auth/server/log-auth-security-event.server";
+import { withLogContext } from "#/shared/server/logger.server";
+
+// The client IP is read from the header the rate limiter trusts, which the environment names.
+process.env.DATABASE_URL = "postgres://test:test@127.0.0.1:1/test";
+process.env.STORAGE_DIR = "test-storage";
+process.env.WHISPER_URL = "http://127.0.0.1:1";
+process.env.WHISPER_MODEL = "test-model";
+process.env.TRUSTED_PROXY_IP_HEADER = "x-real-ip";
+
+const { logAuthSecurityEvent } =
+    await import("#/modules/auth/server/log-auth-security-event.server");
+
+const CLIENT_IP = "203.0.113.7";
 
 const logLineSchema = z.looseObject({ level: z.string(), message: z.string() });
 
@@ -15,7 +27,10 @@ function captureLogLines(): () => Array<z.infer<typeof logLineSchema>> {
 }
 
 function postTo(path: string): Request {
-    return new Request(`http://localhost:3000/api/auth${path}`, { method: "POST" });
+    return new Request(`http://localhost:3000/api/auth${path}`, {
+        method: "POST",
+        headers: { "x-real-ip": CLIENT_IP },
+    });
 }
 
 afterEach(() => {
@@ -23,7 +38,7 @@ afterEach(() => {
 });
 
 describe("logAuthSecurityEvent", () => {
-    it("warns when the auth rate limit answers 429", () => {
+    it("warns with the client IP when the auth rate limit answers 429", () => {
         const readLines = captureLogLines();
 
         logAuthSecurityEvent(postTo("/sign-up/email"), new Response(null, { status: 429 }));
@@ -33,18 +48,35 @@ describe("logAuthSecurityEvent", () => {
                 level: "warn",
                 message: "Auth rate limit hit",
                 path: "/sign-up/email",
+                clientIp: CLIENT_IP,
             }),
         ]);
     });
 
-    it("warns when a sign-in fails", () => {
+    it("warns with the client IP when a sign-in fails", () => {
         const readLines = captureLogLines();
 
         logAuthSecurityEvent(postTo("/sign-in/email"), new Response(null, { status: 401 }));
 
         expect(readLines()).toEqual([
-            expect.objectContaining({ level: "warn", message: "Sign-in failed", status: 401 }),
+            expect.objectContaining({
+                level: "warn",
+                message: "Sign-in failed",
+                status: 401,
+                clientIp: CLIENT_IP,
+            }),
         ]);
+    });
+
+    it("carries the request id of the log context", async () => {
+        const readLines = captureLogLines();
+
+        const failedSignIn = new Response(null, { status: 401 });
+        await withLogContext({ requestId: "request-1" }, () =>
+            Promise.resolve(logAuthSecurityEvent(postTo("/sign-in/email"), failedSignIn)),
+        );
+
+        expect(readLines()).toEqual([expect.objectContaining({ requestId: "request-1" })]);
     });
 
     it("logs nothing for a successful sign-in", () => {

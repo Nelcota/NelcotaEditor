@@ -1,3 +1,4 @@
+import { readClientIp } from "#/modules/auth/server/client-ip.server";
 import { logger } from "#/shared/server/logger.server";
 
 const AUTH_BASE_PATH = "/api/auth";
@@ -8,14 +9,16 @@ const FIRST_SERVER_ERROR_STATUS = 500;
 
 /**
  * Better Auth answers a rate-limited request before any of its hooks run, so failed sign-ins and
- * 429s are read here from the response. Only the path and status: the body holds the email.
+ * 429s are read here from the response. Only the path, status and the client IP the rate limiter
+ * keys on (the request id comes from the log context): the body holds the email.
  */
-export function logAuthSecurityEvent(request: Request, response: Response): void {
+export function logAuthSecurityEvent(authRequest: Request, response: Response): void {
     const status = response.status;
-    const path = new URL(request.url).pathname.replace(AUTH_BASE_PATH, "");
+    const path = new URL(authRequest.url).pathname.replace(AUTH_BASE_PATH, "");
+    const clientIp = readClientIp(authRequest);
 
     if (status === HTTP_TOO_MANY_REQUESTS) {
-        logger.warn({ path }, "Auth rate limit hit");
+        logger.warn({ path, clientIp }, "Auth rate limit hit");
         return;
     }
 
@@ -24,6 +27,6 @@ export function logAuthSecurityEvent(request: Request, response: Response): void
     }
 
     if (status >= FIRST_CLIENT_ERROR_STATUS && status < FIRST_SERVER_ERROR_STATUS) {
-        logger.warn({ status }, "Sign-in failed");
+        logger.warn({ status, clientIp }, "Sign-in failed");
     }
 }

@@ -6,8 +6,9 @@ import { HTTP_PAYLOAD_TOO_LARGE, errorResponse } from "#/shared/server/http-resp
 /** /api/auth/*: Better Auth, with the client IP its rate limit keys on and a capped body. */
 export async function handleAuthRequest(request: Request): Promise<Response> {
     try {
-        const response = await auth.handler(await prepareAuthRequest(request));
-        logAuthSecurityEvent(request, response);
+        const authRequest = await prepareAuthRequest(request);
+        const response = await auth.handler(authRequest);
+        logAuthSecurityEvent(authRequest, response);
         return response;
     } catch (error) {
         if (error instanceof AuthBodyTooLargeError) {
