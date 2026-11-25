@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { AccountMenuButton } from "#/modules/auth/ui/components/account-menu-button";
 import { ImpersonationBanner } from "#/modules/auth/ui/components/impersonation-banner";
+import { MascotAnimationScope } from "#/modules/shell/ui/components/mascot-animation-scope";
 import { AppLayout } from "#/modules/shell/ui/screens/app-layout";
 import { currentUserQueryOptions } from "#/modules/auth/model/current-user-query";
 import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
@@ -50,10 +51,12 @@ export const Route = createFileRoute("/_app")({
 
 function AppLayoutRoute(): ReactNode {
     return (
-        <AppLayout
-            accountMenu={<AccountMenuButton />}
-            impersonationBanner={<ImpersonationBanner />}
-            videoProgressWatcher={<VideoProgressWatcher />}
-        />
+        <MascotAnimationScope>
+            <AppLayout
+                accountMenu={<AccountMenuButton />}
+                impersonationBanner={<ImpersonationBanner />}
+                videoProgressWatcher={<VideoProgressWatcher />}
+            />
+        </MascotAnimationScope>
     );
 }

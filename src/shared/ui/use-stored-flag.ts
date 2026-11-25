@@ -13,10 +13,6 @@ function readFlag(storageKey: string): boolean {
     }
 }
 
-function readFlagOnServer(): boolean {
-    return false;
-}
-
 function subscribe(onChange: () => void): () => void {
     window.addEventListener(CHANGE_EVENT, onChange);
     window.addEventListener("storage", onChange);
@@ -38,8 +34,15 @@ function writeFlag(storageKey: string, isOn: boolean): void {
 }
 
 /** An on/off preference remembered per browser, as a viewer convenience. */
-export function useStoredFlag(storageKey: string): { isOn: boolean; toggle: () => void } {
-    const isOn = useSyncExternalStore(subscribe, () => readFlag(storageKey), readFlagOnServer);
+export function useStoredFlag(
+    storageKey: string,
+    serverValue: boolean = false,
+): { isOn: boolean; toggle: () => void } {
+    const isOn = useSyncExternalStore(
+        subscribe,
+        () => readFlag(storageKey),
+        () => serverValue,
+    );
 
     return { isOn, toggle: () => writeFlag(storageKey, isOn === false) };
 }

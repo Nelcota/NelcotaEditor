@@ -153,6 +153,7 @@ function subscribeToGaze(overlay: SVGSVGElement): () => void {
 
     return () => {
         controller.abort();
+        resetGaze();
 
         if (frame !== null) {
             window.cancelAnimationFrame(frame);
@@ -160,18 +161,18 @@ function subscribeToGaze(overlay: SVGSVGElement): () => void {
     };
 }
 
-export function useBrandGaze(): RefObject<SVGSVGElement | null> {
+export function useBrandGaze(isAnimationEnabled: boolean): RefObject<SVGSVGElement | null> {
     const overlayRef = useRef<SVGSVGElement>(null);
 
     useEffect(() => {
         const overlay = overlayRef.current;
 
-        if (overlay === null) {
+        if (overlay === null || isAnimationEnabled === false) {
             return undefined;
         }
 
         return subscribeToGaze(overlay);
-    }, []);
+    }, [isAnimationEnabled]);
 
     return overlayRef;
 }

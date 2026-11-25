@@ -33,84 +33,106 @@ async function seedDownloadingVideo(email: string): Promise<string> {
     }
 }
 
-function countAnimations(step: Locator): Promise<number> {
-    return step.evaluate((element) => element.getAnimations({ subtree: true }).length);
+function getMascot(section: Locator): Locator {
+    return section.locator(".mascot-animation");
 }
 
-function readNextGesture(step: Locator): Promise<string> {
-    return step.evaluate(
-        (element) =>
-            new Promise<string>((resolve, reject) => {
-                const deadline = window.setTimeout(() => {
-                    element.removeEventListener("animationstart", readGesture);
-                    reject(new Error("The active mascot did not replay its gesture"));
-                }, 6_000);
-
-                function readGesture(event: Event): void {
-                    window.clearTimeout(deadline);
-
-                    if (event instanceof AnimationEvent) {
-                        const gesture = element.getAnimations({ subtree: true }).at(0);
-
-                        if (gesture !== undefined) {
-                            gesture.playbackRate = 0.1;
-                        }
-
-                        resolve(event.animationName);
-                    }
-                }
-
-                element.addEventListener("animationstart", readGesture, { once: true });
-            }),
+function countColumns(list: Locator): Promise<number> {
+    return list.evaluate(
+        (element) => getComputedStyle(element).gridTemplateColumns.split(" ").length,
     );
 }
 
-test("replays the active mascot and respects pause and reduced motion", async ({ page }) => {
+function measureBrandLift(brand: Locator): Promise<number> {
+    return brand.evaluate(async (element) => {
+        const floating = element.getAnimations().find((animation) => {
+            return animation instanceof CSSAnimation && animation.animationName === "brand-float";
+        });
+        const duration = floating?.effect?.getTiming().duration;
+
+        if (floating === undefined || typeof duration !== "number") {
+            throw new Error("The brand mascot could not be replayed in slow motion");
+        }
+
+        floating.pause();
+        await floating.ready;
+        floating.playbackRate = 0.1;
+        floating.currentTime = duration * 0.45;
+        const peak = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+
+        floating.playbackRate = 1;
+        floating.play();
+        return peak.m42;
+    });
+}
+
+test("animates the processing crew and brand by default and saves the setting", async ({
+    page,
+}) => {
     const account = createTestAccount();
+    const desktop = { width: 1680, height: 1000 };
+    await page.setViewportSize(desktop);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await useOwnClientAddress(page);
     await signUp(page, account);
     const videoId = await seedDownloadingVideo(account.email);
 
-    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.bringToFront();
-    await openPage(page, `/videos/${videoId}`);
+    await openPage(page, "/videos/" + videoId);
 
-    const steps = page.getByRole("tabpanel", { name: "Cortes" }).getByRole("listitem");
+    const panel = page.getByRole("region", { name: "Processamento do vídeo" });
+    const crew = panel.getByRole("list");
+    const steps = crew.getByRole("listitem");
     const download = steps.filter({ hasText: "Download" });
     const transcription = steps.filter({ hasText: "Transcrição" });
-    const pause = page.getByRole("button", { name: "Pausar mascotes" });
+    const brandLink = page.getByRole("link", { name: "Nelcota, ir para o início" });
+    const brand = getMascot(brandLink);
+    const cancel = panel.getByRole("button", { name: "Cancelar", exact: true });
 
     await expect(download).toHaveAttribute("aria-current", "step");
-    await expect(pause).toBeVisible();
-    await expect.poll(() => countAnimations(download)).toBe(0);
-    expect(await readNextGesture(download)).toBe("crew-download");
-    await expect.poll(() => countAnimations(transcription)).toBe(0);
-
-    await pause.click();
-    await expect.poll(() => countAnimations(download)).toBe(0);
-    await expect(download).toHaveAttribute("aria-current", "step");
-
-    await page.getByRole("button", { name: "Animar mascotes" }).click();
-    await expect.poll(() => countAnimations(download)).toBe(1);
+    await expect(steps).toHaveCount(4);
+    await expect(getMascot(download)).toHaveCSS("animation-name", "crew-download");
+    await expect(getMascot(download)).toHaveCSS("animation-iteration-count", "infinite");
+    await expect(getMascot(download)).toHaveCSS("width", "80px");
+    await expect(getMascot(transcription)).toHaveCSS("animation-name", "crew-idle");
+    await expect(brand).toHaveCSS("animation-name", "brand-float");
+    expect(await measureBrandLift(brand)).toBeLessThan(-3);
+    await expect(panel.getByRole("button", { name: /animar|pausar mascotes/i })).toHaveCount(0);
+    expect(await countColumns(crew)).toBe(4);
 
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await openPage(page, `/videos/${videoId}`);
+    await expect(getMascot(download)).toHaveCSS("animation-name", "mascot-opacity");
+    await expect(getMascot(download)).toHaveCSS("animation-duration", "2.8s");
+    await expect(getMascot(download)).toHaveCSS("transform", "none");
+    await expect(brand).toHaveCSS("animation-name", "mascot-opacity");
 
-    const play = page.getByRole("button", { name: "Animar mascotes" });
-    await expect(play).toBeVisible();
-    await expect(pause).toBeHidden();
-    await expect.poll(() => countAnimations(download)).toBe(0);
+    await page.setViewportSize({ width: 320, height: 760 });
+    await expect(getMascot(download)).toHaveCSS("width", "56px");
+    expect(await countColumns(crew)).toBe(2);
+    expect(await panel.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+        true,
+    );
+    await expect(cancel).toBeVisible();
 
-    await play.click();
-    await expect(pause).toBeVisible();
-    await expect.poll(() => countAnimations(download)).toBe(1);
-    await expect.poll(() => countAnimations(download)).toBe(0);
-    expect(await readNextGesture(download)).toBe("crew-download");
-    await expect.poll(() => countAnimations(transcription)).toBe(0);
+    await page.setViewportSize(desktop);
+    await openPage(page, "/account");
+    const appearance = page.getByRole("region", { name: "Aparência" });
+    const preference = appearance.getByRole("checkbox", { name: "Animações dos mascotes" });
+    await expect(preference).toBeChecked();
+    await preference.focus();
+    await preference.press("Space");
+    await expect(preference).not.toBeChecked();
+    await expect(brand).toHaveCSS("animation-name", "none");
 
-    await pause.click();
-    await expect(play).toBeVisible();
-    await expect.poll(() => countAnimations(download)).toBe(0);
-    await page.getByRole("button", { name: "Cancelar", exact: true }).hover();
+    await openPage(page, "/videos/" + videoId);
+    await expect(getMascot(download)).toHaveCSS("animation-name", "none");
+    await expect(getMascot(transcription)).toHaveCSS("animation-name", "none");
+    await expect(brand).toHaveCSS("animation-name", "none");
+    await cancel.hover();
     await expectNoAccessibilityViolations(page);
+
+    await openPage(page, "/account");
+    await expect(preference).not.toBeChecked();
+    await preference.check();
+    await expect(brand).toHaveCSS("animation-name", "mascot-opacity");
 });

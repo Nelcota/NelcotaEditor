@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
+import { useMascotAnimations } from "#/shared/ui/use-mascot-animations";
 
 type ResultStatus = "done" | "failed";
 
@@ -36,7 +37,7 @@ function playGesture(mascot: HTMLSpanElement, status: ResultStatus): (() => void
     const { frames, duration } = RESULT_GESTURES[status];
     const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
 
-    if (motion.matches === false) {
+    if (motion.matches === false || document.hidden === true) {
         return undefined;
     }
 
@@ -56,6 +57,7 @@ export function useVideoResultGesture(
 ): RefObject<HTMLSpanElement | null> {
     const mascotRef = useRef<HTMLSpanElement>(null);
     const previous = useRef({ id, status });
+    const { isEnabled } = useMascotAnimations();
 
     useEffect(() => {
         const observed = previous.current;
@@ -63,6 +65,7 @@ export function useVideoResultGesture(
         previous.current = { id, status };
 
         if (
+            isEnabled === false ||
             status !== result ||
             observed.id !== id ||
             observed.status === result ||
@@ -72,7 +75,7 @@ export function useVideoResultGesture(
         }
 
         return playGesture(mascot, status);
-    }, [id, result, status]);
+    }, [id, isEnabled, result, status]);
 
     return mascotRef;
 }

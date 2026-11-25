@@ -16,7 +16,7 @@ export function RenderingOverlay({ progressPercent }: { progressPercent: number 
         >
             <Mascot
                 index={STAGE_CREW.rendering}
-                className="size-12 motion-safe:origin-bottom motion-safe:animate-crew-render"
+                className="mascot-animation size-12 mascot-motion:motion-safe:origin-bottom mascot-motion:motion-safe:animate-crew-render"
             />
             <p className="font-semibold">Brasa está refazendo o corte</p>
             <Progress value={progressPercent} className="w-4/5" />

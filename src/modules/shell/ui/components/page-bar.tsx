@@ -41,7 +41,7 @@ export function PageBar({ children }: { children?: ReactNode }): ReactNode {
                 aria-label="Nelcota, ir para o início"
                 className="shrink-0 rounded-lg outline-none focus-visible:ring-4 focus-visible:ring-ring md:hidden"
             >
-                <BrandMark className="size-6" />
+                <BrandMark className="size-6" isAnimated />
             </Link>
             <nav aria-label="Você está em" className="min-w-0 flex-1">
                 <ol className="flex min-w-0 items-center gap-2 text-sm">

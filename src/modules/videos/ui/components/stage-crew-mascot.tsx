@@ -1,23 +1,22 @@
 import type { ReactNode } from "react";
 import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
-import { useCrewGesture } from "#/modules/videos/ui/hooks/use-crew-gesture";
-import type { CrewGestureContext } from "#/modules/videos/ui/hooks/use-crew-gesture";
 import { cn } from "#/shared/ui/cn";
 import { Mascot } from "#/shared/ui/mascot";
 
 const STAGE_MOTION: Partial<Record<VideoStatus, string>> = {
-    downloading: "crew-motion:animate-crew-download",
-    transcribing: "crew-motion:origin-bottom crew-motion:animate-crew-transcribe",
-    selecting: "crew-motion:animate-crew-select",
-    rendering: "crew-motion:origin-bottom crew-motion:animate-crew-render",
+    downloading: "mascot-motion:motion-safe:animate-crew-download",
+    transcribing:
+        "mascot-motion:motion-safe:origin-bottom mascot-motion:motion-safe:animate-crew-transcribe",
+    selecting: "mascot-motion:motion-safe:animate-crew-select",
+    rendering:
+        "mascot-motion:motion-safe:origin-bottom mascot-motion:motion-safe:animate-crew-render",
 };
 
 interface StageCrewMascotProps {
     status: VideoStatus;
     isWorking?: boolean;
-    isMotionRequested?: boolean;
-    context?: CrewGestureContext;
+    context?: "inline" | "panel";
     className?: string;
 }
 
@@ -25,23 +24,21 @@ interface StageCrewMascotProps {
 export function StageCrewMascot({
     status,
     isWorking = false,
-    isMotionRequested = false,
     context = "inline",
     className,
 }: StageCrewMascotProps): ReactNode {
     const motion = STAGE_MOTION[status];
-    const gesture = useCrewGesture(status, isWorking === true && motion !== undefined, {
-        context,
-        isMotionRequested,
-    });
 
     return (
         <Mascot
-            key={gesture}
             index={STAGE_CREW[status]}
             className={cn(
                 isWorking === true && motion,
-                isWorking === true && isMotionRequested === true && "crew-motion-requested",
+                isWorking === false &&
+                    context === "panel" &&
+                    "mascot-motion:motion-safe:animate-crew-idle",
+                (context === "panel" || (isWorking === true && motion !== undefined)) &&
+                    "mascot-animation",
                 className,
             )}
         />

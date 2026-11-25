@@ -80,9 +80,8 @@ Each drawing has one meaning only:
 
 - **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
   It is reserved: no video or crew member uses it.
-  In the sidebar, its eyes follow the pointer or keyboard focus with up to 2px of travel at the
-  default size. It blinks at irregular intervals while the tab is visible, including when there is
-  no input. The original sprite is shown when reduced motion is enabled.
+  It floats in the app frame. In the expanded sidebar, its eyes also follow the pointer or keyboard
+  focus and blink at irregular intervals while the tab is visible.
 - **Shapes 0–14 are videos.** Each video gets one for life: `hash(video.id) % 15`
   (`src/modules/videos/model/video-mascot.ts`). Gallery cards and the video header.
 - **Objects (16–31) are the crew**, one per stage (`src/modules/videos/model/stage-crew.ts`):
@@ -100,15 +99,15 @@ Each drawing has one meaning only:
 
 - The crew appears in the processing panel, the failed/cancelled panels, clip placeholders and
   empty/error states. It is decorative: the stage is always written next to it.
-- The member at work makes a short gesture when its step starts and repeats it every 3 to 4
-  seconds in the processing panel and every 8 to 12 seconds beside a video in the list. The
-  panel lets people pause or resume the gestures. Lightning darts down, Octopus taps twice,
-  Star twinkles with a turn, and Fire flickers from its base. Upcoming members wait in grey.
-  Replays pause while the tab is hidden.
+- The processing panel shows four larger mascots. Their layout uses two columns in narrow panels
+  and four when the panel has room. The current member repeats its own gesture, and waiting or
+  finished members shift gently out of sync. Upcoming members are grey and finished members
+  have a check mark. The working mascot also repeats its gesture beside a video in the list.
+- Account > Appearance controls mascot animations for this browser. They are on by default
+  and pause in hidden tabs. Reduced motion keeps looping mascots in place with a gentle opacity
+  change and keeps the brand's eyes still.
   Clover makes one small hop when the cuts summary sees a video finish. Shield shakes its head
   once when processing fails. Opening a video with a known result shows its mascot at rest.
-  Reduced motion keeps the crew still by default. People can opt into gestures in the active
-  processing panel.
 - **The cast** (`src/modules/videos/model/crew-lines.ts`), friendly and discreet — one short line, always
   next to the facts, never instead of them: **Nel** (brand ghost, host of empty screens), **Luna**
   (queue), **Faísca** (download), **Tinta** (transcription), **Brilho** (best moments), **Brasa**

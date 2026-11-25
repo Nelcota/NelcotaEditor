@@ -2,17 +2,22 @@ import { useId } from "react";
 import type { ReactNode } from "react";
 import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
 import { useBrandGaze } from "#/shared/ui/use-brand-gaze";
+import { useMascotAnimations } from "#/shared/ui/use-mascot-animations";
 
 export function BrandGaze(): ReactNode {
     const id = useId();
-    const overlayRef = useBrandGaze();
+    const { isEnabled } = useMascotAnimations();
+    const overlayRef = useBrandGaze(isEnabled);
     const faceColor = `${id}-face`;
     const faceEdge = `${id}-edge`;
     const faceMask = `${id}-mask`;
     const eyeColor = `${id}-eyes`;
 
     return (
-        <span aria-hidden="true" className="relative inline-flex size-8 shrink-0">
+        <span
+            aria-hidden="true"
+            className="mascot-animation relative inline-flex size-8 shrink-0 origin-bottom mascot-motion:motion-safe:animate-brand-float"
+        >
             <Mascot index={BRAND_MASCOT_INDEX} className="size-full" />
             <svg
                 ref={overlayRef}
