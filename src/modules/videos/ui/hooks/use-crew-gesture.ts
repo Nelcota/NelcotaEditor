@@ -8,13 +8,21 @@ const REPLAY_DELAYS_MILLISECONDS = {
 
 export type CrewGestureContext = keyof typeof REPLAY_DELAYS_MILLISECONDS;
 
-function subscribeToGestureReplay(replay: () => void, context: CrewGestureContext): () => void {
+interface CrewGestureOptions {
+    context: CrewGestureContext;
+    isMotionRequested: boolean;
+}
+
+function subscribeToGestureReplay(
+    replay: () => void,
+    { context, isMotionRequested }: CrewGestureOptions,
+): () => void {
     const { minimum, maximum } = REPLAY_DELAYS_MILLISECONDS[context];
     const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
     let timer: number | null = null;
 
     function canReplay(): boolean {
-        return motion.matches && document.hidden === false;
+        return (motion.matches || isMotionRequested) && document.hidden === false;
     }
 
     function clearTimer(): void {
@@ -58,7 +66,7 @@ function subscribeToGestureReplay(replay: () => void, context: CrewGestureContex
 export function useCrewGesture(
     status: VideoStatus,
     isWorking: boolean,
-    context: CrewGestureContext,
+    { context, isMotionRequested }: CrewGestureOptions,
 ): number {
     const [gesture, setGesture] = useState(0);
 
@@ -67,8 +75,11 @@ export function useCrewGesture(
             return undefined;
         }
 
-        return subscribeToGestureReplay(() => setGesture((previous) => previous + 1), context);
-    }, [context, isWorking, status]);
+        return subscribeToGestureReplay(() => setGesture((previous) => previous + 1), {
+            context,
+            isMotionRequested,
+        });
+    }, [context, isMotionRequested, isWorking, status]);
 
     return gesture;
 }

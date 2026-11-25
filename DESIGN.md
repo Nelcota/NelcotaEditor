@@ -107,7 +107,8 @@ Each drawing has one meaning only:
   Replays pause while the tab is hidden.
   Clover makes one small hop when the cuts summary sees a video finish. Shield shakes its head
   once when processing fails. Opening a video with a known result shows its mascot at rest.
-  Reduced motion keeps the crew still.
+  Reduced motion keeps the crew still by default. People can opt into gestures in the active
+  processing panel.
 - **The cast** (`src/modules/videos/model/crew-lines.ts`), friendly and discreet — one short line, always
   next to the facts, never instead of them: **Nel** (brand ghost, host of empty screens), **Luna**
   (queue), **Faísca** (download), **Tinta** (transcription), **Brilho** (best moments), **Brasa**
