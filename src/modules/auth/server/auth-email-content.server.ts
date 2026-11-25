@@ -108,7 +108,7 @@ function buildHtml(copy: AuthEmailCopy, url: string): string {
     return [
         '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#18181b;max-width:560px">',
         paragraphs,
-        `<p style="margin:24px 0"><a href="${link}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold">${escapeHtml(copy.buttonLabel)}</a></p>`,
+        `<p style="margin:24px 0"><a href="${link}" style="display:inline-block;background:#C4F800;color:#0D0D0C;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold">${escapeHtml(copy.buttonLabel)}</a></p>`,
         `<p style="margin:0 0 16px;font-size:14px;color:#52525b">Se o botão não abrir, copie este endereço no navegador:<br>${link}</p>`,
         `<p style="margin:0;font-size:14px;color:#52525b">${escapeHtml(copy.closing)}</p>`,
         "</div>",
