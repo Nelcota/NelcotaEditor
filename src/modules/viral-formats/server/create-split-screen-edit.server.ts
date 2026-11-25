@@ -6,6 +6,7 @@ import { findTranscriptWords } from "#/modules/transcription/server/find-transcr
 import { videos } from "#/modules/video-records/video-records.schema";
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
+import { assertFormatAvailable } from "#/modules/viral-formats/server/assert-format-available.server";
 import { enqueueEditRender } from "#/modules/viral-formats/server/edit-render-queue.server";
 import { edits } from "#/modules/viral-formats/viral-formats.schema";
 
@@ -90,6 +91,7 @@ export async function createSplitScreenEdit(
     userId: string,
     plan: SplitScreenPlan,
 ): Promise<string> {
+    await assertFormatAvailable(userId, "split-screen");
     const sourceIds = plan.panels
         .filter((panel) => panel.kind === "example")
         .map((panel) => panel.sourceVideoId);

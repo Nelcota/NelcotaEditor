@@ -1,7 +1,11 @@
 export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "generic" | "app";
 
+/** Free formats are open to everyone; each month a new one arrives for subscribers only. */
+export type FormatAccess = "free" | "subscriber";
+
 export interface ViralFormat {
     id: ViralFormatId;
+    access: FormatAccess;
     name: string;
     tagline: string;
     description: string;
@@ -11,6 +15,7 @@ export interface ViralFormat {
 export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     {
         id: "split-screen",
+        access: "free",
         name: "Tela dividida",
         tagline: "Você em cima, o conteúdo embaixo.",
         description:
@@ -23,6 +28,7 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     },
     {
         id: "ranking",
+        access: "free",
         name: "Ranking",
         tagline: "Top 5, top 10, do pior ao melhor.",
         description:
@@ -35,6 +41,7 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     },
     {
         id: "this-or-that",
+        access: "free",
         name: "Isso ou aquilo",
         tagline: "Duas opções lado a lado.",
         description:
@@ -47,6 +54,7 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     },
     {
         id: "generic",
+        access: "free",
         name: "Genérico",
         tagline: "Talking head limpo com legenda.",
         description:
@@ -59,6 +67,7 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     },
     {
         id: "app",
+        access: "free",
         name: "App",
         tagline: "Demonstração de tela de app ou site.",
         description:

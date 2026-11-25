@@ -8,3 +8,4 @@ export * from "#/modules/admin/admin.schema";
 export * from "#/modules/app-switches/app-switches.schema";
 export * from "#/modules/support/support.schema";
 export * from "#/modules/viral-formats/viral-formats.schema";
+export * from "#/modules/billing/billing.schema";

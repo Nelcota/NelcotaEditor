@@ -82,8 +82,11 @@ function FeaturedFormat({ format, onOpen }: FeaturedFormatProps): ReactNode {
     );
 }
 
-/** Formatos Virais: the formats Editor Oculto edits into, each opening its own details. */
-export function FormatsScreen(): ReactNode {
+/**
+ * Formatos Virais: the formats Editor Oculto edits into, each opening its own details. The route
+ * passes in the subscription panel, which belongs to billing.
+ */
+export function FormatsScreen({ subscriptionPanel }: { subscriptionPanel: ReactNode }): ReactNode {
     const connectionQuery = useQuery(claudeConnectionQueryOptions());
     // Shown only once the answer is known, so a connected person never sees it flash.
     const isClaudeMissing = connectionQuery.data?.connectedAt === null;
@@ -105,6 +108,7 @@ export function FormatsScreen(): ReactNode {
                 </p>
             </header>
             {isClaudeMissing === true && <ConnectClaudeNotice />}
+            {subscriptionPanel}
             {featured !== undefined && <FeaturedFormat format={featured} onOpen={setOpenFormat} />}
             <section aria-labelledby="all-formats" className="grid gap-4">
                 <h2 id="all-formats" className="flex items-baseline gap-2 text-lg font-bold">

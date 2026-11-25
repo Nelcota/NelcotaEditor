@@ -204,6 +204,13 @@
       "when": 1795628711028,
       "tag": "0028_viral_format_edits",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795630764306,
+      "tag": "0029_editor_oculto_subscriptions",
+      "breakpoints": true
     }
   ]
 }

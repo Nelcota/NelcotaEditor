@@ -66,6 +66,12 @@ const baseEnvironmentSchema = z.object({
     TRANSCRIPTION_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(3),
     DEEPSEEK_API_KEY: z.string().default(""),
     DEEPSEEK_MODEL: z.string().min(1).default("deepseek-chat"),
+    // Asaas sells the Editor Oculto subscription. Unset: the subscribe button explains it is not
+    // on sale and webhooks are refused. The sandbox URL is the default so a test key never charges.
+    ASAAS_API_URL: z.url().default("https://api-sandbox.asaas.com"),
+    ASAAS_API_KEY: optionalTextSchema,
+    // The token Asaas sends back in the asaas-access-token header (32 to 255 characters).
+    ASAAS_WEBHOOK_TOKEN: optionalTextSchema.pipe(z.string().min(32).max(255).optional()),
     // Unset: auth emails fail and stay queued for retries, so sign-up cannot finish. Only the
     // worker sends email; the web server queues it.
     RESEND_API_KEY: optionalTextSchema,

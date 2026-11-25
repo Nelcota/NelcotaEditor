@@ -47,6 +47,7 @@ import { Route as AppVideosVideoIdRouteImport } from './routes/_app/videos.$vide
 import { Route as ApiAccountAvatarRouteImport } from './routes/api/account/avatar'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiShareTokenRouteImport } from './routes/api/share/$token'
+import { Route as ApiWebhooksAsaasRouteImport } from './routes/api/webhooks/asaas'
 import { Route as AppAdminSupportIndexRouteImport } from './routes/_app/admin/support/index'
 import { Route as AppAdminSupportTicketIdRouteImport } from './routes/_app/admin/support/$ticketId'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
@@ -249,6 +250,11 @@ const ApiShareTokenRoute = ApiShareTokenRouteImport.update({
   path: '/api/share/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksAsaasRoute = ApiWebhooksAsaasRouteImport.update({
+  id: '/api/webhooks/asaas',
+  path: '/api/webhooks/asaas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAdminSupportIndexRoute = AppAdminSupportIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -349,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
+  '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/admin/': typeof AppAdminIndexRoute
   '/support/': typeof AppSupportIndexRoute
   '/videos/': typeof AppVideosIndexRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
+  '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/admin': typeof AppAdminIndexRoute
   '/support': typeof AppSupportIndexRoute
   '/videos': typeof AppVideosIndexRoute
@@ -451,6 +459,7 @@ export interface FileRoutesById {
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
+  '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/support/': typeof AppSupportIndexRoute
   '/_app/videos/': typeof AppVideosIndexRoute
@@ -504,6 +513,7 @@ export interface FileRouteTypes {
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
+    | '/api/webhooks/asaas'
     | '/admin/'
     | '/support/'
     | '/videos/'
@@ -553,6 +563,7 @@ export interface FileRouteTypes {
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
+    | '/api/webhooks/asaas'
     | '/admin'
     | '/support'
     | '/videos'
@@ -605,6 +616,7 @@ export interface FileRouteTypes {
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
+    | '/api/webhooks/asaas'
     | '/_app/admin/'
     | '/_app/support/'
     | '/_app/videos/'
@@ -639,6 +651,7 @@ export interface RootRouteChildren {
   ApiAccountAvatarRoute: typeof ApiAccountAvatarRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiShareTokenRoute: typeof ApiShareTokenRoute
+  ApiWebhooksAsaasRoute: typeof ApiWebhooksAsaasRoute
   ApiClipsClipIdFileRoute: typeof ApiClipsClipIdFileRoute
   ApiEditsEditIdFileRoute: typeof ApiEditsEditIdFileRoute
   ApiShareTokenPosterRoute: typeof ApiShareTokenPosterRoute
@@ -917,6 +930,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiShareTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/asaas': {
+      id: '/api/webhooks/asaas'
+      path: '/api/webhooks/asaas'
+      fullPath: '/api/webhooks/asaas'
+      preLoaderRoute: typeof ApiWebhooksAsaasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/admin/support/': {
       id: '/_app/admin/support/'
       path: '/'
@@ -1101,6 +1121,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAccountAvatarRoute: ApiAccountAvatarRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiShareTokenRoute: ApiShareTokenRoute,
+  ApiWebhooksAsaasRoute: ApiWebhooksAsaasRoute,
   ApiClipsClipIdFileRoute: ApiClipsClipIdFileRoute,
   ApiEditsEditIdFileRoute: ApiEditsEditIdFileRoute,
   ApiShareTokenPosterRoute: ApiShareTokenPosterRoute,

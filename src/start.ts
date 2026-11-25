@@ -18,6 +18,8 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
  */
 const BEARER_ONLY_PATHS = new Set([
     MCP_PATH,
+    // Asaas posts payment events with a shared token and no Origin; the token is the check.
+    "/api/webhooks/asaas",
     "/api/auth/oauth2/token",
     "/api/auth/oauth2/register",
     "/api/auth/oauth2/revoke",

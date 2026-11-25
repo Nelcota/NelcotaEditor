@@ -816,7 +816,8 @@ Pull requests:
   `overview` · `studio`, then `admin`, `videos` (the library), `processing`, `highlights`,
   `clips`, `transcription` · `support` · `preferences`, `video-records` (the video row, its statuses and transitions),
   `auth` · `app-switches` (the admin's on/off switches, read by every layer above). `viral-formats`
-  (Formatos Virais, Etapa 1, Minhas edições) reads only `auth`; `mcp` (the /api/mcp server a person's
+  (Formatos Virais, Etapa 1, Minhas edições) reads `auth`, `video-records`, `transcription` and
+  `billing` (the Editor Oculto subscription sold through Asaas, which reads only `auth`); `mcp` (the /api/mcp server a person's
   Claude connects to) sits above `videos`, `transcription` and `viral-formats`. The exact map and each file-level exception (with its reason) live in
   `scripts/check-module-boundaries.ts`; `bun run check` enforces them.
 - Integration tests (`*.integration.test.ts`, database included) run with
