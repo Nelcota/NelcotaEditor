@@ -40,7 +40,7 @@ test("keeps the app layout on the 404 page of a missing video's Studio", async (
 
 test("uploads a file and opens the new video's page", async ({ page }) => {
     await openPage(page, "/videos");
-    await page.getByRole("link", { name: "Novo vídeo" }).first().click();
+    await page.getByRole("link", { name: "Enviar o primeiro vídeo" }).click();
     const dialog = page.getByRole("dialog");
 
     await dialog.getByLabel(/escolha no computador/).setInputFiles({

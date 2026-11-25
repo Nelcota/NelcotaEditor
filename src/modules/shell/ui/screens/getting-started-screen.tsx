@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { GettingStartedChecklist } from "#/modules/shell/ui/components/getting-started-checklist";
-import { WelcomeLessonPlayer } from "#/modules/shell/ui/components/welcome-lesson-player";
+import { WELCOME_LESSON } from "#/modules/shell/model/getting-started";
+import { LessonPlayer } from "#/shared/ui/lesson-player";
 import { useGettingStartedChecklist } from "#/modules/shell/ui/hooks/use-getting-started-checklist";
 
 /** "Comece por aqui": the welcome lesson beside the checklist of what to set up first. */
@@ -22,7 +23,10 @@ export function GettingStartedScreen(): ReactNode {
                 </p>
             </header>
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-                <WelcomeLessonPlayer onFinished={() => checklist.markDone("lesson")} />
+                <LessonPlayer
+                    lesson={WELCOME_LESSON}
+                    onFinished={() => checklist.markDone("lesson")}
+                />
                 <GettingStartedChecklist
                     entries={checklist.entries}
                     doneCount={checklist.doneCount}

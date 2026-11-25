@@ -21,7 +21,11 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppClaudeRouteImport } from './routes/_app/claude'
 import { Route as AppClipsRouteImport } from './routes/_app/clips'
+import { Route as AppClipsGettingStartedRouteImport } from './routes/_app/clips-getting-started'
+import { Route as AppEditsRouteImport } from './routes/_app/edits'
+import { Route as AppFormatsRouteImport } from './routes/_app/formats'
 import { Route as AppGettingStartedRouteImport } from './routes/_app/getting-started'
 import { Route as AppOverviewRouteImport } from './routes/_app/overview'
 import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
@@ -110,9 +114,29 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClaudeRoute = AppClaudeRouteImport.update({
+  id: '/claude',
+  path: '/claude',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppClipsRoute = AppClipsRouteImport.update({
   id: '/clips',
   path: '/clips',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClipsGettingStartedRoute = AppClipsGettingStartedRouteImport.update({
+  id: '/clips-getting-started',
+  path: '/clips-getting-started',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEditsRoute = AppEditsRouteImport.update({
+  id: '/edits',
+  path: '/edits',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFormatsRoute = AppFormatsRouteImport.update({
+  id: '/formats',
+  path: '/formats',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGettingStartedRoute = AppGettingStartedRouteImport.update({
@@ -272,7 +296,11 @@ export interface FileRoutesByFullPath {
   '/$': typeof AppSplatRoute
   '/account': typeof AppAccountRoute
   '/admin': typeof AppAdminRouteWithChildren
+  '/claude': typeof AppClaudeRoute
   '/clips': typeof AppClipsRoute
+  '/clips-getting-started': typeof AppClipsGettingStartedRoute
+  '/edits': typeof AppEditsRoute
+  '/formats': typeof AppFormatsRoute
   '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
@@ -312,7 +340,11 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/$': typeof AppSplatRoute
   '/account': typeof AppAccountRoute
+  '/claude': typeof AppClaudeRoute
   '/clips': typeof AppClipsRoute
+  '/clips-getting-started': typeof AppClipsGettingStartedRoute
+  '/edits': typeof AppEditsRoute
+  '/formats': typeof AppFormatsRoute
   '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
@@ -355,7 +387,11 @@ export interface FileRoutesById {
   '/_app/$': typeof AppSplatRoute
   '/_app/account': typeof AppAccountRoute
   '/_app/admin': typeof AppAdminRouteWithChildren
+  '/_app/claude': typeof AppClaudeRoute
   '/_app/clips': typeof AppClipsRoute
+  '/_app/clips-getting-started': typeof AppClipsGettingStartedRoute
+  '/_app/edits': typeof AppEditsRoute
+  '/_app/formats': typeof AppFormatsRoute
   '/_app/getting-started': typeof AppGettingStartedRoute
   '/_app/overview': typeof AppOverviewRoute
   '/_app/preferences': typeof AppPreferencesRoute
@@ -400,7 +436,11 @@ export interface FileRouteTypes {
     | '/$'
     | '/account'
     | '/admin'
+    | '/claude'
     | '/clips'
+    | '/clips-getting-started'
+    | '/edits'
+    | '/formats'
     | '/getting-started'
     | '/overview'
     | '/preferences'
@@ -440,7 +480,11 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/$'
     | '/account'
+    | '/claude'
     | '/clips'
+    | '/clips-getting-started'
+    | '/edits'
+    | '/formats'
     | '/getting-started'
     | '/overview'
     | '/preferences'
@@ -482,7 +526,11 @@ export interface FileRouteTypes {
     | '/_app/$'
     | '/_app/account'
     | '/_app/admin'
+    | '/_app/claude'
     | '/_app/clips'
+    | '/_app/clips-getting-started'
+    | '/_app/edits'
+    | '/_app/formats'
     | '/_app/getting-started'
     | '/_app/overview'
     | '/_app/preferences'
@@ -622,11 +670,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/claude': {
+      id: '/_app/claude'
+      path: '/claude'
+      fullPath: '/claude'
+      preLoaderRoute: typeof AppClaudeRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/clips': {
       id: '/_app/clips'
       path: '/clips'
       fullPath: '/clips'
       preLoaderRoute: typeof AppClipsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clips-getting-started': {
+      id: '/_app/clips-getting-started'
+      path: '/clips-getting-started'
+      fullPath: '/clips-getting-started'
+      preLoaderRoute: typeof AppClipsGettingStartedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/edits': {
+      id: '/_app/edits'
+      path: '/edits'
+      fullPath: '/edits'
+      preLoaderRoute: typeof AppEditsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/formats': {
+      id: '/_app/formats'
+      path: '/formats'
+      fullPath: '/formats'
+      preLoaderRoute: typeof AppFormatsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/getting-started': {
@@ -868,7 +944,11 @@ interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
   AppAccountRoute: typeof AppAccountRoute
   AppAdminRoute: typeof AppAdminRouteWithChildren
+  AppClaudeRoute: typeof AppClaudeRoute
   AppClipsRoute: typeof AppClipsRoute
+  AppClipsGettingStartedRoute: typeof AppClipsGettingStartedRoute
+  AppEditsRoute: typeof AppEditsRoute
+  AppFormatsRoute: typeof AppFormatsRoute
   AppGettingStartedRoute: typeof AppGettingStartedRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppPreferencesRoute: typeof AppPreferencesRoute
@@ -885,7 +965,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
   AppAccountRoute: AppAccountRoute,
   AppAdminRoute: AppAdminRouteWithChildren,
+  AppClaudeRoute: AppClaudeRoute,
   AppClipsRoute: AppClipsRoute,
+  AppClipsGettingStartedRoute: AppClipsGettingStartedRoute,
+  AppEditsRoute: AppEditsRoute,
+  AppFormatsRoute: AppFormatsRoute,
   AppGettingStartedRoute: AppGettingStartedRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppPreferencesRoute: AppPreferencesRoute,

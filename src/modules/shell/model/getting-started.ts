@@ -1,14 +1,4 @@
-import PlayIcon from "~icons/lucide/play";
-import type { NavSection } from "#/modules/shell/model/nav-sections";
-
-export const GETTING_STARTED_PATH = "/getting-started";
-
-export const GETTING_STARTED_SECTION: NavSection = {
-    path: GETTING_STARTED_PATH,
-    label: "Comece por aqui",
-    icon: PlayIcon,
-};
-
+import type { Lesson } from "#/shared/ui/lesson-player";
 export type ChecklistStepId = "lesson" | "account" | "install" | "pro";
 
 export interface ChecklistStep {
@@ -51,14 +41,8 @@ export const CLAUDE_LINKS: ReadonlyArray<ClaudeLink> = [
     { label: "Ativar o plano Pro", href: "https://claude.ai/upgrade" },
 ];
 
-export interface WelcomeLesson {
-    title: string;
-    durationLabel: string;
-    /** Null until the lesson is published; the player says so instead of playing. */
-    videoUrl: string | null;
-}
-
-export const WELCOME_LESSON: WelcomeLesson = {
+export const WELCOME_LESSON: Lesson = {
+    eyebrow: "Aula 1",
     title: "Como instalar o Claude e ativar o Pro",
     durationLabel: "8 min",
     videoUrl: null,

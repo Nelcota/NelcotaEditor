@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { ClipLibrary } from "#/modules/videos/ui/components/clip-library";
+import { RecentVideos } from "#/modules/videos/ui/components/recent-videos";
+import { VideoLinkComposer } from "#/modules/videos/ui/components/video-link-composer";
 import {
     ClipsLoadError,
     ClipsLoading,
@@ -84,9 +86,13 @@ export function ClipsScreen(props: ClipsScreenProps) {
     return (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
             <PageHeader
-                title="Cortes"
-                description="Os cortes prontos de todos os vídeos. Assista, baixe ou ajuste no Studio."
+                title="Meus cortes"
+                description="Cole um link para cortar um vídeo. Os cortes prontos de todos os vídeos ficam aqui."
             />
+            <div className="grid w-full max-w-3xl gap-6">
+                <VideoLinkComposer />
+                <RecentVideos />
+            </div>
             <ClipsContent search={props.search} onSearchChange={props.onSearchChange} />
         </div>
     );

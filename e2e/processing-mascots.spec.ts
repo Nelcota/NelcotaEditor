@@ -66,72 +66,6 @@ function measureBrandLift(brand: Locator): Promise<number> {
     });
 }
 
-test("the home mascot tracks the pointer, changes expression and blinks", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await useOwnClientAddress(page);
-    await signUp(page, createTestAccount());
-
-    const mascot = getMascot(page.getByRole("heading", { level: 1 }));
-    const gaze = mascot.locator(".brand-gaze");
-    const smile = gaze.locator(".brand-gaze-smile");
-    const curious = gaze.locator(".brand-gaze-curious");
-    const lids = gaze.locator(".brand-gaze-lids");
-    const eyes = gaze.locator(".brand-gaze-eyes");
-    const bounds = await mascot.boundingBox();
-
-    if (bounds === null) {
-        throw new Error("The home mascot is not visible");
-    }
-
-    const centerX = bounds.x + bounds.width / 2;
-    const centerY = bounds.y + bounds.height / 2;
-    const pointerDistance = 115;
-    const expectLook = async (direction: number): Promise<void> => {
-        // The app clears its gaze when the page loses focus during a concurrent browser test.
-        await expect(async () => {
-            await page.bringToFront();
-            await page.mouse.move(centerX + direction * pointerDistance, centerY);
-            await expect(curious).toHaveCSS("opacity", "1", { timeout: 1_000 });
-            await expect
-                .poll(
-                    () =>
-                        eyes.evaluate(
-                            (element, sign) =>
-                                Number.parseFloat(getComputedStyle(element).translate) * sign,
-                            direction,
-                        ),
-                    { timeout: 1_000 },
-                )
-                .toBeGreaterThan(12);
-        }).toPass({ timeout: 5_000 });
-    };
-
-    await expect(gaze).toHaveCSS("visibility", "hidden");
-    await lids.evaluate((element) => {
-        element.addEventListener(
-            "animationstart",
-            () => element.setAttribute("data-observed-blink", "true"),
-            { once: true },
-        );
-    });
-    await page.bringToFront();
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await expect(gaze).toHaveCSS("visibility", "visible");
-    await expect(smile).toHaveCSS("opacity", "1");
-
-    await expectLook(1);
-    await expectLook(-1);
-
-    await mascot.hover({ force: true });
-    await expect(smile).toHaveCSS("opacity", "1");
-    await expect(curious).toHaveCSS("opacity", "0");
-    await expect(lids).toHaveAttribute("data-observed-blink", "true");
-
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await expect(gaze).toHaveCSS("visibility", "hidden");
-    await expect(lids).toHaveCSS("animation-name", "none");
-});
-
 test("animates the processing crew and brand by default and saves the setting", async ({
     page,
 }) => {
@@ -151,7 +85,7 @@ test("animates the processing crew and brand by default and saves the setting", 
     const steps = crew.getByRole("listitem");
     const download = steps.filter({ hasText: "Download" });
     const transcription = steps.filter({ hasText: "Transcrição" });
-    const brandLink = page.getByRole("link", { name: "Nelcota, ir para o início" });
+    const brandLink = page.getByRole("link", { name: "Editor Oculto, ir para o início" });
     const brand = getMascot(brandLink);
     const cancel = panel.getByRole("button", { name: "Cancelar", exact: true });
 
@@ -230,7 +164,7 @@ test("can turn off mascot animations when storage refuses writes", async ({ page
     await openPage(page, "/account");
 
     const preference = page.getByRole("switch", { name: "Animações dos mascotes" });
-    const brand = getMascot(page.getByRole("link", { name: "Nelcota, ir para o início" }));
+    const brand = getMascot(page.getByRole("link", { name: "Editor Oculto, ir para o início" }));
     await expect(preference).toBeChecked();
     await expect(brand).toHaveCSS("animation-name", "mascot-opacity");
 

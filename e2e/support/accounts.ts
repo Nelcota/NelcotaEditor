@@ -70,6 +70,6 @@ export async function signUp(page: Page, account: TestAccount): Promise<void> {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("confirmar seu email");
 
     await page.goto(await readEmailedLink(account.email, "verify-email"));
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/getting-started");
     await openPage(page, "/");
 }

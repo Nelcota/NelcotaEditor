@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ActivityBell } from "#/modules/shell/ui/components/activity-bell";
 import { SidebarNav } from "#/modules/shell/ui/components/sidebar-nav";
-import { StorageCard } from "#/modules/shell/ui/components/storage-card";
 import { BrandLogo } from "#/shared/ui/brand-logo";
 import { Button } from "#/shared/ui/button";
 import { HintTooltip } from "#/shared/ui/hint-tooltip";
@@ -12,7 +11,7 @@ const HIDE_LABEL = "Recolher a barra lateral";
 
 /**
  * The sidebar on the window frame, in the reference's order: logo, bell and collapse; the
- * sections; then, at the foot, the storage card and the person.
+ * sections; then, at the foot, the person. Storage lives in Conta.
  */
 interface AppSidebarProps {
     onCollapse: () => void;
@@ -24,7 +23,7 @@ export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactN
         <div className="flex h-full min-h-0 flex-col gap-2 px-2.5 pt-2 pb-2">
             <div className="flex h-12 items-center gap-1 ps-2.5">
                 <Link
-                    to="/"
+                    to="/getting-started"
                     aria-label="Editor Oculto, ir para o início"
                     className="me-auto flex h-11 items-center rounded-xl pe-2 outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
@@ -46,7 +45,6 @@ export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactN
             <div className="relative min-h-0 flex-1 overflow-y-auto pt-1">
                 <SidebarNav />
             </div>
-            <StorageCard />
             {accountMenu}
         </div>
     );

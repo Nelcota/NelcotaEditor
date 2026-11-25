@@ -41,7 +41,7 @@ export function BrandLogo({ className }: { className?: string }): ReactNode {
                 className,
             )}
         >
-            <BrandMark className="h-6.5" />
+            <BrandMark className="h-6.5" isAnimated />
             Editor Oculto
         </span>
     );

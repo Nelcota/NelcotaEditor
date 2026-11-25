@@ -1,14 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import type { ReactNode } from "react";
-import { HomeScreen } from "#/modules/shell/ui/screens/home-screen";
-import { RecentVideos } from "#/modules/videos/ui/components/recent-videos";
-import { VideoLinkComposer } from "#/modules/videos/ui/components/video-link-composer";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Início left the app: each area opens with its own "Comece por aqui", and the Editor Oculto one
+// is where people land. Old links and bookmarks to "/" still arrive there.
 export const Route = createFileRoute("/_app/")({
-    head: () => ({ meta: [{ title: "Início · Editor Oculto" }] }),
-    component: HomeRoute,
+    beforeLoad: () => {
+        throw redirect({ to: "/getting-started", replace: true });
+    },
 });
-
-function HomeRoute(): ReactNode {
-    return <HomeScreen linkComposer={<VideoLinkComposer />} recentVideos={<RecentVideos />} />;
-}

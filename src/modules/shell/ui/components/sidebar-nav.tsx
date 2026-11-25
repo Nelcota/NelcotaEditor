@@ -5,37 +5,23 @@ import type { ReactNode } from "react";
 import {
     ADMIN_SECTION,
     ADMIN_SUB_SECTIONS,
-    NAV_SECTIONS,
+    GETTING_STARTED_SECTION,
+    NAV_GROUPS,
     SECTION_LINK_ACTIVE_OPTIONS,
     SUPPORT_SECTION,
-    VIDEOS_PATH,
     getSectionState,
     isAdminSubSectionCurrent,
 } from "#/modules/shell/model/nav-sections";
-import type { NavSection } from "#/modules/shell/model/nav-sections";
-import { GETTING_STARTED_SECTION } from "#/modules/shell/model/getting-started";
+import type { NavGroup, NavSection } from "#/modules/shell/model/nav-sections";
 import { SIDEBAR_ITEM_CLASS } from "#/modules/shell/ui/components/sidebar-item-class";
 import { useGettingStartedChecklist } from "#/modules/shell/ui/hooks/use-getting-started-checklist";
 import { useQuery } from "@tanstack/react-query";
-import { videoCountsQueryOptions } from "#/modules/videos/model/video-queries";
 import { supportWaitingQueryOptions } from "#/modules/admin/model/admin-queries";
 import { supportReplyQueryOptions } from "#/modules/support/model/support-queries";
 import { cn } from "#/shared/ui/cn";
 import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 
 const appRoute = getRouteApi("/_app");
-
-/** The count beside Vídeos; nothing elsewhere, so the numbers keep one meaning. */
-function useVideoCount(section: NavSection): number | null {
-    const countsQuery = useQuery(videoCountsQueryOptions());
-    const counts = countsQuery.data;
-
-    if (section.path !== VIDEOS_PATH || counts === undefined || counts.all === 0) {
-        return null;
-    }
-
-    return counts.all;
-}
 
 interface SectionLinkProps {
     section: NavSection;
@@ -46,7 +32,6 @@ interface SectionLinkProps {
 
 function SectionLink({ section, pathname, trailing }: SectionLinkProps): ReactNode {
     const state = getSectionState(section, pathname);
-    const count = useVideoCount(section);
     const Icon = section.icon;
 
     return (
@@ -60,11 +45,6 @@ function SectionLink({ section, pathname, trailing }: SectionLinkProps): ReactNo
             >
                 <Icon aria-hidden="true" />
                 <span className="flex-1 truncate">{section.label}</span>
-                {count !== null && (
-                    <span className="text-sm font-normal text-muted-foreground tabular-nums">
-                        {count}
-                    </span>
-                )}
                 {trailing}
             </Link>
         </li>
@@ -179,33 +159,63 @@ function AdminGroup({ pathname }: { pathname: string }): ReactNode {
     );
 }
 
-/** The sections, in the reference's order; admins also get the Admin folder. */
+/** One link of a group: the two with a mark of their own get it, the rest are plain. */
+function GroupSectionLink({ section, pathname }: { section: NavSection; pathname: string }) {
+    if (section === GETTING_STARTED_SECTION) {
+        return <GettingStartedLink pathname={pathname} />;
+    }
+
+    if (section === SUPPORT_SECTION) {
+        return <SupportLink pathname={pathname} />;
+    }
+
+    return <SectionLink section={section} pathname={pathname} />;
+}
+
+interface SidebarGroupProps {
+    group: NavGroup;
+    pathname: string;
+    /** Extra rows after the group's sections, such as the Admin folder. */
+    children?: ReactNode;
+}
+
+function SidebarGroup({ group, pathname, children }: SidebarGroupProps): ReactNode {
+    const headingId = useId();
+
+    return (
+        <div className="grid gap-1">
+            <p
+                id={headingId}
+                className="px-3 text-xs font-bold tracking-eyebrow text-muted-foreground uppercase"
+            >
+                {group.label}
+            </p>
+            <ul aria-labelledby={headingId} className="grid grid-cols-[minmax(0,1fr)] gap-0.5">
+                {group.sections.map((section) => (
+                    <GroupSectionLink key={section.path} section={section} pathname={pathname} />
+                ))}
+                {children}
+            </ul>
+        </div>
+    );
+}
+
+/** The three groups of the Editor Oculto guide; admins also get the Admin folder under Geral. */
 export function SidebarNav(): ReactNode {
     const pathname = useLocation({ select: (location) => location.pathname });
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
-    const groupHeadingId = useId();
+    const lastIndex = NAV_GROUPS.length - 1;
 
     return (
-        <nav aria-label="Seções" className="grid gap-3">
-            <div className="grid gap-1">
-                <p
-                    id={groupHeadingId}
-                    className="px-3 text-xs font-bold tracking-eyebrow text-muted-foreground uppercase"
-                >
-                    Editor Oculto
-                </p>
-                <ul aria-labelledby={groupHeadingId} className="grid grid-cols-[minmax(0,1fr)]">
-                    <GettingStartedLink pathname={pathname} />
-                </ul>
-            </div>
-            <ul className="grid grid-cols-[minmax(0,1fr)] gap-0.5">
-                {NAV_SECTIONS.map((section) => (
-                    <SectionLink key={section.path} section={section} pathname={pathname} />
-                ))}
-                <SupportLink pathname={pathname} />
-                {user.isAdmin === true && <AdminGroup pathname={pathname} />}
-            </ul>
+        <nav aria-label="Seções" className="grid gap-4">
+            {NAV_GROUPS.map((group, index) => (
+                <SidebarGroup key={group.label} group={group} pathname={pathname}>
+                    {index === lastIndex && user.isAdmin === true && (
+                        <AdminGroup pathname={pathname} />
+                    )}
+                </SidebarGroup>
+            ))}
         </nav>
     );
 }

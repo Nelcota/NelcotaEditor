@@ -493,59 +493,6 @@
     animation-delay: -1950ms;
 }
 
-.brand-gaze {
-    visibility: hidden;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .brand-gaze {
-        transition: visibility 150ms step-end;
-    }
-
-    .brand-gaze:is([data-has-gaze], [data-is-blinking]),
-    [data-mascot-animations="true"] .brand-gaze[data-has-expressions="true"] {
-        visibility: visible;
-        transition: none;
-    }
-
-    .brand-gaze-eyes {
-        transform-box: view-box;
-        translate: var(--brand-look-x, 0%) var(--brand-look-y, 0%);
-        transition: translate 150ms ease-out;
-    }
-
-    .brand-gaze-lids {
-        transform-box: fill-box;
-        transform-origin: center;
-        scale: 1;
-    }
-
-    .brand-gaze-smile,
-    .brand-gaze-curious {
-        transition: opacity 150ms ease-out;
-    }
-
-    .brand-gaze-curious,
-    .brand-gaze[data-has-gaze]:not([data-is-near]) .brand-gaze-smile {
-        opacity: 0;
-    }
-
-    .brand-gaze[data-has-gaze]:not([data-is-near]) .brand-gaze-curious {
-        opacity: 1;
-    }
-
-    .brand-gaze[data-is-blinking] .brand-gaze-lids {
-        animation: brand-blink 170ms ease-in-out;
-    }
-}
-
-@keyframes brand-blink {
-    42%,
-    53% {
-        scale: 1 0.12;
-    }
-}
-
 /* Native range inputs (volume, Studio scrubber) drawn with the player's colors in every browser. */
 @utility range-media {
     appearance: none;

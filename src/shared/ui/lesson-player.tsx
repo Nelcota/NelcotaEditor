@@ -1,35 +1,48 @@
 import PlayIcon from "~icons/lucide/play";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { WELCOME_LESSON } from "#/modules/shell/model/getting-started";
+
+/** A recorded lesson; the video address stays null until the lesson is published. */
+export interface Lesson {
+    eyebrow: string;
+    title: string;
+    durationLabel: string | null;
+    videoUrl: string | null;
+}
 
 const NOT_PUBLISHED_MESSAGE = "A aula ainda não foi publicada. Volte em breve.";
 
-interface WelcomeLessonPlayerProps {
-    onFinished: () => void;
+interface LessonPlayerProps {
+    lesson: Lesson;
+    /** Called once the lesson plays to the end. */
+    onFinished?: () => void;
 }
 
-function LessonCaption(): ReactNode {
+function LessonCaption({ lesson }: { lesson: Lesson }): ReactNode {
+    const durationLabel = lesson.durationLabel;
+
     return (
         <div className="flex items-end justify-between gap-3">
             <div className="grid gap-1">
                 <span className="text-xs font-bold tracking-eyebrow text-primary-ink uppercase">
-                    Aula 1
+                    {lesson.eyebrow}
                 </span>
-                <span className="text-lg font-bold text-foreground">{WELCOME_LESSON.title}</span>
+                <span className="text-lg font-bold text-foreground">{lesson.title}</span>
             </div>
-            <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-bold text-muted-foreground tabular-nums">
-                {WELCOME_LESSON.durationLabel}
-            </span>
+            {durationLabel !== null && (
+                <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-bold text-muted-foreground tabular-nums">
+                    {durationLabel}
+                </span>
+            )}
         </div>
     );
 }
 
-/** The welcome lesson; it checks "Assisti à aula" once it plays to the end. */
-export function WelcomeLessonPlayer({ onFinished }: WelcomeLessonPlayerProps): ReactNode {
+/** A lesson's cover with a big play button; it says so when the lesson is not published yet. */
+export function LessonPlayer({ lesson, onFinished }: LessonPlayerProps): ReactNode {
     const [isPlaying, setIsPlaying] = useState(false);
     const [notice, setNotice] = useState("");
-    const videoUrl = WELCOME_LESSON.videoUrl;
+    const videoUrl = lesson.videoUrl;
 
     function startLesson(): void {
         if (videoUrl === null) {
@@ -62,7 +75,7 @@ export function WelcomeLessonPlayer({ onFinished }: WelcomeLessonPlayerProps): R
                     <button
                         type="button"
                         onClick={startLesson}
-                        aria-label={`Assistir à aula: ${WELCOME_LESSON.title}`}
+                        aria-label={`Assistir à aula: ${lesson.title}`}
                         className="grid size-21 place-items-center rounded-full bg-primary-solid text-primary-foreground ring-12 ring-primary-solid/12 outline-none transition-[background-color,scale] hover:bg-primary-solid-hover focus-visible:ring-ring motion-safe:active:scale-99"
                     >
                         <PlayIcon
@@ -71,7 +84,7 @@ export function WelcomeLessonPlayer({ onFinished }: WelcomeLessonPlayerProps): R
                         />
                     </button>
                 </div>
-                <LessonCaption />
+                <LessonCaption lesson={lesson} />
             </div>
             <p role="status" className="text-sm text-muted-foreground">
                 {notice}

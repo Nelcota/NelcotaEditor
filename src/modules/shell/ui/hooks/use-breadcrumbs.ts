@@ -5,7 +5,15 @@ import { useSyncExternalStore } from "react";
 import type { VideoDetails } from "#/modules/videos/model/video-views";
 import { videoDetailsQueryOptions } from "#/modules/videos/model/video-queries";
 
-export type CrumbPath = "/" | "/videos" | "/admin" | "/admin/users" | "/support" | "/admin/support";
+export type CrumbPath =
+    | "/getting-started"
+    | "/clips-getting-started"
+    | "/clips"
+    | "/videos"
+    | "/admin"
+    | "/admin/users"
+    | "/support"
+    | "/admin/support";
 
 export interface Crumb {
     label: string;
@@ -13,7 +21,10 @@ export interface Crumb {
     to?: CrumbPath;
 }
 
-const HOME_CRUMB: Crumb = { label: "Início", to: "/" };
+/** Each area's trail starts at its own "Comece por aqui". */
+const EDITOR_CRUMB: Crumb = { label: "Editor Oculto", to: "/getting-started" };
+const CLIPS_AREA_CRUMB: Crumb = { label: "Cortes", to: "/clips-getting-started" };
+const MY_CLIPS_CRUMB: Crumb = { label: "Meus cortes", to: "/clips" };
 const VIDEOS_CRUMB: Crumb = { label: "Vídeos", to: "/videos" };
 const ADMIN_CRUMB: Crumb = { label: "Admin", to: "/admin" };
 const SUPPORT_CRUMB: Crumb = { label: "Suporte", to: "/support" };
@@ -24,22 +35,25 @@ const VIDEO_PAGE_PATTERN = /^\/videos\/([^/]+)\/?$/;
 const ADMIN_USER_PATTERN = /^\/admin\/users\/[^/]+\/?$/;
 
 const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
-    "/": [{ label: "Início" }],
-    "/getting-started": [HOME_CRUMB, { label: "Comece por aqui" }],
-    "/videos": [HOME_CRUMB, { label: "Vídeos" }],
-    "/clips": [HOME_CRUMB, { label: "Cortes" }],
-    "/overview": [HOME_CRUMB, { label: "Painel" }],
-    "/account": [HOME_CRUMB, { label: "Conta" }],
+    "/getting-started": [EDITOR_CRUMB, { label: "Comece por aqui" }],
+    "/claude": [EDITOR_CRUMB, { label: "Etapa 1 · Conectar Claude" }],
+    "/formats": [EDITOR_CRUMB, { label: "Formatos Virais" }],
+    "/edits": [EDITOR_CRUMB, { label: "Minhas edições" }],
+    "/clips-getting-started": [CLIPS_AREA_CRUMB, { label: "Comece por aqui" }],
+    "/clips": [CLIPS_AREA_CRUMB, { label: "Meus cortes" }],
+    "/videos": [CLIPS_AREA_CRUMB, MY_CLIPS_CRUMB, { label: "Vídeos" }],
+    "/overview": [CLIPS_AREA_CRUMB, { label: "Painel" }],
+    "/account": [{ label: "Conta" }],
     // Old addresses that redirect to Conta; the trail names where they lead while that happens.
-    "/preferences": [HOME_CRUMB, { label: "Conta" }],
-    "/usage": [HOME_CRUMB, { label: "Conta" }],
+    "/preferences": [{ label: "Conta" }],
+    "/usage": [{ label: "Conta" }],
     "/admin": [ADMIN_CRUMB, { label: "Visão geral" }],
     "/admin/users": [ADMIN_CRUMB, { label: "Usuários" }],
     "/admin/videos": [ADMIN_CRUMB, { label: "Vídeos" }],
     "/admin/features": [ADMIN_CRUMB, { label: "Recursos" }],
     "/admin/support": [ADMIN_CRUMB, { label: "Suporte" }],
-    "/support": [HOME_CRUMB, { label: "Suporte" }],
-    "/support/new": [HOME_CRUMB, SUPPORT_CRUMB, { label: "Abrir ticket" }],
+    "/support": [{ label: "Suporte" }],
+    "/support/new": [SUPPORT_CRUMB, { label: "Abrir ticket" }],
 };
 
 /** "/videos/" and "/videos" are the same page. */
@@ -95,7 +109,7 @@ export function useBreadcrumbs(): ReadonlyArray<Crumb> {
     }
 
     if (videoMatch !== null) {
-        return [VIDEOS_CRUMB, { label: videoTitle ?? "Vídeo" }];
+        return [MY_CLIPS_CRUMB, VIDEOS_CRUMB, { label: videoTitle ?? "Vídeo" }];
     }
 
     if (ADMIN_TICKET_PATTERN.test(pathname) === true) {
@@ -103,7 +117,7 @@ export function useBreadcrumbs(): ReadonlyArray<Crumb> {
     }
 
     if (TICKET_PAGE_PATTERN.test(pathname) === true) {
-        return [HOME_CRUMB, SUPPORT_CRUMB, { label: "Ticket" }];
+        return [SUPPORT_CRUMB, { label: "Ticket" }];
     }
 
     if (ADMIN_USER_PATTERN.test(pathname) === true) {
@@ -111,5 +125,5 @@ export function useBreadcrumbs(): ReadonlyArray<Crumb> {
     }
 
     // Any other address is the catch-all 404 page.
-    return [HOME_CRUMB, { label: "Página não encontrada" }];
+    return [{ label: "Página não encontrada" }];
 }

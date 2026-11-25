@@ -37,7 +37,7 @@ export function PageBar({ children }: { children?: ReactNode }): ReactNode {
     return (
         <div className="flex h-14 shrink-0 items-center gap-3 ps-4 pe-2 md:ps-8 md:pe-6">
             <Link
-                to="/"
+                to="/getting-started"
                 aria-label="Editor Oculto, ir para o início"
                 className="shrink-0 rounded-lg outline-none focus-visible:ring-4 focus-visible:ring-ring md:hidden"
             >

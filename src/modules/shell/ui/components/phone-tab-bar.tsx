@@ -1,6 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { PHONE_SECTIONS, VIDEOS_PATH, getSectionState } from "#/modules/shell/model/nav-sections";
+import { CLIPS_PATH, PHONE_SECTIONS, getSectionState } from "#/modules/shell/model/nav-sections";
 import { SectionTabLink } from "#/modules/shell/ui/components/section-tab-link";
 import { useHasWorkingVideo } from "#/modules/shell/ui/hooks/use-has-working-video";
 
@@ -19,7 +19,7 @@ export function PhoneTabBar(): ReactNode {
                     key={section.path}
                     section={section}
                     state={getSectionState(section, pathname)}
-                    hasActivity={section.path === VIDEOS_PATH && hasWorkingVideo === true}
+                    hasActivity={section.path === CLIPS_PATH && hasWorkingVideo === true}
                 />
             ))}
         </nav>

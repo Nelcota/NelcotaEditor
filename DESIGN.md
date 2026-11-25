@@ -1,22 +1,25 @@
 # Nelcota — design brief
 
-Nelcota turns long videos into vertical short clips with captions. Since 2026-11-23 the app follows the
-owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
-(the owner asked for nothing bluish) and blue as the one action colour (it was the brand green until
-2026-11-23). The frame holds the
-sidebar: the Editor Oculto logo, the bell (videos being cut) and the collapse button;
-the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
-(used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
-rounded panel holds the breadcrumb bar (theme toggle trailing) and the page; page titles live in the
-breadcrumb and stay for screen readers only. Light stays available through the toggle.
+Editor Oculto (formerly Nelcota) holds two areas under one login: the Formatos Virais, which edit raw
+videos in a format with the person's Claude, and Cortes, which turn long videos into vertical short
+clips with captions. Since 2026-11-23 the app follows the owner's second reference (a creators
+platform): a dark window by default, with greys that carry no hue (the owner asked for nothing
+bluish) and lime as the one action colour (since 2026-11-25). The frame holds the sidebar: the Editor
+Oculto logo, the bell (videos being cut) and the collapse button; three labelled groups, Editor Oculto
+(Comece por aqui with the checklist count, Etapa 1 · Conectar Claude, Formatos Virais, Minhas
+edições), Cortes (Comece por aqui, Meus cortes, Painel) and Geral (Conta, Suporte, and the Admin
+folder for admins); the person with a menu. Storage lives in Conta. One rounded panel holds the
+breadcrumb bar (theme toggle trailing) and the page. The Editor Oculto pages and both "Comece por
+aqui" show a visible eyebrow and title, as in the prototype; the older pages keep the title in the
+breadcrumb and for screen readers only. Light stays available through the toggle.
 
-- **Início** opens with a greeting from Nel beside the brand mascot (40px on phones, 56px from
-  `sm`), a box to paste a YouTube link (it starts the video with the saved preferences, shown as
-  pills; the plus opens the full form), and shortcuts.
+- **Comece por aqui** is where people land ("/" redirects there): each area has its own.
+- **Meus cortes** opens with the box to paste a YouTube link (it starts the video with the saved
+  preferences, shown as pills; the plus opens the full form) and the last videos, over the clips.
 - **Vídeos** is a table (status pill, source, clips, progress with the stage, date), columns by a
   container query so a narrow panel falls back to compact rows.
 - **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
-- **Cortes** are cards with the primary download button; a finished video's page opens with the summary
+- **Clips** are cards with the primary download button; a finished video's page opens with the summary
   bubble and its settings as tags.
 - **Entrar / Criar conta** (direction B, 2026-11-23): the form wears the public site (`.theme-site`:
   lavender page, white fields, Geist, the bracketed eyebrow and the light/heavy title), so the step
@@ -288,3 +291,4 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-25 | Brand becomes Editor Oculto: its symbol as logo and favicon, the name in titles and copy, lime `#C4F800` buttons with graphite text; in light, text, rings and thin fills use a deep lime (5.5:1) | The owner asked to bring the Editor Oculto prototype's identity in; lime on white is 1.25:1 |
 | 2026-11-25 | The "Novo vídeo" card leaves the sidebar; new videos start from Início's link box and the Vídeos page | The owner asked to remove it |
 | 2026-11-25 | "Comece por aqui" (`/getting-started`, from the Editor Oculto prototype): first in the sidebar under an "Editor Oculto" label with a done/total pill, also in the collapsed rail; the page has the welcome lesson beside a checklist of four steps, the Claude links and "Enviar meu primeiro vídeo". The checklist is kept per person in the browser; the lesson says it is not published until its video exists | The owner asked for the prototype's first screen; no Etapa 1 exists yet, so the button starts a video |
+| 2026-11-25 | Stage 1 of joining the Editor Oculto prototype: the sidebar follows its guide (groups Editor Oculto, Cortes, Geral; no Início, Vídeos or storage card), "/" opens Comece por aqui, the link box moves to Meus cortes, and Etapa 1, Formatos Virais, Minhas edições and the Cortes Comece por aqui arrive. Where nothing works yet (the Claude connection, editing, lessons), the page says so instead of simulating it | The owner chose the guide's menu and asked for real pages over the prototype's simulations; tokens, Pix and the Cortes lock come next |

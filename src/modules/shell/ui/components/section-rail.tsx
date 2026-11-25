@@ -2,7 +2,6 @@ import PanelLeftIcon from "~icons/lucide/panel-left";
 import { Link, useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ActivityBell } from "#/modules/shell/ui/components/activity-bell";
-import { GETTING_STARTED_SECTION } from "#/modules/shell/model/getting-started";
 import { SECTION_LINK_ACTIVE_OPTIONS, getSectionState } from "#/modules/shell/model/nav-sections";
 import type { NavSection } from "#/modules/shell/model/nav-sections";
 import { useNavSections } from "#/modules/shell/ui/hooks/use-nav-sections";
@@ -55,7 +54,6 @@ export function SectionRail({ onExpand }: { onExpand: () => void }): ReactNode {
                     <PanelLeftIcon aria-hidden="true" />
                 </Button>
             </HintTooltip>
-            <RailLink section={GETTING_STARTED_SECTION} pathname={pathname} />
             {sections.map((section) => (
                 <RailLink key={section.path} section={section} pathname={pathname} />
             ))}
