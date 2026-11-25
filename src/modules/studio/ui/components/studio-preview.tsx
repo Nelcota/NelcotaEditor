@@ -80,7 +80,7 @@ function PreviewControls({ draft, playback }: Pick<StudioPreviewProps, "draft" |
                 step={1 / TENTHS_PER_SECOND}
                 value={currentSeconds}
                 onChange={(event) => playback.seek(Number(event.target.value))}
-                className="range-media min-w-0 flex-1 cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring"
+                className="range-media min-w-0 flex-1 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring"
             />
         </div>
     );
