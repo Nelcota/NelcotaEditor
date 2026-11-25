@@ -21,6 +21,7 @@ import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { useHasPainted } from "#/shared/ui/use-has-painted";
 import { useVideoTabNavigation } from "#/modules/videos/ui/hooks/use-video-tab-navigation";
 
 const SKELETON_CLIP_COUNT = 4;
@@ -109,12 +110,15 @@ function StudioPage({ details, search, StudioTab }: VideoWorkspaceProps): ReactN
 
 /**
  * The page column and, from lg, the inspector beside it, each scrolling on its own; the top bar's
- * toggle hides the inspector.
+ * toggle slides the inspector shut. It stays mounted at a fixed width while its column narrows to
+ * zero, so its content never reflows; `invisible` takes it out of focus and the accessibility tree
+ * once the slide ends. Below lg there is no toggle, so it always shows under the page.
  */
 function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): ReactNode {
     const video = details.video;
     const isInspectorHidden = useIsInspectorHidden();
     const isInspectorShown = isInspectorHidden === false;
+    const hasPainted = useHasPainted();
 
     if (search.tab === "studio") {
         return <StudioPage details={details} search={search} StudioTab={StudioTab} />;
@@ -125,6 +129,9 @@ function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): Re
             className={cn(
                 "grid min-h-0 grid-cols-[minmax(0,1fr)] md:h-full md:overflow-y-auto lg:overflow-hidden",
                 isInspectorShown === true && "lg:grid-cols-[minmax(0,1fr)_400px]",
+                isInspectorShown === false && "lg:grid-cols-[minmax(0,1fr)_0px]",
+                hasPainted === true &&
+                    "motion-safe:transition-[grid-template-columns] motion-safe:duration-200 motion-safe:ease-out",
             )}
         >
             <div className={cn(PAGE_COLUMN_CLASS, "lg:overflow-y-auto")}>
@@ -134,14 +141,17 @@ function VideoWorkspace({ details, search, StudioTab }: VideoWorkspaceProps): Re
                 )}
                 <VideoPageTabs details={details} search={search} />
             </div>
-            {isInspectorShown === true && (
-                <aside
-                    aria-label="Detalhes do vídeo"
-                    className="border-t bg-inspector px-4 py-8 md:px-6 lg:overflow-y-auto lg:border-t-0 lg:border-s"
-                >
+            <aside
+                aria-label="Detalhes do vídeo"
+                className={cn(
+                    "min-w-0 lg:overflow-hidden lg:transition-[visibility] lg:duration-200",
+                    isInspectorShown === false && "lg:invisible",
+                )}
+            >
+                <div className="h-full border-t bg-inspector px-4 py-8 md:px-6 lg:w-100 lg:overflow-y-auto lg:border-t-0 lg:border-s">
                     <VideoInspector details={details} />
-                </aside>
-            )}
+                </div>
+            </aside>
         </div>
     );
 }
