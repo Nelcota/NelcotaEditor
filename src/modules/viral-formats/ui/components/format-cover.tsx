@@ -6,8 +6,7 @@ const COVER_PHOTOS = {
     "split-presenter": { width: 448, height: 352 },
     "split-espresso": { width: 448, height: 352 },
     "ranking-presenter": { width: 448, height: 704 },
-    "comparison-hot": { width: 224, height: 704 },
-    "comparison-iced": { width: 224, height: 704 },
+    "contrast-example-poster": { width: 720, height: 1280 },
     "generic-presenter": { width: 448, height: 704 },
 } as const;
 
@@ -78,17 +77,7 @@ const COVER_LAYOUTS: Record<ViralFormatId, (props: CoverLayoutProps) => ReactNod
     ),
     ranking: RankingCover,
     "this-or-that": ({ loading }) => (
-        <div className="relative grid size-full grid-cols-2 gap-1.5">
-            <FormatPhoto name="comparison-hot" loading={loading} className="rounded-lg" />
-            <FormatPhoto name="comparison-iced" loading={loading} className="rounded-lg" />
-            <span className="absolute inset-x-0 top-1/2 mx-auto grid size-7 -translate-y-1/2 place-items-center rounded-full bg-primary-solid text-xs font-bold text-primary-foreground">
-                OU
-            </span>
-            <div className="absolute inset-x-0 bottom-3 grid grid-cols-2 justify-items-center gap-1.5 text-xs font-bold text-white">
-                <span className="rounded bg-stage/90 px-1.5">Quente</span>
-                <span className="rounded bg-stage/90 px-1.5">Gelado</span>
-            </div>
-        </div>
+        <FormatPhoto name="contrast-example-poster" loading={loading} className="rounded-lg" />
     ),
     generic: ({ loading }) => (
         <div className="relative size-full overflow-hidden rounded-lg">
