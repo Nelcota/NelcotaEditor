@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>Primeiro vídeo · opção</title>
+        <link rel="stylesheet" href="option.css" />
+    </head>
+    <body>
+        <div id="root"></div>
+        <script>
+            const SPRITES = [
+                "../../../public/mascots/shapes.webp",
+                "../../../public/mascots/objects.webp",
+            ];
+            function m(index) {
+                const sprite = Math.floor(index / 16);
+                const tile = index % 16;
+                const column = tile % 4;
+                const row = Math.floor(tile / 4);
+                return `<span class="m" style="background-image:url(${SPRITES[sprite]});background-position:${column * 33.333}% ${row * 33.333}%"></span>`;
+            }
+            const NEL = 15;
+            const CREW = [
+                [24, "Faísca", "baixa o vídeo"],
+                [23, "Tinta", "transcreve a fala"],
+                [30, "Brilho", "escolhe os momentos"],
+                [21, "Brasa", "faz os cortes"],
+            ];
+            const plus = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+            const upload = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>`;
+            const head = `<div class="page-head"><p class="crumb">Nelcota / Início</p><h1>Início</h1></div>`;
+            const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+
+            const VIEWS = {
+                current: () => `<div class="empty">
+                    <div style="display:grid;justify-items:center;gap:12px">${m(NEL)}<div style="display:flex;gap:6px">${CREW.map(([i]) => m(i)).join("")}</div></div>
+                    <p class="title">Oi! Eu sou o Nel.</p>
+                    <p class="desc">Cole um link do YouTube ou envie um arquivo e a equipe começa: Faísca baixa, Tinta transcreve, Brilho escolhe os melhores momentos e Brasa faz os cortes.</p>
+                    <div style="margin-top:8px"><span class="btn">${plus}Enviar o primeiro vídeo</span></div></div>
+                    <style>.empty > div:first-child > .m{width:64px;height:64px}.empty > div > div .m{width:36px;height:36px}</style>`,
+                a: () => `<div class="empty a">
+                    ${m(NEL)}<style>.a > .m{width:56px;height:56px}</style>
+                    <p class="title">Envie seu primeiro vídeo</p>
+                    <p class="desc">Um link do YouTube ou um arquivo. A equipe do Nel cuida do resto.</p>
+                    <ol class="steps">${CREW.map(([i, n, v]) => `<li>${m(i)}<b>${n}</b><span>${v}</span></li>`).join("")}</ol>
+                    <span class="btn">${plus}Enviar o primeiro vídeo</span></div>`,
+                b: () => `<div class="empty b">
+                    ${m(NEL)}<style>.b > .m{width:56px;height:56px}</style>
+                    <p class="title">Comece com um vídeo</p>
+                    <div class="field"><label>Link do YouTube</label><div class="row"><span class="input">https://youtube.com/watch?v=...</span><span class="btn">Continuar</span></div></div>
+                    <p class="or">ou</p>
+                    <span class="btn secondary">${upload}Enviar arquivo do computador</span>
+                    <p class="crew-line">${CREW.map(([i]) => m(i)).join("")}<span>Faísca, Tinta, Brilho e Brasa fazem os cortes.</span></p></div>`,
+                c: () => `<div class="c">
+                    <div class="left">${m(NEL)}<style>.left > .m{width:48px;height:48px}</style>
+                        <p class="title">Oi, eu sou o Nel. Vamos ao primeiro vídeo.</p>
+                        <p class="desc">Cole um link do YouTube ou envie um arquivo. Em alguns minutos os cortes aparecem aqui, prontos para baixar.</p>
+                        <span class="btn">${plus}Enviar o primeiro vídeo</span></div>
+                    <ol class="timeline">${CREW.map(([i, n, v]) => `<li>${m(i)}<div><b>${n}</b><span>${capitalize(v)}</span></div></li>`).join("")}</ol></div>`,
+            };
+
+            // The view comes from comparing names, never from indexing with text from the address.
+            const params = new URLSearchParams(location.search);
+            const entries = Object.entries(VIEWS);
+            const entry = entries.find(([name]) => name === params.get("o")) ?? entries[0];
+            if (params.get("v") === "phone") {
+                document.body.classList.add("is-phone");
+            }
+            document.getElementById("root").innerHTML =
+                `<div class="panel">${head}${entry[1]()}</div>`;
+        </script>
+    </body>
+</html>
