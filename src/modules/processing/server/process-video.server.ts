@@ -92,7 +92,10 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
     if ((await markVideoDone(run)) === false) {
         // Records nothing unless this run was the one the user cancelled.
         await finishStoppedVideo(run, null);
+        return;
     }
+
+    logger.info({ videoId }, "Video processing completed");
 }
 
 async function runPipeline(video: Video, signal: AbortSignal): Promise<void> {

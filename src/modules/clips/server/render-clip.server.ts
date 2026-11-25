@@ -17,6 +17,7 @@ import type { ClipStatus } from "#/modules/clips/model/clip-status";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
+import { getEnvironment } from "#/shared/server/env.server";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 import { getVideoDirectory } from "#/shared/server/storage.server";
@@ -30,6 +31,7 @@ const CROP_FILTERS: Record<AspectRatio, string> = {
     horizontal: "crop=w='min(iw,ih*16/9)':h='min(ih,iw*9/16)'",
 };
 const VIDEO_CODEC = "libx264";
+const FILTER_THREADS = "1";
 // "veryfast" with CRF 21 keeps social-media quality while rendering several clips per minute.
 const ENCODER_PRESET = "veryfast";
 const CONSTANT_RATE_FACTOR = "21";
@@ -89,6 +91,14 @@ function buildVideoFilter(clip: Clip): string {
     return `${shapeFilter},ass=${clip.id}.ass`;
 }
 
+function buildFrameRateArguments(maxFramesPerSecond: string | undefined): Array<string> {
+    if (maxFramesPerSecond === undefined) {
+        return [];
+    }
+
+    return ["-fpsmax", maxFramesPerSecond];
+}
+
 interface FfmpegFiles {
     sourceAbsolutePath: string;
     outputFileName: string;
@@ -96,11 +106,17 @@ interface FfmpegFiles {
 
 function buildFfmpegArguments(clip: Clip, files: FfmpegFiles): Array<string> {
     const durationSeconds = clip.endSeconds - clip.startSeconds;
+    const { CLIP_RENDER_THREADS: threads, CLIP_RENDER_MAX_FPS: maxFramesPerSecond } =
+        getEnvironment();
 
     return [
         "-y",
+        "-filter_threads",
+        FILTER_THREADS,
         "-ss",
         clip.startSeconds.toFixed(TIME_DECIMALS),
+        "-threads:v",
+        String(threads),
         ...localFileInput(files.sourceAbsolutePath),
         "-t",
         durationSeconds.toFixed(TIME_DECIMALS),
@@ -108,6 +124,9 @@ function buildFfmpegArguments(clip: Clip, files: FfmpegFiles): Array<string> {
         buildVideoFilter(clip),
         "-c:v",
         VIDEO_CODEC,
+        "-threads:v",
+        String(threads),
+        ...buildFrameRateArguments(maxFramesPerSecond),
         "-preset",
         ENCODER_PRESET,
         "-crf",
@@ -166,11 +185,13 @@ async function writeSubtitles(input: RenderClipInput, workspace: ClipWorkspace):
     );
 }
 
-async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Promise<void> {
+async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Promise<number> {
     const files = {
         sourceAbsolutePath: input.localSourcePath,
         outputFileName: workspace.outputFileName,
     };
+
+    const startedAt = performance.now();
 
     try {
         // The working directory keeps the ass filter argument free of path escaping issues.
@@ -178,6 +199,7 @@ async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Pro
             workingDirectory: workspace.workingDirectory,
             signal: input.signal,
         });
+        return Math.round(performance.now() - startedAt);
     } finally {
         // A failed or cancelled render must not leave the subtitles behind.
         await rm(workspace.subtitlesFile, { force: true });
@@ -187,6 +209,7 @@ async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Pro
 interface RenderedClipFile {
     outputPath: string;
     localPath: string;
+    encodeDurationMs: number;
 }
 
 export async function recordRenderedClip(
@@ -214,8 +237,9 @@ export async function renderClip(input: RenderClipInput): Promise<RenderedClipFi
 
     await mkdir(workspace.workingDirectory, { recursive: true });
     await writeSubtitles(input, workspace);
-    await encodeClip(input, workspace);
+    const encodeDurationMs = await encodeClip(input, workspace);
     return {
+        encodeDurationMs,
         outputPath: workspace.outputPath,
         localPath: path.join(workspace.workingDirectory, workspace.outputFileName),
     };
