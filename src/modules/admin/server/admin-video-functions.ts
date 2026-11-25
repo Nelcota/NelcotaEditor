@@ -10,10 +10,8 @@ import { adminMiddleware } from "#/modules/admin/server/admin-middleware";
 import { summarizeAdminOverview } from "#/modules/admin/server/admin-overview.server";
 import { listAdminVideos } from "#/modules/admin/server/admin-video-rows.server";
 import { recordAdminAction } from "#/modules/admin/server/record-admin-action.server";
-import {
-    deleteStoppedVideo,
-    requestVideoCancellation,
-} from "#/modules/video-records/server/stop-video.server";
+import { requestVideoCancellation } from "#/modules/video-records/server/stop-video.server";
+import { deleteVideoCoveringUploadLink } from "#/modules/videos/server/delete-video.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
@@ -64,7 +62,7 @@ export const deleteAnyVideo = createServerFn({ method: "POST" })
     .handler(async ({ context, data }): Promise<void> => {
         const ownerId = await findVideoOwnerId(data.videoId);
 
-        await deleteStoppedVideo(data.videoId);
+        await deleteVideoCoveringUploadLink({ id: data.videoId, userId: ownerId });
         await recordAdminAction({
             action: "delete-video",
             adminId: context.admin.id,

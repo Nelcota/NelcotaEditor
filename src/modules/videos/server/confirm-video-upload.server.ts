@@ -1,4 +1,4 @@
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
 import {
     discardPendingUpload,
@@ -50,7 +50,13 @@ async function createVideoFromUpload(upload: VideoUpload, sourceBytes: number): 
         // Deleting the row is the claim: a sweep or a second confirmation finds nothing after it.
         const claimed = await transaction
             .delete(videoUploads)
-            .where(and(eq(videoUploads.id, upload.id), gt(videoUploads.expiresAt, sql`now()`)))
+            .where(
+                and(
+                    eq(videoUploads.id, upload.id),
+                    gt(videoUploads.expiresAt, sql`now()`),
+                    isNull(videoUploads.cancelledAt),
+                ),
+            )
             .returning({ id: videoUploads.id });
 
         if (claimed.length === 0) {

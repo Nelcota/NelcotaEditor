@@ -2,6 +2,7 @@ import { and, count, eq, gte, sum } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import type { StorageUsage, UsageSummary } from "#/modules/videos/model/video-views";
+import { summarizePendingUploads } from "#/modules/videos/server/pending-uploads.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { getEnvironment } from "#/shared/server/env.server";
 import { startOfBusinessMonth } from "#/shared/server/business-time-zone";
@@ -113,13 +114,24 @@ async function sumClipBytes(userId: string, executor: QueryExecutor): Promise<nu
 export async function measureUserStorage(
     userId: string,
     executor: QueryExecutor,
-): Promise<StorageUsage> {
+): Promise<Omit<StorageUsage, "reservedBytes">> {
     const [sourceBytes, clipBytes] = await Promise.all([
         sumSourceBytes(userId, executor),
         sumClipBytes(userId, executor),
     ]);
 
     return { totalBytes: sourceBytes + clipBytes, clipBytes, sourceBytes };
+}
+
+/** What the files take plus what uploads hold, the same space the quota check counts. */
+async function measureStorageWithReservations(userId: string): Promise<StorageUsage> {
+    const [stored, pendingUploads] = await Promise.all([
+        measureUserStorage(userId, db),
+        summarizePendingUploads(userId, db, null),
+    ]);
+    const reservedBytes = pendingUploads.bytes;
+
+    return { ...stored, reservedBytes, totalBytes: stored.totalBytes + reservedBytes };
 }
 
 /** The queries do not depend on each other, so they all run at once. */
@@ -130,7 +142,7 @@ export async function summarizeUsage(userId: string): Promise<UsageSummary> {
             countSelectedClips(userId),
             countReadyClips(userId, null),
             countReadyClips(userId, startOfCurrentMonth()),
-            measureUserStorage(userId, db),
+            measureStorageWithReservations(userId),
         ]);
 
     return {
