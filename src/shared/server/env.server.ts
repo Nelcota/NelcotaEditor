@@ -62,6 +62,7 @@ const baseEnvironmentSchema = z.object({
     WHISPER_URL: z.url(),
     WHISPER_MODEL: z.string().min(1),
     WHISPER_LANGUAGE: z.string().default(""),
+    TRANSCRIPTION_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(3),
     DEEPSEEK_API_KEY: z.string().default(""),
     DEEPSEEK_MODEL: z.string().min(1).default("deepseek-chat"),
     // Unset: auth emails fail and stay queued for retries, so sign-up cannot finish. Only the
@@ -70,9 +71,11 @@ const baseEnvironmentSchema = z.object({
     EMAIL_FROM: z.string().trim().min(1).default("Nelcota <nao-responda@tela.nelcota.com>"),
     // Soft limit per user: the usage screen warns as it fills, nothing is blocked.
     STORAGE_QUOTA_GIGABYTES: z.coerce.number().positive().default(20),
-    // Videos one worker processes at once (each from a different person). Size it by the CPU and
-    // the Whisper workers: every video runs ffmpeg and Whisper of its own.
+    // Videos per worker, from different users. Each video has its own rendering and transcription lanes.
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(2),
+    CLIP_RENDER_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(2),
+    CLIP_RENDER_THREADS: z.coerce.number().int().min(1).max(8).default(2),
+    CLIP_RENDER_MAX_FPS: optionalTextSchema.pipe(z.literal("30").optional()),
     // A Netscape cookies.txt of a dedicated YouTube account, in base64. YouTube asks datacenter
     // addresses to sign in, so production downloads fail without it. Unset: no cookies are sent.
     YOUTUBE_COOKIES_BASE64: optionalTextSchema.pipe(z.base64().optional()),

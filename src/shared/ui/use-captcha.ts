@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { buildCaptchaHeaders } from "#/modules/auth/client/captcha-headers";
 
 export const CAPTCHA_PENDING_MESSAGE =
     "Aguarde a verificação de segurança terminar e tente de novo.";
@@ -11,7 +10,8 @@ export interface Captcha {
     widgetKey: number;
     setToken: (token: string | null) => void;
     isWaitingForToken: () => boolean;
-    buildHeaders: () => Record<string, string>;
+    /** The current token, or null before the widget solved; the form sends it its own way. */
+    readToken: () => string | null;
     /** A token is single use: after any submit the next attempt needs a new one. */
     renew: () => void;
 }
@@ -24,11 +24,11 @@ export function useCaptcha(siteKey: string | null): Captcha {
         tokenRef.current = token;
     };
     const isWaitingForToken = (): boolean => siteKey !== null && tokenRef.current === null;
-    const buildHeaders = (): Record<string, string> => buildCaptchaHeaders(tokenRef.current);
+    const readToken = (): string | null => tokenRef.current;
     const renew = (): void => {
         tokenRef.current = null;
         setWidgetKey((key) => key + 1);
     };
 
-    return { siteKey, widgetKey, setToken, isWaitingForToken, buildHeaders, renew };
+    return { siteKey, widgetKey, setToken, isWaitingForToken, readToken, renew };
 }

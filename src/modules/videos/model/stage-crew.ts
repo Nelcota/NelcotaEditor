@@ -33,11 +33,3 @@ export const STAGE_CREW: Record<VideoStatus, number> = {
     // Sits still, by choice. Purple keeps it apart from the green octopus at small sizes.
     cancelled: CREW_MASCOTS.mushroom,
 };
-
-/** The crew members that do the work, in pipeline order, for illustrations of the whole team. */
-export const WORKING_CREW: ReadonlyArray<number> = [
-    STAGE_CREW.downloading,
-    STAGE_CREW.transcribing,
-    STAGE_CREW.selecting,
-    STAGE_CREW.rendering,
-];

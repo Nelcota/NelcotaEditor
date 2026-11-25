@@ -27,8 +27,9 @@ services:
             # the worker, transcribed 10 minutes of audio in 51s (165s with the defaults).
             # Keep workers x threads close to the number of CPU cores.
             WHISPER__COMPUTE_TYPE: int8
-            WHISPER__NUM_WORKERS: "4"
-            WHISPER__CPU_THREADS: "2"
+            WHISPER__NUM_WORKERS: ${WHISPER__NUM_WORKERS:-4}
+            WHISPER__CPU_THREADS: ${WHISPER__CPU_THREADS:-2}
+            WHISPER__USE_BATCHED_MODE: ${WHISPER__USE_BATCHED_MODE:-false}
         ports:
             - "127.0.0.1:8000:8000"
         volumes:
@@ -60,6 +61,10 @@ services:
             EMAIL_FROM: ${EMAIL_FROM:-Nelcota <nao-responda@tela.nelcota.com>}
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
             WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+            CLIP_RENDER_CONCURRENCY: ${CLIP_RENDER_CONCURRENCY:-2}
+            CLIP_RENDER_THREADS: ${CLIP_RENDER_THREADS:-2}
+            CLIP_RENDER_MAX_FPS: ${CLIP_RENDER_MAX_FPS:-}
+            TRANSCRIPTION_CONCURRENCY: ${TRANSCRIPTION_CONCURRENCY:-3}
             YOUTUBE_COOKIES_BASE64: ${YOUTUBE_COOKIES_BASE64:-}
         cap_drop:
             - ALL

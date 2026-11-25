@@ -1,0 +1,353 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..750&display=swap");
+
+/* Mirror of the dark tokens in src/styles.css. */
+:root {
+    color-scheme: dark;
+    --frame: oklch(0.185 0 0);
+    --background: oklch(0.215 0 0);
+    --foreground: oklch(0.96 0 0);
+    --card: oklch(0.245 0 0);
+    --muted: oklch(0.26 0 0);
+    --muted-foreground: oklch(0.7 0 0);
+    --secondary: oklch(0.28 0 0);
+    --primary: oklch(0.56 0.2 258);
+    --input: color-mix(in oklab, var(--foreground) 40%, var(--card));
+    --border: color-mix(in oklab, var(--foreground) 8%, transparent);
+    --card-border: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    background: var(--frame);
+    color: var(--foreground);
+    font:
+        15px/1.5 Inter,
+        system-ui,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 20px;
+}
+
+.panel {
+    background: var(--background);
+    border-radius: 18px;
+    padding: 28px 32px;
+    display: grid;
+    gap: 20px;
+    min-height: calc(100vh - 40px);
+    align-content: start;
+}
+
+/* Headless Edge keeps a wider minimum viewport, so the phone width is set here. */
+body.is-phone {
+    padding: 0;
+    width: 390px;
+}
+
+body.is-phone .panel {
+    border-radius: 0;
+    padding: 20px 16px;
+    min-height: 100vh;
+}
+
+.page-head h1 {
+    font-size: 28px;
+    font-weight: 420;
+    letter-spacing: -0.01em;
+}
+
+.crumb {
+    font-size: 13px;
+    color: var(--muted-foreground);
+}
+
+.m {
+    display: inline-block;
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-size: 400% 400%;
+}
+
+.empty {
+    border: 1px dashed var(--card-border);
+    background: var(--muted);
+    border-radius: 12px;
+    padding: 56px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+}
+
+.desc {
+    font-size: 15px;
+    color: var(--muted-foreground);
+    max-width: 24rem;
+    text-wrap: pretty;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 8px;
+    font: 600 15px Inter;
+    background: var(--primary);
+    color: white;
+    white-space: nowrap;
+}
+
+.btn.secondary {
+    background: var(--secondary);
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* A: the crew as four steps */
+.a {
+    padding: 64px 24px 56px;
+    gap: 0;
+}
+
+.a .title {
+    font-size: 22px;
+    margin-top: 16px;
+}
+
+.a .desc {
+    margin-top: 6px;
+}
+
+.steps {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 156px);
+    margin: 32px 0 36px;
+    position: relative;
+}
+
+.steps::before {
+    content: "";
+    position: absolute;
+    top: 22px;
+    left: 78px;
+    right: 78px;
+    border-top: 1px dashed var(--input);
+}
+
+.steps li {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    position: relative;
+}
+
+.steps .m {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 8px;
+    background-color: var(--muted);
+}
+
+.steps b {
+    font-weight: 600;
+}
+
+.steps span {
+    font-size: 14px;
+    color: var(--muted-foreground);
+}
+
+.is-phone .steps {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 20px;
+    width: 100%;
+}
+
+.is-phone .steps::before {
+    display: none;
+}
+
+/* B: the link field right there */
+.b {
+    padding: 64px 24px;
+    gap: 16px;
+}
+
+.b .title {
+    font-size: 22px;
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+    text-align: left;
+    width: min(100%, 520px);
+    margin-top: 8px;
+}
+
+.field label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.field .row {
+    display: flex;
+    gap: 8px;
+}
+
+.field .input {
+    flex: 1;
+    height: 44px;
+    border-radius: 8px;
+    border: 1px solid var(--input);
+    background: var(--card);
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    color: var(--muted-foreground);
+}
+
+.or {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(100%, 520px);
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+
+.or::before,
+.or::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--border);
+}
+
+.crew-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+.crew-line .m {
+    width: 24px;
+    height: 24px;
+}
+
+.is-phone .field .row {
+    flex-direction: column;
+}
+
+.is-phone .field .btn,
+.is-phone .b .btn.secondary {
+    justify-content: center;
+    width: 100%;
+}
+
+/* C: text left, crew right */
+.c {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 56px;
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    border-radius: 12px;
+    padding: 48px;
+    align-items: center;
+}
+
+.c .left {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+}
+
+.c .title {
+    font-size: 26px;
+    font-weight: 420;
+    letter-spacing: -0.015em;
+}
+
+.c .desc {
+    max-width: 30rem;
+}
+
+.c .btn {
+    margin-top: 8px;
+}
+
+.timeline {
+    list-style: none;
+    padding: 0;
+    display: grid;
+}
+
+.timeline li {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+}
+
+.timeline li:first-child {
+    border-top: 0;
+}
+
+.timeline .m {
+    width: 40px;
+    height: 40px;
+}
+
+.timeline b {
+    font-weight: 600;
+    display: block;
+}
+
+.timeline span {
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+
+.is-phone .c {
+    grid-template-columns: 1fr;
+    padding: 28px 20px;
+    gap: 24px;
+}
+
+.is-phone .c .btn {
+    width: 100%;
+    justify-content: center;
+}
+
+.is-phone .a,
+.is-phone .b {
+    padding: 40px 16px;
+}

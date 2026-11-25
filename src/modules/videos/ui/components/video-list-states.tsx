@@ -3,8 +3,9 @@ import PlusIcon from "~icons/lucide/plus";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import SearchXIcon from "~icons/lucide/search-x";
 import { Link } from "@tanstack/react-router";
-import { HOST_NAME } from "#/modules/videos/model/crew-lines";
-import { WORKING_CREW } from "#/modules/videos/model/stage-crew";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
+import { CREW_NAMES, HOST_NAME } from "#/modules/videos/model/crew-lines";
+import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
 import { BrandMark } from "#/shared/ui/brand-logo";
@@ -36,25 +37,41 @@ export function VideoListLoading(): ReactNode {
     );
 }
 
-function CrewWelcomeArt() {
+/** What each working crew member does, in pipeline order. */
+const CREW_STEPS: ReadonlyArray<{ status: VideoStatus; task: string }> = [
+    { status: "downloading", task: "baixa o vídeo" },
+    { status: "transcribing", task: "transcreve a fala" },
+    { status: "selecting", task: "escolhe os momentos" },
+    { status: "rendering", task: "faz os cortes" },
+];
+
+function CrewSteps(): ReactNode {
     return (
-        <div className="grid justify-items-center gap-3">
-            <BrandMark className="size-16" />
-            <div className="flex gap-1.5" aria-hidden="true">
-                {WORKING_CREW.map((index) => (
-                    <Mascot key={index} index={index} className="size-9" />
-                ))}
-            </div>
-        </div>
+        <ol
+            aria-label="Etapas do processamento"
+            className="relative mt-5 mb-3 grid w-full max-w-2xl list-decimal grid-cols-2 gap-x-2 gap-y-5 sm:grid-cols-4 sm:before:absolute sm:before:inset-x-1/8 sm:before:top-5.5 sm:before:border-t sm:before:border-dashed sm:before:border-input"
+        >
+            {CREW_STEPS.map(({ status, task }) => (
+                <li key={status} className="relative min-w-0 marker:text-transparent">
+                    <div className="grid justify-items-center">
+                        <Mascot index={STAGE_CREW[status]} className="mb-2 size-11 bg-muted" />
+                        <span className="font-semibold">{CREW_NAMES[status]}</span>
+                        <span className="text-meta text-muted-foreground [overflow-wrap:anywhere]">
+                            {task}
+                        </span>
+                    </div>
+                </li>
+            ))}
+        </ol>
     );
 }
 
 export function FirstVideoEmptyState() {
     return (
         <EmptyState
-            art={<CrewWelcomeArt />}
-            title={`Oi! Eu sou o ${HOST_NAME}.`}
-            description="Cole um link do YouTube ou envie um arquivo e a equipe começa: Faísca baixa, Tinta transcreve, Brilho escolhe os melhores momentos e Brasa faz os cortes."
+            art={<BrandMark className="mb-1 size-14" />}
+            title="Envie seu primeiro vídeo"
+            description={`Um link do YouTube ou um arquivo. A equipe do ${HOST_NAME} cuida do resto.`}
             action={
                 <Button asChild size="lg" className="font-semibold">
                     <Link to="/videos" search={{ newVideo: true }}>
@@ -63,7 +80,9 @@ export function FirstVideoEmptyState() {
                     </Link>
                 </Button>
             }
-        />
+        >
+            <CrewSteps />
+        </EmptyState>
     );
 }
 

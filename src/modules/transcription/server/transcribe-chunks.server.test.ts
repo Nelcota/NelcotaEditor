@@ -54,6 +54,7 @@ describe("transcribeChunks", () => {
         const run = transcribeChunks(
             {
                 chunks: [SLOW_CHUNK, FAILING_CHUNK],
+                concurrency: 3,
                 language: "pt",
                 signal: new AbortController().signal,
             },
@@ -73,7 +74,12 @@ describe("transcribeChunks", () => {
         );
 
         const run = transcribeChunks(
-            { chunks: [SLOW_CHUNK, FAILING_CHUNK], language: "pt", signal: cancellation.signal },
+            {
+                chunks: [SLOW_CHUNK, FAILING_CHUNK],
+                concurrency: 3,
+                language: "pt",
+                signal: cancellation.signal,
+            },
             () => undefined,
         );
         cancellation.abort();
@@ -82,7 +88,7 @@ describe("transcribeChunks", () => {
         expect(events).toEqual(["slow request aborted", "slow request aborted"]);
     });
 
-    it("joins the words of every chunk in order with the first detected language", async () => {
+    it("respects the chunk limit and joins the words in input order", async () => {
         vi.mocked(transcribeAudioChunk).mockImplementation(async (chunk) => ({
             language: "pt",
             words: [
@@ -94,15 +100,20 @@ describe("transcribeChunks", () => {
             ],
         }));
 
-        const transcription = await transcribeChunks(
+        const run = transcribeChunks(
             {
                 chunks: [FAILING_CHUNK, SLOW_CHUNK],
+                concurrency: 1,
                 language: null,
                 signal: new AbortController().signal,
             },
             () => undefined,
         );
 
+        expect(transcribeAudioChunk).toHaveBeenCalledTimes(1);
+
+        const transcription = await run;
+        expect(transcribeAudioChunk).toHaveBeenCalledTimes(2);
         expect(transcription.language).toBe("pt");
         expect(transcription.words.map((word) => word.startSeconds)).toEqual([0, 120]);
     });

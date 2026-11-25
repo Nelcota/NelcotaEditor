@@ -39,6 +39,7 @@ export async function writeAvatarPhoto(
 interface AvatarPhoto {
     userId: string;
     extension: AvatarPhotoExtension;
+    shouldProxy: boolean;
 }
 
 /** 404 when the row briefly points at a photo that a newer upload already replaced. */
@@ -51,6 +52,7 @@ export function respondWithAvatarPhoto(
         key: toAvatarKey(photo.userId, photo.extension),
         headers,
         linkLifetimeSeconds: OWNER_LINK_LIFETIME_SECONDS,
+        shouldProxy: photo.shouldProxy,
     });
 }
 

@@ -38,6 +38,16 @@ describe("parseEnvironment", () => {
         expect(environment.TURNSTILE_SITE_KEY).toBeUndefined();
     });
 
+    it("keeps the source frame rate by default and accepts the 30 fps cap", () => {
+        expect(parseEnvironment(BASE_VARIABLES).CLIP_RENDER_MAX_FPS).toBeUndefined();
+        expect(
+            parseEnvironment({ ...BASE_VARIABLES, CLIP_RENDER_MAX_FPS: "30" }).CLIP_RENDER_MAX_FPS,
+        ).toBe("30");
+        expect(() => parseEnvironment({ ...BASE_VARIABLES, CLIP_RENDER_MAX_FPS: "60" })).toThrow(
+            /CLIP_RENDER_MAX_FPS/,
+        );
+    });
+
     it("rejects only one Turnstile key", () => {
         const variables = { ...BASE_VARIABLES, TURNSTILE_SITE_KEY: "site-key" };
 
