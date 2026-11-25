@@ -34,6 +34,8 @@
     --brand-ink: oklch(0.159 0.002 106.6);
     /* Claude's orange, for its logo only. */
     --claude: oklch(0.672 0.131 38.8);
+    /* YouTube's red, for its badge on a video row only; white on it is 4.37:1. */
+    --youtube: oklch(0.601 0.216 27.8);
     /* Lime is 1.25:1 on white, so text, rings and thin fills use a deep lime that keeps 5.5:1. */
     --primary: oklch(0.511 0.128 124.8);
     --primary-ink: oklch(0.473 0.118 124.6);
@@ -194,6 +196,7 @@
     --color-brand: var(--brand);
     --color-brand-ink: var(--brand-ink);
     --color-claude: var(--claude);
+    --color-youtube: var(--youtube);
     /* Controls are 10px (rounded-xl), panels 12px (rounded-md, rounded-2xl), small chips 8px. */
     --radius-sm: 0.375rem;
     --radius-md: 0.75rem;
