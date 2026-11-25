@@ -1,5 +1,5 @@
 export const APP_TITLE = "Editor Oculto: vídeos editados nos formatos virais";
-export const SITE_PREVIEW_IMAGE_PATH = "/og-editor-oculto.png";
+export const SITE_PREVIEW_IMAGE_PATH = "/og-editor-oculto.jpg";
 
 const APP_DESCRIPTION =
     "Você grava, o seu Claude edita. Vídeos editados nos formatos virais, prontos para postar.";
@@ -21,7 +21,7 @@ export function buildSitePreviewMeta(imageUrl: string): Array<PreviewMeta> {
         { property: "og:title", content: APP_TITLE },
         { property: "og:description", content: APP_DESCRIPTION },
         { property: "og:image", content: imageUrl },
-        { property: "og:image:type", content: "image/png" },
+        { property: "og:image:type", content: "image/jpeg" },
         { property: "og:image:width", content: String(PREVIEW_IMAGE_WIDTH) },
         { property: "og:image:height", content: String(PREVIEW_IMAGE_HEIGHT) },
         {
