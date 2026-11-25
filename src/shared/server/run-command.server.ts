@@ -60,51 +60,47 @@ function toCommandError(command: string, error: unknown): unknown {
     return new CommandFailedError(command, error.exitCode ?? null, stderr);
 }
 
-/**
- * Runs a program without a shell (arguments are never interpolated) and returns its stdout.
- * execa handles line splitting, cancellation and killing the process tree.
- */
-/** The iterable is lazy: without a listener nothing reads the output line by line. */
 async function forwardOutputLines(
     lines: AsyncIterable<string>,
-    onOutputLine: ((line: string) => void) | undefined,
+    onOutputLine: (line: string) => void,
 ): Promise<void> {
-    if (onOutputLine === undefined) {
-        return;
-    }
-
     for await (const line of lines) {
         onOutputLine(line);
     }
 }
 
+/**
+ * Runs a program without a shell (arguments are never interpolated) and returns its stdout.
+ * Execa handles line splitting, cancellation and killing the process tree.
+ */
 export async function runCommand(
     command: string,
     args: ReadonlyArray<string>,
     options: CommandOptions = {},
 ): Promise<string> {
+    const { workingDirectory, signal, onOutputLine } = options;
+
     if (command.trim().length === 0) {
         throw new EmptyCommandError();
     }
 
     const subprocess = execa(command, args, {
-        cwd: options.workingDirectory,
-        cancelSignal: options.signal,
+        cwd: workingDirectory,
+        cancelSignal: signal,
         timeout: MAX_COMMAND_MILLISECONDS,
-        all: true,
-        // The interleaved output is read line by line above, never as a whole: keeping it too
-        // would hold yt-dlp and ffmpeg progress for a 3-hour video in memory a third time.
+        // On Bun an unread combined stream can keep Execa waiting after the command exits.
+        all: onOutputLine !== undefined,
         buffer: { stdout: true, stderr: true, all: false },
     });
-    const onOutputLine = options.onOutputLine;
 
     try {
-        await forwardOutputLines(subprocess.iterable({ from: "all" }), onOutputLine);
+        if (onOutputLine !== undefined) {
+            await forwardOutputLines(subprocess.iterable({ from: "all" }), onOutputLine);
+        }
+
         const result = await subprocess;
         return result.stdout;
     } catch (error) {
-        const signal = options.signal;
-
         // Cancelling is not a failure of the command: callers check for the abort reason.
         if (signal !== undefined && signal.aborted === true) {
             throw signal.reason;
