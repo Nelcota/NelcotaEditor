@@ -4,13 +4,15 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { db } from "#/db/database.server";
 import { appSwitches } from "#/modules/app-switches/app-switches.schema";
 import { saveAppSwitch } from "#/modules/app-switches/server/app-switches.server";
-import { user } from "#/modules/auth/auth.schema";
+import { USER_ROLE, user } from "#/modules/auth/auth.schema";
+import { MAX_NAME_LENGTH } from "#/modules/auth/model/auth-forms";
 import { auth } from "#/modules/auth/server/auth.server";
 import { getEnvironment } from "#/shared/server/env.server";
 
 // Runs against the test database from .env.test: bun run test:integration
 
 const HTTP_OK = 200;
+const HTTP_BAD_REQUEST = 400;
 const HTTP_FORBIDDEN = 403;
 const IP_OCTET_LIMIT = 255;
 
@@ -95,12 +97,36 @@ describe("email-verification switch", () => {
         const duplicate = await postToAuth("/sign-up/email", body);
         const publicResponse = {
             token: null,
-            user: { email: credentials.email, name: "Ana Teste", emailVerified: false },
+            user: {
+                id: expect.any(String),
+                email: credentials.email,
+                name: "Ana Teste",
+                emailVerified: false,
+                image: null,
+                role: USER_ROLE,
+                banned: false,
+                banReason: null,
+                banExpires: null,
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+            },
         };
 
         expect(first.status).toBe(HTTP_OK);
         expect(duplicate.status).toBe(HTTP_OK);
-        expect(await first.json()).toMatchObject(publicResponse);
-        expect(await duplicate.json()).toMatchObject(publicResponse);
+        expect(await first.json()).toEqual(publicResponse);
+        expect(await duplicate.json()).toEqual(publicResponse);
+    });
+
+    it("validates the name before checking whether the email is taken", async () => {
+        const existing = createCredentials();
+        await postToAuth("/sign-up/email", { name: "Ana Teste", ...existing });
+        const name = "A".repeat(MAX_NAME_LENGTH + 1);
+        const fresh = await postToAuth("/sign-up/email", { name, ...createCredentials() });
+        const duplicate = await postToAuth("/sign-up/email", { name, ...existing });
+
+        expect(fresh.status).toBe(HTTP_BAD_REQUEST);
+        expect(duplicate.status).toBe(HTTP_BAD_REQUEST);
+        expect(await duplicate.json()).toEqual(await fresh.json());
     });
 });
