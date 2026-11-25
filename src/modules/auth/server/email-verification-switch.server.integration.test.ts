@@ -90,14 +90,17 @@ describe("email-verification switch", () => {
     it("answers a taken email the same way while the switch is off", async () => {
         const credentials = createCredentials();
         await saveAppSwitch({ key: "email-verification", isEnabled: false, adminId: randomUUID() });
-        await postToAuth("/sign-up/email", { name: "Ana Teste", ...credentials });
+        const body = { name: "  Ana Teste  ", ...credentials };
+        const first = await postToAuth("/sign-up/email", body);
+        const duplicate = await postToAuth("/sign-up/email", body);
+        const publicResponse = {
+            token: null,
+            user: { email: credentials.email, name: "Ana Teste", emailVerified: false },
+        };
 
-        const response = await postToAuth("/sign-up/email", {
-            name: "Outra Pessoa",
-            email: credentials.email,
-            password: `senha-${randomUUID()}`,
-        });
-
-        expect(response.status).toBe(HTTP_OK);
+        expect(first.status).toBe(HTTP_OK);
+        expect(duplicate.status).toBe(HTTP_OK);
+        expect(await first.json()).toMatchObject(publicResponse);
+        expect(await duplicate.json()).toMatchObject(publicResponse);
     });
 });

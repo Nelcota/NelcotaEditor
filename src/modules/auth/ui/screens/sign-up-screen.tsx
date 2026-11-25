@@ -10,9 +10,9 @@ import {
 import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
+import { AccountCreatedCard } from "#/modules/auth/ui/components/account-created-card";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
 import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
-import { AccountCreatedCard } from "#/modules/auth/ui/components/account-created-card";
 import { CheckEmailCard } from "#/modules/auth/ui/components/check-email-card";
 import { HoneypotField } from "#/modules/auth/ui/components/honeypot-field";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";

@@ -138,6 +138,10 @@ async function checkNewUser(
     const result = await trimNameWithinLimit(newUser);
     rejectHoneypotSignUp(context);
 
+    if (context?.path !== SIGN_UP_PATH) {
+        return result;
+    }
+
     if ((await isAppSwitchEnabled("email-verification")) === true) {
         return result;
     }
@@ -173,6 +177,30 @@ function requirePasswordToDeleteUser(body: unknown): void {
 }
 
 const SIGN_UP_PATH = "/sign-up/email";
+
+const signUpResponseSchema = z.looseObject({
+    token: z.null(),
+    user: z.looseObject({ name: z.string(), emailVerified: z.boolean() }),
+});
+
+const normalizeSignUpResponse = createAuthMiddleware(async (context) => {
+    if (context.path !== SIGN_UP_PATH) {
+        return undefined;
+    }
+
+    const result = signUpResponseSchema.safeParse(context.context.returned);
+
+    if (result.success === false) {
+        return undefined;
+    }
+
+    // Better Auth's synthetic duplicate response always reports emailVerified: false.
+    const { user: signedUpUser } = result.data;
+    return context.json({
+        ...result.data,
+        user: { ...signedUpUser, name: signedUpUser.name.trim(), emailVerified: false },
+    });
+});
 
 /**
  * Runs before the captcha and the email lookup, so a closed sign-up answers the same for every
@@ -261,6 +289,7 @@ export const auth = betterAuth({
     },
     hooks: {
         before: runBeforeAuthHooks,
+        after: normalizeSignUpResponse,
     },
     rateLimit: AUTH_RATE_LIMIT,
     advanced: {
