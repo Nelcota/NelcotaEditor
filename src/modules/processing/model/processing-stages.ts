@@ -1,4 +1,4 @@
-import type { VideoStatus } from "#/modules/video-records/model/video-status";
+import type { VideoPurpose, VideoStatus } from "#/modules/video-records/model/video-status";
 
 export interface StageRange {
     startPercent: number;
@@ -16,11 +16,30 @@ export const STAGE_RANGES: Partial<Record<VideoStatus, StageRange>> = {
     rendering: { startPercent: 70, endPercent: 99 },
 };
 
+/**
+ * A raw video for a format edit stops after the transcript, so its two steps fill the whole bar
+ * instead of parking at 65% and then jumping to done.
+ */
+export const FORMAT_STAGE_RANGES: Partial<Record<VideoStatus, StageRange>> = {
+    downloading: { startPercent: 0, endPercent: 15 },
+    transcribing: { startPercent: 15, endPercent: 99 },
+};
+
+const RANGES_BY_PURPOSE: Readonly<Record<VideoPurpose, Partial<Record<VideoStatus, StageRange>>>> =
+    {
+        clips: STAGE_RANGES,
+        format: FORMAT_STAGE_RANGES,
+    };
+
 const PERCENT = 100;
 
 /** Maps a step's own progress (0–100) to the overall progress bar. */
-export function toOverallPercent(status: VideoStatus, stagePercent: number): number {
-    const range = STAGE_RANGES[status];
+export function toOverallPercent(
+    status: VideoStatus,
+    stagePercent: number,
+    purpose: VideoPurpose = "clips",
+): number {
+    const range = RANGES_BY_PURPOSE[purpose][status];
 
     // NaN would survive Math.min/Math.max and end up saved as the video's progress.
     if (Number.isFinite(stagePercent) === false) {

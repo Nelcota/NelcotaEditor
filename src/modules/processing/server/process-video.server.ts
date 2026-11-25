@@ -34,10 +34,13 @@ import { logger } from "#/shared/server/logger.server";
  * so the stage modules never depend on processing.
  */
 function saveStageProgress(
-    run: VideoRun,
+    video: Video,
     status: VideoStatus,
 ): (stagePercent: number) => Promise<void> {
-    return (stagePercent) => updateVideoStage(run, status, toOverallPercent(status, stagePercent));
+    const run = toVideoRun(video);
+
+    return (stagePercent) =>
+        updateVideoStage(run, status, toOverallPercent(status, stagePercent, video.purpose));
 }
 
 /** Marks the run done, unless a cancel arrived after its last step: that still wins over "done". */
@@ -71,7 +74,7 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
             workDirectory,
             language: video.transcriptionLanguage,
             signal,
-            saveProgress: saveStageProgress(run, "transcribing"),
+            saveProgress: saveStageProgress(video, "transcribing"),
         }),
     );
 
@@ -90,7 +93,7 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
             words,
             durationSeconds: source.durationSeconds,
             signal,
-            saveProgress: saveStageProgress(run, "selecting"),
+            saveProgress: saveStageProgress(video, "selecting"),
         }),
     );
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { EDIT_FORMATS } from "#/modules/viral-formats/model/edit-status";
 import type { EditFormat } from "#/modules/viral-formats/model/edit-status";
 import type { EditView } from "#/modules/viral-formats/model/edit-view";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
 
 /**
  * collecting: the person is still adding raw videos and adjustments. queued: they clicked Começar a
@@ -65,7 +66,7 @@ export interface EditSessionSummary {
 export interface SessionVideo {
     id: string;
     title: string;
-    status: string;
+    status: VideoStatus;
     progressPercent: number;
     durationSeconds: number | null;
     sourceBytes: number | null;

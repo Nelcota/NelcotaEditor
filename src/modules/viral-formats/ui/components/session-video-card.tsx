@@ -4,7 +4,16 @@ import type { SessionVideo } from "#/modules/viral-formats/model/edit-session";
 import { EDIT_STATUS_LABELS } from "#/modules/viral-formats/model/edit-status";
 import type { EditView } from "#/modules/viral-formats/model/edit-view";
 import { toEditFileUrl } from "#/modules/viral-formats/model/edit-view";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { formatBytes } from "#/shared/ui/format";
+import { Spinner } from "#/shared/ui/spinner";
+
+/** The step the worker is on, so the percent reads against something real. */
+const PREPARATION_STEP_LABELS: Partial<Record<VideoStatus, string>> = {
+    queued: "Na fila",
+    downloading: "Lendo o vídeo",
+    transcribing: "Transcrevendo o áudio",
+};
 
 interface SessionVideoCardProps {
     video: SessionVideo;
@@ -21,7 +30,9 @@ function describePreparation(video: SessionVideo): string {
     }
 
     if (video.isReady === false) {
-        return `Preparando · ${video.progressPercent}%`;
+        const stepLabel = PREPARATION_STEP_LABELS[video.status] ?? "Preparando";
+
+        return `${stepLabel} · ${video.progressPercent}%`;
     }
 
     if (video.sourceBytes === null) {
@@ -75,7 +86,10 @@ export function SessionVideoCard({
                 <p className="truncate text-sm font-bold" title={video.title}>
                     {video.title}
                 </p>
-                <p className="text-meta text-muted-foreground tabular-nums">
+                <p className="flex items-center gap-1.5 text-meta text-muted-foreground tabular-nums">
+                    {video.isReady === false && video.hasFailed === false && (
+                        <Spinner className="size-3.5 shrink-0" />
+                    )}
                     {describePreparation(video)}
                 </p>
                 {edit !== undefined && <EditState edit={edit} />}

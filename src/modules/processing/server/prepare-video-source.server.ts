@@ -12,7 +12,6 @@ import {
     toVideoRun,
     updateVideoStage,
 } from "#/modules/video-records/server/video-progress.server";
-import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 import { ensureVideoThumbnail } from "#/modules/processing/server/video-thumbnail.server";
 import { saveDownloadedSource } from "#/modules/processing/server/save-downloaded-source.server";
 import { storeProcessedVideoFile } from "#/modules/processing/server/store-processed-video-file.server";
@@ -49,14 +48,15 @@ interface SourceContext {
  * Bringing the source in, from YouTube or from the store, is the "downloading" step; without it
  * the video sits on "queued" while gigabytes move.
  */
-function saveDownloadProgress(run: VideoRun, downloadPercent: number): Promise<void> {
-    return updateVideoStage(run, "downloading", toOverallPercent("downloading", downloadPercent));
+function saveDownloadProgress(video: Video, downloadPercent: number): Promise<void> {
+    const overallPercent = toOverallPercent("downloading", downloadPercent, video.purpose);
+
+    return updateVideoStage(toVideoRun(video), "downloading", overallPercent);
 }
 
 async function downloadSource(video: Video, context: SourceContext): Promise<DownloadedVideo> {
-    const run = toVideoRun(video);
     const saveProgress = (downloadPercent: number): Promise<void> =>
-        saveDownloadProgress(run, downloadPercent * TRANSFER_STAGE_SHARE);
+        saveDownloadProgress(video, downloadPercent * TRANSFER_STAGE_SHARE);
 
     await saveProgress(0);
     const downloaded = await runWithProgress(
@@ -143,9 +143,8 @@ async function fetchStoredSource(
     sourcePath: string,
     context: SourceContext,
 ): Promise<string> {
-    const run = toVideoRun(video);
     const saveProgress = (downloadPercent: number): Promise<void> =>
-        saveDownloadProgress(run, downloadPercent * TRANSFER_STAGE_SHARE);
+        saveDownloadProgress(video, downloadPercent * TRANSFER_STAGE_SHARE);
 
     await saveProgress(0);
     return runWithProgress(
@@ -225,6 +224,6 @@ export async function prepareVideoSource(
         signal: context.signal,
     });
     context.signal.throwIfAborted();
-    await saveDownloadProgress(toVideoRun(video), COMPLETED_STAGE_PERCENT);
+    await saveDownloadProgress(video, COMPLETED_STAGE_PERCENT);
     return source;
 }
