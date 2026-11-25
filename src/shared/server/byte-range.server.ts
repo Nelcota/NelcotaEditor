@@ -13,35 +13,40 @@ export class InvalidFileSizeError extends Error {
     }
 }
 
-function parseSuffixRange(suffixText: string, fileSize: number): ByteRange | null {
-    const suffixLength = Number(suffixText);
-
-    if (Number.isFinite(suffixLength) === false || suffixLength <= 0) {
+function parseSuffixRange(suffixLength: bigint, fileSize: bigint): ByteRange | null {
+    if (suffixLength === 0n) {
         return null;
     }
 
-    return { start: Math.max(0, fileSize - suffixLength), end: fileSize - 1 };
-}
+    const end = Number(fileSize - 1n);
 
-function parseRangeEnd(endText: string, fileSize: number): number {
-    const lastByte = fileSize - 1;
-
-    if (endText.length === 0) {
-        return lastByte;
+    if (suffixLength >= fileSize) {
+        return { start: 0, end };
     }
 
-    return Math.min(Number(endText), lastByte);
+    return { start: Number(fileSize - suffixLength), end };
 }
 
-function parseStartRange(startText: string, endText: string, fileSize: number): ByteRange | null {
-    const start = Number(startText);
-    const end = parseRangeEnd(endText, fileSize);
-
-    if (Number.isFinite(start) === false || start > end) {
+function parseStartRange(start: bigint, end: bigint | null, fileSize: bigint): ByteRange | null {
+    if (start >= fileSize) {
         return null;
     }
 
-    return { start, end };
+    const lastByte = fileSize - 1n;
+
+    if (end === null || end > lastByte) {
+        return { start: Number(start), end: Number(lastByte) };
+    }
+
+    return { start: Number(start), end: Number(end) };
+}
+
+function readPosition(digits: string): bigint | null {
+    if (digits.length === 0) {
+        return null;
+    }
+
+    return BigInt(digits);
 }
 
 /**
@@ -67,15 +72,14 @@ export function parseByteRange(
         return undefined;
     }
 
-    const startText = match[1] ?? "";
-    const endText = match[2] ?? "";
+    const start = readPosition(match[1] ?? "");
+    const end = readPosition(match[2] ?? "");
 
-    if (startText.length === 0 && endText.length === 0) {
+    if (start === null && end === null) {
         return undefined;
     }
 
-    // RFC 9110: a last position before the first makes the header invalid, so it is ignored.
-    if (startText.length > 0 && endText.length > 0 && Number(endText) < Number(startText)) {
+    if (start !== null && end !== null && end < start) {
         return undefined;
     }
 
@@ -83,9 +87,11 @@ export function parseByteRange(
         return null;
     }
 
-    if (startText.length === 0) {
-        return parseSuffixRange(endText, fileSize);
+    const size = BigInt(fileSize);
+
+    if (start === null && end !== null) {
+        return parseSuffixRange(end, size);
     }
 
-    return parseStartRange(startText, endText, fileSize);
+    return parseStartRange(start ?? 0n, end, size);
 }

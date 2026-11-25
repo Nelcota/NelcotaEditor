@@ -33,6 +33,11 @@ describe("parseClockInput", () => {
         assert.equal(parseClockInput(formatPreciseClock(75.4)), 75.4);
     });
 
+    it("rejects overflow when converting finite hours to seconds", () => {
+        assert.equal(parseClockInput(`${"9".repeat(306)}:00:00`), null);
+        assert.equal(formatPreciseClock(1e308), "0:00.0");
+    });
+
     it("rejects minutes or seconds of 60 and above after the first part", () => {
         assert.equal(parseClockInput("1:75"), null);
         assert.equal(parseClockInput("1:60"), null);

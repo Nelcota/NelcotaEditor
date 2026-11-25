@@ -42,7 +42,7 @@ function toCue(cueWords: Array<TranscriptWord>): CaptionCue | null {
 
     return {
         startSeconds: firstWord.startSeconds,
-        endSeconds: lastWord.endSeconds,
+        endSeconds: Math.max(...cueWords.map((word) => word.endSeconds)),
         text: joinWords(cueWords),
     };
 }
@@ -82,13 +82,22 @@ function padNumber(value: number, length: number): string {
     return String(value).padStart(length, "0");
 }
 
-/** WebVTT timestamps are always hh:mm:ss.ttt. */
-export function formatVttTimestamp(seconds: number): string {
-    if (Number.isFinite(seconds) === false || seconds < 0) {
+function toVttMilliseconds(seconds: number): number {
+    const milliseconds = Math.round(seconds * MILLISECONDS_PER_SECOND);
+
+    if (Number.isSafeInteger(milliseconds) === false || seconds < 0) {
         throw new RangeError(`A caption time must be a finite, non-negative number: ${seconds}`);
     }
 
-    const totalMilliseconds = Math.round(seconds * MILLISECONDS_PER_SECOND);
+    return milliseconds;
+}
+
+/** WebVTT timestamps are always hh:mm:ss.ttt. */
+export function formatVttTimestamp(seconds: number): string {
+    return formatVttMilliseconds(toVttMilliseconds(seconds));
+}
+
+function formatVttMilliseconds(totalMilliseconds: number): string {
     const totalSeconds = Math.floor(totalMilliseconds / MILLISECONDS_PER_SECOND);
     const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
     const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
@@ -103,16 +112,23 @@ function escapeCueText(text: string): string {
     return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-function formatCue(cue: CaptionCue): string {
-    const start = formatVttTimestamp(cue.startSeconds);
-    const end = formatVttTimestamp(cue.endSeconds);
+function formatCue(cue: CaptionCue): Array<string> {
+    const startMilliseconds = toVttMilliseconds(cue.startSeconds);
+    const endMilliseconds = toVttMilliseconds(cue.endSeconds);
 
-    return `${start} --> ${end}\n${escapeCueText(cue.text)}`;
+    if (endMilliseconds <= startMilliseconds) {
+        return [];
+    }
+
+    const start = formatVttMilliseconds(startMilliseconds);
+    const end = formatVttMilliseconds(endMilliseconds);
+    return [`${start} --> ${end}\n${escapeCueText(cue.text)}`];
 }
 
 /** The transcript as a WebVTT captions file, so players can show it as closed captions. */
 export function buildWebVtt(words: Array<TranscriptWord>): string {
-    const blocks = ["WEBVTT", ...groupIntoCues(words).map(formatCue)];
+    const sortedWords = words.toSorted((first, second) => first.startSeconds - second.startSeconds);
+    const blocks = ["WEBVTT", ...groupIntoCues(sortedWords).flatMap(formatCue)];
 
     return `${blocks.join("\n\n")}\n`;
 }

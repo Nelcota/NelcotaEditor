@@ -88,7 +88,7 @@ describe("findVideosWithoutJob", () => {
 
     test("leaves a video that a job waits for", async () => {
         const { videoId, userId } = await insertVideo("queued", LONG_AGO);
-        await enqueueVideoProcessing({ videoId, userId }, null);
+        await enqueueVideoProcessing({ videoId, userId, processingStartedAt: null }, null);
 
         assert.equal((await findStuckVideoIds()).includes(videoId), false);
     });

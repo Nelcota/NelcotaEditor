@@ -101,7 +101,7 @@ describe("markVideoDone", () => {
         const firstRun = await insertRenderingVideo(createdAt, createdAt);
 
         assert.equal(await markVideoFailed(firstRun, "Test failure"), true);
-        assert.equal(await resetVideoToQueued(firstRun.videoId), true);
+        assert.ok(await resetVideoToQueued(firstRun.videoId));
         const queued = await readVideo(firstRun.videoId);
         assert.equal(await markVideoDone(toVideoRun(queued)), true);
 
@@ -118,7 +118,7 @@ describe("markVideoDone", () => {
             processingStartedAt: now,
             hasUnrecordedFirstFinish: true,
         });
-        assert.equal(await resetVideoToQueued(run.videoId), true);
+        assert.ok(await resetVideoToQueued(run.videoId));
         const queued = await readVideo(run.videoId);
         assert.equal(await markVideoDone(toVideoRun(queued)), true);
 

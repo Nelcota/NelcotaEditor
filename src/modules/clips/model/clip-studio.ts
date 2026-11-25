@@ -7,7 +7,13 @@ import {
     DEFAULT_CAPTION_FONT,
 } from "#/modules/clips/model/caption-style";
 import { ASPECT_RATIOS, CAPTION_STYLES } from "#/modules/clips/model/clip-format";
-import { MAX_CLIP_SECONDS, MIN_CLIP_SECONDS } from "#/modules/clips/model/clip-limits";
+import {
+    clipDurationCentiseconds,
+    MAX_CLIP_CENTISECONDS,
+    MAX_CLIP_SECONDS,
+    MIN_CLIP_CENTISECONDS,
+    MIN_CLIP_SECONDS,
+} from "#/modules/clips/model/clip-limits";
 import { MAX_CAPTION_WORD_LENGTH } from "#/modules/transcription/model/transcript-word";
 
 export const MAX_CAPTION_WORDS_PER_CUE = 30;
@@ -89,20 +95,17 @@ const draftFieldsSchema = z.object({
 
 type DraftFields = z.infer<typeof draftFieldsSchema>;
 
-const CENTISECONDS_PER_SECOND = 100;
-
 /**
  * Compared in whole hundredths: edges are rounded to hundredths, and float subtraction turns a
  * trim exactly at the limit into 14.999999999999998 or 90.00000000000001.
  */
 function hasAllowedDuration(draft: DraftFields): boolean {
-    const durationCentiseconds = Math.round(
-        (draft.endSeconds - draft.startSeconds) * CENTISECONDS_PER_SECOND,
-    );
-    const minCentiseconds = MIN_CLIP_SECONDS * CENTISECONDS_PER_SECOND;
-    const maxCentiseconds = MAX_CLIP_SECONDS * CENTISECONDS_PER_SECOND;
+    const durationCentiseconds = clipDurationCentiseconds(draft.startSeconds, draft.endSeconds);
 
-    return durationCentiseconds >= minCentiseconds && durationCentiseconds <= maxCentiseconds;
+    return (
+        durationCentiseconds >= MIN_CLIP_CENTISECONDS &&
+        durationCentiseconds <= MAX_CLIP_CENTISECONDS
+    );
 }
 
 interface TimeRange {

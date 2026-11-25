@@ -52,7 +52,11 @@ export function assertDraftFitsVideo(draft: StudioDraft, video: Video): void {
 
     // A clip only exists after the source was probed, so a missing duration is inconsistent data:
     // refuse rather than skip the check.
-    if (durationSeconds === null) {
+    if (
+        durationSeconds === null ||
+        Number.isFinite(durationSeconds) === false ||
+        durationSeconds <= 0
+    ) {
         throw new UserFacingError("Não foi possível ler a duração do vídeo.");
     }
 

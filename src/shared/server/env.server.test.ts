@@ -48,6 +48,14 @@ describe("parseEnvironment", () => {
         );
     });
 
+    it("rejects quotas that cannot be represented as a positive safe byte count", () => {
+        for (const quota of ["1e308", "1e-10"]) {
+            expect(() =>
+                parseEnvironment({ ...BASE_VARIABLES, STORAGE_QUOTA_GIGABYTES: quota }),
+            ).toThrow("STORAGE_QUOTA_GIGABYTES");
+        }
+    });
+
     it("rejects only one Turnstile key", () => {
         const variables = { ...BASE_VARIABLES, TURNSTILE_SITE_KEY: "site-key" };
 

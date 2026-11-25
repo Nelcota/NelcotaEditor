@@ -4,10 +4,8 @@ import { clips } from "#/modules/clips/clips.schema";
 import type { StorageUsage, UsageSummary } from "#/modules/videos/model/video-views";
 import { summarizePendingUploads } from "#/modules/videos/server/pending-uploads.server";
 import { videos } from "#/modules/video-records/video-records.schema";
-import { getEnvironment } from "#/shared/server/env.server";
+import { BYTES_PER_GIBIBYTE, getEnvironment } from "#/shared/server/env.server";
 import { startOfBusinessMonth } from "#/shared/server/business-time-zone";
-
-const BYTES_PER_GIGABYTE = 1024 * 1024 * 1024;
 
 /** The database or the open transaction that holds the user's start lock. */
 type QueryExecutor = Pick<typeof db, "select">;
@@ -85,7 +83,7 @@ async function countSelectedClips(userId: string): Promise<number> {
 export function getStorageQuotaBytes(): number {
     const environment = getEnvironment();
 
-    return environment.STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIGABYTE;
+    return Math.floor(environment.STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIBIBYTE);
 }
 
 async function sumSourceBytes(userId: string, executor: QueryExecutor): Promise<number | null> {

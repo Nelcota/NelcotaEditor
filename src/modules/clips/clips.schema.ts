@@ -97,6 +97,10 @@ export const clips = pgTable(
         check("clips_start_seconds_positive", sql`${table.startSeconds} >= 0`),
         check("clips_range_ordered", sql`${table.endSeconds} > ${table.startSeconds}`),
         check(
+            "clips_times_finite",
+            sql`${table.startSeconds} < 'Infinity'::double precision and ${table.endSeconds} < 'Infinity'::double precision`,
+        ),
+        check(
             "clips_score_range",
             sql`${table.score} between ${sql.raw(String(MIN_SCORE))} and ${sql.raw(String(MAX_SCORE))}`,
         ),

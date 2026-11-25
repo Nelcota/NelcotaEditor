@@ -8,6 +8,7 @@ import { findClipOfVideo } from "#/modules/clips/server/find-clip-of-video.serve
 import { toClipView } from "#/modules/clips/server/clip-views.server";
 import { readStoredCaptionCues } from "#/modules/clips/server/read-stored-caption-cues.server";
 import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
+import { UserFacingError } from "#/shared/server/user-facing-error";
 
 /**
  * One clip's Studio state without the transcript. The browser already holds the video's words
@@ -31,12 +32,17 @@ export const getClipStudioSnapshot = createServerFn({ method: "GET" })
     .handler(async ({ context, data }): Promise<ClipStudioSnapshot> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
         const clip = await findClipOfVideo(video.id, data.clipId);
+        const { startSeconds, endSeconds } = clip;
+
+        if (Number.isFinite(startSeconds) === false || Number.isFinite(endSeconds) === false) {
+            throw new UserFacingError("Não foi possível ler os tempos deste corte.");
+        }
 
         return {
             clip: toClipView(clip),
             appliedSettings: {
-                startSeconds: clip.startSeconds,
-                endSeconds: clip.endSeconds,
+                startSeconds,
+                endSeconds,
                 aspectRatio: clip.aspectRatio,
                 captionStyle: clip.captionStyle,
                 captionColor: clip.captionColor,

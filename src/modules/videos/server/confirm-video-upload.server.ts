@@ -63,6 +63,7 @@ async function createVideoFromUpload(upload: VideoUpload, sourceBytes: number): 
             throw new UploadNotFoundError();
         }
 
+        const processingStartedAt = new Date();
         await transaction.insert(videos).values({
             id: upload.id,
             userId,
@@ -73,9 +74,12 @@ async function createVideoFromUpload(upload: VideoUpload, sourceBytes: number): 
             requestedClipCount: upload.requestedClipCount,
             clipLength: upload.clipLength,
             transcriptionLanguage: upload.transcriptionLanguage,
-            processingStartedAt: new Date(),
+            processingStartedAt,
         });
-        await enqueueVideoProcessing({ videoId: upload.id, userId }, jobDatabase);
+        await enqueueVideoProcessing(
+            { videoId: upload.id, userId, processingStartedAt },
+            jobDatabase,
+        );
     });
 }
 

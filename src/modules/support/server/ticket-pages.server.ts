@@ -1,4 +1,4 @@
-import { and, eq, gt, lt, or } from "drizzle-orm";
+import { and, eq, gt, lt, or, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import type { TicketCursor } from "#/modules/support/model/support-ticket";
 import { supportTickets } from "#/modules/support/support.schema";
@@ -10,8 +10,11 @@ const CURSOR_COMPARISONS: Readonly<Record<TicketOrder, typeof lt>> = { newest: l
 
 interface PagedRow {
     id: string;
-    lastMessageAt: Date;
+    lastMessageAt: string;
 }
+
+/** Keep the database's full precision in the cursor while ordering on the indexed column. */
+export const ticketActivityTime = sql<string>`to_char(${supportTickets.lastMessageAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
 
 /** The rows after the cursor in the list's order; ties on time are broken by id. */
 export function afterTicketCursor(
@@ -22,7 +25,7 @@ export function afterTicketCursor(
         return undefined;
     }
 
-    const cursorTime = new Date(cursor.lastMessageAt);
+    const cursorTime = sql`${cursor.lastMessageAt}::timestamptz`;
     const compare = CURSOR_COMPARISONS[order];
 
     return or(
@@ -49,6 +52,6 @@ export function splitTicketPage<Row extends PagedRow>(
 
     return {
         pageRows,
-        nextCursor: { lastMessageAt: lastRow.lastMessageAt.toISOString(), id: lastRow.id },
+        nextCursor: { lastMessageAt: lastRow.lastMessageAt, id: lastRow.id },
     };
 }

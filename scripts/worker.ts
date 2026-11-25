@@ -13,6 +13,7 @@ import {
     PROCESS_VIDEO_QUEUE,
     processVideoJobSchema,
 } from "#/modules/processing/server/video-processing-queue.server";
+import type { ProcessVideoJob } from "#/modules/processing/server/video-processing-queue.server";
 import { createVideoWorkSync } from "#/modules/processing/server/video-work-switch.server";
 import { startIdleTicketClosing } from "#/modules/support/server/close-idle-tickets.server";
 import { startSupportEmailWorker } from "#/modules/support/server/support-email-queue.server";
@@ -53,15 +54,16 @@ async function readFinalStatus(videoId: string): Promise<string> {
  * come from the log context around the job.
  */
 async function processVideoWithLogs(
-    videoId: string,
+    job: ProcessVideoJob,
     signal: AbortSignal,
     queueWaitMs: number,
 ): Promise<void> {
+    const { videoId, runStartedAt } = job;
     const startedAt = performance.now();
     logger.info({ queueWaitMs }, "Job started");
 
     try {
-        await processVideo(videoId, signal);
+        await processVideo(videoId, signal, runStartedAt);
     } catch (error) {
         // pg-boss only marks the job failed; this line is the one record of why.
         logger.error({ durationMs: Math.round(performance.now() - startedAt), error }, "Job threw");
@@ -85,11 +87,12 @@ async function handleJob(job: JobWithMetadata<unknown>): Promise<void> {
         throw new InvalidJobPayloadError(result.error.issues.length);
     }
 
-    const videoId = result.data.videoId;
+    const processingJob = result.data;
+    const videoId = processingJob.videoId;
     const eligibleAt = Math.max(createdOn.getTime(), startAfter.getTime());
     const queueWaitMs = Math.max(0, startedOn.getTime() - eligibleAt);
     await withLogContext({ jobId, videoId }, () =>
-        processVideoWithLogs(videoId, signal, queueWaitMs),
+        processVideoWithLogs(processingJob, signal, queueWaitMs),
     );
 }
 

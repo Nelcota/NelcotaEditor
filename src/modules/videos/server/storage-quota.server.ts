@@ -15,7 +15,7 @@ interface StorageRequest {
 }
 
 function assertValidByteCount(name: string, bytes: number): void {
-    if (Number.isFinite(bytes) === false || bytes < 0) {
+    if (Number.isSafeInteger(bytes) === false || bytes < 0) {
         throw new RangeError(`Invalid ${name} byte count: ${String(bytes)}`);
     }
 }

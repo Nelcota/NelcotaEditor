@@ -87,6 +87,10 @@ export const videos = pgTable(
             sql`${table.durationSeconds} is null or ${table.durationSeconds} > 0`,
         ),
         check(
+            "videos_duration_seconds_finite",
+            sql`${table.durationSeconds} is null or ${table.durationSeconds} < 'Infinity'::double precision`,
+        ),
+        check(
             "videos_title_length",
             sql`char_length(${table.title}) between 1 and ${sql.raw(String(MAX_VIDEO_TITLE_LENGTH))}`,
         ),

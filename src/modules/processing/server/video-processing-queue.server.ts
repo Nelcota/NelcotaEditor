@@ -10,7 +10,12 @@ const SIX_HOURS_IN_SECONDS = 6 * 60 * 60;
 // next job for hours, and no worker has to assume it is the only one.
 const JOB_HEARTBEAT_SECONDS = 60;
 
-export const processVideoJobSchema = z.object({ videoId: z.uuid() });
+export const processVideoJobSchema = z.object({
+    videoId: z.uuid(),
+    runStartedAt: z.iso.datetime().nullable().optional(),
+});
+
+export type ProcessVideoJob = z.infer<typeof processVideoJobSchema>;
 
 let queueReadyPromise: Promise<void> | null = null;
 
@@ -46,6 +51,7 @@ export function ensureProcessVideoQueue(): Promise<void> {
 export interface VideoProcessingRequest {
     videoId: string;
     userId: string;
+    processingStartedAt: Date | null;
     /** Seconds the job waits before a worker may take it; it starts at once when absent. */
     startAfterSeconds?: number;
 }
@@ -58,7 +64,7 @@ export async function enqueueVideoProcessing(
     request: VideoProcessingRequest,
     jobDatabase: JobDatabase | null,
 ): Promise<void> {
-    const { videoId, userId } = request;
+    const { videoId, userId, processingStartedAt } = request;
     const startAfterSeconds = request.startAfterSeconds ?? 0;
 
     if (videoId.trim().length === 0) {
@@ -83,11 +89,12 @@ export async function enqueueVideoProcessing(
         heartbeatSeconds: JOB_HEARTBEAT_SECONDS,
         startAfter: startAfterSeconds,
     };
+    const payload = { videoId, runStartedAt: processingStartedAt?.toISOString() ?? null };
 
     if (jobDatabase === null) {
-        await jobQueue.send(PROCESS_VIDEO_QUEUE, { videoId }, options);
+        await jobQueue.send(PROCESS_VIDEO_QUEUE, payload, options);
         return;
     }
 
-    await jobQueue.send(PROCESS_VIDEO_QUEUE, { videoId }, { ...options, db: jobDatabase });
+    await jobQueue.send(PROCESS_VIDEO_QUEUE, payload, { ...options, db: jobDatabase });
 }

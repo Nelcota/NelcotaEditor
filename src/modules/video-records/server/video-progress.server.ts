@@ -223,13 +223,14 @@ export async function markVideoDone(run: VideoRun): Promise<boolean> {
 }
 
 /**
- * Puts a finished video back at the start of the queue; the caller enqueues the job only when this
- * returns true. The status is checked in the same statement, so two retries never both win.
+ * Puts a finished video back in the queue and returns the new run's start. The timestamp must
+ * advance even if two runs start in the same millisecond or another host's clock is behind.
  */
 export async function resetVideoToQueued(
     videoId: string,
     executor: DatabaseExecutor = db,
-): Promise<boolean> {
+): Promise<Date | null> {
+    const startedAt = new Date();
     const resetRows = await executor
         .update(videos)
         .set({
@@ -238,12 +239,12 @@ export async function resetVideoToQueued(
             progressPercent: MIN_PERCENT,
             cancelRequested: false,
             finishedAt: null,
-            processingStartedAt: new Date(),
+            processingStartedAt: sql`greatest(date_trunc('milliseconds', ${videos.processingStartedAt}) + interval '1 millisecond', ${sql.param(startedAt, videos.processingStartedAt)}::timestamptz)`,
         })
         .where(and(eq(videos.id, videoId), canMoveVideoTo("queued")))
-        .returning({ id: videos.id });
+        .returning({ processingStartedAt: videos.processingStartedAt });
 
-    return resetRows.length > 0;
+    return resetRows[0]?.processingStartedAt ?? null;
 }
 
 export async function saveVideoSource(

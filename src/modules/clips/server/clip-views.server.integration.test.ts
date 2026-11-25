@@ -87,6 +87,20 @@ describe("listReadyClipsSince", () => {
         ).rejects.toMatchObject({ cause: { constraint: "clips_caption_cues_array" } });
     });
 
+    test("rejects invalid floating-point times at the database boundary", async () => {
+        const userId = await createTestUser();
+        const videoId = await insertVideoWithReadyClip(userId, "done");
+
+        for (const seconds of [Number.NaN, Number.POSITIVE_INFINITY]) {
+            await expect(
+                db.update(videos).set({ durationSeconds: seconds }).where(eq(videos.id, videoId)),
+            ).rejects.toMatchObject({ cause: { constraint: "videos_duration_seconds_finite" } });
+            await expect(
+                db.update(clips).set({ endSeconds: seconds }).where(eq(clips.videoId, videoId)),
+            ).rejects.toMatchObject({ cause: { constraint: "clips_times_finite" } });
+        }
+    });
+
     test("falls back to the transcript when saved captions contain an invalid word", async () => {
         const userId = await createTestUser();
         const videoId = await insertVideoWithReadyClip(userId, "done");

@@ -19,12 +19,24 @@ describe("formatVttTimestamp", () => {
     it("refuses negative and non-finite times", () => {
         assert.throws(() => formatVttTimestamp(-1), RangeError);
         assert.throws(() => formatVttTimestamp(Number.NaN), RangeError);
+        assert.throws(() => formatVttTimestamp(1e308), RangeError);
     });
 });
 
 describe("buildWebVtt", () => {
     it("writes only the header for a silent video", () => {
         assert.equal(buildWebVtt([]), "WEBVTT\n");
+    });
+
+    it("omits cues whose endpoints round to the same millisecond", () => {
+        assert.equal(buildWebVtt([word("Oi.", 1, 1.0001)]), "WEBVTT\n");
+    });
+
+    it("orders cues by the start timestamp", () => {
+        assert.equal(
+            buildWebVtt([word("Depois.", 4, 4.5), word("Antes.", 1, 1.5)]),
+            "WEBVTT\n\n00:00:01.000 --> 00:00:01.500\nAntes.\n\n00:00:04.000 --> 00:00:04.500\nDepois.\n",
+        );
     });
 
     it("ends a cue at the end of a sentence", () => {

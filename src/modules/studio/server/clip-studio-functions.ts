@@ -119,11 +119,13 @@ async function applyDraftAndRequeue(target: DraftToApply): Promise<RenderDraftRe
             }
 
             // Throwing rolls the clip update back.
-            if ((await resetVideoToQueued(videoId, transaction)) === false) {
+            const processingStartedAt = await resetVideoToQueued(videoId, transaction);
+
+            if (processingStartedAt === null) {
                 throw new UserFacingError(VIDEO_ALREADY_PROCESSING_MESSAGE);
             }
 
-            await enqueueVideoProcessing({ videoId, userId }, jobDatabase);
+            await enqueueVideoProcessing({ videoId, userId, processingStartedAt }, jobDatabase);
             return { kind: "queued" };
         },
     );

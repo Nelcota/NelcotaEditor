@@ -27,7 +27,9 @@ export async function restartVideo(request: RestartRequest): Promise<void> {
         // A retry renders new files too, so a full account is refused like a new video.
         await assertVideoStartAllowed({ userId, incomingBytes: 0 }, transaction);
 
-        if ((await resetVideoToQueued(videoId, transaction)) === false) {
+        const processingStartedAt = await resetVideoToQueued(videoId, transaction);
+
+        if (processingStartedAt === null) {
             return false;
         }
 
@@ -35,7 +37,7 @@ export async function restartVideo(request: RestartRequest): Promise<void> {
             .update(clips)
             .set({ status: "pending" })
             .where(and(eq(clips.videoId, videoId), clipCondition));
-        await enqueueVideoProcessing({ videoId, userId }, jobDatabase);
+        await enqueueVideoProcessing({ videoId, userId, processingStartedAt }, jobDatabase);
         return true;
     });
 
