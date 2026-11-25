@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "#/db/database.server";
+import type { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import { enqueueSupportEmail } from "#/modules/support/server/support-email-queue.server";
 import { supportTickets } from "#/modules/support/support.schema";
@@ -20,13 +20,15 @@ function buildTicketUrl(ticketId: string): string {
     return new URL(`/support/${ticketId}`, appUrl).toString();
 }
 
-/**
- * Called after the answer is saved, outside its transaction. An account holder gets a link; a
- * guest, who cannot sign in, gets the answer itself.
- */
-export async function notifyTicketReply(answered: AnsweredTicket): Promise<void> {
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/** The email job commits with the reply. Account holders get a link, guests the answer itself. */
+export async function notifyTicketReply(
+    answered: AnsweredTicket,
+    transaction: Transaction,
+): Promise<void> {
     const { ticketId, replyText } = answered;
-    const rows = await db
+    const rows = await transaction
         .select({
             number: supportTickets.number,
             contactEmail: supportTickets.contactEmail,
@@ -45,12 +47,10 @@ export async function notifyTicketReply(answered: AnsweredTicket): Promise<void>
     const { number: ticketNumber, accountEmail, contactEmail } = ticket;
 
     if (accountEmail !== null) {
-        await enqueueSupportEmail({
-            to: accountEmail,
-            ticketNumber,
-            url: buildTicketUrl(ticketId),
-            replyText: null,
-        });
+        await enqueueSupportEmail(
+            { to: accountEmail, ticketNumber, url: buildTicketUrl(ticketId), replyText: null },
+            transaction,
+        );
         return;
     }
 
@@ -58,5 +58,8 @@ export async function notifyTicketReply(answered: AnsweredTicket): Promise<void>
         throw new Error(`Ticket ${ticketId} has no address to answer`);
     }
 
-    await enqueueSupportEmail({ to: contactEmail, ticketNumber, url: null, replyText });
+    await enqueueSupportEmail(
+        { to: contactEmail, ticketNumber, url: null, replyText },
+        transaction,
+    );
 }

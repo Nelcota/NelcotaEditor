@@ -48,6 +48,7 @@ export const newTicketSchema = z.object({
 export type NewTicketInput = z.input<typeof newTicketSchema>;
 
 export const ticketIdInputSchema = z.object({ ticketId: z.uuid() });
+export const ticketReadSchema = ticketIdInputSchema.extend({ lastMessageAt: z.iso.datetime() });
 
 export const ticketReplySchema = z.object({
     ticketId: z.uuid(),

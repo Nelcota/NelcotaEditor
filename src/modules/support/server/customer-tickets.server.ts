@@ -32,6 +32,7 @@ import { findOwnedVideoOrNull } from "#/modules/video-records/server/find-owned-
 import { videos } from "#/modules/video-records/video-records.schema";
 
 type NewTicket = z.output<typeof newTicketSchema>;
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 interface OwnedTicket {
     userId: string;
@@ -44,6 +45,7 @@ interface OwnedTicketRow {
     subject: string;
     status: TicketStatus;
     hasUnreadReply: boolean;
+    lastMessageAt: Date;
     videoId: string | null;
     videoTitle: string | null;
     videoStatus: VideoStatus | null;
@@ -58,6 +60,7 @@ async function findOwnedTicketRow(owned: OwnedTicket): Promise<OwnedTicketRow | 
             subject: supportTickets.subject,
             status: supportTickets.status,
             hasUnreadReply: supportTickets.hasUnreadReply,
+            lastMessageAt: supportTickets.lastMessageAt,
             videoId: videos.id,
             videoTitle: videos.title,
             videoStatus: videos.status,
@@ -68,6 +71,21 @@ async function findOwnedTicketRow(owned: OwnedTicket): Promise<OwnedTicketRow | 
         .limit(1);
 
     return rows[0] ?? null;
+}
+
+async function lockCustomerTickets(transaction: Transaction, userId: string): Promise<void> {
+    await transaction.execute(sql`select pg_advisory_xact_lock(hashtext(${`support:${userId}`}))`);
+}
+
+async function assertTicketCapacity(transaction: Transaction, userId: string): Promise<void> {
+    const openRows = await transaction
+        .select({ openCount: count() })
+        .from(supportTickets)
+        .where(and(eq(supportTickets.userId, userId), ne(supportTickets.status, "closed")));
+
+    if ((openRows[0]?.openCount ?? 0) >= MAX_OPEN_TICKETS_PER_PERSON) {
+        throw new TooManyOpenTicketsError();
+    }
 }
 
 /**
@@ -82,17 +100,8 @@ export async function openTicket(userId: string, ticket: NewTicket): Promise<str
     }
 
     return await db.transaction(async (transaction) => {
-        await transaction.execute(
-            sql`select pg_advisory_xact_lock(hashtext(${`support:${userId}`}))`,
-        );
-        const openRows = await transaction
-            .select({ openCount: count() })
-            .from(supportTickets)
-            .where(and(eq(supportTickets.userId, userId), ne(supportTickets.status, "closed")));
-
-        if ((openRows[0]?.openCount ?? 0) >= MAX_OPEN_TICKETS_PER_PERSON) {
-            throw new TooManyOpenTicketsError();
-        }
+        await lockCustomerTickets(transaction, userId);
+        await assertTicketCapacity(transaction, userId);
 
         const inserted = await transaction
             .insert(supportTickets)
@@ -143,7 +152,6 @@ export async function listCustomerTickets(
     };
 }
 
-/** Opening the ticket reads the answer, so the dot in the sidebar goes away. */
 export async function findCustomerTicket(
     owned: OwnedTicket,
 ): Promise<CustomerTicketDetails | null> {
@@ -153,14 +161,13 @@ export async function findCustomerTicket(
         return null;
     }
 
+    const { videoId, videoTitle, videoStatus } = ticket;
+    let unreadReplyAt: string | null = null;
+
     if (ticket.hasUnreadReply === true) {
-        await db
-            .update(supportTickets)
-            .set({ hasUnreadReply: false })
-            .where(eq(supportTickets.id, ticket.id));
+        unreadReplyAt = ticket.lastMessageAt.toISOString();
     }
 
-    const { videoId, videoTitle, videoStatus } = ticket;
     let video: CustomerTicketDetails["video"] = null;
 
     if (videoId !== null && videoTitle !== null && videoStatus !== null) {
@@ -172,31 +179,62 @@ export async function findCustomerTicket(
         number: ticket.number,
         subject: ticket.subject,
         status: ticket.status,
+        unreadReplyAt,
         video,
         messages: await listTicketMessages(ticket.id, "customer"),
     };
 }
 
+/** Leave any reply newer than the rendered conversation unread. */
+export async function markCustomerTicketRead(
+    owned: OwnedTicket,
+    lastMessageAt: Date,
+): Promise<void> {
+    await db
+        .update(supportTickets)
+        .set({ hasUnreadReply: false })
+        .where(
+            and(
+                eq(supportTickets.id, owned.ticketId),
+                eq(supportTickets.userId, owned.userId),
+                eq(supportTickets.hasUnreadReply, true),
+                eq(supportTickets.lastMessageAt, lastMessageAt),
+            ),
+        );
+}
+
 /** Answering puts the ticket back in the admins' queue, a closed one included. */
 export async function replyAsCustomer(owned: OwnedTicket, body: string): Promise<boolean> {
     await assertFeatureEnabled("support");
-    const ticket = await findOwnedTicketRow(owned);
+    const { ticketId, userId } = owned;
 
-    if (ticket === null) {
-        return false;
-    }
+    return db.transaction(async (transaction) => {
+        await lockCustomerTickets(transaction, userId);
+        const rows = await transaction
+            .select({ status: supportTickets.status })
+            .from(supportTickets)
+            .where(and(eq(supportTickets.id, ticketId), eq(supportTickets.userId, userId)))
+            .for("update");
+        const ticket = rows[0];
 
-    await db.transaction(async (transaction) => {
+        if (ticket === undefined) {
+            return false;
+        }
+
+        if (ticket.status === "closed") {
+            await assertTicketCapacity(transaction, userId);
+        }
+
         await appendTicketMessage(transaction, {
-            ticketId: ticket.id,
+            ticketId,
             authorKind: "customer",
-            authorId: owned.userId,
+            authorId: userId,
             body,
             status: "open",
             hasUnreadReply: false,
         });
+        return true;
     });
-    return true;
 }
 
 export async function closeCustomerTicket(owned: OwnedTicket): Promise<boolean> {

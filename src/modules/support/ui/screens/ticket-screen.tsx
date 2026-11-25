@@ -2,6 +2,7 @@ import RotateCwIcon from "~icons/lucide/rotate-cw";
 import SquarePlayIcon from "~icons/lucide/square-play";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import {
     invalidateSupportQueries,
@@ -14,7 +15,11 @@ import {
     formatTicketNumber,
     toThreadMessages,
 } from "#/modules/support/model/ticket-display";
-import { closeMyTicket, replyToMyTicket } from "#/modules/support/server/support-functions";
+import {
+    closeMyTicket,
+    markMyTicketRead,
+    replyToMyTicket,
+} from "#/modules/support/server/support-functions";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
@@ -82,7 +87,19 @@ function TicketHeader({ ticket }: { ticket: CustomerTicketDetails }): ReactNode 
 
 function TicketConversation({ ticket }: { ticket: CustomerTicketDetails }): ReactNode {
     const queryClient = useQueryClient();
-    const ticketId = ticket.id;
+    const { id: ticketId, unreadReplyAt } = ticket;
+    const { mutate: markRead } = useMutation({
+        mutationFn: (lastMessageAt: string) =>
+            markMyTicketRead({ data: { ticketId, lastMessageAt } }),
+        onSuccess: () => invalidateSupportQueries(queryClient),
+    });
+
+    useEffect(() => {
+        if (unreadReplyAt !== null) {
+            markRead(unreadReplyAt);
+        }
+    }, [markRead, unreadReplyAt]);
+
     let hint: string | undefined = undefined;
 
     if (ticket.status === "closed") {

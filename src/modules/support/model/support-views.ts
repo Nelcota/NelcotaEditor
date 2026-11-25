@@ -41,6 +41,7 @@ export interface CustomerTicketDetails {
     number: number;
     subject: string;
     status: TicketStatus;
+    unreadReplyAt: string | null;
     video: TicketVideo | null;
     messages: Array<TicketMessageView>;
 }

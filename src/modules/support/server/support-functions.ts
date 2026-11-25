@@ -5,6 +5,7 @@ import {
     newTicketSchema,
     ticketIdInputSchema,
     ticketListInputSchema,
+    ticketReadSchema,
     ticketReplySchema,
 } from "#/modules/support/model/support-ticket";
 import type {
@@ -19,6 +20,7 @@ import {
     hasUnreadSupportReply,
     listCustomerTickets,
     listTicketVideoOptions,
+    markCustomerTicketRead,
     openTicket,
     replyAsCustomer,
 } from "#/modules/support/server/customer-tickets.server";
@@ -54,6 +56,17 @@ export const openSupportTicket = createServerFn({ method: "POST" })
         const ticketId = await openTicket(context.user.id, data);
 
         return { ticketId };
+    });
+
+export const markMyTicketRead = createServerFn({ method: "POST" })
+    .middleware([authMiddleware])
+    .validator(ticketReadSchema)
+    .handler(async ({ context, data }): Promise<void> => {
+        const { ticketId, lastMessageAt } = data;
+        await markCustomerTicketRead(
+            { userId: context.user.id, ticketId },
+            new Date(lastMessageAt),
+        );
     });
 
 export const replyToMyTicket = createServerFn({ method: "POST" })

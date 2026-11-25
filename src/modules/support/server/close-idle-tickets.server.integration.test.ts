@@ -17,7 +17,10 @@ async function openAnsweredTicket(): Promise<string> {
         message: "Oi",
         videoId: null,
     });
-    await replyAsStaff({ adminId: await createTestAccount(), ticketId, body: "Resposta" });
+    const adminId = await createTestAccount();
+    await db.transaction((transaction) =>
+        replyAsStaff({ adminId, ticketId, body: "Resposta" }, transaction),
+    );
 
     return ticketId;
 }

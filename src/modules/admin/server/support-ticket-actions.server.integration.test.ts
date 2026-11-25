@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { adminAuditLog } from "#/modules/admin/admin.schema";
+import * as adminActions from "#/modules/admin/server/record-admin-action.server";
 import {
     answerSupportTicket,
     closeSupportTicket,
@@ -70,6 +71,27 @@ describe("answerSupportTicket", () => {
         expect(emails).toHaveLength(1);
         expect(emails[0]?.url).toContain(`/support/${ticketId}`);
         expect(emails[0]?.replyText).toBeNull();
+    });
+
+    it("rolls back the reply and email job if the audit entry fails", async () => {
+        const customerId = await createTestAccount();
+        const ticketId = await openSimpleTicket(customerId);
+        const adminId = await createTestAccount();
+        const audit = vi.spyOn(adminActions, "recordAdminAction");
+        audit.mockRejectedValueOnce(new Error("Audit store unavailable"));
+
+        try {
+            await expect(
+                answerSupportTicket(adminId, { ticketId, message: "Resposta" }),
+            ).rejects.toThrow("Audit store unavailable");
+        } finally {
+            audit.mockRestore();
+        }
+
+        const ticket = await findStaffTicket(ticketId);
+        expect(ticket?.status).toBe("open");
+        expect(ticket?.messages).toHaveLength(1);
+        expect(await readQueuedSupportEmails(`support-${customerId}@example.com`)).toEqual([]);
     });
 
     it("emails a guest the answer itself", async () => {

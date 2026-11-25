@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { user } from "#/modules/auth/auth.schema";
 import { STAFF_FALLBACK_NAME } from "#/modules/support/model/support-ticket";
@@ -6,7 +6,7 @@ import type { MessageAuthorKind, TicketStatus } from "#/modules/support/model/su
 import type { TicketMessageView } from "#/modules/support/model/support-views";
 import { supportMessages, supportTickets } from "#/modules/support/support.schema";
 
-/** A thread longer than this is not a support conversation any more; the newest stay hidden. */
+/** Fetch a bounded window ending at the newest reply. */
 const MAX_THREAD_MESSAGES = 500;
 const GUEST_NAME = "Visitante";
 const OWN_MESSAGE_NAME = "Você";
@@ -67,10 +67,10 @@ export async function listTicketMessages(
         // Left join: an admin who answered may have been deleted since.
         .leftJoin(user, eq(user.id, supportMessages.authorId))
         .where(eq(supportMessages.ticketId, ticketId))
-        .orderBy(asc(supportMessages.createdAt), asc(supportMessages.id))
+        .orderBy(desc(supportMessages.createdAt), desc(supportMessages.id))
         .limit(MAX_THREAD_MESSAGES);
 
-    return rows.map((row) => ({
+    return rows.toReversed().map((row) => ({
         id: row.id,
         authorKind: row.authorKind,
         authorName: nameAuthor(reader, row.authorKind, row.accountName),
@@ -85,16 +85,25 @@ export async function appendTicketMessage(
     message: NewMessage,
 ): Promise<string> {
     const { ticketId, authorKind, authorId, body, status, hasUnreadReply } = message;
-    // Set here, in milliseconds, so the list cursor (a JavaScript date) matches it exactly.
-    const now = new Date();
-
-    await transaction
+    // Advance the millisecond cursor even when two replies arrive in the same millisecond.
+    const updated = await transaction
         .update(supportTickets)
-        .set({ status, hasUnreadReply, lastMessageAt: now })
-        .where(eq(supportTickets.id, ticketId));
+        .set({
+            status,
+            hasUnreadReply,
+            lastMessageAt: sql`greatest(date_trunc('milliseconds', ${supportTickets.lastMessageAt}) + interval '1 millisecond', date_trunc('milliseconds', clock_timestamp()))`,
+        })
+        .where(eq(supportTickets.id, ticketId))
+        .returning({ lastMessageAt: supportTickets.lastMessageAt });
+    const lastMessageAt = updated[0]?.lastMessageAt;
+
+    if (lastMessageAt === undefined) {
+        throw new Error(`Updating ticket ${ticketId} returned no row`);
+    }
+
     const inserted = await transaction
         .insert(supportMessages)
-        .values({ ticketId, authorKind, authorId, body, createdAt: now })
+        .values({ ticketId, authorKind, authorId, body, createdAt: lastMessageAt })
         .returning({ id: supportMessages.id });
     const messageId = inserted[0]?.id;
 

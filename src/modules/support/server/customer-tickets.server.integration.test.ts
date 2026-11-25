@@ -13,6 +13,7 @@ import {
     findCustomerTicket,
     hasUnreadSupportReply,
     listCustomerTickets,
+    markCustomerTicketRead,
     openTicket,
     replyAsCustomer,
 } from "#/modules/support/server/customer-tickets.server";
@@ -130,14 +131,34 @@ describe("an answer from the team", () => {
     it("marks the ticket unread until the person opens it", async () => {
         const userId = await createTestAccount();
         const ticketId = await openSimpleTicket(userId);
-        await replyAsStaff({
-            adminId: await createTestAccount("Ana"),
-            ticketId,
-            body: "Resolvido",
-        });
+        const adminId = await createTestAccount("Ana");
+        await db.transaction((transaction) =>
+            replyAsStaff({ adminId, ticketId, body: "Resolvido" }, transaction),
+        );
 
         expect(await hasUnreadSupportReply(userId)).toBe(true);
-        await findCustomerTicket({ userId, ticketId });
+        const ticket = await findCustomerTicket({ userId, ticketId });
+        const unreadReplyAt = ticket?.unreadReplyAt;
+        expect(await hasUnreadSupportReply(userId)).toBe(true);
+
+        if (unreadReplyAt === undefined || unreadReplyAt === null) {
+            throw new Error("The ticket had no unread reply");
+        }
+
+        await db.transaction((transaction) =>
+            replyAsStaff({ adminId, ticketId, body: "Complemento" }, transaction),
+        );
+        await markCustomerTicketRead({ userId, ticketId }, new Date(unreadReplyAt));
+        expect(await hasUnreadSupportReply(userId)).toBe(true);
+
+        const latest = await findCustomerTicket({ userId, ticketId });
+        const latestUnreadReplyAt = latest?.unreadReplyAt;
+
+        if (latestUnreadReplyAt === undefined || latestUnreadReplyAt === null) {
+            throw new Error("The ticket had no new unread reply");
+        }
+
+        await markCustomerTicketRead({ userId, ticketId }, new Date(latestUnreadReplyAt));
         expect(await hasUnreadSupportReply(userId)).toBe(false);
     });
 
@@ -145,7 +166,9 @@ describe("an answer from the team", () => {
         const userId = await createTestAccount();
         const ticketId = await openSimpleTicket(userId);
         const adminId = await createTestAccount("Ana Souza Lima");
-        await replyAsStaff({ adminId, ticketId, body: "Resolvido" });
+        await db.transaction((transaction) =>
+            replyAsStaff({ adminId, ticketId, body: "Resolvido" }, transaction),
+        );
 
         const ticket = await findCustomerTicket({ userId, ticketId });
 
@@ -160,5 +183,19 @@ describe("an answer from the team", () => {
         await replyAsCustomer({ userId, ticketId }, "Voltou a falhar");
 
         expect((await findCustomerTicket({ userId, ticketId }))?.status).toBe("open");
+    });
+
+    it("enforces the active ticket limit when reopening a closed ticket", async () => {
+        const userId = await createTestAccount();
+        const ticketId = await openSimpleTicket(userId);
+        await closeCustomerTicket({ userId, ticketId });
+        await openSimpleTicket(userId, "Primeiro");
+        await openSimpleTicket(userId, "Segundo");
+        await openSimpleTicket(userId, "Terceiro");
+
+        await expect(replyAsCustomer({ userId, ticketId }, "Voltou a falhar")).rejects.toThrow(
+            TooManyOpenTicketsError,
+        );
+        expect((await findCustomerTicket({ userId, ticketId }))?.status).toBe("closed");
     });
 });

@@ -37,7 +37,7 @@ async function createSupportEmailQueueOrReset(): Promise<void> {
     }
 }
 
-function ensureSupportEmailQueue(): Promise<void> {
+export function ensureSupportEmailQueue(): Promise<void> {
     if (queueReadyPromise === null) {
         queueReadyPromise = createSupportEmailQueueOrReset();
     }
@@ -45,10 +45,20 @@ function ensureSupportEmailQueue(): Promise<void> {
     return queueReadyPromise;
 }
 
-export async function enqueueSupportEmail(job: SupportEmailJob): Promise<void> {
-    await ensureSupportEmailQueue();
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export async function enqueueSupportEmail(
+    job: SupportEmailJob,
+    transaction: Transaction,
+): Promise<void> {
     const jobQueue = await getJobQueue();
-    await jobQueue.send(SUPPORT_EMAIL_QUEUE, job);
+    const jobId = await jobQueue.send(SUPPORT_EMAIL_QUEUE, job, {
+        db: fromDrizzle(transaction, sql),
+    });
+
+    if (jobId === null) {
+        throw new Error("Enqueuing a support email returned no job");
+    }
 }
 
 interface QueuedSupportEmail {
@@ -98,3 +108,6 @@ export async function startSupportEmailWorker(): Promise<void> {
         }
     });
 }
+import { sql } from "drizzle-orm";
+import { fromDrizzle } from "pg-boss";
+import type { db } from "#/db/database.server";

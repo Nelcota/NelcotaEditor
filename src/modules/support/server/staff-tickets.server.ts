@@ -30,6 +30,8 @@ interface StaffReply {
     body: string;
 }
 
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
 interface FilterRule {
     where: SQL | undefined;
     order: TicketOrder;
@@ -143,33 +145,37 @@ export async function findStaffTicket(ticketId: string): Promise<StaffTicketDeta
 }
 
 /** The customer sees the answer marked unread; returns the message id, or null for no ticket. */
-export async function replyAsStaff(reply: StaffReply): Promise<string | null> {
+export async function replyAsStaff(
+    reply: StaffReply,
+    transaction: Transaction,
+): Promise<string | null> {
     const { adminId, ticketId, body } = reply;
-    const rows = await db
+    const rows = await transaction
         .select({ id: supportTickets.id })
         .from(supportTickets)
         .where(eq(supportTickets.id, ticketId))
-        .limit(1);
+        .limit(1)
+        .for("update");
 
     if (rows.length === 0) {
         return null;
     }
 
-    return await db.transaction(
-        async (transaction) =>
-            await appendTicketMessage(transaction, {
-                ticketId,
-                authorKind: "staff",
-                authorId: adminId,
-                body,
-                status: "answered",
-                hasUnreadReply: true,
-            }),
-    );
+    return appendTicketMessage(transaction, {
+        ticketId,
+        authorKind: "staff",
+        authorId: adminId,
+        body,
+        status: "answered",
+        hasUnreadReply: true,
+    });
 }
 
-export async function closeStaffTicket(ticketId: string): Promise<boolean> {
-    const closed = await db
+export async function closeStaffTicket(
+    ticketId: string,
+    transaction: Transaction,
+): Promise<boolean> {
+    const closed = await transaction
         .update(supportTickets)
         .set({ status: "closed" })
         .where(eq(supportTickets.id, ticketId))
