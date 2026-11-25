@@ -1,5 +1,6 @@
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import type { UsageSummary } from "#/modules/videos/model/video-views";
+import { pluralize } from "#/shared/ui/pluralize";
 
 const SECONDS_PER_MINUTE = 60;
 const MINUTES_PER_HOUR = 60;
@@ -14,12 +15,17 @@ export interface CrewStat {
 }
 
 /**
- * 5400 → "1 h 30 min", 300 → "5 min", 0 → "0 min". Rounds to whole minutes first, so 3599 is
- * "1 h 0 min" and never "60 min".
+ * 5400 → "1 h 30 min", 300 → "5 min", 19 → "19 s", 0 → "0 min". Under a minute it counts seconds,
+ * so a short video never reads as nothing. Rounds to whole minutes first, so 3599 is "1 h 0 min"
+ * and never "60 min".
  */
 export function formatProcessedTime(totalSeconds: number): string {
     if (Number.isFinite(totalSeconds) === false || totalSeconds <= 0) {
         return "0 min";
+    }
+
+    if (totalSeconds < SECONDS_PER_MINUTE) {
+        return `${Math.max(1, Math.round(totalSeconds))} s`;
     }
 
     const totalMinutes = Math.round(totalSeconds / SECONDS_PER_MINUTE);
@@ -40,7 +46,7 @@ export function toCrewStats(usage: UsageSummary): Array<CrewStat> {
             stage: "downloading",
             value: numberFormatter.format(usage.videoCount),
             label: "vídeos recebidos",
-            detail: `${numberFormatter.format(usage.readyVideoCount)} prontos`,
+            detail: `${numberFormatter.format(usage.readyVideoCount)} ${pluralize(usage.readyVideoCount, "pronto", "prontos")}`,
         },
         {
             stage: "transcribing",

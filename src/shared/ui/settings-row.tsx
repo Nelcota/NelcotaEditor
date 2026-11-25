@@ -29,18 +29,18 @@ export function SettingsRow({
     return (
         <div
             className={cn(
-                "flex min-h-16 flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3.5 sm:gap-x-6 sm:px-5",
+                "flex min-h-20 flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:gap-x-6 sm:px-6",
                 className,
             )}
         >
-            <div className="flex min-w-40 flex-[1_1_12rem] items-center gap-3">
+            <div className="flex min-w-40 flex-[1_1_12rem] items-center gap-4">
                 {art}
-                <div className="grid min-w-0 gap-0.5">
-                    <span id={labelId} className="text-sm font-semibold">
+                <div className="grid min-w-0 gap-1">
+                    <span id={labelId} className="text-base font-semibold">
                         {label}
                     </span>
                     {description !== undefined && (
-                        <span className="text-xs text-muted-foreground">{description}</span>
+                        <span className="text-sm text-muted-foreground">{description}</span>
                     )}
                 </div>
             </div>

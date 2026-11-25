@@ -11,8 +11,8 @@ import type { Preferences, TranscriptionLanguage } from "#/modules/preferences/m
 import { useSavePreferences } from "#/modules/preferences/ui/hooks/use-save-preferences";
 import { SaveStatus } from "#/modules/preferences/ui/components/save-status";
 import ScissorsIcon from "~icons/lucide/scissors";
-import { CLIP_COUNT_STEPPER } from "#/modules/preferences/model/preferences";
-import { CountStepper } from "#/shared/ui/count-stepper";
+import { CLIP_COUNT_STEPPER, QUICK_CLIP_COUNTS } from "#/modules/preferences/model/preferences";
+import { QuickCountPicker } from "#/shared/ui/quick-count-picker";
 import { SegmentedControl } from "#/shared/ui/segmented-control";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
 import { SettingsRow } from "#/shared/ui/settings-row";
@@ -48,7 +48,7 @@ function LanguageSelect({ labelId, value, onValueChange }: LanguageSelectProps):
         >
             <SelectTrigger
                 aria-labelledby={labelId}
-                className="h-9 rounded-xl border-transparent bg-card font-semibold hover:border-input/40 hover:bg-accent"
+                className="h-10 rounded-xl border-transparent bg-card font-semibold hover:border-input/40 hover:bg-accent"
             >
                 <SelectValue />
             </SelectTrigger>
@@ -86,22 +86,17 @@ export function PreferencesForm({ preferences }: { preferences: Preferences }): 
                 label="Cortes por vídeo"
                 description="Já vem escolhido em cada vídeo novo; dá para mudar ao enviar."
             >
-                <div className="w-48">
-                    <CountStepper
-                        {...CLIP_COUNT_STEPPER}
-                        icon={
-                            <ScissorsIcon
-                                aria-hidden="true"
-                                className="size-5 text-muted-foreground"
-                            />
-                        }
-                        id="default-clip-count"
-                        label="Cortes por vídeo"
-                        labelClassName="sr-only"
-                        value={preferences.defaultClipCount}
-                        onValueChange={(defaultClipCount) => save.mutate({ defaultClipCount })}
-                    />
-                </div>
+                <QuickCountPicker
+                    id="default-clip-count"
+                    label="Cortes por vídeo"
+                    icon={
+                        <ScissorsIcon aria-hidden="true" className="size-5 text-muted-foreground" />
+                    }
+                    quickCounts={QUICK_CLIP_COUNTS}
+                    stepper={CLIP_COUNT_STEPPER}
+                    value={preferences.defaultClipCount}
+                    onValueChange={(defaultClipCount) => save.mutate({ defaultClipCount })}
+                />
             </SettingsRow>
             <SettingsRow
                 label={CLIP_LENGTH_LABEL}
@@ -132,7 +127,7 @@ export function PreferencesForm({ preferences }: { preferences: Preferences }): 
                     }
                 />
             </SettingsRow>
-            <div className="px-4 py-1 sm:px-5">
+            <div className="px-5 py-2 sm:px-6">
                 <SaveStatus status={save.status} onRetry={retry} />
             </div>
         </>

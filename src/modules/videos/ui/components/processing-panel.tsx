@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import CheckIcon from "~icons/lucide/check";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
-import { toCrewLine } from "#/modules/videos/model/crew-lines";
 import { CancelVideoButton } from "#/modules/videos/ui/components/cancel-video-button";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { useProcessingTimeLeft } from "#/modules/videos/ui/hooks/use-processing-time-left";
@@ -73,7 +72,7 @@ function StepCrew({ status, state }: StepCrewProps): ReactNode {
 
 function describeStage(video: VideoSummary): string {
     if (video.status === "queued") {
-        return "Na fila: começa assim que o vídeo anterior terminar.";
+        return "Na fila: começa assim que chegar a vez dele.";
     }
 
     return `${VIDEO_STATUS_LABELS[video.status]}…`;
@@ -89,16 +88,13 @@ function describeProgress(progressPercent: number, secondsLeft: number | null): 
     return `${percent} · faltam ${formatTimeLeft(secondsLeft)}`;
 }
 
-/** The stage in words and how far the whole video is; the step list shows who is at work. */
+/** The stage in words and how far the whole video is; the step list below shows who is at work. */
 function StageHeadline({ video }: { video: VideoSummary }) {
     const secondsLeft = useProcessingTimeLeft(video.processingStartedAt, video.progressPercent);
 
     return (
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
-            <div>
-                <p className="text-xl font-semibold @md:text-2xl">{describeStage(video)}</p>
-                <p className="text-sm text-foreground">{toCrewLine(video)}</p>
-            </div>
+            <p className="text-xl font-semibold @md:text-2xl">{describeStage(video)}</p>
             <p className="text-sm text-muted-foreground tabular-nums">
                 {describeProgress(video.progressPercent, secondsLeft)}
             </p>

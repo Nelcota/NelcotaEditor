@@ -26,7 +26,7 @@ function roundTime(seconds: number): number {
 }
 
 const INVALID_EDIT_MESSAGE = "Essa mudança não cabe nas regras do corte.";
-const RENDER_FAILED_MESSAGE = "Não foi possível enviar o corte para a Brasa. Tente novamente.";
+const RENDER_FAILED_MESSAGE = "Não foi possível renderizar o corte. Tente novamente.";
 
 type RenderOutcome = "queued" | "conflict" | "failed";
 

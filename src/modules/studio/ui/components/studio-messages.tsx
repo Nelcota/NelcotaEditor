@@ -8,12 +8,21 @@ import {
 } from "#/modules/studio/ui/components/studio-notices";
 import type { StudioEditor } from "#/modules/studio/ui/hooks/use-studio-editor";
 
-/** True once a render this page started (or watched) has just finished. */
-function useJustRendered(isRendering: boolean): boolean {
+interface JustRendered {
+    /** A render this page started (or watched) has just finished, and the notice is still up. */
+    isShown: boolean;
+    dismiss: () => void;
+}
+
+function useJustRendered(isRendering: boolean): JustRendered {
     const wasRenderingRef = useRef(isRendering);
     const [hasFinished, setHasFinished] = useState(false);
 
     useEffect(() => {
+        if (wasRenderingRef.current === false && isRendering === true) {
+            setHasFinished(false);
+        }
+
         if (wasRenderingRef.current === true && isRendering === false) {
             setHasFinished(true);
         }
@@ -21,7 +30,7 @@ function useJustRendered(isRendering: boolean): boolean {
         wasRenderingRef.current = isRendering;
     }, [isRendering]);
 
-    return hasFinished;
+    return { isShown: hasFinished, dismiss: () => setHasFinished(false) };
 }
 
 interface StudioMessagesProps {
@@ -38,14 +47,16 @@ export function StudioMessages({
     editor,
     isRendering,
 }: StudioMessagesProps): ReactNode {
-    const hasJustRendered = useJustRendered(isRendering);
+    const justRendered = useJustRendered(isRendering);
 
     return (
         <>
             {clip.status === "failed" && isRendering === false && (
                 <RenderFailedBanner videoId={videoId} clip={clip} />
             )}
-            {hasJustRendered === true && clip.status === "done" && <RenderedNotice clip={clip} />}
+            {justRendered.isShown === true && clip.status === "done" && (
+                <RenderedNotice clip={clip} onDismiss={justRendered.dismiss} />
+            )}
             {editor.autosave.status === "offline" && <OfflineNotice />}
             {editor.renderError !== null && (
                 <p role="alert" className="text-sm text-destructive">

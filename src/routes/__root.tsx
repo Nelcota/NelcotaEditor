@@ -1,14 +1,19 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import {
+    APP_TITLE,
+    SITE_PREVIEW_IMAGE_PATH,
+    buildSitePreviewMeta,
+} from "#/modules/shell/model/site-preview";
 import { THEME_COLOR_META, THEME_HEAD_SCRIPT } from "#/modules/shell/model/theme-head";
+import { getSitePreviewImageUrl } from "#/modules/shell/server/site-preview-functions";
 import appCss from "#/styles.css?url";
 
 interface RouterContext {
     queryClient: QueryClient;
 }
 
-const APP_TITLE = "Nelcota: cortes com legenda";
 const NOT_FOUND_TITLE = "Página não encontrada · Nelcota";
 
 interface MatchState {
@@ -27,13 +32,17 @@ function pickTitle(matches: Array<MatchState>): string {
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-    head: ({ matches }) => ({
+    loader: async () => ({ previewImageUrl: await getSitePreviewImageUrl() }),
+    // The address never changes while the app runs; without this every navigation asks again.
+    staleTime: Number.POSITIVE_INFINITY,
+    head: ({ matches, loaderData }) => ({
         meta: [
             { charSet: "utf-8" },
             { name: "viewport", content: "width=device-width, initial-scale=1" },
             { name: "color-scheme", content: "light" },
             THEME_COLOR_META,
             { title: pickTitle(matches) },
+            ...buildSitePreviewMeta(loaderData?.previewImageUrl ?? SITE_PREVIEW_IMAGE_PATH),
         ],
         links: [
             { rel: "stylesheet", href: appCss },

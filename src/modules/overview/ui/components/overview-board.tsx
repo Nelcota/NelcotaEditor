@@ -40,7 +40,7 @@ export function OverviewBoard({ stats, isStale, onWiden }: OverviewBoardProps): 
             )}
             <section aria-labelledby="crew-title" className="grid gap-3">
                 <h2 id="crew-title" className="text-lg font-semibold">
-                    O que a turma fez no período
+                    Cada etapa no período
                 </h2>
                 <ol className="grid grid-cols-2 gap-3 @4xl:grid-cols-4">
                     {CREW_STAGES.map((stage) => (

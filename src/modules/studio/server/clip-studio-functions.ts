@@ -109,6 +109,7 @@ async function applyDraftAndRequeue(target: DraftToApply): Promise<RenderDraftRe
                     status: "pending",
                     outputPath: null,
                     outputBytes: null,
+                    posterPath: null,
                 })
                 .where(and(eq(clips.id, clip.id), eq(clips.studioDraftVersion, expectedVersion)))
                 .returning({ id: clips.id });
@@ -130,14 +131,13 @@ async function applyDraftAndRequeue(target: DraftToApply): Promise<RenderDraftRe
 
 /** Runs after the commit, so a failure here only leaves an unused file behind. */
 async function removeOldOutput(clip: Clip): Promise<void> {
-    const outputPath = clip.outputPath;
-
-    if (outputPath === null) {
-        return;
-    }
+    const storage = getFileStorage();
+    const storedPaths = [clip.outputPath, clip.posterPath].filter(
+        (storedPath) => storedPath !== null,
+    );
 
     try {
-        await getFileStorage().deleteFile(outputPath);
+        await Promise.all(storedPaths.map((storedPath) => storage.deleteFile(storedPath)));
     } catch (error) {
         logger.error({ clipId: clip.id, error }, "Failed to remove the previous clip file");
     }

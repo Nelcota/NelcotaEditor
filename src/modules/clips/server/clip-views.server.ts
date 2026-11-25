@@ -1,6 +1,7 @@
 import { and, asc, eq, gte, inArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import type { ClipView } from "#/modules/clips/model/clip-view";
+import { toSharedClipPagePath } from "#/modules/clips/model/shared-clip";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { FINISHED_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";
@@ -33,7 +34,7 @@ function toSharePath(clip: ClipViewRow): string | null {
         return null;
     }
 
-    return `/api/share/${clip.shareToken}`;
+    return toSharedClipPagePath(clip.shareToken);
 }
 
 export function toClipView(clip: ClipViewRow): ClipView {

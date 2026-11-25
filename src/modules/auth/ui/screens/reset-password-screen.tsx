@@ -13,6 +13,7 @@ import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 const FIELD_NAMES = ["newPassword"] as const;
 
@@ -48,7 +49,8 @@ function ResetPasswordForm({ token }: { token: string }): ReactNode {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { newPassword: "" },
-        validators: { onSubmit: resetPasswordSchema },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: resetPasswordSchema },
         onSubmitInvalid: ({ formApi }) => focusFirstInvalidField(FIELD_NAMES, formApi),
         onSubmit: async ({ value }) => {
             setErrorMessage(null);

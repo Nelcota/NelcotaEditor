@@ -7,8 +7,21 @@ import { Button } from "#/shared/ui/button";
 interface StandaloneMessageScreenProps {
     title: string;
     description: string;
-    /** Extra actions shown before the way back to the start page. */
+    /** Extra actions shown before the way back. */
     actions?: ReactNode;
+    /** The way back; the start page unless a closer place fits (a missing video goes to Vídeos). */
+    returnLink?: ReactNode;
+}
+
+function HomeLink(): ReactNode {
+    return (
+        <Button asChild variant="secondary">
+            <Link to="/">
+                <ArrowLeftIcon aria-hidden="true" />
+                Ir para o início
+            </Link>
+        </Button>
+    );
 }
 
 /** A full page for when there is no screen to show: an unknown address or an unexpected error. */
@@ -16,6 +29,7 @@ export function StandaloneMessageScreen({
     title,
     description,
     actions,
+    returnLink,
 }: StandaloneMessageScreenProps) {
     return (
         <main className="grid min-h-dvh place-items-center px-4 py-12">
@@ -25,12 +39,7 @@ export function StandaloneMessageScreen({
                 <p className="text-muted-foreground">{description}</p>
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
                     {actions}
-                    <Button asChild variant="secondary">
-                        <Link to="/">
-                            <ArrowLeftIcon aria-hidden="true" />
-                            Ir para o início
-                        </Link>
-                    </Button>
+                    {returnLink ?? <HomeLink />}
                 </div>
             </div>
         </main>

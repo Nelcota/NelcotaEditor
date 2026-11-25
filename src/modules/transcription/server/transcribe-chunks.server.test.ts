@@ -4,9 +4,12 @@ import type { AudioChunk } from "#/modules/transcription/server/extract-audio-ch
 import { transcribeChunks } from "#/modules/transcription/server/transcribe-chunks.server";
 import { transcribeAudioChunk } from "#/modules/transcription/server/whisper-client.server";
 
-// Whisper is an external server; only its adapter is replaced.
 vi.mock("#/modules/transcription/server/whisper-client.server", () => ({
     transcribeAudioChunk: vi.fn(),
+}));
+
+vi.mock("#/shared/server/env.server", () => ({
+    getEnvironment: () => ({ TRANSCRIPTION_CONCURRENCY: 3 }),
 }));
 
 class ChunkFailedError extends Error {

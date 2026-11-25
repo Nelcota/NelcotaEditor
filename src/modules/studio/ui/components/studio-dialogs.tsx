@@ -74,7 +74,7 @@ export function SharedRenderDialog(props: SharedRenderDialogProps): ReactNode {
                     rail={null}
                     progress={null}
                     title="Renderizar o corte de novo?"
-                    description="O arquivo atual é substituído pelo novo. Este corte tem link público: quem abrir o link verá a versão nova depois que a Brasa terminar."
+                    description="O arquivo atual é substituído pelo novo. Este corte tem link público: quem abrir o link verá a versão nova depois que a renderização terminar."
                     footer={
                         <>
                             <AlertDialogCancel variant="ghost" className="text-muted-foreground">

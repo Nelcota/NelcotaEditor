@@ -42,7 +42,10 @@ export function buildHighlightSystemPrompt(clipCount: number, clipLength: ClipLe
         "- Makes sense on its own, without the rest of the video.",
         "- Does not overlap any other clip.",
         "Prefer surprising facts, useful advice, strong opinions, emotion, stories and humor.",
-        "Write `title` and `reason` in the same language as the transcript.",
+        // The title goes on the post, so it follows the video; the reason is read in the app, whose
+        // interface is Brazilian Portuguese.
+        "Write `title` in the same language as the transcript, never translated: an English transcript gets an English title.",
+        "Write `reason` in Brazilian Portuguese, whatever the language of the transcript; only `reason` is in Portuguese.",
         "Never use em dashes or en dashes in `title` or `reason`; use a comma, a colon or a period instead.",
         "Answer only with JSON in this exact format:",
         '{"clips":[{"start":12.3,"end":48.9,"title":"Short catchy title (max 60 characters)","reason":"One sentence on why it works","score":87}]}',

@@ -137,6 +137,33 @@ function ClipRanking({ clips }: { clips: Array<LibraryClip> }): ReactNode {
     );
 }
 
+type PeakLabelPosition = "top" | "left" | "right";
+
+/** Share of the axis near each edge where a label above the dot would be cut by the chart's side. */
+const EDGE_SHARE = 0.2;
+
+/** Near either side the peak's label leans inward, so a peak on the first or last day stays readable. */
+function toPeakLabelPosition(points: Array<DailyPoint>, peak: Peak): PeakLabelPosition {
+    const lastIndex = points.length - 1;
+    const peakIndex = points.findIndex((point) => point.day === peak.day);
+
+    if (lastIndex <= 0 || peakIndex < 0) {
+        return "top";
+    }
+
+    const position = peakIndex / lastIndex;
+
+    if (position >= 1 - EDGE_SHARE) {
+        return "left";
+    }
+
+    if (position <= EDGE_SHARE) {
+        return "right";
+    }
+
+    return "top";
+}
+
 function DailyClipsChart({
     points,
     peak,
@@ -186,7 +213,7 @@ function DailyClipsChart({
                                 stroke="var(--card)"
                                 label={{
                                     value: `${peak.clips} ${pluralize(peak.clips, "corte", "cortes")}`,
-                                    position: "top",
+                                    position: toPeakLabelPosition(points, peak),
                                     fill: "var(--foreground)",
                                     fontSize: 13,
                                     fontWeight: 700,

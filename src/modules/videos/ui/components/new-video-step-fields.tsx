@@ -63,11 +63,7 @@ export function ClipsStepFields({
     return (
         <div className="grid gap-6">
             <div className="grid gap-3">
-                <ClipCountPicker
-                    value={clipCount}
-                    onValueChange={onClipCountChange}
-                    disabled={false}
-                />
+                <ClipCountPicker value={clipCount} onValueChange={onClipCountChange} />
                 <p className="max-w-prose text-sm text-muted-foreground">
                     Vídeos curtos podem render menos cortes. Funciona melhor com alguém falando.
                 </p>

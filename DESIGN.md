@@ -116,6 +116,10 @@ Each drawing has one meaning only:
   next to the facts, never instead of them: **Nel** (brand ghost, host of empty screens), **Luna**
   (queue), **Faísca** (download), **Tinta** (transcription), **Brilho** (best moments), **Brasa**
   (clips), **Sorte** (done), **Guarda** (failed), **Cogu** (cancelled).
+- A name appears only beside its mascot or its role (the processing steps, the Painel crew cards,
+  the Uso rows). Instructions, dialogs, errors and empty states say what happens in plain words
+  ("Descobrimos o idioma sozinhos", "depois que a renderização terminar"), never "a Tinta" or
+  "a turma" alone. The clip score reads "Nota", and its reason is always in Portuguese.
 
 ## Restraint
 
@@ -279,3 +283,4 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-25 | First-video empty state (Vídeos, Painel): title says the action ("Envie seu primeiro vídeo"), one line on what to send, then the four working crew members as steps (mascot, name, what each does) joined by a dashed line, two columns on phones; `EmptyState` takes `children` between the description and the action | The greeting and a paragraph listing the crew in running text took the first glance from the action |
 | 2026-11-25 | Admin gets a fourth tab, Recursos: one settings group per area with a `Switch` (`src/shared/ui/switch.tsx`, Radix) per feature, its effect in one line and who changed it last; a blue notice on top lists the switches away from normal. Closing sign-up and turning maintenance on ask first. Where a feature is paused, the screen shows its one-line reason in place of the control | The owner wanted to turn parts of the app off without a deploy; a reason in place of a missing control keeps people from guessing |
 | 2026-11-25 | Suporte (board "Suporte: tickets dentro do Nelcota"): a Suporte item at the foot of the sidebar list with a blue dot for an unread answer (in the account menu on phones); tickets are a conversation with Aberto, Respondido and Fechado; a failed video offers "Relatar problema" with the video picked; Admin gets a Suporte tab with the queue beside the open ticket and its account, video and error, and the Admin folder counts the tickets waiting; people who cannot sign in reach a public Contato form, in the site's look, from Entrar | The owner wanted people to ask for help inside the app; tickets tied to a video spare a round of questions, and the public form follows the usual way out for a locked account |
+| 2026-11-25 | UX pass as a first-time user: crew names only next to their mascot or role; Início lists the last three videos under the shortcuts; quick counts use the same pills as the other short choices (wizard and Conta), "Curtos" reads "30 segundos"; storage shares are of the quota ("<1%" for a little); finished videos leave the list's progress cell empty; unknown addresses keep the app layout for signed-in people; forms validate on submit, then on change | A new person met six unexplained names, an empty Início after their first video and numbers that looked broken; the rest repeated what a pill or label already said |

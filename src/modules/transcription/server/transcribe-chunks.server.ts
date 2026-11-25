@@ -2,9 +2,12 @@ import type { TranscriptWord } from "#/modules/transcription/model/transcript-wo
 import type { AudioChunk } from "#/modules/transcription/server/extract-audio-chunks.server";
 import { transcribeAudioChunk } from "#/modules/transcription/server/whisper-client.server";
 import type { ChunkTranscription } from "#/modules/transcription/server/whisper-client.server";
+import { createConcurrencyLimit } from "#/shared/server/create-concurrency-limit.server";
+import { getEnvironment } from "#/shared/server/env.server";
 import { runWithConcurrency } from "#/shared/server/run-with-concurrency.server";
 
 const PERCENT = 100;
+let transcriptionSlots: ReturnType<typeof createConcurrencyLimit> | null = null;
 
 export interface Transcription {
     words: Array<TranscriptWord>;
@@ -33,6 +36,9 @@ export async function transcribeChunks(
     onProgress: (percent: number) => void,
 ): Promise<Transcription> {
     const { chunks, concurrency, language } = input;
+    const slots = (transcriptionSlots ??= createConcurrencyLimit(
+        getEnvironment().TRANSCRIPTION_CONCURRENCY,
+    ));
     const siblingFailure = new AbortController();
     const signal = AbortSignal.any([input.signal, siblingFailure.signal]);
     const failures: Array<unknown> = [];
@@ -46,7 +52,9 @@ export async function transcribeChunks(
             }
 
             try {
-                const result = await transcribeAudioChunk(chunk, language, signal);
+                const result = await slots.run(signal, () =>
+                    transcribeAudioChunk(chunk, language, signal),
+                );
                 completedChunks += 1;
                 onProgress((completedChunks / chunks.length) * PERCENT);
                 return [result];

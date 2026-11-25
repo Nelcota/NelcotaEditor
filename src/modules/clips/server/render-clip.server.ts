@@ -10,13 +10,18 @@ import {
 } from "#/modules/clips/model/caption-cues";
 import type { CaptionCue } from "#/modules/clips/model/clip-studio";
 import { ASPECT_RATIO_SIZES } from "#/modules/clips/model/clip-format";
-import { buildClipOutputFileName } from "#/modules/clips/model/clip-output-file";
+import {
+    buildClipOutputFileName,
+    toClipPosterFileName,
+} from "#/modules/clips/model/clip-output-file";
 import { buildRenderedClipUpdate } from "#/modules/clips/model/rendered-clip-update";
 import type { AspectRatio } from "#/modules/clips/model/clip-format";
 import type { ClipStatus } from "#/modules/clips/model/clip-status";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
+import { extractClipPoster } from "#/modules/clips/server/clip-poster.server";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
+import { getClipRenderCapacity } from "#/shared/server/clip-render-capacity.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
@@ -106,8 +111,8 @@ interface FfmpegFiles {
 
 function buildFfmpegArguments(clip: Clip, files: FfmpegFiles): Array<string> {
     const durationSeconds = clip.endSeconds - clip.startSeconds;
-    const { CLIP_RENDER_THREADS: threads, CLIP_RENDER_MAX_FPS: maxFramesPerSecond } =
-        getEnvironment();
+    const { decoderThreads, encoderThreads } = getClipRenderCapacity();
+    const { CLIP_RENDER_MAX_FPS: maxFramesPerSecond } = getEnvironment();
 
     return [
         "-y",
@@ -116,7 +121,7 @@ function buildFfmpegArguments(clip: Clip, files: FfmpegFiles): Array<string> {
         "-ss",
         clip.startSeconds.toFixed(TIME_DECIMALS),
         "-threads:v",
-        String(threads),
+        decoderThreads,
         ...localFileInput(files.sourceAbsolutePath),
         "-t",
         durationSeconds.toFixed(TIME_DECIMALS),
@@ -125,7 +130,7 @@ function buildFfmpegArguments(clip: Clip, files: FfmpegFiles): Array<string> {
         "-c:v",
         VIDEO_CODEC,
         "-threads:v",
-        String(threads),
+        encoderThreads,
         ...buildFrameRateArguments(maxFramesPerSecond),
         "-preset",
         ENCODER_PRESET,
@@ -149,11 +154,14 @@ interface ClipWorkspace {
     outputFileName: string;
     /** The stored file's key. */
     outputPath: string;
+    posterFileName: string;
+    posterPath: string;
 }
 
 function createClipWorkspace(clip: Clip, workDirectory: string): ClipWorkspace {
     const workingDirectory = path.join(workDirectory, CLIPS_DIRECTORY_NAME);
     const outputFileName = buildClipOutputFileName(clip.id, clip.studioDraftVersion);
+    const posterFileName = toClipPosterFileName(outputFileName);
     const clipsDirectory = path.posix.join(getVideoDirectory(clip.videoId), CLIPS_DIRECTORY_NAME);
 
     return {
@@ -161,6 +169,8 @@ function createClipWorkspace(clip: Clip, workDirectory: string): ClipWorkspace {
         subtitlesFile: path.join(workingDirectory, `${clip.id}.ass`),
         outputFileName,
         outputPath: path.posix.join(clipsDirectory, outputFileName),
+        posterFileName,
+        posterPath: path.posix.join(clipsDirectory, posterFileName),
     };
 }
 
@@ -190,37 +200,74 @@ async function encodeClip(input: RenderClipInput, workspace: ClipWorkspace): Pro
         sourceAbsolutePath: input.localSourcePath,
         outputFileName: workspace.outputFileName,
     };
-
-    const startedAt = performance.now();
+    const { slots } = getClipRenderCapacity();
 
     try {
         // The working directory keeps the ass filter argument free of path escaping issues.
-        await runCommand("ffmpeg", buildFfmpegArguments(input.clip, files), {
-            workingDirectory: workspace.workingDirectory,
-            signal: input.signal,
+        return await slots.run(input.signal, async () => {
+            const startedAt = performance.now();
+            await runCommand("ffmpeg", buildFfmpegArguments(input.clip, files), {
+                workingDirectory: workspace.workingDirectory,
+                signal: input.signal,
+            });
+            return Math.round(performance.now() - startedAt);
         });
-        return Math.round(performance.now() - startedAt);
     } finally {
         // A failed or cancelled render must not leave the subtitles behind.
         await rm(workspace.subtitlesFile, { force: true });
     }
 }
 
-interface RenderedClipFile {
-    outputPath: string;
+export interface LocalClipFile {
+    /** The stored file's key. */
+    storagePath: string;
     localPath: string;
+}
+
+interface RenderedClipFiles {
+    video: LocalClipFile;
     encodeDurationMs: number;
+    /** Null when the frame could not be taken; the clip is fine without it. */
+    poster: LocalClipFile | null;
+}
+
+async function takePoster(
+    input: RenderClipInput,
+    workspace: ClipWorkspace,
+): Promise<LocalClipFile | null> {
+    const clip = input.clip;
+    const localPath = path.join(workspace.workingDirectory, workspace.posterFileName);
+    const isWritten = await extractClipPoster({
+        clipId: clip.id,
+        renderedFilePath: path.join(workspace.workingDirectory, workspace.outputFileName),
+        durationSeconds: clip.endSeconds - clip.startSeconds,
+        posterFilePath: localPath,
+        signal: input.signal,
+    });
+
+    if (isWritten === false) {
+        return null;
+    }
+
+    return { storagePath: workspace.posterPath, localPath };
+}
+
+export interface RenderedClipOutput {
+    outputPath: string;
+    /** The video and the poster together. */
+    outputBytes: number;
+    posterPath: string | null;
 }
 
 export async function recordRenderedClip(
     clipId: string,
-    output: { outputPath: string; outputBytes: number },
+    output: RenderedClipOutput,
     executor: Pick<typeof db, "update">,
 ): Promise<void> {
-    const { outputPath, outputBytes } = output;
+    const { outputPath, outputBytes, posterPath } = output;
     const rows = await executor
         .update(clips)
-        .set(buildRenderedClipUpdate(outputPath, outputBytes))
+        .set({ ...buildRenderedClipUpdate(outputPath, outputBytes), posterPath })
         .where(eq(clips.id, clipId))
         .returning({ id: clips.id });
 
@@ -229,8 +276,8 @@ export async function recordRenderedClip(
     }
 }
 
-/** Encodes one clip in the local workspace in its chosen shape and caption style. */
-export async function renderClip(input: RenderClipInput): Promise<RenderedClipFile> {
+/** Encodes one clip in the local workspace in its chosen shape and caption style, with a poster. */
+export async function renderClip(input: RenderClipInput): Promise<RenderedClipFiles> {
     const clip = input.clip;
     assertValidRange(clip);
     const workspace = createClipWorkspace(clip, input.workDirectory);
@@ -238,11 +285,12 @@ export async function renderClip(input: RenderClipInput): Promise<RenderedClipFi
     await mkdir(workspace.workingDirectory, { recursive: true });
     await writeSubtitles(input, workspace);
     const encodeDurationMs = await encodeClip(input, workspace);
-    return {
-        encodeDurationMs,
-        outputPath: workspace.outputPath,
+    const video = {
+        storagePath: workspace.outputPath,
         localPath: path.join(workspace.workingDirectory, workspace.outputFileName),
     };
+
+    return { video, encodeDurationMs, poster: await takePoster(input, workspace) };
 }
 
 export async function setClipStatus(clipId: string, status: ClipStatus): Promise<void> {

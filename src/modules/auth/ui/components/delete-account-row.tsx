@@ -13,7 +13,7 @@ export function DeleteAccountRow(): ReactNode {
         <section aria-label="Excluir conta" className="rounded-2xl border border-destructive/35">
             <SettingsRow
                 label="Excluir conta"
-                description="Apaga a conta e tudo o que a equipe fez para você. Vídeos em processamento precisam ser cancelados antes."
+                description="Apaga a conta e todos os seus vídeos e cortes. Vídeos em processamento precisam ser cancelados antes."
             >
                 <Button
                     variant="secondary"

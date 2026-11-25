@@ -2,12 +2,12 @@ import FileVideoIcon from "~icons/lucide/file-video";
 import ScissorsIcon from "~icons/lucide/scissors";
 import YoutubeIcon from "~icons/lucide/youtube";
 import { Link } from "@tanstack/react-router";
-import { useId, useState } from "react";
+import { useId } from "react";
 import type { ReactNode } from "react";
 import { toCrewLine } from "#/modules/videos/model/crew-lines";
 import { useVideoRowActions } from "#/modules/videos/ui/hooks/use-video-row-actions";
 import type { VideoRowActions } from "#/modules/videos/ui/hooks/use-video-row-actions";
-import { VideoMascot } from "#/modules/videos/ui/components/video-mascot";
+import { VideoThumbnail } from "#/modules/videos/ui/components/video-thumbnail";
 import { VideoRowMenu } from "#/modules/videos/ui/components/video-row-menu";
 import { VideoRowStatus } from "#/modules/videos/ui/components/video-row-status";
 import { VIDEO_SOURCE_LABELS } from "#/modules/videos/model/video-status-labels";
@@ -25,32 +25,6 @@ export const VIDEO_TABLE_COLUMNS =
     "@4xl:grid-cols-[minmax(0,2.4fr)_8.5rem_4rem_4.5rem_minmax(0,1.5fr)_5rem_2.5rem]";
 
 const PERCENT = 100;
-
-/** A frame of the video when there is one; its mascot on a sunken field otherwise. */
-function RowThumbnail({ video }: { video: VideoSummary }): ReactNode {
-    const thumbnailUrl = video.thumbnailUrl;
-    // A frame that fails to load (deleted file, blocked host) falls back to the mascot too.
-    const [hasFailed, setHasFailed] = useState(false);
-
-    if (thumbnailUrl === null || hasFailed === true) {
-        return (
-            <span className="grid h-10 w-16 shrink-0 place-items-center rounded-lg bg-secondary">
-                <VideoMascot videoId={video.id} className="size-6" />
-            </span>
-        );
-    }
-
-    return (
-        <img
-            src={thumbnailUrl}
-            alt=""
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            onError={() => setHasFailed(true)}
-            className="h-10 w-16 shrink-0 rounded-lg bg-secondary object-cover outline-1 -outline-offset-1 outline-foreground/10 outline-solid"
-        />
-    );
-}
 
 /** "YouTube · 16:51": where it came from and how long it is. */
 function describeSource(video: VideoSummary): string {
@@ -174,13 +148,16 @@ function ClipCount({ video }: { video: VideoSummary }): ReactNode {
     );
 }
 
-/** The stage in words, the percent and the bar, coloured by how it is going. */
+/**
+ * The stage in words, the percent and the bar, while the video is still on its way. A finished,
+ * failed or cancelled video leaves it empty: the status pill already says how it ended.
+ */
 function ProgressCell({ video }: { video: VideoSummary }): ReactNode {
     const status = toTableStatus(video.status);
-    let percent = Math.min(PERCENT, Math.max(0, video.progressPercent));
+    const percent = Math.min(PERCENT, Math.max(0, video.progressPercent));
 
-    if (video.status === "done") {
-        percent = PERCENT;
+    if (status.tone === "success" || status.tone === "danger" || video.status === "cancelled") {
+        return null;
     }
 
     return (
@@ -215,7 +192,7 @@ export function VideoListRow({ video }: { video: VideoSummary }): ReactNode {
             )}
         >
             <div className="flex min-w-0 items-center gap-3">
-                <RowThumbnail video={video} />
+                <VideoThumbnail video={video} />
                 <div className="grid min-w-0 gap-0.5">
                     {/* The link covers the whole row; the menu and retry sit above it. */}
                     <Link

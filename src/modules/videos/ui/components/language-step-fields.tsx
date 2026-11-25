@@ -7,7 +7,7 @@ import type { TranscriptionLanguage } from "#/modules/preferences/model/preferen
 
 /** One line under each option, so the choice is clear without reading a manual. */
 const LANGUAGE_HINTS: Record<TranscriptionLanguage, string> = {
-    "": "A Tinta descobre sozinha. Funciona na maioria dos vídeos.",
+    "": "Descobrimos o idioma sozinhos. Funciona na maioria dos vídeos.",
     pt: "Fala em português do Brasil ou de Portugal.",
     en: "Fala em inglês.",
     es: "Fala em espanhol.",

@@ -34,7 +34,7 @@ function AvatarButton({ onClick }: { onClick: () => void }): ReactNode {
             <UserAvatar
                 name={user.name}
                 avatar={toAvatar(user.image)}
-                className="size-14 text-base transition-opacity group-hover:opacity-85"
+                className="size-16 text-lg transition-opacity group-hover:opacity-85"
             />
             <span className="absolute -end-0.5 -bottom-0.5 grid size-6 place-items-center rounded-full bg-foreground text-background ring-2 ring-background">
                 <CameraIcon className="size-3.5" aria-hidden="true" />
@@ -90,7 +90,7 @@ export function ProfileRows(): ReactNode {
             <SettingsRow
                 art={<AvatarButton onClick={() => setOpenDialog("photo")} />}
                 label={
-                    <span title={user.name} className="block truncate text-base">
+                    <span title={user.name} className="block truncate text-lg">
                         {user.name}
                     </span>
                 }
@@ -101,7 +101,7 @@ export function ProfileRows(): ReactNode {
                 }
                 className="py-4"
             >
-                <Button variant="secondary" size="sm" onClick={() => setOpenDialog("profile")}>
+                <Button variant="secondary" onClick={() => setOpenDialog("profile")}>
                     <PenIcon aria-hidden="true" />
                     Editar perfil
                 </Button>
@@ -110,7 +110,7 @@ export function ProfileRows(): ReactNode {
                 label="Senha"
                 description={<PasswordLine hasChanged={hasChangedPassword} />}
             >
-                <Button variant="secondary" size="sm" onClick={() => setOpenDialog("password")}>
+                <Button variant="secondary" onClick={() => setOpenDialog("password")}>
                     <KeyRoundIcon aria-hidden="true" />
                     Trocar senha
                 </Button>
@@ -118,7 +118,7 @@ export function ProfileRows(): ReactNode {
             <SettingsRow label="Sessão" description={sessionLine}>
                 <Button
                     variant="secondary"
-                    size="sm"
+
                     onClick={() => track(signOut())}
                     disabled={isSigningOut}
                     aria-busy={isSigningOut}

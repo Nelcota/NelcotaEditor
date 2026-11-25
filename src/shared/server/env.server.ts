@@ -71,10 +71,17 @@ const baseEnvironmentSchema = z.object({
     EMAIL_FROM: z.string().trim().min(1).default("Nelcota <nao-responda@tela.nelcota.com>"),
     // Soft limit per user: the usage screen warns as it fills, nothing is blocked.
     STORAGE_QUOTA_GIGABYTES: z.coerce.number().positive().default(20),
-    // Videos per worker, from different users. Each video has its own rendering and transcription lanes.
+    // Videos per worker, from different users. They share encoding and transcription capacity.
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(2),
-    CLIP_RENDER_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(2),
-    CLIP_RENDER_THREADS: z.coerce.number().int().min(1).max(8).default(2),
+    FFMPEG_CPU_BUDGET: optionalTextSchema.pipe(
+        z.coerce.number<string>().int().positive().optional(),
+    ),
+    CLIP_RENDER_CONCURRENCY: optionalTextSchema.pipe(
+        z.coerce.number<string>().int().min(1).max(8).optional(),
+    ),
+    CLIP_RENDER_THREADS: optionalTextSchema.pipe(
+        z.coerce.number<string>().int().min(1).max(8).optional(),
+    ),
     CLIP_RENDER_MAX_FPS: optionalTextSchema.pipe(z.literal("30").optional()),
     // A Netscape cookies.txt of a dedicated YouTube account, in base64. YouTube asks datacenter
     // addresses to sign in, so production downloads fail without it. Unset: no cookies are sent.

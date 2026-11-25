@@ -25,6 +25,7 @@ import { StepRail } from "#/shared/ui/step-rail";
 import { TextField } from "#/shared/ui/text-field";
 import { useSteps } from "#/shared/ui/use-steps";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 const appRoute = getRouteApi("/_app");
 const SAVE_FAILED_MESSAGE = "Não foi possível salvar o nome. Tente novamente.";
@@ -67,7 +68,8 @@ function useProfileNameForm(onDone: () => void) {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { name: user.name },
-        validators: { onSubmit: profileNameSchema },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: profileNameSchema },
         onSubmit: async ({ value }) => {
             setErrorMessage(null);
 

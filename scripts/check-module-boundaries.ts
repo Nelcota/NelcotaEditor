@@ -73,6 +73,11 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
         reason: "The worker checks each new file against the same quota as incoming uploads",
     },
     {
+        from: "src/modules/processing/server/render-pending-clips.server.ts",
+        to: "src/modules/videos/model/storage-quota-exceeded-error",
+        reason: "A render that fits without its optional poster can retry the storage transaction",
+    },
+    {
         from: "src/modules/processing/server/video-storage-transaction.server.ts",
         to: "src/modules/videos/server/video-start-transaction.server",
         reason: "The worker records files under the same per-user lock as uploads",

@@ -13,16 +13,16 @@ export function SettingsGroup({ title, description, children }: SettingsGroupPro
     const titleId = useId();
 
     return (
-        <section aria-labelledby={titleId} className="grid gap-2">
+        <section aria-labelledby={titleId} className="grid gap-3">
             <div className="grid gap-0.5 px-1">
                 <h2
                     id={titleId}
-                    className="text-xs font-bold tracking-[0.08em] text-muted-foreground uppercase"
+                    className="text-sm font-bold tracking-eyebrow text-muted-foreground uppercase"
                 >
                     {title}
                 </h2>
                 {description !== undefined && (
-                    <p className="text-xs text-muted-foreground">{description}</p>
+                    <p className="text-sm text-muted-foreground">{description}</p>
                 )}
             </div>
             <div className="divide-y overflow-hidden rounded-2xl border">{children}</div>

@@ -1,4 +1,5 @@
 const CLIP_OUTPUT_EXTENSION = ".mp4";
+const CLIP_POSTER_EXTENSION = ".jpg";
 
 /**
  * The rendered file's name. The draft version moves forward on every Studio render, so a new
@@ -14,4 +15,13 @@ export function buildClipOutputFileName(clipId: string, draftVersion: number): s
     }
 
     return `${clipId}-v${draftVersion}${CLIP_OUTPUT_EXTENSION}`;
+}
+
+/** The poster sits beside its render with the same name, so the two are removed together. */
+export function toClipPosterFileName(outputFileName: string): string {
+    if (outputFileName.endsWith(CLIP_OUTPUT_EXTENSION) === false) {
+        throw new RangeError(`Not a rendered clip file: ${outputFileName}`);
+    }
+
+    return `${outputFileName.slice(0, -CLIP_OUTPUT_EXTENSION.length)}${CLIP_POSTER_EXTENSION}`;
 }

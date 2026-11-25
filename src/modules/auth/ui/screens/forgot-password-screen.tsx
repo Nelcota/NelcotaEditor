@@ -15,6 +15,7 @@ import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 const FIELD_NAMES = ["email"] as const;
 /** The email's link opens Better Auth, which forwards a valid token to this screen. */
@@ -51,7 +52,8 @@ export function ForgotPasswordScreen({ captchaSiteKey }: ForgotPasswordScreenPro
     const [sentToEmail, setSentToEmail] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { email: "" },
-        validators: { onSubmit: forgotPasswordSchema },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: forgotPasswordSchema },
         onSubmitInvalid: ({ formApi }) => focusFirstInvalidField(FIELD_NAMES, formApi),
         onSubmit: async ({ value }) => {
             setErrorMessage(null);

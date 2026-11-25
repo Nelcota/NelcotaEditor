@@ -109,5 +109,6 @@ export function useBreadcrumbs(): ReadonlyArray<Crumb> {
         return [ADMIN_CRUMB, { label: "Usuários", to: "/admin/users" }, { label: "Conta" }];
     }
 
-    return [HOME_CRUMB];
+    // Any other address is the catch-all 404 page.
+    return [HOME_CRUMB, { label: "Página não encontrada" }];
 }

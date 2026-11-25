@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { AccountMenuButton } from "#/modules/auth/ui/components/account-menu-button";
 import { ImpersonationBanner } from "#/modules/auth/ui/components/impersonation-banner";
@@ -15,8 +15,13 @@ import {
 import { VideoProgressWatcher } from "#/modules/videos/ui/components/video-progress-watcher";
 
 export const Route = createFileRoute("/_app")({
-    beforeLoad: async ({ context, location }) => {
+    beforeLoad: async ({ context, location, params }) => {
         const user = await context.queryClient.fetchQuery(currentUserQueryOptions());
+
+        // An unknown address (the catch-all child) is a 404 for everyone, not a sign-in prompt.
+        if (user === null && "_splat" in params) {
+            throw notFound();
+        }
 
         // The page asked for comes back after signing in; href is relative (path, search, hash).
         if (user === null) {

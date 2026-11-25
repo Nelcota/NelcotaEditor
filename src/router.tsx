@@ -51,7 +51,7 @@ export function getRouter() {
         scrollRestoration: true,
         defaultPreload: "intent",
         defaultPreloadStaleTime: 0,
-        defaultNotFoundComponent: NotFoundScreen,
+        defaultNotFoundComponent: () => <NotFoundScreen />,
         defaultErrorComponent: RouteErrorScreen,
         ssr: { nonce: readCspNonce() },
     });

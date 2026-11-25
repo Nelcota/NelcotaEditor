@@ -18,6 +18,7 @@ import {
 } from "#/shared/ui/step-dialog-frame";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 const FALLBACK_ERROR_MESSAGE =
     "Não foi possível renomear o vídeo. Confira sua conexão e tente de novo.";
@@ -46,7 +47,8 @@ function RenameVideoForm({ video, onDone }: RenameVideoFormProps) {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { title: video.title },
-        validators: { onSubmit: renameVideoFormSchema },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: renameVideoFormSchema },
         onSubmit: async ({ value }) => {
             setErrorMessage(null);
 

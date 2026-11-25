@@ -8,6 +8,10 @@ import { asc, eq, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import type { Clip } from "#/modules/clips/clips.schema";
+import {
+    buildClipOutputFileName,
+    toClipPosterFileName,
+} from "#/modules/clips/model/clip-output-file";
 import { processVideo } from "#/modules/processing/server/process-video.server";
 import { renderPendingClips } from "#/modules/processing/server/render-pending-clips.server";
 import { requestVideoCancellation } from "#/modules/video-records/server/stop-video.server";
@@ -50,6 +54,7 @@ vi.mock("execa", async (importOriginal) => {
 
 const GIGABYTE = 1024 * 1024 * 1024;
 const CLIP_BYTES = 128;
+const POSTER_BYTES = 32;
 
 async function insertVideo(sourceBytes: number | null = null): Promise<Video> {
     const userId = randomUUID();
@@ -99,6 +104,12 @@ async function writeTestRender(
     const outputName = args.at(-1);
     assert.equal(command, "ffmpeg");
     assert.ok(outputName);
+
+    if (path.isAbsolute(outputName) === true) {
+        await writeFile(outputName, new Uint8Array(POSTER_BYTES));
+        return;
+    }
+
     assert.ok(options.cwd);
     await writeFile(path.join(options.cwd, outputName), new Uint8Array(CLIP_BYTES));
 }
@@ -174,7 +185,11 @@ describe("renderPendingClips", () => {
             await renderTestClips(video, videoClips);
 
             const savedClips = await db
-                .select({ status: clips.status })
+                .select({
+                    status: clips.status,
+                    outputBytes: clips.outputBytes,
+                    posterPath: clips.posterPath,
+                })
                 .from(clips)
                 .where(eq(clips.videoId, video.id))
                 .orderBy(asc(clips.position));
@@ -182,12 +197,16 @@ describe("renderPendingClips", () => {
                 savedClips.map((clip) => clip.status),
                 ["done", "failed"],
             );
+            const rendered = savedClips[0];
+            assert.ok(rendered?.posterPath);
+            assert.equal(rendered.outputBytes, CLIP_BYTES + POSTER_BYTES);
+            assert.equal(await getFileStorage().measureFile(rendered.posterPath), POSTER_BYTES);
         } finally {
             await getFileStorage().deleteFolder(getVideoDirectory(video.id));
         }
     });
 
-    test("keeps only the output that fits when two renders finish concurrently", async () => {
+    test("keeps the video that fits and discards both posters when space is tight", async () => {
         const quotaBytes = getEnvironment().STORAGE_QUOTA_GIGABYTES * GIGABYTE;
         const video = await insertVideo(Math.floor(quotaBytes) - CLIP_BYTES);
         const videoClips = await insertClips(video.id, ["pending", "pending"]);
@@ -196,14 +215,25 @@ describe("renderPendingClips", () => {
             await renderTestClips(video, videoClips);
 
             const savedClips = await db
-                .select({ status: clips.status, outputBytes: clips.outputBytes })
+                .select({
+                    status: clips.status,
+                    outputBytes: clips.outputBytes,
+                    posterPath: clips.posterPath,
+                })
                 .from(clips)
                 .where(eq(clips.videoId, video.id))
                 .orderBy(asc(clips.status));
             assert.deepEqual(savedClips, [
-                { status: "done", outputBytes: CLIP_BYTES },
-                { status: "failed", outputBytes: null },
+                { status: "done", outputBytes: CLIP_BYTES, posterPath: null },
+                { status: "failed", outputBytes: null, posterPath: null },
             ]);
+            const clipDirectory = path.posix.join(getVideoDirectory(video.id), "clips");
+
+            for (const clip of videoClips) {
+                const outputName = buildClipOutputFileName(clip.id, clip.studioDraftVersion);
+                const posterPath = path.posix.join(clipDirectory, toClipPosterFileName(outputName));
+                assert.equal(await getFileStorage().measureFile(posterPath), 0);
+            }
         } finally {
             await getFileStorage().deleteFolder(getVideoDirectory(video.id));
         }

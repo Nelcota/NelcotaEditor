@@ -37,7 +37,7 @@ export const METRIC_DEFINITIONS: ReadonlyArray<MetricDefinition> = [
     {
         key: "transcribedMinutes",
         label: "Minutos transcritos",
-        help: "Duração somada dos vídeos que a Tinta transcreveu.",
+        help: "Duração somada dos vídeos transcritos.",
         format: formatInteger,
         unit: "min",
         betterWhen: "up",
@@ -56,8 +56,8 @@ export const METRIC_DEFINITIONS: ReadonlyArray<MetricDefinition> = [
     },
     {
         key: "averageScore",
-        label: "Nota média do Brilho",
-        help: "Média das notas (0 a 100) que o Brilho deu aos cortes.",
+        label: "Nota média dos cortes",
+        help: "Média das notas (0 a 100) dadas aos cortes.",
         format: formatInteger,
         unit: "/100",
         betterWhen: "up",

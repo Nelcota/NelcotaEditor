@@ -16,7 +16,7 @@ import type { VideoDetails } from "#/modules/videos/model/video-views";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { EmptyState } from "#/shared/ui/empty-state";
-import { NotFoundScreen } from "#/shared/ui/not-found-screen";
+import { VideoNotFoundScreen } from "#/modules/videos/ui/screens/video-not-found-screen";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { AsyncButton } from "#/shared/ui/async-button";
@@ -168,7 +168,7 @@ export function VideoDetailsScreen({ videoId, search, StudioTab }: VideoDetailsS
 
     // Deleted in another tab while this page was open: the poll answers not found over old data.
     if (isNotFound(detailsQuery.error) === true) {
-        return <NotFoundScreen />;
+        return <VideoNotFoundScreen />;
     }
 
     if (detailsQuery.isError === true && details === undefined) {

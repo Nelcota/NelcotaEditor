@@ -81,7 +81,7 @@ export function OriginalPlayer(props: OriginalPlayerProps): ReactNode {
         return (
             <OriginalUnavailable
                 video={video}
-                message="O vídeo original aparece aqui assim que o Faísca terminar de trazê-lo."
+                message="O vídeo original aparece aqui assim que o download terminar."
             />
         );
     }

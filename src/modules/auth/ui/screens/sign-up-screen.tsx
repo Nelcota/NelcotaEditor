@@ -1,6 +1,7 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import type { ReactNode } from "react";
 import {
     NEW_PASSWORD_HINT,
@@ -23,6 +24,7 @@ import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 /** In page order; each field's input id matches its name. */
 const FIELD_NAMES = ["name", "email", "password"] as const;
@@ -37,6 +39,8 @@ const SERVER_ERROR_FIELDS = new Map<string, (typeof FIELD_NAMES)[number]>([
     [toAuthErrorMessage("PASSWORD_TOO_SHORT"), "password"],
     [toAuthErrorMessage("PASSWORD_TOO_LONG"), "password"],
 ]);
+
+const EMAIL_FIELD_ID = "email";
 
 interface SignUpScreenProps {
     /** Cloudflare Turnstile site key; null when the check is turned off. */
@@ -55,7 +59,8 @@ export function SignUpScreen({
     const [sentToEmail, setSentToEmail] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { name: "", email: "", password: "", [SIGN_UP_HONEYPOT_FIELD]: "" },
-        validators: { onSubmit: signUpSchema },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: signUpSchema },
         onSubmitInvalid: ({ formApi }) => focusFirstInvalidField(FIELD_NAMES, formApi),
         onSubmit: async ({ value, formApi }) => {
             setErrorMessage(null);
@@ -95,7 +100,13 @@ export function SignUpScreen({
     }
 
     if (sentToEmail !== null) {
-        return <CheckEmailCard email={sentToEmail} />;
+        // Back on the form, still filled in, with the cursor in the address to fix.
+        const changeEmail = (): void => {
+            flushSync(() => setSentToEmail(null));
+            document.getElementById(EMAIL_FIELD_ID)?.focus();
+        };
+
+        return <CheckEmailCard email={sentToEmail} onChangeEmail={changeEmail} />;
     }
 
     return (
@@ -131,7 +142,7 @@ export function SignUpScreen({
                 <form.Field name="email">
                     {(field) => (
                         <TextField
-                            id="email"
+                            id={EMAIL_FIELD_ID}
                             label="Email"
                             type="email"
                             autoComplete="email"

@@ -34,7 +34,7 @@ const FAILED_COPY: PanelCopy = {
 const CANCELLED_COPY: PanelCopy = {
     title: "Processamento cancelado",
     fallbackDescription:
-        "Cogu guardou as etapas que já terminaram. Retome para continuar de onde parou.",
+        "As etapas que já terminaram estão salvas. Retome para continuar de onde parou.",
     actionLabel: "Retomar",
     actionIcon: PlayIcon,
     className: "bg-popover",

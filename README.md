@@ -139,17 +139,19 @@ What makes it fast:
   2 threads, see `docker-compose.yml`). 10 minutes of audio went from 165s to 51s.
 - YouTube downloads prefer H.264, which decodes much faster than AV1/VP9 when rendering, and
   fetch 4 fragments at once.
-- Two clips render at the same time.
+- Clip encoding uses a shared pool sized by the worker's available CPUs. With eight CPUs, up to
+  three clips encode at once. Saving finished clips can overlap the next encode.
 
 Use the Compose environment to tune the worker for the server's CPU budget.
 
 | Setting                                           | Default                            | What it controls                                                                                       |
 | ------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `WORKER_CONCURRENCY`                              | 1 in production, 2 locally         | Videos per worker. Each account can process one video at a time across replicas.                       |
-| `CLIP_RENDER_CONCURRENCY`                         | 2                                  | Clips rendered at once per video.                                                                      |
-| `CLIP_RENDER_THREADS`                             | 2                                  | Video decoder and encoder threads per FFmpeg process. The filter chain uses one thread.                |
+| `FFMPEG_CPU_BUDGET`                               | Visible CPUs                       | CPU count used to size the encoding pool. Set it when the container has a lower CPU time quota.        |
+| `CLIP_RENDER_CONCURRENCY`                         | Automatic                          | Parallel clip encodes shared by all videos in one worker process.                                      |
+| `CLIP_RENDER_THREADS`                             | Automatic                          | Video decoder and encoder threads per FFmpeg process. The filter chain uses one thread.                |
 | `CLIP_RENDER_MAX_FPS`                             | Empty                              | Set to `30` to cap exports at 30 fps. Leave empty to use the source frame rate.                        |
-| `TRANSCRIPTION_CONCURRENCY`                       | 3                                  | Audio chunks submitted at once per video.                                                              |
+| `TRANSCRIPTION_CONCURRENCY`                       | 3                                  | Parallel audio requests shared by all videos in one worker process.                                    |
 | `WHISPER__NUM_WORKERS` and `WHISPER__CPU_THREADS` | 3 × 2 in production, 4 × 2 locally | How the Whisper service divides CPU threads across requests.                                           |
 | `WHISPER__USE_BATCHED_MODE`                       | `false`                            | Switches Whisper to batched inference. Validate word error rate and caption timing before enabling it. |
 

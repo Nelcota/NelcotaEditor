@@ -44,11 +44,17 @@ function useGreeting(): string {
     return greetingForHour(hour);
 }
 
+interface HomeScreenProps {
+    linkComposer: ReactNode;
+    /** The last videos, from the videos module; empty for someone who has none yet. */
+    recentVideos: ReactNode;
+}
+
 /**
  * Início, as plain as the reference's assistant home: a greeting from Nel, the link box that
- * starts a video and three shortcuts under it. Nothing else competes with the box.
+ * starts a video and three shortcuts under it, then the last videos once there are any.
  */
-export function HomeScreen({ linkComposer }: { linkComposer: ReactNode }): ReactNode {
+export function HomeScreen({ linkComposer, recentVideos }: HomeScreenProps): ReactNode {
     const firstName = useFirstName();
     const greeting = useGreeting();
 
@@ -68,6 +74,7 @@ export function HomeScreen({ linkComposer }: { linkComposer: ReactNode }): React
             </div>
             <div className="grid w-full max-w-3xl">{linkComposer}</div>
             <HomeShortcuts />
+            {recentVideos}
         </div>
     );
 }

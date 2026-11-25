@@ -19,7 +19,7 @@ const CLIP_STAGE: Record<ClipStatus, VideoStatus> = {
 
 const NOT_READY_LABELS: Record<ClipStatus, string> = {
     pending: "Na fila",
-    rendering: "Brasa está montando",
+    rendering: "Montando o corte",
     done: "",
     failed: "Não deu para renderizar",
 };
