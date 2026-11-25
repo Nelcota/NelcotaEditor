@@ -141,6 +141,13 @@
       "when": 1795563740315,
       "tag": "0019_video_upload_cancelled_at",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1795573042563,
+      "tag": "0020_app_switches",
+      "breakpoints": true
     }
   ]
 }

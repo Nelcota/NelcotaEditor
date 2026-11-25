@@ -20,18 +20,27 @@ const MODULE_LAYOUT_HINT =
     "<module>.schema.ts, model/, client/, server/, ui/screens|components|hooks/ or hexagonal layers";
 
 const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>>> = {
-    auth: [],
+    "app-switches": [],
+    auth: ["app-switches"],
     "video-records": ["auth"],
     preferences: ["auth", "video-records"],
     transcription: ["auth", "video-records"],
-    clips: ["auth", "video-records", "transcription"],
+    clips: ["app-switches", "auth", "video-records", "transcription"],
     highlights: ["video-records", "transcription", "clips"],
-    processing: ["video-records", "transcription", "clips", "highlights"],
-    videos: ["auth", "video-records", "preferences", "transcription", "clips", "processing"],
+    processing: ["app-switches", "video-records", "transcription", "clips", "highlights"],
+    videos: [
+        "app-switches",
+        "auth",
+        "video-records",
+        "preferences",
+        "transcription",
+        "clips",
+        "processing",
+    ],
     studio: ["auth", "video-records", "transcription", "clips", "processing", "videos"],
     overview: ["auth", "video-records", "transcription", "clips", "videos"],
-    shell: ["auth", "video-records", "preferences", "videos"],
-    admin: ["auth", "video-records", "clips", "videos"],
+    shell: ["app-switches", "auth", "video-records", "preferences", "videos"],
+    admin: ["app-switches", "auth", "video-records", "clips", "videos"],
 };
 
 interface AllowedException {

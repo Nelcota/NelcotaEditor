@@ -19,7 +19,8 @@ interface AuthCardProps {
         linkLabel: string;
         linkTo: "/sign-in" | "/sign-up" | "/forgot-password";
     };
-    children: ReactNode;
+    /** The form; a page with nothing to fill in leaves it out. */
+    children?: ReactNode;
 }
 
 /** The site's logo: the ghost and the uppercase wordmark. */

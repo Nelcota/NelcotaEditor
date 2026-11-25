@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { AccountMenuButton } from "#/modules/auth/ui/components/account-menu-button";
 import { ImpersonationBanner } from "#/modules/auth/ui/components/impersonation-banner";
 import { AppLayout } from "#/modules/shell/ui/screens/app-layout";
+import { appSwitchStatesQueryOptions } from "#/modules/app-switches/model/app-switch-queries";
 import { currentUserQueryOptions } from "#/modules/auth/model/current-user-query";
 import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
 import { usageQueryOptions } from "#/modules/videos/model/library-queries";
@@ -19,6 +20,13 @@ export const Route = createFileRoute("/_app")({
         // The page asked for comes back after signing in; href is relative (path, search, hash).
         if (user === null) {
             throw redirect({ to: "/sign-in", search: { redirect: location.href } });
+        }
+
+        // Only the way there: every server function refuses non-admins during maintenance itself.
+        const switches = await context.queryClient.fetchQuery(appSwitchStatesQueryOptions());
+
+        if (switches["maintenance-mode"] === true && user.isAdmin === false) {
+            throw redirect({ to: "/maintenance" });
         }
 
         return { user };

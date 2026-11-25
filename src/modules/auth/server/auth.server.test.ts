@@ -11,6 +11,12 @@ process.env.BETTER_AUTH_SECRET = "test-secret-with-at-least-thirty-two-character
 process.env.TURNSTILE_SITE_KEY = "";
 process.env.TURNSTILE_SECRET_KEY = "";
 
+// The sign-up switch lives in the database, which unit tests never reach; it stays open here and
+// is checked against the real database in sign-up-closed.server.integration.test.ts.
+vi.mock("#/modules/app-switches/server/app-switches.server", () => ({
+    isAppSwitchEnabled: async (): Promise<boolean> => true,
+}));
+
 const { auth } = await import("#/modules/auth/server/auth.server");
 
 const HTTP_NOT_FOUND = 404;

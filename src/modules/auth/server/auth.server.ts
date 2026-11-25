@@ -6,8 +6,11 @@ import { admin } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { z } from "zod";
 import { db } from "#/db/database.server";
+import { isAppSwitchEnabled } from "#/modules/app-switches/server/app-switches.server";
 import {
     BANNED_USER_MESSAGE,
+    SIGN_UP_CLOSED_CODE,
+    SIGN_UP_CLOSED_MESSAGE,
     VIDEOS_STILL_PROCESSING_CODE,
 } from "#/modules/auth/model/auth-error-message";
 import {
@@ -155,9 +158,27 @@ function requirePasswordToDeleteUser(body: unknown): void {
     }
 }
 
+const SIGN_UP_PATH = "/sign-up/email";
+
+/**
+ * Runs before the captcha and the email lookup, so a closed sign-up answers the same for every
+ * address and never emails the owner of a taken one.
+ */
+async function rejectSignUpWhileClosed(): Promise<void> {
+    if ((await isAppSwitchEnabled("sign-up")) === true) {
+        return;
+    }
+
+    throw new APIError("FORBIDDEN", { message: SIGN_UP_CLOSED_MESSAGE, code: SIGN_UP_CLOSED_CODE });
+}
+
 const runBeforeAuthHooks = createAuthMiddleware(async (ctx) => {
     if (ctx.path === DELETE_USER_PATH) {
         requirePasswordToDeleteUser(ctx.body);
+    }
+
+    if (ctx.path === SIGN_UP_PATH) {
+        await rejectSignUpWhileClosed();
     }
 
     return undefined;
