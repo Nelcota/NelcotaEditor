@@ -5,6 +5,7 @@ import { claudeConnectionQueryOptions } from "#/modules/auth/model/claude-connec
 import type { ClaudeConnection } from "#/modules/auth/model/claude-connection";
 import { ClaudeConnectSteps } from "#/modules/viral-formats/ui/components/claude-connect-steps";
 import { ClaudeConnectedCard } from "#/modules/viral-formats/ui/components/claude-connected-card";
+import { useClaudeConnectedAnnouncement } from "#/modules/viral-formats/ui/hooks/use-claude-connected-announcement";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { BrandMark } from "#/shared/ui/brand-logo";
 import { ClaudeLogo } from "#/shared/ui/claude-logo";
@@ -63,9 +64,13 @@ export function ClaudeConnectionScreen(): ReactNode {
     const connectionQuery = useQuery(claudeConnectionQueryOptions());
     const connection = connectionQuery.data;
     const connectedAt = connection?.connectedAt ?? null;
+    const announcement = useClaudeConnectedAnnouncement(connection);
 
     return (
         <div className="@container grid grid-cols-[minmax(0,1fr)] gap-8">
+            <p role="status" className="sr-only">
+                {announcement}
+            </p>
             <header className="grid max-w-2xl gap-2">
                 <p className="text-xs font-bold tracking-eyebrow text-primary-ink uppercase">
                     Etapa 1

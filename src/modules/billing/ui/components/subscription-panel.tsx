@@ -5,6 +5,7 @@ import { mySubscriptionQueryOptions } from "#/modules/billing/model/subscription
 import type { SubscriptionView } from "#/modules/billing/model/subscription-view";
 import { CancelSubscriptionDialog } from "#/modules/billing/ui/components/cancel-subscription-dialog";
 import { SubscribeOffer } from "#/modules/billing/ui/components/subscribe-offer";
+import { useSubscriptionAnnouncement } from "#/modules/billing/ui/hooks/use-subscription-announcement";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { formatDate } from "#/shared/ui/format";
 import { Skeleton } from "#/shared/ui/skeleton";
@@ -71,8 +72,14 @@ function SubscriptionContent(): ReactNode {
 
 /** The Editor Oculto subscription: the offer for others, the state and cancelling for subscribers. */
 export function SubscriptionPanel(): ReactNode {
+    const subscriptionQuery = useQuery(mySubscriptionQueryOptions());
+    const announcement = useSubscriptionAnnouncement(subscriptionQuery.data);
+
     return (
         <section aria-labelledby="subscription" className={PANEL_CLASS}>
+            <p role="status" className="sr-only">
+                {announcement}
+            </p>
             <SubscriptionContent />
         </section>
     );

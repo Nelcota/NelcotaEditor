@@ -53,10 +53,7 @@ export function SubscribeOffer({
                 </Button>
             </div>
             {isWaitingForPayment(subscription) === true && (
-                <p
-                    role="status"
-                    className="flex items-center gap-2.5 text-sm text-muted-foreground"
-                >
+                <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
                     <Spinner className="size-4" />
                     Esperando o pagamento ser confirmado. Esta página atualiza sozinha.
                 </p>

@@ -49,7 +49,7 @@ export function ClaudeConnectSteps({ mcpUrl }: { mcpUrl: string }): ReactNode {
                     Editor Oculto e permita o acesso.
                 </li>
             </ol>
-            <p role="status" className="flex items-center gap-2.5 text-sm text-muted-foreground">
+            <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
                 <Spinner className="size-4" />
                 Esperando o Claude se conectar. Esta página atualiza sozinha.
             </p>

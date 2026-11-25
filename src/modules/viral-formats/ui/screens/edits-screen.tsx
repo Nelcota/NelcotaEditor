@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { myEditsQueryOptions } from "#/modules/viral-formats/model/edit-queries";
 import { EditList } from "#/modules/viral-formats/ui/components/edit-list";
+import { useFinishedEditsAnnouncement } from "#/modules/viral-formats/ui/hooks/use-finished-edits-announcement";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
@@ -73,8 +74,14 @@ function EditsContent(): ReactNode {
 
 /** Minhas edições: what the person's Claude edited in the formats, while and after it renders. */
 export function EditsScreen(): ReactNode {
+    const editsQuery = useQuery(myEditsQueryOptions());
+    const announcement = useFinishedEditsAnnouncement(editsQuery.data);
+
     return (
         <div className="grid max-w-4xl grid-cols-[minmax(0,1fr)] gap-8">
+            <p role="status" className="sr-only">
+                {announcement}
+            </p>
             <header className="grid max-w-2xl gap-2">
                 <p className="text-xs font-bold tracking-eyebrow text-primary-ink uppercase">
                     Histórico
