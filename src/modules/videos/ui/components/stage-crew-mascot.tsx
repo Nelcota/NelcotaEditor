@@ -7,15 +7,16 @@ import { cn } from "#/shared/ui/cn";
 import { Mascot } from "#/shared/ui/mascot";
 
 const STAGE_MOTION: Partial<Record<VideoStatus, string>> = {
-    downloading: "motion-safe:animate-crew-download",
-    transcribing: "motion-safe:origin-bottom motion-safe:animate-crew-transcribe",
-    selecting: "motion-safe:animate-crew-select",
-    rendering: "motion-safe:origin-bottom motion-safe:animate-crew-render",
+    downloading: "crew-motion:animate-crew-download",
+    transcribing: "crew-motion:origin-bottom crew-motion:animate-crew-transcribe",
+    selecting: "crew-motion:animate-crew-select",
+    rendering: "crew-motion:origin-bottom crew-motion:animate-crew-render",
 };
 
 interface StageCrewMascotProps {
     status: VideoStatus;
     isWorking?: boolean;
+    isMotionRequested?: boolean;
     context?: CrewGestureContext;
     className?: string;
 }
@@ -24,17 +25,25 @@ interface StageCrewMascotProps {
 export function StageCrewMascot({
     status,
     isWorking = false,
+    isMotionRequested = false,
     context = "inline",
     className,
 }: StageCrewMascotProps): ReactNode {
     const motion = STAGE_MOTION[status];
-    const gesture = useCrewGesture(status, isWorking === true && motion !== undefined, context);
+    const gesture = useCrewGesture(status, isWorking === true && motion !== undefined, {
+        context,
+        isMotionRequested,
+    });
 
     return (
         <Mascot
             key={gesture}
             index={STAGE_CREW[status]}
-            className={cn(isWorking === true && motion, className)}
+            className={cn(
+                isWorking === true && motion,
+                isWorking === true && isMotionRequested === true && "crew-motion-requested",
+                className,
+            )}
         />
     );
 }
