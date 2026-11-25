@@ -1,4 +1,6 @@
 import { startAuthEmailWorker } from "#/modules/auth/server/auth-email-queue.server";
+import { startIdleTicketClosing } from "#/modules/support/server/close-idle-tickets.server";
+import { startSupportEmailWorker } from "#/modules/support/server/support-email-queue.server";
 import { backfillStoredBytes } from "#/modules/processing/server/backfill-stored-bytes.server";
 import { processVideo } from "#/modules/processing/server/process-video.server";
 import {
@@ -168,6 +170,8 @@ async function startWorker(): Promise<void> {
     await startStuckVideoRecovery();
     await startExpiredUploadSweep();
     await startAuthEmailWorker();
+    await startSupportEmailWorker();
+    await startIdleTicketClosing();
     logger.info({ workerConcurrency }, "Worker ready");
 
     process.once("SIGTERM", stopWorker);

@@ -813,8 +813,8 @@ Pull requests:
 ## Nelcota specifics
 
 - Module layers: modules import only from lower layers, never sideways or up: `shell` ·
-  `overview` · `studio`, then `videos` (the library), `processing`, `highlights`, `clips`,
-  `transcription` · `preferences`, `video-records` (the video row, its statuses and transitions),
+  `overview` · `studio`, then `admin`, `videos` (the library), `processing`, `highlights`,
+  `clips`, `transcription` · `support` · `preferences`, `video-records` (the video row, its statuses and transitions),
   `auth` · `app-switches` (the admin's on/off switches, read by every layer above). The exact map and each file-level exception (with its reason) live in
   `scripts/check-module-boundaries.ts`; `bun run check` enforces them.
 - Integration tests (`*.integration.test.ts`, database included) run with

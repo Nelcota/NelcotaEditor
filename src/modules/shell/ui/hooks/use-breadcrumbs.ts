@@ -5,7 +5,7 @@ import { useSyncExternalStore } from "react";
 import type { VideoDetails } from "#/modules/videos/model/video-views";
 import { videoDetailsQueryOptions } from "#/modules/videos/model/video-queries";
 
-export type CrumbPath = "/" | "/videos" | "/admin" | "/admin/users";
+export type CrumbPath = "/" | "/videos" | "/admin" | "/admin/users" | "/support" | "/admin/support";
 
 export interface Crumb {
     label: string;
@@ -16,6 +16,10 @@ export interface Crumb {
 const HOME_CRUMB: Crumb = { label: "Início", to: "/" };
 const VIDEOS_CRUMB: Crumb = { label: "Vídeos", to: "/videos" };
 const ADMIN_CRUMB: Crumb = { label: "Admin", to: "/admin" };
+const SUPPORT_CRUMB: Crumb = { label: "Suporte", to: "/support" };
+const ADMIN_SUPPORT_CRUMB: Crumb = { label: "Suporte", to: "/admin/support" };
+const TICKET_PAGE_PATTERN = /^\/support\/[^/]+\/?$/;
+const ADMIN_TICKET_PATTERN = /^\/admin\/support\/[^/]+\/?$/;
 const VIDEO_PAGE_PATTERN = /^\/videos\/([^/]+)\/?$/;
 const ADMIN_USER_PATTERN = /^\/admin\/users\/[^/]+\/?$/;
 
@@ -32,6 +36,9 @@ const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
     "/admin/users": [ADMIN_CRUMB, { label: "Usuários" }],
     "/admin/videos": [ADMIN_CRUMB, { label: "Vídeos" }],
     "/admin/features": [ADMIN_CRUMB, { label: "Recursos" }],
+    "/admin/support": [ADMIN_CRUMB, { label: "Suporte" }],
+    "/support": [HOME_CRUMB, { label: "Suporte" }],
+    "/support/new": [HOME_CRUMB, SUPPORT_CRUMB, { label: "Abrir ticket" }],
 };
 
 /** "/videos/" and "/videos" are the same page. */
@@ -88,6 +95,14 @@ export function useBreadcrumbs(): ReadonlyArray<Crumb> {
 
     if (videoMatch !== null) {
         return [VIDEOS_CRUMB, { label: videoTitle ?? "Vídeo" }];
+    }
+
+    if (ADMIN_TICKET_PATTERN.test(pathname) === true) {
+        return [ADMIN_CRUMB, ADMIN_SUPPORT_CRUMB, { label: "Ticket" }];
+    }
+
+    if (TICKET_PAGE_PATTERN.test(pathname) === true) {
+        return [HOME_CRUMB, SUPPORT_CRUMB, { label: "Ticket" }];
     }
 
     if (ADMIN_USER_PATTERN.test(pathname) === true) {

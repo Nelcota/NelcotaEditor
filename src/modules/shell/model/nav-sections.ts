@@ -1,4 +1,5 @@
 import ChartNoAxesColumnIcon from "~icons/lucide/chart-no-axes-column";
+import CircleHelpIcon from "~icons/lucide/circle-help";
 import HouseIcon from "~icons/lucide/house";
 import ScissorsIcon from "~icons/lucide/scissors";
 import ShieldIcon from "~icons/lucide/shield";
@@ -7,7 +8,14 @@ import UserRoundIcon from "~icons/lucide/user-round";
 import type { ActiveOptions } from "@tanstack/react-router";
 import type { IconComponent } from "#/shared/ui/icon-component";
 
-export type SectionPath = "/" | "/videos" | "/clips" | "/overview" | "/account" | "/admin";
+export type SectionPath =
+    | "/"
+    | "/videos"
+    | "/clips"
+    | "/overview"
+    | "/account"
+    | "/support"
+    | "/admin";
 
 export interface NavSection {
     path: SectionPath;
@@ -15,7 +23,12 @@ export interface NavSection {
     icon: IconComponent;
 }
 
-export type AdminSubPath = "/admin" | "/admin/users" | "/admin/videos" | "/admin/features";
+export type AdminSubPath =
+    | "/admin"
+    | "/admin/users"
+    | "/admin/videos"
+    | "/admin/support"
+    | "/admin/features";
 
 export interface AdminSubSection {
     path: AdminSubPath;
@@ -50,6 +63,13 @@ export const NAV_SECTIONS: ReadonlyArray<NavSection> = [
     { path: "/account", label: "Conta", icon: UserRoundIcon },
 ];
 
+/** Kept apart from the work sections, at the foot of the list, and off the phone tab bar. */
+export const SUPPORT_SECTION: NavSection = {
+    path: "/support",
+    label: "Suporte",
+    icon: CircleHelpIcon,
+};
+
 /** Shown to admins only; the admin routes and server functions check the role on their own. */
 export const ADMIN_SECTION: NavSection = {
     path: ADMIN_PATH,
@@ -62,6 +82,7 @@ export const ADMIN_SUB_SECTIONS: ReadonlyArray<AdminSubSection> = [
     { path: "/admin", label: "Visão geral" },
     { path: "/admin/users", label: "Usuários" },
     { path: "/admin/videos", label: "Vídeos" },
+    { path: "/admin/support", label: "Suporte" },
     { path: "/admin/features", label: "Recursos" },
 ];
 

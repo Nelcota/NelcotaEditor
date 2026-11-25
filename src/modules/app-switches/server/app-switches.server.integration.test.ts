@@ -34,6 +34,7 @@ describe("app switches", () => {
             "file-uploads": true,
             "clip-sharing": true,
             "video-processing": true,
+            support: true,
             "maintenance-mode": false,
         });
     });

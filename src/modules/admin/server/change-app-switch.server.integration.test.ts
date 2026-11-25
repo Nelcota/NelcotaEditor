@@ -104,7 +104,7 @@ describe("changeAppSwitch", () => {
 
         const switches = await listAdminAppSwitches();
 
-        expect(switches).toHaveLength(6);
+        expect(switches).toHaveLength(7);
         expect(switches.find((appSwitch) => appSwitch.key === "sign-up")).toMatchObject({
             isEnabled: false,
             changedByName: "Admin Teste",
