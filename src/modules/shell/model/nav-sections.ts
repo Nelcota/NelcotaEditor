@@ -26,6 +26,8 @@ export interface NavSection {
     path: SectionPath;
     label: string;
     icon: IconComponent;
+    /** A name that fits the phone tab bar, part of the full one so voice control still finds it. */
+    shortLabel?: string;
     /** Pages that live elsewhere in the address but belong to this section (a video, in Meus cortes). */
     childPaths?: ReadonlyArray<string>;
 }
@@ -70,6 +72,7 @@ const ADMIN_PATH = "/admin";
 export const GETTING_STARTED_SECTION: NavSection = {
     path: START_PATH,
     label: "Comece por aqui",
+    shortLabel: "Comece",
     icon: PlayIcon,
 };
 
@@ -82,6 +85,7 @@ export const CLAUDE_SECTION: NavSection = {
 export const FORMATS_SECTION: NavSection = {
     path: "/formats",
     label: "Formatos Virais",
+    shortLabel: "Formatos",
     icon: ClapperboardIcon,
 };
 
@@ -100,6 +104,7 @@ export const CLIPS_GETTING_STARTED_SECTION: NavSection = {
 export const CLIPS_SECTION: NavSection = {
     path: CLIPS_PATH,
     label: "Meus cortes",
+    shortLabel: "Cortes",
     icon: ScissorsIcon,
     childPaths: ["/videos"],
 };

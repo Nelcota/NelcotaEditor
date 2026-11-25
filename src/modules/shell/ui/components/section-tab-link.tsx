@@ -29,23 +29,30 @@ export function SectionTabLink({
     hasActivity,
     className,
 }: SectionTabLinkProps): ReactNode {
+    const label = section.label;
+    const shortLabel = section.shortLabel ?? label;
+    // The full name stays the accessible one; the short one only has to fit under the icon.
+    let accessibleName = label;
+
+    if (hasActivity === true) {
+        accessibleName = `${label}, processando`;
+    }
+
     return (
         <Link
             to={section.path}
             activeOptions={SECTION_LINK_ACTIVE_OPTIONS}
             aria-current={toAriaCurrent(state === "current")}
+            aria-label={accessibleName}
             className={cn(TAB_CLASS, STATE_CLASSES[state], className)}
         >
             <SectionIcon section={section} state={state} />
-            {section.label}
+            <span className="max-w-full truncate">{shortLabel}</span>
             {hasActivity === true && (
-                <>
-                    <span
-                        aria-hidden="true"
-                        className="absolute top-3 start-[calc(50%+8px)] size-2 rounded-full bg-primary ring-2 ring-background"
-                    />
-                    <span className="sr-only">, processando</span>
-                </>
+                <span
+                    aria-hidden="true"
+                    className="absolute top-3 start-[calc(50%+8px)] size-2 rounded-full bg-primary ring-2 ring-background"
+                />
             )}
         </Link>
     );
