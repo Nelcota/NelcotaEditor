@@ -148,6 +148,13 @@
       "when": 1795573042563,
       "tag": "0020_app_switches",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1795608270134,
+      "tag": "0021_email_verification_switch",
+      "breakpoints": true
     }
   ]
 }

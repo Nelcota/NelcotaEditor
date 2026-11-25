@@ -30,6 +30,7 @@ describe("app switches", () => {
 
         expect(states).toEqual({
             "sign-up": true,
+            "email-verification": true,
             "youtube-links": true,
             "file-uploads": true,
             "clip-sharing": true,

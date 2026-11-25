@@ -121,14 +121,28 @@ async function trimNameWithinLimit(fields: {
     return { data: { name: trimmedName } };
 }
 
-/** The name is checked first, so a caught bot with a bad name gets the same error as a person. */
+interface NewUserChanges {
+    name?: string;
+    emailVerified?: boolean;
+}
+
+/**
+ * The name is checked first, so a caught bot with a bad name gets the same error as a person.
+ * With the email-verification switch off, the account starts confirmed: Better Auth keeps
+ * requireEmailVerification, so sign-up still answers the same for a taken email.
+ */
 async function checkNewUser(
     newUser: { name?: unknown },
     context: { path?: string; body?: unknown } | null,
-): Promise<{ data: { name: string } } | undefined> {
+): Promise<{ data: NewUserChanges } | undefined> {
     const result = await trimNameWithinLimit(newUser);
     rejectHoneypotSignUp(context);
-    return result;
+
+    if ((await isAppSwitchEnabled("email-verification")) === true) {
+        return result;
+    }
+
+    return { data: { ...result?.data, emailVerified: true } };
 }
 
 async function notifyOwnerOfSignUpAttempt(
