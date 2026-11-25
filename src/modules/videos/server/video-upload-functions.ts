@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertFeatureEnabled } from "#/modules/app-switches/server/app-switches.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import {
     startVideoUploadInputSchema,
@@ -23,11 +24,15 @@ function appUploadUrl(uploadId: string): string {
     return `/api/videos/uploads/${uploadId}/file`;
 }
 
-/** Reserves space and a processing slot, then says where to send the file. */
+/**
+ * Reserves space and a processing slot, then says where to send the file. Only the start checks
+ * the uploads switch: a file already on its way still finishes.
+ */
 export const startVideoUpload = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(startVideoUploadInputSchema)
     .handler(async ({ context, data }): Promise<StartedVideoUpload> => {
+        await assertFeatureEnabled("file-uploads");
         const upload = await reserveVideoUpload(context.user.id, data);
         const storageUrl = await getFileStorage().createUploadUrl(upload.sourcePath, {
             sizeBytes: upload.declaredBytes,

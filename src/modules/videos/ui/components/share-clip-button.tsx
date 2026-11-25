@@ -1,5 +1,8 @@
 import Link2Icon from "~icons/lucide/link-2";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { readSwitchState } from "#/modules/app-switches/model/app-switch";
+import { appSwitchStatesQueryOptions } from "#/modules/app-switches/model/app-switch-queries";
+import { FEATURE_TURNED_OFF_MESSAGES } from "#/modules/app-switches/model/feature-turned-off-error";
 import { setClipSharing } from "#/modules/clips/server/clip-sharing-functions";
 import type { ClipView } from "#/modules/clips/model/clip-view";
 import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
@@ -12,8 +15,22 @@ interface ShareClipButtonProps {
     clip: ClipView;
 }
 
+interface SharedLinkProps {
+    sharePath: string | null;
+    isSharingOn: boolean;
+}
+
 /** The copy button for a ready clip; while it renders again the link opens nothing, so say so. */
-function SharedLink({ sharePath }: { sharePath: string | null }) {
+function SharedLink({ sharePath, isSharingOn }: SharedLinkProps) {
+    if (isSharingOn === false) {
+        return (
+            <p className="text-sm text-muted-foreground">
+                {FEATURE_TURNED_OFF_MESSAGES["clip-sharing"]} O link volta a abrir quando ele for
+                retomado.
+            </p>
+        );
+    }
+
     if (sharePath === null) {
         return (
             <p className="text-sm text-muted-foreground">
@@ -34,6 +51,8 @@ function SharedLink({ sharePath }: { sharePath: string | null }) {
 /** Without a link nobody but the owner can watch the clip; turning it off kills the old link. */
 export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
     const queryClient = useQueryClient();
+    const { data: switches } = useQuery(appSwitchStatesQueryOptions());
+    const isSharingOn = readSwitchState(switches, "clip-sharing");
     const mutation = useMutation({
         mutationFn: (isShared: boolean) =>
             setClipSharing({ data: { videoId, clipId: clip.id, isShared } }),
@@ -44,6 +63,14 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
 
     if (clip.isShared === false && clip.status !== "done") {
         return null;
+    }
+
+    if (clip.isShared === false && isSharingOn === false) {
+        return (
+            <p className="text-sm text-muted-foreground">
+                {FEATURE_TURNED_OFF_MESSAGES["clip-sharing"]}
+            </p>
+        );
     }
 
     if (clip.isShared === false) {
@@ -66,7 +93,7 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
 
     return (
         <div className="grid gap-2">
-            <SharedLink sharePath={clip.sharePath} />
+            <SharedLink sharePath={clip.sharePath} isSharingOn={isSharingOn} />
             <Button
                 variant="ghost"
                 onClick={() => mutation.mutate(false)}

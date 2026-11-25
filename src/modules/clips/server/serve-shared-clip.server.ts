@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
+import { isAppSwitchEnabled } from "#/modules/app-switches/server/app-switches.server";
 import { clips } from "#/modules/clips/clips.schema";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { HTTP_NOT_FOUND } from "#/shared/server/http-response";
@@ -26,6 +27,11 @@ export async function serveSharedClip(request: Request, token: string): Promise<
     const tokenResult = shareTokenSchema.safeParse(token);
 
     if (tokenResult.success === false) {
+        return new Response(null, { status: HTTP_NOT_FOUND });
+    }
+
+    // Paused sharing stops the links already sent too: that is what the switch is for.
+    if ((await isAppSwitchEnabled("clip-sharing")) === false) {
         return new Response(null, { status: HTTP_NOT_FOUND });
     }
 

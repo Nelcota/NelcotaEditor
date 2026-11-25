@@ -3,6 +3,7 @@ import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { assertFeatureEnabled } from "#/modules/app-switches/server/app-switches.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
 import { TRANSCRIPTION_LANGUAGES } from "#/modules/preferences/model/preferences";
@@ -117,6 +118,7 @@ export const createYoutubeVideo = createServerFn({ method: "POST" })
     .handler(async ({ context, data }): Promise<{ videoId: string }> => {
         const userId = context.user.id;
         const videoId = randomUUID();
+        await assertFeatureEnabled("youtube-links");
         // Looked up before the transaction: a slow YouTube must not hold the user's start lock.
         const title = await resolveYoutubeTitle(data.url);
 

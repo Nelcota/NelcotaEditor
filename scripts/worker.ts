@@ -12,6 +12,7 @@ import {
     PROCESS_VIDEO_QUEUE,
     processVideoJobSchema,
 } from "#/modules/processing/server/video-processing-queue.server";
+import { createVideoWorkSync } from "#/modules/processing/server/video-work-switch.server";
 import { findVideoById } from "#/modules/video-records/server/video-progress.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { getJobQueue, setJobQueueRole } from "#/shared/server/job-queue.server";
@@ -19,6 +20,9 @@ import { logger, withLogContext } from "#/shared/server/logger.server";
 
 /** One person's videos run one after the other, so nobody waits behind someone else's batch. */
 const VIDEOS_PER_USER_AT_ONCE = 1;
+
+/** How long a pause or resume from the admin panel takes to reach this worker. */
+const VIDEO_WORK_SWITCH_CHECK_MS = 10_000;
 
 class InvalidJobPayloadError extends Error {
     constructor(issueCount: number) {
@@ -96,18 +100,10 @@ async function backfillStoredBytesWithoutBlocking(): Promise<void> {
     }
 }
 
-async function startWorker(): Promise<void> {
-    setJobQueueRole("worker");
-    await ensureProcessVideoQueue();
+async function startVideoWork(): Promise<void> {
     const jobQueue = await getJobQueue();
-
     const workerConcurrency = getEnvironment().WORKER_CONCURRENCY;
 
-    // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
-    // their video's lock is free, so a start never touches the active runs of other replicas.
-    await removeAbandonedVideoWorkspaces();
-    await backfillStoredBytesWithoutBlocking();
-    await requeueInterruptedVideos();
     // groupConcurrency is tracked in the database, so "one video per person" holds across replicas.
     await jobQueue.work(
         PROCESS_VIDEO_QUEUE,
@@ -118,6 +114,57 @@ async function startWorker(): Promise<void> {
             }
         },
     );
+}
+
+async function stopVideoWork(): Promise<void> {
+    const jobQueue = await getJobQueue();
+    await jobQueue.offWork(PROCESS_VIDEO_QUEUE, { wait: true });
+}
+
+const syncVideoWork = createVideoWorkSync({
+    startWork: startVideoWork,
+    stopWork: stopVideoWork,
+});
+
+let isStopping = false;
+
+/** A failed check keeps the current state; the next one tries again. */
+async function syncVideoWorkAndReschedule(): Promise<void> {
+    if (isStopping === true) {
+        return;
+    }
+
+    try {
+        await syncVideoWork();
+    } catch (error) {
+        logger.error({ error }, "Could not check the video processing switch");
+    }
+
+    scheduleVideoWorkSync();
+}
+
+// A timeout after each check instead of an interval: pausing waits for the running videos, and
+// checks must never overlap.
+function scheduleVideoWorkSync(): void {
+    setTimeout(() => {
+        syncVideoWorkAndReschedule().catch((error: unknown) => {
+            logger.error({ error }, "Video processing switch watch stopped");
+        });
+    }, VIDEO_WORK_SWITCH_CHECK_MS);
+}
+
+async function startWorker(): Promise<void> {
+    setJobQueueRole("worker");
+    await ensureProcessVideoQueue();
+    const workerConcurrency = getEnvironment().WORKER_CONCURRENCY;
+
+    // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
+    // their video's lock is free, so a start never touches the active runs of other replicas.
+    await removeAbandonedVideoWorkspaces();
+    await backfillStoredBytesWithoutBlocking();
+    await requeueInterruptedVideos();
+    await syncVideoWork();
+    scheduleVideoWorkSync();
     await startStuckVideoRecovery();
     await startExpiredUploadSweep();
     await startAuthEmailWorker();
@@ -126,8 +173,6 @@ async function startWorker(): Promise<void> {
     process.once("SIGTERM", stopWorker);
     process.once("SIGINT", stopWorker);
 }
-
-let isStopping = false;
 
 async function stopGracefully(): Promise<void> {
     const jobQueue = await getJobQueue();

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
@@ -23,6 +24,7 @@ import { Route as AppOverviewRouteImport } from './routes/_app/overview'
 import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
 import { Route as AppUsageRouteImport } from './routes/_app/usage'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppAdminFeaturesRouteImport } from './routes/_app/admin/features'
 import { Route as AppAdminVideosRouteImport } from './routes/_app/admin/videos'
 import { Route as AppVideosIndexRouteImport } from './routes/_app/videos.index'
 import { Route as AppVideosVideoIdRouteImport } from './routes/_app/videos.$videoId'
@@ -49,6 +51,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaintenanceRoute = MaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -104,6 +111,11 @@ const AppUsageRoute = AppUsageRouteImport.update({
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminFeaturesRoute = AppAdminFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
   getParentRoute: () => AppAdminRoute,
 } as any)
 const AppAdminVideosRoute = AppAdminVideosRouteImport.update({
@@ -179,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
+  '/maintenance': typeof MaintenanceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -188,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
+  '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/videos': typeof AppAdminVideosRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
@@ -206,6 +220,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
+  '/maintenance': typeof MaintenanceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -215,6 +230,7 @@ export interface FileRoutesByTo {
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
   '/': typeof AppIndexRoute
+  '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/videos': typeof AppAdminVideosRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
@@ -235,6 +251,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
+  '/maintenance': typeof MaintenanceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -245,6 +262,7 @@ export interface FileRoutesById {
   '/_app/preferences': typeof AppPreferencesRoute
   '/_app/usage': typeof AppUsageRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/admin/features': typeof AppAdminFeaturesRoute
   '/_app/admin/videos': typeof AppAdminVideosRoute
   '/_app/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
@@ -266,6 +284,7 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot-password'
     | '/health'
+    | '/maintenance'
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
@@ -275,6 +294,7 @@ export interface FileRouteTypes {
     | '/overview'
     | '/preferences'
     | '/usage'
+    | '/admin/features'
     | '/admin/videos'
     | '/videos/$videoId'
     | '/api/account/avatar'
@@ -293,6 +313,7 @@ export interface FileRouteTypes {
   to:
     | '/forgot-password'
     | '/health'
+    | '/maintenance'
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
@@ -302,6 +323,7 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/usage'
     | '/'
+    | '/admin/features'
     | '/admin/videos'
     | '/videos/$videoId'
     | '/api/account/avatar'
@@ -321,6 +343,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/forgot-password'
     | '/health'
+    | '/maintenance'
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
@@ -331,6 +354,7 @@ export interface FileRouteTypes {
     | '/_app/preferences'
     | '/_app/usage'
     | '/_app/'
+    | '/_app/admin/features'
     | '/_app/admin/videos'
     | '/_app/videos/$videoId'
     | '/api/account/avatar'
@@ -351,6 +375,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   HealthRoute: typeof HealthRoute
+  MaintenanceRoute: typeof MaintenanceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
@@ -385,6 +410,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maintenance': {
+      id: '/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof MaintenanceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -462,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/features': {
+      id: '/_app/admin/features'
+      path: '/features'
+      fullPath: '/admin/features'
+      preLoaderRoute: typeof AppAdminFeaturesRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/_app/admin/videos': {
@@ -559,6 +598,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAdminRouteChildren {
+  AppAdminFeaturesRoute: typeof AppAdminFeaturesRoute
   AppAdminVideosRoute: typeof AppAdminVideosRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
   AppAdminUsersUserIdRoute: typeof AppAdminUsersUserIdRoute
@@ -566,6 +606,7 @@ interface AppAdminRouteChildren {
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminFeaturesRoute: AppAdminFeaturesRoute,
   AppAdminVideosRoute: AppAdminVideosRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
   AppAdminUsersUserIdRoute: AppAdminUsersUserIdRoute,
@@ -606,6 +647,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   HealthRoute: HealthRoute,
+  MaintenanceRoute: MaintenanceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,

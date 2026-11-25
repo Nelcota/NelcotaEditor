@@ -4,6 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
+import { readSwitchState } from "#/modules/app-switches/model/app-switch";
+import { appSwitchStatesQueryOptions } from "#/modules/app-switches/model/app-switch-queries";
+import { FEATURE_TURNED_OFF_MESSAGES } from "#/modules/app-switches/model/feature-turned-off-error";
 import { preferencesQueryOptions } from "#/modules/preferences/model/preferences-queries";
 import { useIsLinkBlocked } from "#/modules/videos/ui/hooks/use-is-link-blocked";
 import { useVideoSubmission } from "#/modules/videos/ui/hooks/use-video-submission";
@@ -44,12 +47,39 @@ function describeProblem({ text, isSubmitAttempted, isLinkBlocked }: ProblemInpu
     return describeYoutubeLinkProblem(text);
 }
 
+/** In place of the box while links are paused: the full form still takes a file. */
+function PausedLinkNotice(): ReactNode {
+    return (
+        <div className="grid w-full justify-items-start gap-3 rounded-3xl border border-input/40 bg-card px-5 py-5">
+            <p className="text-sm text-muted-foreground">
+                {FEATURE_TURNED_OFF_MESSAGES["youtube-links"]}
+            </p>
+            <Button asChild variant="outline">
+                <Link to="/videos" search={{ newVideo: true }}>
+                    <SquarePlusIcon aria-hidden="true" />
+                    Enviar um arquivo
+                </Link>
+            </Button>
+        </div>
+    );
+}
+
 /**
  * The Início's prompt box (the reference's assistant field): paste a YouTube link and send, and the
  * video starts with the saved preferences. The plus opens the full form, for a file or other
  * settings.
  */
 export function VideoLinkComposer(): ReactNode {
+    const { data: switches } = useQuery(appSwitchStatesQueryOptions());
+
+    if (readSwitchState(switches, "youtube-links") === false) {
+        return <PausedLinkNotice />;
+    }
+
+    return <LinkComposerForm />;
+}
+
+function LinkComposerForm(): ReactNode {
     const problemId = useId();
     const preferencesQuery = useQuery(preferencesQueryOptions());
     // No fallback to the defaults: the box sends without a review step, so a video must never go

@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
+import { assertFeatureEnabled } from "#/modules/app-switches/server/app-switches.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { clips } from "#/modules/clips/clips.schema";
 import { findClipOfVideo } from "#/modules/clips/server/find-clip-of-video.server";
@@ -17,7 +18,10 @@ const clipSharingInputSchema = z.object({
     isShared: z.boolean(),
 });
 
-/** Turns the public link on (a new secret each time) or off. Only rendered clips can be shared. */
+/**
+ * Turns the public link on (a new secret each time) or off. Only rendered clips can be shared;
+ * turning a link off stays possible while sharing is paused.
+ */
 export const setClipSharing = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(clipSharingInputSchema)
@@ -33,6 +37,8 @@ export const setClipSharing = createServerFn({ method: "POST" })
         if (clip.status !== "done") {
             throw new UserFacingError("Só é possível compartilhar um corte que já está pronto.");
         }
+
+        await assertFeatureEnabled("clip-sharing");
 
         const shareToken = randomBytes(SHARE_TOKEN_BYTES).toString("base64url");
 
