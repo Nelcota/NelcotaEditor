@@ -42,7 +42,7 @@ export function SectionRail({ onExpand }: { onExpand: () => void }): ReactNode {
 
     return (
         <nav aria-label="Seções" className="grid content-start justify-items-center gap-1 pt-3">
-            <BrandMark className="mb-2 size-7" isAnimated />
+            <BrandMark className="mb-2 h-5" isAnimated />
             <ActivityBell />
             <HintTooltip label={SHOW_LABEL}>
                 <Button

@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_app/admin/users/$userId")({
             return {};
         }
 
-        return { meta: [{ title: "Conta · Admin · Nelcota" }] };
+        return { meta: [{ title: "Conta · Admin · Editor Oculto" }] };
     },
     // The account and the first page of its videos, as the screen asks for them.
     loader: async ({ context, params }): Promise<void> => {

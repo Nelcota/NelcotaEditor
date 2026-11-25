@@ -58,12 +58,12 @@ function buildAccountEmail(job: SupportEmailJob, url: string): SupportEmailConte
 }
 
 function buildGuestEmail(job: SupportEmailJob, replyText: string): SupportEmailContent {
-    const intro = `Esta é a resposta à sua mensagem para o suporte do Nelcota (#${job.ticketNumber}).`;
+    const intro = `Esta é a resposta à sua mensagem para o suporte do Editor Oculto (#${job.ticketNumber}).`;
     const closing = "Para continuar, envie uma nova mensagem pelo formulário de contato.";
     const replyHtml = escapeHtml(replyText).replace(LINE_BREAKS, "<br>");
 
     return {
-        subject: `Resposta do suporte do Nelcota (#${job.ticketNumber})`,
+        subject: `Resposta do suporte do Editor Oculto (#${job.ticketNumber})`,
         html: [
             WRAPPER_START,
             `${PARAGRAPH_START}${escapeHtml(intro)}</p>`,

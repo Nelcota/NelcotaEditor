@@ -18,7 +18,7 @@ export const SUPPORT_PAGE_SIZE = 25;
 /** What a guest ticket from the public form is called; guests write no subject. */
 export const GUEST_TICKET_SUBJECT = "Contato sem conta";
 /** Shown to customers for an admin whose account is gone. */
-export const STAFF_FALLBACK_NAME = "Suporte Nelcota";
+export const STAFF_FALLBACK_NAME = "Suporte Editor Oculto";
 
 export const TICKET_STATUS_LABELS: Readonly<Record<TicketStatus, string>> = {
     open: "Aberto",

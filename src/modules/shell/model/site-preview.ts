@@ -1,4 +1,4 @@
-export const APP_TITLE = "Nelcota: cortes com legenda";
+export const APP_TITLE = "Editor Oculto: cortes com legenda";
 export const SITE_PREVIEW_IMAGE_PATH = "/og-image.png";
 
 const APP_DESCRIPTION = "Cole o link de um vídeo e receba cortes curtos com legenda.";
@@ -14,7 +14,7 @@ type PreviewMeta = { name: string; content: string } | { property: string; conte
 export function buildSitePreviewMeta(imageUrl: string): Array<PreviewMeta> {
     return [
         { name: "description", content: APP_DESCRIPTION },
-        { property: "og:site_name", content: "Nelcota" },
+        { property: "og:site_name", content: "Editor Oculto" },
         { property: "og:locale", content: "pt_BR" },
         { property: "og:type", content: "website" },
         { property: "og:title", content: APP_TITLE },
@@ -23,7 +23,7 @@ export function buildSitePreviewMeta(imageUrl: string): Array<PreviewMeta> {
         { property: "og:image:type", content: "image/png" },
         { property: "og:image:width", content: String(PREVIEW_IMAGE_WIDTH) },
         { property: "og:image:height", content: String(PREVIEW_IMAGE_HEIGHT) },
-        { property: "og:image:alt", content: "Nelcota" },
+        { property: "og:image:alt", content: "Editor Oculto" },
         { name: "twitter:card", content: "summary_large_image" },
     ];
 }

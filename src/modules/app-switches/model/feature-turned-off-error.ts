@@ -10,7 +10,7 @@ export const FEATURE_TURNED_OFF_MESSAGES: Readonly<Record<RefusableSwitchKey, st
     "file-uploads": "O envio de arquivos está pausado no momento. Tente mais tarde.",
     "clip-sharing": "O compartilhamento de cortes está pausado no momento.",
     support: "O suporte está pausado no momento. Tente mais tarde.",
-    "maintenance-mode": "O Nelcota está em manutenção. Volte em instantes.",
+    "maintenance-mode": "O Editor Oculto está em manutenção. Volte em instantes.",
 };
 
 export class FeatureTurnedOffError extends UserFacingError {

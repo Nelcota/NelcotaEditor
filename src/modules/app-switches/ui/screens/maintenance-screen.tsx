@@ -5,7 +5,7 @@ import { StandaloneMessageScreen } from "#/shared/ui/standalone-message-screen";
 export function MaintenanceScreen(): ReactNode {
     return (
         <StandaloneMessageScreen
-            title="O Nelcota está em manutenção"
+            title="O Editor Oculto está em manutenção"
             description="Voltamos em instantes. Seus vídeos e cortes continuam guardados."
         />
     );

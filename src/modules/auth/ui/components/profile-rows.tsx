@@ -45,7 +45,7 @@ function AvatarButton({ onClick }: { onClick: () => void }): ReactNode {
 
 function PasswordLine({ hasChanged }: { hasChanged: boolean }): ReactNode {
     if (hasChanged === false) {
-        return "Para entrar no Nelcota";
+        return "Para entrar no Editor Oculto";
     }
 
     return (

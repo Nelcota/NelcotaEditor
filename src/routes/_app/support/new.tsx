@@ -5,7 +5,7 @@ import { NewTicketScreen } from "#/modules/support/ui/screens/new-ticket-screen"
 
 export const Route = createFileRoute("/_app/support/new")({
     validateSearch: newTicketSearchSchema,
-    head: () => ({ meta: [{ title: "Abrir ticket · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Abrir ticket · Editor Oculto" }] }),
     component: NewTicketRoute,
 });
 

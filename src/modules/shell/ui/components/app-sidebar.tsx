@@ -26,7 +26,7 @@ export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactN
             <div className="flex h-12 items-center gap-1 ps-2.5">
                 <Link
                     to="/"
-                    aria-label="Nelcota, ir para o início"
+                    aria-label="Editor Oculto, ir para o início"
                     className="me-auto flex h-11 items-center rounded-xl pe-2 outline-none transition-[opacity,scale] hover:opacity-85 focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
                 >
                     <BrandLogo className="gap-2.5 text-logo" />

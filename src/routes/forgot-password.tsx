@@ -5,7 +5,7 @@ import { getCurrentUser } from "#/modules/auth/server/get-current-user";
 import { ForgotPasswordScreen } from "#/modules/auth/ui/screens/forgot-password-screen";
 
 export const Route = createFileRoute("/forgot-password")({
-    head: () => ({ meta: [{ title: "Recuperar senha · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Recuperar senha · Editor Oculto" }] }),
     beforeLoad: async () => {
         const user = await getCurrentUser();
 

@@ -9,6 +9,6 @@ export const Route = createFileRoute("/_app/admin")({
             throw redirect({ to: "/", replace: true });
         }
     },
-    head: () => ({ meta: [{ title: "Admin · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Admin · Editor Oculto" }] }),
     component: AdminLayout,
 });

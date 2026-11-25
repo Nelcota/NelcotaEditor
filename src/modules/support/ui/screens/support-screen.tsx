@@ -46,7 +46,7 @@ export function SupportScreen(): ReactNode {
         <div className="grid gap-6">
             <PageHeader
                 title="Suporte"
-                description="Seus tickets com o suporte do Nelcota."
+                description="Seus tickets com o suporte do Editor Oculto."
                 action={<NewTicketLink />}
             />
             {ticketsQuery.isPending === true && <SupportLoading />}

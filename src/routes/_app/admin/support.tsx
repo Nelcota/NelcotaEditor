@@ -10,7 +10,7 @@ import type { StaffTicketFilter } from "#/modules/support/model/staff-ticket-fil
 
 export const Route = createFileRoute("/_app/admin/support")({
     validateSearch: adminSupportSearchSchema,
-    head: () => ({ meta: [{ title: "Suporte · Admin · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Suporte · Admin · Editor Oculto" }] }),
     loaderDeps: ({ search }) => ({ filter: search.filter ?? DEFAULT_STAFF_TICKET_FILTER }),
     loader: async ({ context, deps }): Promise<void> => {
         await context.queryClient.prefetchInfiniteQuery({

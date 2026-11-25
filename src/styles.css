@@ -13,8 +13,7 @@
 /*
  * Window system (2026-11-23, from the owner's reference): a frame holds the sidebar; one rounded panel
  * holds the page, with the breadcrumb on top. Greys carry no hue (the owner asked for nothing bluish);
- * the brand blue (2026-11-23, from the owner's reference) is the action colour: primary buttons, the
- * current section, links and progress. The ghost logo stays green: it is the mark, not an action.
+ * Editor Oculto's lime is the action colour: primary buttons, the current section, links and progress.
  */
 :root,
 .theme-site {
@@ -30,15 +29,16 @@
     --card: oklch(0.97 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: var(--foreground);
-    /* Dark enough that white text on it keeps 4.5:1. */
-    --primary: oklch(0.56 0.2 260);
-    /* Blue text and links: darker than the fill so small text keeps 4.5:1 on white. */
-    --primary-ink: oklch(0.5 0.2 262);
-    /* Primary button fill. */
-    --primary-solid: oklch(0.56 0.2 260);
-    /* Hover darkens on white: mixing toward the page would drop white text below 4.5:1. */
-    --primary-solid-hover: oklch(0.5 0.2 260);
-    --primary-foreground: oklch(1 0 0);
+    /* Editor Oculto's lime and graphite: the symbol, constant in both themes. */
+    --brand: oklch(0.91 0.225 123.6);
+    --brand-ink: oklch(0.159 0.002 106.6);
+    /* Lime is 1.25:1 on white, so text, rings and thin fills use a deep lime that keeps 5.5:1. */
+    --primary: oklch(0.511 0.128 124.8);
+    --primary-ink: oklch(0.473 0.118 124.6);
+    /* Primary button fill: the brand lime with graphite text (15.5:1). */
+    --primary-solid: var(--brand);
+    --primary-solid-hover: oklch(0.814 0.201 123.6);
+    --primary-foreground: var(--brand-ink);
     --secondary: oklch(0.935 0 0);
     --secondary-foreground: var(--foreground);
     --muted: oklch(0.955 0 0);
@@ -93,11 +93,10 @@
     --inspector: oklch(0.2 0 0);
     --card: oklch(0.245 0 0);
     --popover: oklch(0.255 0 0);
-    --primary: oklch(0.56 0.2 258);
-    --primary-ink: oklch(0.74 0.14 255);
-    --primary-solid: oklch(0.56 0.2 258);
-    --primary-solid-hover: oklch(0.5 0.18 258);
-    --primary-foreground: oklch(1 0 0);
+    --primary: var(--brand);
+    --primary-ink: var(--brand);
+    --primary-solid: var(--brand);
+    --primary-solid-hover: oklch(0.935 0.221 121.9);
     --secondary: oklch(0.28 0 0);
     --muted: oklch(0.26 0 0);
     --muted-foreground: oklch(0.7 0 0);
@@ -151,6 +150,8 @@
     --font-weight-title-strong: 560;
     /* Vertical clip frames in the sign-in showcase. */
     --aspect-clip-card: 9 / 14;
+    /* Editor Oculto's symbol, 120 by 64. */
+    --aspect-brand-mark: 15 / 8;
 }
 
 @theme inline {
@@ -188,6 +189,8 @@
     --color-ring: var(--ring);
     --color-chart-current: var(--chart-current);
     --color-media-accent: var(--media-accent);
+    --color-brand: var(--brand);
+    --color-brand-ink: var(--brand-ink);
     /* Controls are 10px (rounded-xl), panels 12px (rounded-md, rounded-2xl), small chips 8px. */
     --radius-sm: 0.375rem;
     --radius-md: 0.75rem;

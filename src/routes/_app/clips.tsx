@@ -7,7 +7,7 @@ import { libraryClipsQueryOptions } from "#/modules/videos/model/library-queries
 import { ClipsScreen } from "#/modules/videos/ui/screens/clips-screen";
 
 export const Route = createFileRoute("/_app/clips")({
-    head: () => ({ meta: [{ title: "Cortes · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Cortes · Editor Oculto" }] }),
     validateSearch: clipsSearchSchema,
     loaderDeps: ({ search }) => ({ q: search.q, order: search.order }),
     // The same request the screen makes, so the screen finds the first page in the cache.

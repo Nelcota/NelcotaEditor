@@ -50,7 +50,7 @@ export function AuthShowcase(): ReactNode {
             className="theme-app hidden content-center gap-7 overflow-hidden rounded-frame bg-background p-10 xl:p-12 font-sans text-foreground lg:grid"
         >
             <p className="flex items-center gap-3 text-title font-semibold tracking-display">
-                <BrandMark className="size-9" />
+                <BrandMark className="h-9" />
                 Cole um link. O Nel corta.
             </p>
             <div className="grid gap-5 rounded-2xl border border-border bg-card p-4 text-muted-foreground">

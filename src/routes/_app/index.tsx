@@ -5,7 +5,7 @@ import { RecentVideos } from "#/modules/videos/ui/components/recent-videos";
 import { VideoLinkComposer } from "#/modules/videos/ui/components/video-link-composer";
 
 export const Route = createFileRoute("/_app/")({
-    head: () => ({ meta: [{ title: "Início · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Início · Editor Oculto" }] }),
     component: HomeRoute,
 });
 

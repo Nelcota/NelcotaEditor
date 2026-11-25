@@ -7,7 +7,7 @@ import { AdminUsersScreen } from "#/modules/admin/ui/screens/admin-users-screen"
 
 export const Route = createFileRoute("/_app/admin/users/")({
     validateSearch: adminUsersSearchSchema,
-    head: () => ({ meta: [{ title: "Usuários · Admin · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Usuários · Admin · Editor Oculto" }] }),
     loaderDeps: ({ search }) => ({ q: search.q, page: search.page }),
     // The same input the screen asks for, so the screen finds this result in the cache.
     loader: async ({ context, deps }): Promise<void> => {

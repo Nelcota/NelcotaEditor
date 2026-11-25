@@ -10,7 +10,7 @@ import { AdminVideosScreen } from "#/modules/admin/ui/screens/admin-videos-scree
 
 export const Route = createFileRoute("/_app/admin/videos")({
     validateSearch: adminVideosSearchSchema,
-    head: () => ({ meta: [{ title: "Vídeos · Admin · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Vídeos · Admin · Editor Oculto" }] }),
     loaderDeps: ({ search }) => ({ q: search.q, page: search.page, filter: search.filter }),
     // The same input the screen asks for, so the screen finds this result in the cache.
     loader: async ({ context, deps }): Promise<void> => {

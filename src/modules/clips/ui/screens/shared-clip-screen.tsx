@@ -23,7 +23,7 @@ export function SharedClipScreen({ clip }: SharedClipScreenProps): ReactNode {
             <header>
                 <Link
                     to="/"
-                    aria-label="Nelcota, página inicial"
+                    aria-label="Editor Oculto, página inicial"
                     className="inline-block rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-99"
                 >
                     <BrandLogo />

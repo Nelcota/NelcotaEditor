@@ -23,12 +23,12 @@ interface AuthCardProps {
     children?: ReactNode;
 }
 
-/** The site's logo: the ghost and the uppercase wordmark. */
+/** The site's logo: the symbol and the wordmark. */
 function SiteLogo(): ReactNode {
     return (
         <span className="flex items-center gap-2.5 text-logo font-bold tracking-tight">
-            <BrandMark className="size-7" />
-            NELCOTA
+            <BrandMark className="h-7" />
+            Editor Oculto
         </span>
     );
 }

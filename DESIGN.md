@@ -4,7 +4,7 @@ Nelcota turns long videos into vertical short clips with captions. Since 2026-11
 owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
 (the owner asked for nothing bluish) and blue as the one action colour (it was the brand green until
 2026-11-23). The frame holds the
-sidebar: the NELCOTA logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
+sidebar: the Editor Oculto logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
 the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
 (used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
 rounded panel holds the breadcrumb bar (theme toggle trailing) and the page; page titles live in the
@@ -79,7 +79,8 @@ Raised one step on 2026-11-19: small grey text on the dark canvas was hard to re
 Two 4x4 sprites in `public/mascots/` (sources in `design/assets/`), drawn by `Mascot` (index 0–31).
 Each drawing has one meaning only:
 
-- **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
+- **Shape 15 (the green ghost) is Nel, the brand mascot** (home greeting, empty screens). Since
+  2026-11-25 the logo is Editor Oculto's symbol (`BrandMark`): two lime clips with the play between them.
   It is reserved: no video or crew member uses it.
   It floats in the app frame and makes one gentle hop beside the home greeting. In the expanded
   sidebar and on Home, its eyes follow the pointer, taps or keyboard focus. It blinks at irregular
@@ -284,3 +285,4 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-25 | Admin gets a fourth tab, Recursos: one settings group per area with a `Switch` (`src/shared/ui/switch.tsx`, Radix) per feature, its effect in one line and who changed it last; a blue notice on top lists the switches away from normal. Closing sign-up and turning maintenance on ask first. Where a feature is paused, the screen shows its one-line reason in place of the control | The owner wanted to turn parts of the app off without a deploy; a reason in place of a missing control keeps people from guessing |
 | 2026-11-25 | Suporte (board "Suporte: tickets dentro do Nelcota"): a Suporte item at the foot of the sidebar list with a blue dot for an unread answer (in the account menu on phones); tickets are a conversation with Aberto, Respondido and Fechado; a failed video offers "Relatar problema" with the video picked; Admin gets a Suporte tab with the queue beside the open ticket and its account, video and error, and the Admin folder counts the tickets waiting; people who cannot sign in reach a public Contato form, in the site's look, from Entrar | The owner wanted people to ask for help inside the app; tickets tied to a video spare a round of questions, and the public form follows the usual way out for a locked account |
 | 2026-11-25 | UX pass as a first-time user: crew names only next to their mascot or role; Início lists the last three videos under the shortcuts; quick counts use the same pills as the other short choices (wizard and Conta), "Curtos" reads "30 segundos"; storage shares are of the quota ("<1%" for a little); finished videos leave the list's progress cell empty; unknown addresses keep the app layout for signed-in people; forms validate on submit, then on change | A new person met six unexplained names, an empty Início after their first video and numbers that looked broken; the rest repeated what a pill or label already said |
+| 2026-11-25 | Brand becomes Editor Oculto: its symbol as logo and favicon, the name in titles and copy, lime `#C4F800` buttons with graphite text; in light, text, rings and thin fills use a deep lime (5.5:1) | The owner asked to bring the Editor Oculto prototype's identity in; lime on white is 1.25:1 |
