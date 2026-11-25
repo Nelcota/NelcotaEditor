@@ -2,6 +2,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { releaseRenderingClips } from "#/modules/clips/server/release-rendering-clips.server";
 import { ensureHighlights } from "#/modules/highlights/server/select-highlights.server";
 import { watchForCancellation } from "#/modules/processing/server/cancellation-watch.server";
+import { measureVideoStage } from "#/modules/processing/server/measure-video-stage.server";
 import { finishStoppedVideo } from "#/modules/processing/server/finish-stopped-video.server";
 import { renderPendingClips } from "#/modules/processing/server/render-pending-clips.server";
 import { runWithVideoProcessingLock } from "#/modules/processing/server/video-processing-lock.server";
@@ -46,37 +47,45 @@ function saveStageProgress(
 async function runStages(video: Video, workDirectory: string, signal: AbortSignal): Promise<void> {
     const videoId = video.id;
     const run = toVideoRun(video);
-    const source = await prepareVideoSource(video, { signal, workDirectory });
+    const source = await measureVideoStage({ videoId, name: "source" }, () =>
+        prepareVideoSource(video, { signal, workDirectory }),
+    );
     const localSourcePath = source.localSourcePath;
     signal.throwIfAborted();
-    const words = await ensureTranscript({
-        videoId,
-        localSourcePath,
-        workDirectory,
-        language: video.transcriptionLanguage,
-        signal,
-        saveProgress: saveStageProgress(run, "transcribing"),
-    });
+    const words = await measureVideoStage({ videoId, name: "transcript" }, () =>
+        ensureTranscript({
+            videoId,
+            localSourcePath,
+            workDirectory,
+            language: video.transcriptionLanguage,
+            signal,
+            saveProgress: saveStageProgress(run, "transcribing"),
+        }),
+    );
 
     signal.throwIfAborted();
-    const clips = await ensureHighlights({
-        video,
-        words,
-        durationSeconds: source.durationSeconds,
-        signal,
-        saveProgress: saveStageProgress(run, "selecting"),
-    });
+    const clips = await measureVideoStage({ videoId, name: "highlights" }, () =>
+        ensureHighlights({
+            video,
+            words,
+            durationSeconds: source.durationSeconds,
+            signal,
+            saveProgress: saveStageProgress(run, "selecting"),
+        }),
+    );
 
     signal.throwIfAborted();
-    await renderPendingClips({
-        run,
-        userId: video.userId,
-        localSourcePath,
-        workDirectory,
-        clips,
-        words,
-        signal,
-    });
+    await measureVideoStage({ videoId, name: "clips" }, () =>
+        renderPendingClips({
+            run,
+            userId: video.userId,
+            localSourcePath,
+            workDirectory,
+            clips,
+            words,
+            signal,
+        }),
+    );
     signal.throwIfAborted();
 
     // A cancel that arrived after the last step still wins over "done".

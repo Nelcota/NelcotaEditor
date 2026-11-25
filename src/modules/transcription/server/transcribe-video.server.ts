@@ -33,6 +33,7 @@ async function transcribeAudio(request: TranscriptRequest): Promise<Transcriptio
     const audioDirectory = path.join(workDirectory, AUDIO_DIRECTORY_NAME);
 
     try {
+        const extractStartedAt = performance.now();
         const chunks = await extractAudioChunks(localSourcePath, audioDirectory, signal);
 
         // Also keeps transcribeChunks from dividing by zero when it reports progress.
@@ -40,6 +41,7 @@ async function transcribeAudio(request: TranscriptRequest): Promise<Transcriptio
             throw new UserFacingError("Não foi possível extrair o áudio do vídeo.");
         }
 
+        const extractDurationMs = Math.round(performance.now() - extractStartedAt);
         const startedAt = performance.now();
         const transcription = await runWithProgress(
             (onProgress) => transcribeChunks({ chunks, language, signal }, onProgress),
@@ -52,6 +54,7 @@ async function transcribeAudio(request: TranscriptRequest): Promise<Transcriptio
                 chunkCount: chunks.length,
                 wordCount: transcription.words.length,
                 language: transcription.language ?? null,
+                extractDurationMs,
                 durationMs,
             },
             "Video transcribed",
