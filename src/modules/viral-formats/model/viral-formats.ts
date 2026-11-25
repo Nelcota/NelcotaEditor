@@ -42,7 +42,7 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     {
         id: "this-or-that",
         access: "free",
-        name: "Isso ou aquilo",
+        name: "Contraste",
         tagline: "Duas opções lado a lado.",
         description:
             "Coloca duas escolhas frente a frente e deixa claro qual vence. Gera comentário porque todo mundo quer dar a própria opinião.",
