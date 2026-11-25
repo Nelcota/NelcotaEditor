@@ -598,7 +598,8 @@ WCAG 2.2 AA is the minimum.
   (`head`), and `<html lang>` matching the UI language.
 - Works at 200% zoom and 320 px wide with no horizontal scroll. Never block zoom
   (`user-scalable=no`, `maximum-scale`).
-- Animations respect `prefers-reduced-motion` (`motion-safe:`).
+- Animations respect `prefers-reduced-motion` (`motion-safe:`). Loading spinners are the
+  exception: they keep turning, since they travel nowhere and a still one looks frozen.
 
 ## UI copy
 

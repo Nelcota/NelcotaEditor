@@ -101,10 +101,7 @@ function StatusPill({ video }: { video: VideoSummary }): ReactNode {
                 STATUS_PILL_CLASSES[status.tone],
             )}
         >
-            <Icon
-                aria-hidden="true"
-                className={cn(status.tone === "working" && "motion-safe:animate-spin")}
-            />
+            <Icon aria-hidden="true" className={cn(status.tone === "working" && "animate-spin")} />
             {status.label}
         </span>
     );

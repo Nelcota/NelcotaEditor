@@ -555,7 +555,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *:where(:not(.mascot-animation)),
+    /* Loading spinners keep turning: they travel nowhere, and a still one reads as frozen. */
+    *:where(:not(.mascot-animation, .animate-spin)),
     ::before,
     ::after {
         animation-duration: 0.01ms !important;

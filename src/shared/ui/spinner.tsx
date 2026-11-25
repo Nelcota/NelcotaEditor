@@ -16,7 +16,7 @@ export function Spinner({ className, ...props }: SVGProps<SVGSVGElement>) {
             strokeWidth={STROKE_WIDTH}
             strokeLinecap="round"
             aria-hidden="true"
-            className={cn("size-4 motion-safe:animate-spin", className)}
+            className={cn("size-4 animate-spin", className)}
             {...props}
         >
             <circle cx="12" cy="12" r={RADIUS} opacity={0.25} />
