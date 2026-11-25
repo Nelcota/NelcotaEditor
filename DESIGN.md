@@ -100,9 +100,11 @@ Each drawing has one meaning only:
 
 - The crew appears in the processing panel, the failed/cancelled panels, clip placeholders and
   empty/error states. It is decorative: the stage is always written next to it.
-- The member at work makes a short gesture when its step starts and repeats it at intervals of
-  8 to 12 seconds: Lightning darts down, Octopus taps twice, Star twinkles with a turn, and Fire
-  flickers from its base. Upcoming members wait in grey. Replays pause while the tab is hidden.
+- The member at work makes a short gesture when its step starts and repeats it every 3 to 4
+  seconds in the processing panel and every 8 to 12 seconds beside a video in the list. The
+  panel lets people pause or resume the gestures. Lightning darts down, Octopus taps twice,
+  Star twinkles with a turn, and Fire flickers from its base. Upcoming members wait in grey.
+  Replays pause while the tab is hidden.
   Clover makes one small hop when the cuts summary sees a video finish. Shield shakes its head
   once when processing fails. Opening a video with a known result shows its mascot at rest.
   Reduced motion keeps the crew still.

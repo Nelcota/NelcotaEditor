@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { useCrewGesture } from "#/modules/videos/ui/hooks/use-crew-gesture";
+import type { CrewGestureContext } from "#/modules/videos/ui/hooks/use-crew-gesture";
 import { cn } from "#/shared/ui/cn";
 import { Mascot } from "#/shared/ui/mascot";
 
@@ -15,6 +16,7 @@ const STAGE_MOTION: Partial<Record<VideoStatus, string>> = {
 interface StageCrewMascotProps {
     status: VideoStatus;
     isWorking?: boolean;
+    context?: CrewGestureContext;
     className?: string;
 }
 
@@ -22,10 +24,11 @@ interface StageCrewMascotProps {
 export function StageCrewMascot({
     status,
     isWorking = false,
+    context = "inline",
     className,
 }: StageCrewMascotProps): ReactNode {
     const motion = STAGE_MOTION[status];
-    const gesture = useCrewGesture(status, isWorking === true && motion !== undefined);
+    const gesture = useCrewGesture(status, isWorking === true && motion !== undefined, context);
 
     return (
         <Mascot

@@ -1,4 +1,7 @@
+import { useState } from "react";
+import type { ReactNode } from "react";
 import CheckIcon from "~icons/lucide/check";
+import { isVideoWorking } from "#/modules/video-records/model/video-status";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { toCrewLine } from "#/modules/videos/model/crew-lines";
@@ -6,6 +9,7 @@ import { CancelVideoButton } from "#/modules/videos/ui/components/cancel-video-b
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { useProcessingTimeLeft } from "#/modules/videos/ui/hooks/use-processing-time-left";
 import { PROCESSING_STEPS, VIDEO_STATUS_LABELS } from "#/modules/videos/model/video-status-labels";
+import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { formatTimeLeft } from "#/shared/ui/format";
 import { Progress } from "#/shared/ui/progress";
@@ -49,12 +53,19 @@ const STEP_LABEL_STYLES: Record<StepState, string> = {
     upcoming: "text-muted-foreground",
 };
 
-function StepCrew({ status, state }: { status: VideoStatus; state: StepState }) {
+interface StepCrewProps {
+    status: VideoStatus;
+    state: StepState;
+    isMotionEnabled: boolean;
+}
+
+function StepCrew({ status, state, isMotionEnabled }: StepCrewProps): ReactNode {
     return (
         <span className="relative shrink-0">
             <StageCrewMascot
                 status={status}
-                isWorking={state === "current"}
+                isWorking={state === "current" && isMotionEnabled}
+                context="panel"
                 className={cn("size-8", STEP_MASCOT_STYLES[state])}
             />
             {state === "done" && (
@@ -101,11 +112,17 @@ function StageHeadline({ video }: { video: VideoSummary }) {
     );
 }
 
-function ProcessingSteps({ video }: { video: VideoSummary }) {
+function ProcessingSteps({
+    status,
+    isMotionEnabled,
+}: {
+    status: VideoStatus;
+    isMotionEnabled: boolean;
+}): ReactNode {
     return (
         <ol className="grid gap-3 sm:auto-cols-fr sm:grid-flow-col">
             {PROCESSING_STEPS.map((step) => {
-                const state = stepState(step.status, video.status);
+                const state = stepState(step.status, status);
 
                 return (
                     <li
@@ -113,7 +130,11 @@ function ProcessingSteps({ video }: { video: VideoSummary }) {
                         aria-current={state === "current" && "step"}
                         className="flex items-center gap-2.5 text-sm"
                     >
-                        <StepCrew status={step.status} state={state} />
+                        <StepCrew
+                            status={step.status}
+                            state={state}
+                            isMotionEnabled={isMotionEnabled}
+                        />
                         <span className={STEP_LABEL_STYLES[state]}>{step.label}</span>
                     </li>
                 );
@@ -122,18 +143,38 @@ function ProcessingSteps({ video }: { video: VideoSummary }) {
     );
 }
 
-export function ProcessingPanel({ video }: { video: VideoSummary }) {
+export function ProcessingPanel({ video }: { video: VideoSummary }): ReactNode {
+    const { status, progressPercent, isCancelling } = video;
+    const [isMotionPaused, setMotionPaused] = useState(false);
+
     return (
         <section className="grid gap-5 rounded-2xl border bg-popover p-4 sm:p-5">
             <StageHeadline video={video} />
-            <Progress value={video.progressPercent} aria-label="Progresso do processamento" />
-            <ProcessingSteps video={video} />
+            <Progress value={progressPercent} aria-label="Progresso do processamento" />
+            <ProcessingSteps
+                status={status}
+                isMotionEnabled={isMotionPaused === false && isCancelling === false}
+            />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">
                     Pode fechar esta página: o processamento continua. Os cortes aparecem aqui e na
                     lista de vídeos assim que ficarem prontos.
                 </p>
-                <CancelVideoButton video={video} />
+                <div className="flex flex-wrap items-start gap-2 sm:justify-end">
+                    {isVideoWorking(status) === true && isCancelling === false && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="hidden h-9 text-muted-foreground motion-safe:inline-flex"
+                            onClick={() => setMotionPaused((previous) => previous === false)}
+                        >
+                            {isMotionPaused === true && "Animar mascotes"}
+                            {isMotionPaused === false && "Pausar mascotes"}
+                        </Button>
+                    )}
+                    <CancelVideoButton video={video} />
+                </div>
             </div>
         </section>
     );
