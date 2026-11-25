@@ -86,8 +86,25 @@ test("the home mascot tracks the pointer, changes expression and blinks", async 
     const centerX = bounds.x + bounds.width / 2;
     const centerY = bounds.y + bounds.height / 2;
     const pointerDistance = 115;
-    const horizontalTravel = (): Promise<number> =>
-        eyes.evaluate((element) => Number.parseFloat(getComputedStyle(element).translate));
+    const expectLook = async (direction: number): Promise<void> => {
+        // The app clears its gaze when the page loses focus during a concurrent browser test.
+        await expect(async () => {
+            await page.bringToFront();
+            await page.mouse.move(centerX + direction * pointerDistance, centerY);
+            await expect(curious).toHaveCSS("opacity", "1", { timeout: 1_000 });
+            await expect
+                .poll(
+                    () =>
+                        eyes.evaluate(
+                            (element, sign) =>
+                                Number.parseFloat(getComputedStyle(element).translate) * sign,
+                            direction,
+                        ),
+                    { timeout: 1_000 },
+                )
+                .toBeGreaterThan(12);
+        }).toPass({ timeout: 5_000 });
+    };
 
     await expect(gaze).toHaveCSS("visibility", "hidden");
     await lids.evaluate((element) => {
@@ -102,12 +119,8 @@ test("the home mascot tracks the pointer, changes expression and blinks", async 
     await expect(gaze).toHaveCSS("visibility", "visible");
     await expect(smile).toHaveCSS("opacity", "1");
 
-    await page.mouse.move(centerX + pointerDistance, centerY);
-    await expect(curious).toHaveCSS("opacity", "1");
-    await expect.poll(horizontalTravel).toBeGreaterThan(12);
-
-    await page.mouse.move(centerX - pointerDistance, centerY);
-    await expect.poll(horizontalTravel).toBeLessThan(-12);
+    await expectLook(1);
+    await expectLook(-1);
 
     await mascot.hover({ force: true });
     await expect(smile).toHaveCSS("opacity", "1");
