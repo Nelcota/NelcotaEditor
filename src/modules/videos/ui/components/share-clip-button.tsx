@@ -41,7 +41,7 @@ function SharedLink({ sharePath, isSharingOn }: SharedLinkProps) {
 
     return (
         <CopyTextButton
-            text={`${window.location.origin}${sharePath}`}
+            text={() => new URL(sharePath, window.location.origin).href}
             label="Copiar link"
             className="min-w-36"
         />

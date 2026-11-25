@@ -14,7 +14,7 @@ const COPIED_LABEL = "Copiado";
 const FAILED_LABEL = "Não deu para copiar";
 
 interface CopyTextButtonProps {
-    text: string;
+    text: string | (() => string);
     label: string;
     className?: string;
     /** E.g. `max-sm:sr-only` for an icon-only button on phones; the icon still shows each state. */
@@ -60,7 +60,13 @@ export function CopyTextButton({
 
     const copy = async (): Promise<void> => {
         try {
-            await navigator.clipboard.writeText(text);
+            let value = text;
+
+            if (typeof value === "function") {
+                value = value();
+            }
+
+            await navigator.clipboard.writeText(value);
             setState("copied");
         } catch (error) {
             reportClientProblem("Could not copy to the clipboard", error);
@@ -69,14 +75,19 @@ export function CopyTextButton({
     };
 
     return (
-        <Button
-            variant="outline"
-            onClick={() => track(copy())}
-            aria-live="polite"
-            className={className}
-        >
-            {STATE_ICONS[state]}
-            <span className={labelClassName}>{toLabel(state, label)}</span>
-        </Button>
+        <>
+            <Button
+                type="button"
+                variant="outline"
+                onClick={() => track(copy())}
+                className={className}
+            >
+                {STATE_ICONS[state]}
+                <span className={labelClassName}>{toLabel(state, label)}</span>
+            </Button>
+            <span role="status" className="sr-only">
+                {state !== "idle" && toLabel(state, label)}
+            </span>
+        </>
     );
 }

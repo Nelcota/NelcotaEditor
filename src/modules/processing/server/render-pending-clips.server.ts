@@ -12,6 +12,7 @@ import { runVideoStorageTransaction } from "#/modules/processing/server/video-st
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
 import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
+import { StorageQuotaExceededError } from "#/modules/videos/model/storage-quota-exceeded-error";
 import { getClipRenderCapacity } from "#/shared/server/clip-render-capacity.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
@@ -70,6 +71,58 @@ interface StoredClipFiles {
     encodeDurationMs: number;
 }
 
+interface ClipToRecord {
+    clip: Clip;
+    userId: string;
+    outputPath: string;
+    videoBytes: number;
+    signal: AbortSignal;
+}
+
+function recordClipFiles(output: ClipToRecord, poster: StoredPoster | null): Promise<void> {
+    const { clip, userId, outputPath, videoBytes, signal } = output;
+    const outputBytes = videoBytes + (poster?.posterBytes ?? 0);
+    const posterPath = poster?.posterPath ?? null;
+    const replacedBytes = clip.outputBytes ?? 0;
+
+    signal.throwIfAborted();
+    return runVideoStorageTransaction(
+        { userId, byteDelta: outputBytes - replacedBytes },
+        (transaction) =>
+            recordRenderedClip(clip.id, { outputPath, outputBytes, posterPath }, transaction),
+    );
+}
+
+async function recordWithOptionalPoster(
+    output: ClipToRecord,
+    poster: StoredPoster | null,
+): Promise<StoredPoster | null> {
+    try {
+        await recordClipFiles(output, poster);
+        return poster;
+    } catch (error) {
+        if (poster === null || error instanceof StorageQuotaExceededError === false) {
+            throw error;
+        }
+    }
+
+    // A preview image should never make a video that fits fail the quota check.
+    await recordClipFiles(output, null);
+    return null;
+}
+
+async function removeUnrecordedPoster(clipId: string, poster: StoredPoster | null): Promise<void> {
+    if (poster === null) {
+        return;
+    }
+
+    try {
+        await getFileStorage().deleteFile(poster.posterPath);
+    } catch (error) {
+        logger.warn({ clipId, error }, "Could not remove the unrecorded clip poster");
+    }
+}
+
 async function storeVideoAndRecord(
     clip: Clip,
     input: RenderPendingClipsInput,
@@ -78,26 +131,22 @@ async function storeVideoAndRecord(
     const { userId, signal } = input;
     const { video, poster, encodeDurationMs } = files;
     const outputPath = video.storagePath;
-    const posterPath = poster?.posterPath ?? null;
-    const posterBytes = poster?.posterBytes ?? 0;
-    const replacedBytes = clip.outputBytes ?? 0;
+    let recordedPoster = poster;
 
     const { bytes: videoBytes, storageDurationMs } = await storeProcessedVideoFile(
         { key: outputPath, localPath: video.localPath, signal },
-        (storedVideoBytes) => {
-            const outputBytes = storedVideoBytes + posterBytes;
-
-            return runVideoStorageTransaction(
-                { userId, byteDelta: outputBytes - replacedBytes },
-                (transaction) =>
-                    recordRenderedClip(
-                        clip.id,
-                        { outputPath, outputBytes, posterPath },
-                        transaction,
-                    ),
+        async (storedVideoBytes) => {
+            recordedPoster = await recordWithOptionalPoster(
+                { clip, userId, outputPath, videoBytes: storedVideoBytes, signal },
+                poster,
             );
         },
     );
+
+    if (recordedPoster === null) {
+        await removeUnrecordedPoster(clip.id, poster);
+    }
+
     const { STORAGE_DRIVER: storageDriver } = getEnvironment();
     logger.info(
         {
@@ -105,7 +154,7 @@ async function storeVideoAndRecord(
             encodeDurationMs,
             storageDurationMs,
             storageDriver,
-            outputBytes: videoBytes + posterBytes,
+            outputBytes: videoBytes + (recordedPoster?.posterBytes ?? 0),
         },
         "Clip rendered and stored",
     );
@@ -124,10 +173,7 @@ async function renderAndStoreClip(clip: Clip, input: RenderPendingClipsInput): P
         });
     } catch (error) {
         // The clip has no row pointing at the poster, so nothing else would ever remove it.
-        if (poster !== null) {
-            await getFileStorage().deleteFile(poster.posterPath);
-        }
-
+        await removeUnrecordedPoster(clip.id, poster);
         throw error;
     }
 }

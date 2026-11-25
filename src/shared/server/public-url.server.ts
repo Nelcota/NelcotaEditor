@@ -1,8 +1,8 @@
-import { InvalidEnvironmentError, getEnvironment } from "#/shared/server/env.server";
+import { getEnvironment } from "#/shared/server/env.server";
 
 /**
  * An absolute link to a path of the app, for places that have no page around them to resolve a
- * relative one: link previews (WhatsApp and the like require absolute image links).
+ * relative one. Development may run without an explicit origin and keep relative paths.
  */
 export function toPublicUrl(pathname: string): string {
     const appUrl = getEnvironment().BETTER_AUTH_URL;
@@ -12,7 +12,7 @@ export function toPublicUrl(pathname: string): string {
     }
 
     if (appUrl === undefined) {
-        throw new InvalidEnvironmentError(["BETTER_AUTH_URL"]);
+        return pathname;
     }
 
     return new URL(pathname, appUrl).toString();

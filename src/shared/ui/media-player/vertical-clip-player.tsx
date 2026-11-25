@@ -20,13 +20,16 @@ interface VerticalClipPlayerProps {
     /** The player's accessible name. */
     label: string;
     fileUrl: string;
+    frameClassName?: string;
+    posterUrl?: string;
 }
 
 /**
  * The clip at its real vertical shape with the same controls as the original, smaller. In narrow
  * spots (the phone list) only the play button and a thin bar fit, and that is all it shows.
  */
-export function VerticalClipPlayer({ label, fileUrl }: VerticalClipPlayerProps): ReactNode {
+export function VerticalClipPlayer(props: VerticalClipPlayerProps): ReactNode {
+    const { label, fileUrl, frameClassName, posterUrl } = props;
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const player = useMediaPlayer(videoRef, containerRef);
@@ -36,8 +39,12 @@ export function VerticalClipPlayer({ label, fileUrl }: VerticalClipPlayerProps):
     let source: string | undefined = undefined;
 
     if (isNearViewport === true) {
-        // The media fragment makes the browser show an early frame as the cover.
-        source = `${fileUrl}#t=0.1`;
+        source = fileUrl;
+
+        if (posterUrl === undefined) {
+            // The media fragment makes the browser show an early frame as the cover.
+            source = `${fileUrl}#t=0.1`;
+        }
     }
 
     return (
@@ -46,7 +53,7 @@ export function VerticalClipPlayer({ label, fileUrl }: VerticalClipPlayerProps):
             containerRef={containerRef}
             label={label}
             size="sm"
-            className={CLIP_FRAME_CLASS}
+            className={cn(CLIP_FRAME_CLASS, frameClassName)}
             controls={
                 <div className="grid gap-0.5 px-2 pb-1.5">
                     <SeekBar
@@ -76,6 +83,7 @@ export function VerticalClipPlayer({ label, fileUrl }: VerticalClipPlayerProps):
                 disableRemotePlayback
                 ref={videoRef}
                 src={source}
+                poster={posterUrl}
                 playsInline
                 preload="metadata"
                 className={cn("object-cover", player.isFullscreen === true && "object-contain")}
