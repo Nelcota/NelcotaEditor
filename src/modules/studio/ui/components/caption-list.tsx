@@ -298,7 +298,7 @@ export function CaptionList(props: CaptionListProps): ReactNode {
                                 onSeek(cue.startSeconds);
                             }}
                             className={cn(
-                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 rounded-lg px-3 py-2.5 text-left text-sm outline-none transition-colors hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-inset",
+                                "grid w-full grid-cols-[56px_minmax(0,1fr)] items-baseline gap-3 rounded-lg px-3 py-2.5 text-left text-sm outline-none transition-[background-color,scale] hover:bg-accent/50 focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-inset motion-safe:active:scale-[0.99]",
                                 index === playingIndex &&
                                     "bg-primary/10 shadow-[inset_3px_0_0_var(--primary)]",
                             )}

@@ -179,26 +179,10 @@
     --radius-xl: 0.625rem;
     --radius-2xl: 0.875rem;
 
-    --animate-crew-work: crew-work 1.4s ease-in-out infinite;
     --animate-crew-download: crew-download 780ms ease-in-out;
     --animate-crew-transcribe: crew-transcribe 940ms ease-in-out;
     --animate-crew-select: crew-select 1000ms ease-in-out;
     --animate-crew-render: crew-render 1180ms ease-in-out;
-
-    @keyframes crew-work {
-        0%,
-        100% {
-            transform: translateY(0) rotate(0deg);
-        }
-
-        25% {
-            transform: translateY(-3px) rotate(-6deg);
-        }
-
-        75% {
-            transform: translateY(-1px) rotate(6deg);
-        }
-    }
 
     @keyframes crew-download {
         18% {
