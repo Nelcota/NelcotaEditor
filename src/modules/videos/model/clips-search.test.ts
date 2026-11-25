@@ -4,11 +4,13 @@ import { clipsSearchSchema, toClipsSearch } from "#/modules/videos/model/clips-s
 
 describe("toClipsSearch", () => {
     it("keeps the defaults out of the URL", () => {
-        assert.deepEqual(toClipsSearch("  ", "newest"), {});
+        assert.deepEqual(toClipsSearch({ query: "  ", order: "newest", view: "grid" }), {});
     });
 
-    it("keeps a trimmed search and a non-default order", () => {
-        assert.deepEqual(toClipsSearch(" receita ", "best"), { q: "receita", order: "best" });
+    it("keeps a trimmed search, a non-default order and a non-default view", () => {
+        const search = toClipsSearch({ query: " receita ", order: "best", view: "table" });
+
+        assert.deepEqual(search, { q: "receita", order: "best", view: "table" });
     });
 });
 
@@ -17,5 +19,11 @@ describe("clipsSearchSchema", () => {
         const search = clipsSearchSchema.parse({ q: "receita", order: "oldest" });
 
         assert.deepEqual(search, { q: "receita", order: undefined });
+    });
+
+    it("drops an unknown view instead of failing the page", () => {
+        const search = clipsSearchSchema.parse({ view: "list" });
+
+        assert.deepEqual(search, { view: undefined });
     });
 });

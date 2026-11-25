@@ -8,6 +8,8 @@ import {
 } from "#/modules/videos/ui/components/clips-screen-states";
 import { DEFAULT_CLIP_ORDER } from "#/modules/videos/model/clip-order";
 import type { ClipOrder } from "#/modules/videos/model/clip-order";
+import { DEFAULT_CLIP_VIEW_MODE } from "#/modules/videos/model/clip-view-mode";
+import type { ClipViewMode } from "#/modules/videos/model/clip-view-mode";
 import { toClipsSearch } from "#/modules/videos/model/clips-search";
 import type { ClipsSearch } from "#/modules/videos/model/clips-search";
 import { libraryClipsQueryOptions } from "#/modules/videos/model/library-queries";
@@ -24,9 +26,10 @@ function ClipsContent({ search, onSearchChange }: ClipsScreenProps): ReactNode {
     const track = useTrackPromise();
     const query = search.q ?? "";
     const order = search.order ?? DEFAULT_CLIP_ORDER;
+    const view = search.view ?? DEFAULT_CLIP_VIEW_MODE;
     const clipsQuery = useInfiniteQuery(libraryClipsQueryOptions({ query, order }));
     const searchDraft = useSearchDraft(query, (next: string) =>
-        track(onSearchChange(toClipsSearch(next, order))),
+        track(onSearchChange(toClipsSearch({ query: next, order, view }))),
     );
     const pages = clipsQuery.data?.pages;
     const firstPage = pages?.[0];
@@ -43,7 +46,7 @@ function ClipsContent({ search, onSearchChange }: ClipsScreenProps): ReactNode {
     }
 
     if (pages === undefined || firstPage === undefined) {
-        return <ClipsLoading />;
+        return <ClipsLoading view={view} />;
     }
 
     if (firstPage.totalCount === 0 && query.length === 0) {
@@ -55,8 +58,16 @@ function ClipsContent({ search, onSearchChange }: ClipsScreenProps): ReactNode {
             items={pages.flatMap((page) => page.items)}
             totalCount={firstPage.totalCount}
             search={searchDraft}
-            order={order}
-            onOrderChange={(next: ClipOrder) => track(onSearchChange(toClipsSearch(query, next)))}
+            order={{
+                value: order,
+                onChange: (next: ClipOrder) =>
+                    track(onSearchChange(toClipsSearch({ query, order: next, view }))),
+            }}
+            view={{
+                value: view,
+                onChange: (next: ClipViewMode) =>
+                    track(onSearchChange(toClipsSearch({ query, order, view: next }))),
+            }}
             nextPage={{
                 hasNextPage: clipsQuery.hasNextPage,
                 isFetching: clipsQuery.isFetchingNextPage,

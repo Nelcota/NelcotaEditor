@@ -8,7 +8,3 @@ export const CLIP_ORDER_LABELS: Record<ClipOrder, string> = {
     newest: "Recentes",
     best: "Maior nota",
 };
-
-export function isClipOrder(value: string): value is ClipOrder {
-    return CLIP_ORDERS.some((order) => order === value);
-}
