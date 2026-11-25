@@ -25,6 +25,7 @@ const ADMIN_USER_PATTERN = /^\/admin\/users\/[^/]+\/?$/;
 
 const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
     "/": [{ label: "Início" }],
+    "/getting-started": [HOME_CRUMB, { label: "Comece por aqui" }],
     "/videos": [HOME_CRUMB, { label: "Vídeos" }],
     "/clips": [HOME_CRUMB, { label: "Cortes" }],
     "/overview": [HOME_CRUMB, { label: "Painel" }],

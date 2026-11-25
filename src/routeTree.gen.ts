@@ -22,6 +22,7 @@ import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppClipsRouteImport } from './routes/_app/clips'
+import { Route as AppGettingStartedRouteImport } from './routes/_app/getting-started'
 import { Route as AppOverviewRouteImport } from './routes/_app/overview'
 import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
 import { Route as AppUsageRouteImport } from './routes/_app/usage'
@@ -112,6 +113,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
 const AppClipsRoute = AppClipsRouteImport.update({
   id: '/clips',
   path: '/clips',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGettingStartedRoute = AppGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
   getParentRoute: () => AppRoute,
 } as any)
 const AppOverviewRoute = AppOverviewRouteImport.update({
@@ -267,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AppAccountRoute
   '/admin': typeof AppAdminRouteWithChildren
   '/clips': typeof AppClipsRoute
+  '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
@@ -306,6 +313,7 @@ export interface FileRoutesByTo {
   '/$': typeof AppSplatRoute
   '/account': typeof AppAccountRoute
   '/clips': typeof AppClipsRoute
+  '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/_app/account': typeof AppAccountRoute
   '/_app/admin': typeof AppAdminRouteWithChildren
   '/_app/clips': typeof AppClipsRoute
+  '/_app/getting-started': typeof AppGettingStartedRoute
   '/_app/overview': typeof AppOverviewRoute
   '/_app/preferences': typeof AppPreferencesRoute
   '/_app/usage': typeof AppUsageRoute
@@ -392,6 +401,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/clips'
+    | '/getting-started'
     | '/overview'
     | '/preferences'
     | '/usage'
@@ -431,6 +441,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/account'
     | '/clips'
+    | '/getting-started'
     | '/overview'
     | '/preferences'
     | '/usage'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/_app/account'
     | '/_app/admin'
     | '/_app/clips'
+    | '/_app/getting-started'
     | '/_app/overview'
     | '/_app/preferences'
     | '/_app/usage'
@@ -615,6 +627,13 @@ declare module '@tanstack/react-router' {
       path: '/clips'
       fullPath: '/clips'
       preLoaderRoute: typeof AppClipsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/getting-started': {
+      id: '/_app/getting-started'
+      path: '/getting-started'
+      fullPath: '/getting-started'
+      preLoaderRoute: typeof AppGettingStartedRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/overview': {
@@ -850,6 +869,7 @@ interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppClipsRoute: typeof AppClipsRoute
+  AppGettingStartedRoute: typeof AppGettingStartedRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppPreferencesRoute: typeof AppPreferencesRoute
   AppUsageRoute: typeof AppUsageRoute
@@ -866,6 +886,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
   AppAdminRoute: AppAdminRouteWithChildren,
   AppClipsRoute: AppClipsRoute,
+  AppGettingStartedRoute: AppGettingStartedRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppPreferencesRoute: AppPreferencesRoute,
   AppUsageRoute: AppUsageRoute,

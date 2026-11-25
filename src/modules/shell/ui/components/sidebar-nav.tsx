@@ -13,7 +13,9 @@ import {
     isAdminSubSectionCurrent,
 } from "#/modules/shell/model/nav-sections";
 import type { NavSection } from "#/modules/shell/model/nav-sections";
+import { GETTING_STARTED_SECTION } from "#/modules/shell/model/getting-started";
 import { SIDEBAR_ITEM_CLASS } from "#/modules/shell/ui/components/sidebar-item-class";
+import { useGettingStartedChecklist } from "#/modules/shell/ui/hooks/use-getting-started-checklist";
 import { useQuery } from "@tanstack/react-query";
 import { videoCountsQueryOptions } from "#/modules/videos/model/video-queries";
 import { supportWaitingQueryOptions } from "#/modules/admin/model/admin-queries";
@@ -83,6 +85,26 @@ function SupportLink({ pathname }: { pathname: string }): ReactNode {
     }
 
     return <SectionLink section={SUPPORT_SECTION} pathname={pathname} trailing={trailing} />;
+}
+
+/** Comece por aqui, with how many checklist steps are done ("0/4"); lime once all are. */
+function GettingStartedLink({ pathname }: { pathname: string }): ReactNode {
+    const { doneCount, totalCount } = useGettingStartedChecklist();
+    const trailing = (
+        <span
+            className={cn(
+                "rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-muted-foreground tabular-nums",
+                doneCount === totalCount && "bg-primary/15 text-primary-ink",
+            )}
+        >
+            {doneCount}/{totalCount}
+            <span className="sr-only"> passos feitos</span>
+        </span>
+    );
+
+    return (
+        <SectionLink section={GETTING_STARTED_SECTION} pathname={pathname} trailing={trailing} />
+    );
 }
 
 /** How many tickets wait for an answer; nothing when none do. */
@@ -162,9 +184,21 @@ export function SidebarNav(): ReactNode {
     const pathname = useLocation({ select: (location) => location.pathname });
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
+    const groupHeadingId = useId();
 
     return (
-        <nav aria-label="Seções">
+        <nav aria-label="Seções" className="grid gap-3">
+            <div className="grid gap-1">
+                <p
+                    id={groupHeadingId}
+                    className="px-3 text-xs font-bold tracking-eyebrow text-muted-foreground uppercase"
+                >
+                    Editor Oculto
+                </p>
+                <ul aria-labelledby={groupHeadingId} className="grid grid-cols-[minmax(0,1fr)]">
+                    <GettingStartedLink pathname={pathname} />
+                </ul>
+            </div>
             <ul className="grid grid-cols-[minmax(0,1fr)] gap-0.5">
                 {NAV_SECTIONS.map((section) => (
                     <SectionLink key={section.path} section={section} pathname={pathname} />

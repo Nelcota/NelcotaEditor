@@ -10,6 +10,7 @@ import type { IconComponent } from "#/shared/ui/icon-component";
 
 export type SectionPath =
     | "/"
+    | "/getting-started"
     | "/videos"
     | "/clips"
     | "/overview"
