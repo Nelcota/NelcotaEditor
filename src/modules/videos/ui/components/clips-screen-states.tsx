@@ -70,7 +70,7 @@ export function ClipsLoading({ view }: { view: ClipViewMode }): ReactNode {
             <span className="sr-only">Carregando cortes</span>
             <div aria-hidden="true" className="flex flex-wrap items-center gap-2">
                 <Skeleton className="h-10 w-full rounded-xl sm:w-72" />
-                <Skeleton className="h-10 w-full rounded-xl sm:ms-auto sm:w-64" />
+                <Skeleton className="h-10 w-full rounded-xl sm:w-64" />
                 <div className="w-full">
                     <Skeleton className="h-5 w-20" />
                 </div>

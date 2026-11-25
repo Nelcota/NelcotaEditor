@@ -1,6 +1,5 @@
-import ClockIcon from "~icons/lucide/clock";
+import ArrowUpDownIcon from "~icons/lucide/arrow-up-down";
 import LayoutGridIcon from "~icons/lucide/layout-grid";
-import StarIcon from "~icons/lucide/star";
 import TableIcon from "~icons/lucide/table";
 import type { ReactNode } from "react";
 import { CLIP_ORDERS, CLIP_ORDER_LABELS, isClipOrder } from "#/modules/videos/model/clip-order";
@@ -11,49 +10,16 @@ import {
     isClipViewMode,
 } from "#/modules/videos/model/clip-view-mode";
 import type { ClipViewMode } from "#/modules/videos/model/clip-view-mode";
+import { TOOLBAR_SELECT_TRIGGER_CLASS } from "#/modules/videos/ui/components/library-toolbar";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { SearchField } from "#/shared/ui/search-field";
-import { SegmentedControl } from "#/shared/ui/segmented-control";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
 
-const ORDER_ICONS: Record<ClipOrder, IconComponent> = {
-    newest: ClockIcon,
-    best: StarIcon,
-};
-
+/** The trigger shows the shape in use, so the icon changes with the choice. */
 const VIEW_MODE_ICONS: Record<ClipViewMode, IconComponent> = {
     grid: LayoutGridIcon,
     table: TableIcon,
 };
-
-const ORDER_OPTIONS = CLIP_ORDERS.map((value) => {
-    const Icon = ORDER_ICONS[value];
-
-    return {
-        value,
-        label: (
-            <span className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <Icon aria-hidden="true" className="size-4 shrink-0" />
-                {CLIP_ORDER_LABELS[value]}
-            </span>
-        ),
-    };
-});
-
-/** Icons only: the two shapes are drawn, and the name is read out and shown on hover. */
-const VIEW_MODE_OPTIONS = CLIP_VIEW_MODES.map((value) => {
-    const Icon = VIEW_MODE_ICONS[value];
-    const label = CLIP_VIEW_MODE_LABELS[value];
-
-    return {
-        value,
-        ariaLabel: label,
-        label: (
-            <span title={label} className="inline-flex items-center justify-center">
-                <Icon aria-hidden="true" className="size-4 shrink-0" />
-            </span>
-        ),
-    };
-});
 
 interface ClipsToolbarProps {
     query: string;
@@ -63,42 +29,74 @@ interface ClipsToolbarProps {
     countLabel: string;
 }
 
+function OrderSelect({ order }: { order: ClipsToolbarProps["order"] }): ReactNode {
+    return (
+        <Select
+            value={order.value}
+            onValueChange={(value) => {
+                // The options are the known orders, so anything else is ignored.
+                if (isClipOrder(value) === true) {
+                    order.onChange(value);
+                }
+            }}
+        >
+            <SelectTrigger aria-label="Ordenar cortes" className={TOOLBAR_SELECT_TRIGGER_CLASS}>
+                <ArrowUpDownIcon aria-hidden="true" className="size-4 text-primary-ink" />
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" align="start">
+                {CLIP_ORDERS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                        {CLIP_ORDER_LABELS[option]}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    );
+}
+
+function ViewModeSelect({ view }: { view: ClipsToolbarProps["view"] }): ReactNode {
+    const Icon = VIEW_MODE_ICONS[view.value];
+
+    return (
+        <Select
+            value={view.value}
+            onValueChange={(value) => {
+                if (isClipViewMode(value) === true) {
+                    view.onChange(value);
+                }
+            }}
+        >
+            <SelectTrigger aria-label="Exibir cortes como" className={TOOLBAR_SELECT_TRIGGER_CLASS}>
+                <Icon aria-hidden="true" className="size-4 text-primary-ink" />
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" align="start">
+                {CLIP_VIEW_MODES.map((option) => (
+                    <SelectItem key={option} value={option}>
+                        {CLIP_VIEW_MODE_LABELS[option]}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    );
+}
+
+/** The same toolbar as the video library: search, then the order and the view as selects. */
 export function ClipsToolbar(props: ClipsToolbarProps): ReactNode {
     const { query, onQueryChange, order, view, countLabel } = props;
 
     return (
         <div className="flex flex-wrap items-center gap-2">
             <SearchField
-                label="Buscar cortes"
-                placeholder="Buscar por corte ou vídeo"
+                label="Buscar por corte ou vídeo"
+                placeholder="Pesquisar"
                 value={query}
                 onValueChange={onQueryChange}
             />
-            <div className="flex w-full flex-wrap items-center gap-2 sm:ms-auto sm:w-auto">
-                {/* Two fixed orders: both visible instead of a list that opens over the page. */}
-                <SegmentedControl
-                    label="Ordenar cortes"
-                    value={order.value}
-                    options={ORDER_OPTIONS}
-                    onValueChange={(value) => {
-                        // The options are the known orders, so anything else is ignored.
-                        if (isClipOrder(value) === true) {
-                            order.onChange(value);
-                        }
-                    }}
-                    className="flex-1 sm:flex-none"
-                />
-                <SegmentedControl
-                    label="Exibir cortes como"
-                    value={view.value}
-                    options={VIEW_MODE_OPTIONS}
-                    onValueChange={(value) => {
-                        if (isClipViewMode(value) === true) {
-                            view.onChange(value);
-                        }
-                    }}
-                    className="flex-nowrap"
-                />
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+                <OrderSelect order={order} />
+                <ViewModeSelect view={view} />
             </div>
             <span
                 aria-hidden="true"

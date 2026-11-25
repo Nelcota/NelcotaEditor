@@ -21,7 +21,7 @@ interface LibraryToolbarProps {
 }
 
 /** The reference's "Filtros" and "Colunas" buttons: a filled box with blue text and icon. */
-const TRIGGER_CLASS =
+export const TOOLBAR_SELECT_TRIGGER_CLASS =
     "h-10 w-full rounded-xl border-transparent bg-card font-semibold text-primary-ink hover:border-input/40 hover:bg-accent sm:w-auto";
 
 /** An empty status is noise; "Todos" and the one in use always stay, so nobody gets stranded. */
@@ -51,7 +51,10 @@ export function LibraryToolbar(props: LibraryToolbarProps): ReactNode {
                     value={filter}
                     onValueChange={(value) => onFilterChange(toVideoFilter(value))}
                 >
-                    <SelectTrigger aria-label="Filtrar por situação" className={TRIGGER_CLASS}>
+                    <SelectTrigger
+                        aria-label="Filtrar por situação"
+                        className={TOOLBAR_SELECT_TRIGGER_CLASS}
+                    >
                         <ListFilterIcon aria-hidden="true" className="size-4 text-primary-ink" />
                         <SelectValue />
                     </SelectTrigger>
@@ -69,7 +72,10 @@ export function LibraryToolbar(props: LibraryToolbarProps): ReactNode {
                     </SelectContent>
                 </Select>
                 <Select value={sort} onValueChange={(value) => onSortChange(toVideoSort(value))}>
-                    <SelectTrigger aria-label="Ordenar vídeos" className={TRIGGER_CLASS}>
+                    <SelectTrigger
+                        aria-label="Ordenar vídeos"
+                        className={TOOLBAR_SELECT_TRIGGER_CLASS}
+                    >
                         <ArrowUpDownIcon aria-hidden="true" className="size-4 text-primary-ink" />
                         <SelectValue />
                     </SelectTrigger>
