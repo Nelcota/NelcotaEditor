@@ -124,7 +124,11 @@ export function FormatsScreen({ subscriptionPanel }: { subscriptionPanel: ReactN
                 </ul>
             </section>
             {openFormat !== null && (
-                <FormatDialog format={openFormat} onClose={() => setOpenFormat(null)} />
+                <FormatDialog
+                    format={openFormat}
+                    isClaudeConnected={typeof connectionQuery.data?.connectedAt === "string"}
+                    onClose={() => setOpenFormat(null)}
+                />
             )}
         </div>
     );
