@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+import { TEST_ENV_FILE, readTestEnvironment } from "./scripts/test-environment.ts";
 
-const TEST_ENV_FILE = ".env.test";
 const E2E_PORT = 3299;
 const BASE_URL = `http://localhost:${E2E_PORT}`;
 const SERVER_START_TIMEOUT_MILLISECONDS = 120_000;
@@ -10,8 +10,9 @@ if (existsSync(TEST_ENV_FILE) === false) {
     throw new Error(`${TEST_ENV_FILE} is missing. Run \`bun run setup\` first.`);
 }
 
-// The app under test reads the test database and has Turnstile off; see prepare-test-database.ts.
-process.loadEnvFile(TEST_ENV_FILE);
+// The app under test reads the test database and has every outside service off. Unlike
+// process.loadEnvFile, this replaces values the shell already set; see test-environment.ts.
+Object.assign(process.env, readTestEnvironment());
 
 export default defineConfig({
     testDir: "e2e",

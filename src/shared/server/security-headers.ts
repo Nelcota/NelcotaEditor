@@ -1,14 +1,36 @@
+// Fullscreen (the media player) and clipboard writes (copy buttons) keep their default, this origin
+// only; every feature below is off for the app and any frame inside it, Turnstile included.
+const DISABLED_FEATURES = [
+    "accelerometer",
+    "bluetooth",
+    "browsing-topics",
+    "camera",
+    "display-capture",
+    "geolocation",
+    "gyroscope",
+    "hid",
+    "magnetometer",
+    "microphone",
+    "midi",
+    "payment",
+    "serial",
+    "usb",
+] as const;
+
+const PERMISSIONS_POLICY = DISABLED_FEATURES.map((feature) => `${feature}=()`).join(", ");
+
 /**
  * No other site may frame the app (clickjacking on the delete and cancel buttons), URLs with ids
  * do not leak to other origins, and once a browser has seen the app over HTTPS it never falls back
  * to plain HTTP (browsers ignore HSTS on http://localhost). The Content-Security-Policy is set per
- * request (its nonce).
+ * request (its nonce). Permissions-Policy keeps device features off.
  */
 export const SECURITY_HEADERS = [
     ["X-Frame-Options", "DENY"],
     ["Referrer-Policy", "strict-origin-when-cross-origin"],
     ["X-Content-Type-Options", "nosniff"],
     ["Strict-Transport-Security", "max-age=31536000; includeSubDomains"],
+    ["Permissions-Policy", PERMISSIONS_POLICY],
 ] as const;
 
 const CACHE_CONTROL_HEADER = "Cache-Control";

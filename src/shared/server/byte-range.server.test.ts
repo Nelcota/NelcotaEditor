@@ -26,10 +26,15 @@ describe("parseByteRange", () => {
         assert.deepEqual(parseByteRange("bytes=-5000", FILE_SIZE), { start: 0, end: 999 });
     });
 
-    it("cannot satisfy a zero suffix, a start past the end or a reversed range", () => {
+    it("cannot satisfy a zero suffix or a start past the end", () => {
         assert.equal(parseByteRange("bytes=-0", FILE_SIZE), null);
         assert.equal(parseByteRange("bytes=1000-", FILE_SIZE), null);
-        assert.equal(parseByteRange("bytes=5-3", FILE_SIZE), null);
+        assert.equal(parseByteRange("bytes=2000-3000", FILE_SIZE), null);
+    });
+
+    it("sends the whole file for a reversed range, which is not a valid range", () => {
+        assert.equal(parseByteRange("bytes=500-100", FILE_SIZE), undefined);
+        assert.equal(parseByteRange("bytes=5-3", 0), undefined);
     });
 
     it("cannot satisfy any range of an empty file", () => {
