@@ -75,7 +75,7 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
 
     if (clip.isShared === false) {
         return (
-            <div className="grid gap-2">
+            <div className="contents">
                 <Button
                     variant="outline"
                     onClick={() => mutation.mutate(true)}
@@ -86,13 +86,18 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
                     <Link2Icon aria-hidden="true" />
                     Criar link
                 </Button>
-                {mutation.isError === true && <FormAlert message={mutation.error.message} />}
+                {mutation.isError === true && (
+                    <div className="basis-full">
+                        <FormAlert message={mutation.error.message} />
+                    </div>
+                )}
             </div>
         );
     }
 
+    // The actions sit in one wrapping row, so these join it instead of stacking under each other.
     return (
-        <div className="grid gap-2">
+        <div className="contents">
             <SharedLink sharePath={clip.sharePath} isSharingOn={isSharingOn} />
             <Button
                 variant="ghost"
@@ -102,7 +107,16 @@ export function ShareClipButton({ videoId, clip }: ShareClipButtonProps) {
             >
                 Desativar link
             </Button>
-            {mutation.isError === true && <FormAlert message={mutation.error.message} />}
+            {mutation.isSuccess === true && mutation.variables === true && (
+                <p role="status" className="self-center text-sm text-muted-foreground">
+                    Link criado
+                </p>
+            )}
+            {mutation.isError === true && (
+                <div className="basis-full">
+                    <FormAlert message={mutation.error.message} />
+                </div>
+            )}
         </div>
     );
 }

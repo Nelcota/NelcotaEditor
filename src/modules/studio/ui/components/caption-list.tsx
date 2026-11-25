@@ -34,8 +34,8 @@ function NoSpeech(): ReactNode {
             <Mascot index={STAGE_CREW.transcribing} className="size-10" />
             <p className="font-semibold">Nenhuma fala neste trecho</p>
             <p className="max-w-xs text-sm text-muted-foreground">
-                Tinta não ouviu ninguém falando aqui. Mude o trecho para incluir fala, ou deixe o
-                corte sem legenda.
+                Não há fala neste trecho. Mude o trecho para incluir fala, ou deixe o corte sem
+                legenda.
             </p>
         </div>
     );

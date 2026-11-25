@@ -48,6 +48,21 @@ function VideoBubble({ video }: { video: VideoSummary }): ReactNode {
     );
 }
 
+/** When fewer clips came out than were asked for, says why instead of leaving a silent gap. */
+function FewerClipsNote({ video }: { video: VideoSummary }): ReactNode {
+    const requestedClipCount = video.requestedClipCount;
+
+    if (video.readyClipCount >= requestedClipCount) {
+        return null;
+    }
+
+    return (
+        <p className="text-sm text-muted-foreground">
+            Você pediu {requestedClipCount}. Só viram corte os momentos com começo, meio e fim.
+        </p>
+    );
+}
+
 /**
  * Over a finished video's clips, the reference's answer: the video as a bubble, one sentence on
  * what came out, and the settings it used as tags.
@@ -73,6 +88,7 @@ export function VideoResultSummary({ video }: { video: VideoSummary }): ReactNod
                     e com legenda.
                 </p>
             </div>
+            <FewerClipsNote video={video} />
             <ul aria-label="Como foi cortado" className="flex flex-wrap gap-1.5">
                 <li className={TAG_CLASS}>
                     <ScissorsIcon aria-hidden="true" />

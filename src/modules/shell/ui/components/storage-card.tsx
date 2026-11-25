@@ -41,14 +41,24 @@ interface StorageRowProps {
     icon: IconComponent;
     label: string;
     bytes: number;
-    totalBytes: number;
+    /** Each share is of the quota, the same total the card's headline counts against. */
+    quotaBytes: number;
     barClass: string;
     isHidden: boolean;
 }
 
+/** A little space still shows as used, not as an empty 0%. */
+function describePercent(bytes: number, percent: number): string {
+    if (percent === 0 && bytes > 0) {
+        return "<1%";
+    }
+
+    return `${percent}%`;
+}
+
 function StorageRow(props: StorageRowProps): ReactNode {
-    const { icon: Icon, label, bytes, totalBytes, barClass, isHidden } = props;
-    const percent = toPercent(bytes, totalBytes);
+    const { icon: Icon, label, bytes, quotaBytes, barClass, isHidden } = props;
+    const percent = toPercent(bytes, quotaBytes);
     let value = formatBytes(bytes);
 
     if (isHidden === true) {
@@ -61,7 +71,10 @@ function StorageRow(props: StorageRowProps): ReactNode {
                 <Icon aria-hidden="true" className="size-3.5 text-muted-foreground" />
                 <span className="flex-1">{label}</span>
                 <span className="tabular-nums">
-                    {value} <span className="font-medium text-muted-foreground">({percent}%)</span>
+                    {value}{" "}
+                    <span className="font-medium text-muted-foreground">
+                        ({describePercent(bytes, percent)})
+                    </span>
                 </span>
             </div>
             <div className="h-1 overflow-hidden rounded-full bg-foreground/10">
@@ -78,7 +91,7 @@ interface StorageDetailsProps {
     sourceBytes: number;
     clipBytes: number;
     reservedBytes: number;
-    totalBytes: number;
+    quotaBytes: number;
     isHidden: boolean;
 }
 
@@ -87,7 +100,7 @@ interface StorageDetailsProps {
  * A cancelled upload keeps its space for a few hours, so the row shows why the total is higher.
  */
 function StorageDetails(props: StorageDetailsProps): ReactNode {
-    const { sourceBytes, clipBytes, reservedBytes, totalBytes, isHidden } = props;
+    const { sourceBytes, clipBytes, reservedBytes, quotaBytes, isHidden } = props;
 
     return (
         <>
@@ -95,7 +108,7 @@ function StorageDetails(props: StorageDetailsProps): ReactNode {
                 icon={FilmIcon}
                 label="Originais"
                 bytes={sourceBytes}
-                totalBytes={totalBytes}
+                quotaBytes={quotaBytes}
                 barClass="bg-success"
                 isHidden={isHidden}
             />
@@ -103,7 +116,7 @@ function StorageDetails(props: StorageDetailsProps): ReactNode {
                 icon={ScissorsIcon}
                 label="Cortes"
                 bytes={clipBytes}
-                totalBytes={totalBytes}
+                quotaBytes={quotaBytes}
                 barClass="bg-primary"
                 isHidden={isHidden}
             />
@@ -112,7 +125,7 @@ function StorageDetails(props: StorageDetailsProps): ReactNode {
                     icon={UploadIcon}
                     label="Reservado para envios"
                     bytes={reservedBytes}
-                    totalBytes={totalBytes}
+                    quotaBytes={quotaBytes}
                     barClass="bg-muted-foreground"
                     isHidden={isHidden}
                 />
@@ -123,7 +136,7 @@ function StorageDetails(props: StorageDetailsProps): ReactNode {
                 </Button>
                 <Button asChild size="sm">
                     <Link to="/videos">
-                        Gerenciar
+                        Liberar espaço
                         <ArrowRightIcon aria-hidden="true" className="size-4" />
                     </Link>
                 </Button>
@@ -239,7 +252,7 @@ export function StorageCard(): ReactNode {
                         sourceBytes={storage.sourceBytes}
                         clipBytes={storage.clipBytes}
                         reservedBytes={storage.reservedBytes}
-                        totalBytes={totalBytes}
+                        quotaBytes={usage.storageQuotaBytes}
                         isHidden={isHidden}
                     />
                 </div>

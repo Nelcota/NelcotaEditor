@@ -51,9 +51,7 @@ export function TranscriptBody({ lines, currentSeconds, onSeek }: TranscriptBody
     const fullText = lines.map((line) => line.text).join("\n");
 
     if (lines.length === 0) {
-        return (
-            <p className="text-sm text-muted-foreground">A Tinta não encontrou fala neste vídeo.</p>
-        );
+        return <p className="text-sm text-muted-foreground">Não encontramos fala neste vídeo.</p>;
     }
 
     return (

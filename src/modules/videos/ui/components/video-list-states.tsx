@@ -4,7 +4,7 @@ import RotateCwIcon from "~icons/lucide/rotate-cw";
 import SearchXIcon from "~icons/lucide/search-x";
 import { Link } from "@tanstack/react-router";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
-import { CREW_NAMES, HOST_NAME } from "#/modules/videos/model/crew-lines";
+import { CREW_NAMES } from "#/modules/videos/model/crew-lines";
 import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
@@ -71,7 +71,7 @@ export function FirstVideoEmptyState() {
         <EmptyState
             art={<BrandMark className="mb-1 size-14" />}
             title="Envie seu primeiro vídeo"
-            description={`Um link do YouTube ou um arquivo. A equipe do ${HOST_NAME} cuida do resto.`}
+            description="Um link do YouTube ou um arquivo. O Nelcota cuida do resto."
             action={
                 <Button asChild size="lg" className="font-semibold">
                     <Link to="/videos" search={{ newVideo: true }}>

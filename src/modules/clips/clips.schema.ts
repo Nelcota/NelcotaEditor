@@ -56,8 +56,11 @@ export const clips = pgTable(
         score: integer("score").notNull(),
         status: clipStatusEnum("status").notNull().default("pending"),
         outputPath: text("output_path"),
-        // Size of the rendered file, written with outputPath and cleared with it.
+        // Size of the rendered file and its poster, written with outputPath and cleared with it.
         outputBytes: bigint("output_bytes", { mode: "number" }),
+        // A frame of the rendered file for link previews; null for renders made before posters
+        // existed and for a frame that failed, which leaves the preview without an image.
+        posterPath: text("poster_path"),
         aspectRatio: aspectRatioEnum("aspect_ratio").notNull().default(DEFAULT_ASPECT_RATIO),
         captionStyle: captionStyleEnum("caption_style").notNull().default(DEFAULT_CAPTION_STYLE),
         captionColor: captionColorEnum("caption_color").notNull().default(DEFAULT_CAPTION_COLOR),

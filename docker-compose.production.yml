@@ -126,8 +126,9 @@ services:
             STORAGE_QUOTA_GIGABYTES: ${STORAGE_QUOTA_GIGABYTES:-20}
             # One video at a time: ffmpeg and Whisper share the server's 6 cores.
             WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-1}
-            CLIP_RENDER_CONCURRENCY: ${CLIP_RENDER_CONCURRENCY:-2}
-            CLIP_RENDER_THREADS: ${CLIP_RENDER_THREADS:-2}
+            FFMPEG_CPU_BUDGET: ${FFMPEG_CPU_BUDGET:-}
+            CLIP_RENDER_CONCURRENCY: ${CLIP_RENDER_CONCURRENCY:-}
+            CLIP_RENDER_THREADS: ${CLIP_RENDER_THREADS:-}
             CLIP_RENDER_MAX_FPS: ${CLIP_RENDER_MAX_FPS:-}
             TRANSCRIPTION_CONCURRENCY: ${TRANSCRIPTION_CONCURRENCY:-3}
             # YouTube asks the server's datacenter address to sign in; see .env.example.

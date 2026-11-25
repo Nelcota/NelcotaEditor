@@ -21,7 +21,7 @@ export const TRANSCRIPTION_LANGUAGE_LABELS: Record<TranscriptionLanguage, string
 };
 
 export const CLIP_LENGTH_LABELS: Record<ClipLength, string> = {
-    short: "Curtos",
+    short: "30 segundos",
     minute: "1 minuto",
     free: "Livre",
 };
@@ -71,6 +71,9 @@ function describeClipCount(count: number): string {
 }
 
 /** What a CountStepper needs to pick a number of clips. */
+/** The clip counts people pick most, shown as pills; anything else in range is under "Outro". */
+export const QUICK_CLIP_COUNTS: ReadonlyArray<number> = [3, 5, 8, 10];
+
 export const CLIP_COUNT_STEPPER = {
     min: MIN_CLIP_COUNT,
     max: MAX_CLIP_COUNT,

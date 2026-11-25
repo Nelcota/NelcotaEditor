@@ -66,7 +66,7 @@ function PlaceholderRow({ number }: { number: number }): ReactNode {
             <span className="grid size-7 place-items-center rounded-lg border border-dashed text-xs tabular-nums">
                 {number}
             </span>
-            Luna guarda o lugar
+            Corte a caminho
         </li>
     );
 }

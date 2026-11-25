@@ -29,6 +29,13 @@ describe("buildHighlightSystemPrompt", () => {
         assert.match(buildHighlightSystemPrompt(5, "minute"), /Pick up to 8 of the best moments/);
     });
 
+    it("asks for the reason in Brazilian Portuguese and the title in the video's language", () => {
+        const prompt = buildHighlightSystemPrompt(5, "free");
+
+        assert.match(prompt, /Write `reason` in Brazilian Portuguese/);
+        assert.match(prompt, /Write `title` in the same language as the transcript/);
+    });
+
     it("throws for a count that is not a positive integer", () => {
         for (const clipCount of [0, -1, 1.5, Number.NaN]) {
             assert.throws(() => buildHighlightSystemPrompt(clipCount, "free"), RangeError);

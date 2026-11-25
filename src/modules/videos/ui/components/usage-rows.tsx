@@ -3,7 +3,7 @@ import TriangleAlertIcon from "~icons/lucide/triangle-alert";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { CREW_NAMES, HOST_NAME } from "#/modules/videos/model/crew-lines";
+import { CREW_NAMES } from "#/modules/videos/model/crew-lines";
 import { toCrewStats } from "#/modules/videos/model/crew-stats";
 import type { CrewStat } from "#/modules/videos/model/crew-stats";
 import { usageQueryOptions } from "#/modules/videos/model/library-queries";
@@ -70,11 +70,21 @@ function describeStorage(usedPercent: number, usedLabel: string): ReactNode {
     );
 }
 
+/** A little space still shows as used, not as an empty 0%. */
+function describePercent(bytes: number, percent: number): string {
+    if (percent === 0 && bytes > 0) {
+        return "<1%";
+    }
+
+    return `${percent}%`;
+}
+
 /** Space held by uploads counts as used, so the line says how much of it is only reserved. */
 function describeUsedSpace(usage: UsageSummary, usedPercent: number): string {
     const storage = usage.storage;
     const reservedBytes = storage.reservedBytes;
-    const usedLabel = `${formatBytes(storage.totalBytes)} de ${formatBytes(usage.storageQuotaBytes)} · ${usedPercent}%`;
+    const totalBytes = storage.totalBytes;
+    const usedLabel = `${formatBytes(totalBytes)} de ${formatBytes(usage.storageQuotaBytes)} · ${describePercent(totalBytes, usedPercent)}`;
 
     if (reservedBytes <= 0) {
         return usedLabel;
@@ -142,7 +152,7 @@ export function UsageRows(): ReactNode {
 
     if (usage === undefined) {
         return (
-            <div role="status" aria-busy="true" className="grid gap-2 p-4 sm:p-5">
+            <div role="status" aria-busy="true" className="grid gap-2 p-5 sm:p-6">
                 <span className="sr-only">Carregando uso</span>
                 <Skeleton className="h-10 rounded-xl" />
                 <Skeleton className="h-10 rounded-xl" />
@@ -154,8 +164,8 @@ export function UsageRows(): ReactNode {
         return (
             <SettingsRow
                 art={<Mascot index={BRAND_MASCOT_INDEX} className={ROW_MASCOT_CLASS} />}
-                label="A equipe ainda não trabalhou para você"
-                description={`Adicione um vídeo e o ${HOST_NAME} chama a turma.`}
+                label="Nenhum vídeo ainda"
+                description="Adicione um vídeo para ver o uso aqui."
             >
                 <NewVideoLink emphasis="secondary" />
             </SettingsRow>

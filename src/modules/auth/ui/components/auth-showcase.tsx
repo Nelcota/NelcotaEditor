@@ -18,12 +18,13 @@ const SHOWCASE_CLIPS: ReadonlyArray<ShowcaseClip> = [
 
 function ShowcaseCard({ clip }: { clip: ShowcaseClip }): ReactNode {
     return (
-        <div className="overflow-hidden rounded-xl border border-border bg-card">
+        // The fourth clip only fits whole titles on wide screens; below that it would cut them.
+        <div className="overflow-hidden rounded-xl border border-border bg-card last:hidden xl:last:block">
             <img
                 src={clip.imageUrl}
                 alt=""
                 loading="lazy"
-                className="aspect-[9/14] w-full object-cover"
+                className="aspect-clip-card w-full object-cover"
             />
             <div className="grid gap-0.5 p-2.5">
                 <span className="line-clamp-2 text-xs leading-snug font-semibold">
@@ -46,9 +47,9 @@ export function AuthShowcase(): ReactNode {
     return (
         <div
             aria-hidden="true"
-            className="theme-app hidden content-center gap-7 overflow-hidden rounded-[1.125rem] bg-background p-12 font-sans text-foreground lg:grid"
+            className="theme-app hidden content-center gap-7 overflow-hidden rounded-frame bg-background p-10 xl:p-12 font-sans text-foreground lg:grid"
         >
-            <p className="flex items-center gap-3 text-[1.75rem] leading-tight font-semibold tracking-[-0.035em]">
+            <p className="flex items-center gap-3 text-title font-semibold tracking-display">
                 <BrandMark className="size-9" />
                 Cole um link. O Nel corta.
             </p>
@@ -66,7 +67,7 @@ export function AuthShowcase(): ReactNode {
                     </span>
                 </span>
             </div>
-            <div className="grid grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-3 gap-2.5 xl:grid-cols-4">
                 {SHOWCASE_CLIPS.map((clip) => (
                     <ShowcaseCard key={clip.imageUrl} clip={clip} />
                 ))}

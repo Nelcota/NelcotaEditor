@@ -13,3 +13,11 @@ export const signInSearchSchema = z.object({
 });
 
 export type SignInSearch = z.infer<typeof signInSearchSchema>;
+
+// The address a person just signed up with rides in the history entry, never in the URL, so the
+// sign-in form can start filled in without the email reaching logs or the address bar.
+declare module "@tanstack/react-router" {
+    interface HistoryState {
+        signInEmail?: string;
+    }
+}

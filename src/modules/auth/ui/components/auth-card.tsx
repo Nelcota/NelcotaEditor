@@ -26,7 +26,7 @@ interface AuthCardProps {
 /** The site's logo: the ghost and the uppercase wordmark. */
 function SiteLogo(): ReactNode {
     return (
-        <span className="flex items-center gap-2.5 text-[1.3125rem] leading-none font-bold tracking-[-0.01em]">
+        <span className="flex items-center gap-2.5 text-logo font-bold tracking-tight">
             <BrandMark className="size-7" />
             NELCOTA
         </span>
@@ -45,26 +45,27 @@ export function AuthCard({
     children,
 }: AuthCardProps): ReactNode {
     return (
-        <main className="theme-site grid min-h-dvh bg-background text-foreground lg:grid-cols-[minmax(26rem,1fr)_1.15fr] lg:gap-2 lg:p-2">
+        <main className="theme-site grid min-h-dvh bg-background text-foreground lg:grid-cols-2 lg:gap-2 lg:p-2">
             <div className="grid grid-rows-[auto_1fr] gap-8 px-5 py-6 sm:px-10 lg:py-5">
                 <SiteLogo />
-                <div className="grid w-full max-w-sm content-center gap-6 justify-self-center">
-                    <div className="grid gap-3">
-                        <p className="font-mono text-xs font-medium tracking-[0.08em] text-foreground/65 uppercase">
+                <div className="grid w-full max-w-md content-center gap-8 justify-self-center">
+                    <div className="grid gap-4">
+                        <p className="font-mono text-sm font-medium tracking-eyebrow text-foreground/65 uppercase">
                             <span className="text-primary-ink">[</span> {eyebrow}{" "}
                             <span className="text-primary-ink">]</span>
                         </p>
-                        <h1 className="text-[2.375rem] leading-[1.08] font-[420] tracking-[-0.035em] text-balance">
-                            {title.lead} <strong className="font-[560]">{title.emphasis}</strong>
+                        <h1 className="text-display font-title tracking-display">
+                            {title.lead}{" "}
+                            <strong className="block font-title-strong">{title.emphasis}</strong>
                         </h1>
-                        <p className="text-foreground/65">{description}</p>
+                        <p className="text-lg text-foreground/65">{description}</p>
                     </div>
                     {children}
-                    <p className="text-center text-sm text-foreground/65">
+                    <p className="text-center text-foreground/65">
                         {footer.text}{" "}
                         <Link
                             to={footer.linkTo}
-                            className="inline-block rounded font-semibold text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
+                            className="inline-block rounded font-semibold text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-99"
                         >
                             {footer.linkLabel}
                         </Link>

@@ -137,6 +137,20 @@
     /* Page titles (PageHeader, the sign-in card, the video's name). */
     --text-title: 1.75rem;
     --text-title--line-height: 1.25;
+    /* The wordmark beside the ghost. */
+    --text-logo: 1.3125rem;
+    --text-logo--line-height: 1;
+    /* The sign-in pages' headline, set like the public site's hero. */
+    --text-display: 2.75rem;
+    --text-display--line-height: 1.08;
+    --tracking-display: -0.035em;
+    /* Uppercase labels over sections: the bracketed eyebrow and settings group titles. */
+    --tracking-eyebrow: 0.08em;
+    /* Geist's in-between weights the site uses for the headline's two halves. */
+    --font-weight-title: 420;
+    --font-weight-title-strong: 560;
+    /* Vertical clip frames in the sign-in showcase. */
+    --aspect-clip-card: 9 / 14;
 }
 
 @theme inline {
@@ -180,6 +194,8 @@
     --radius-lg: 0.5rem;
     --radius-xl: 0.625rem;
     --radius-2xl: 0.875rem;
+    /* The app's outer frame and the sign-in showcase, which mirrors it. */
+    --radius-frame: 1.125rem;
 
     --animate-crew-download: crew-download 1.65s ease-in-out infinite;
     --animate-crew-transcribe: crew-transcribe 1.85s ease-in-out infinite;

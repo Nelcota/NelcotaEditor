@@ -3,6 +3,7 @@ import {
     renderClip,
     setClipStatus,
 } from "#/modules/clips/server/render-clip.server";
+import type { LocalClipFile } from "#/modules/clips/server/render-clip.server";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import { runLanesToTheEnd } from "#/modules/processing/server/run-lanes-to-the-end.server";
@@ -11,8 +12,10 @@ import { runVideoStorageTransaction } from "#/modules/processing/server/video-st
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
 import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
+import { getClipRenderCapacity } from "#/shared/server/clip-render-capacity.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { runWithProgress } from "#/shared/server/run-with-progress.server";
+import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 import { logger } from "#/shared/server/logger.server";
 
@@ -30,31 +33,103 @@ interface RenderPendingClipsInput {
     signal: AbortSignal;
 }
 
-async function renderAndStoreClip(clip: Clip, input: RenderPendingClipsInput): Promise<void> {
-    const { userId, localSourcePath, workDirectory, words, signal } = input;
-    const { id: clipId, outputBytes: previousOutputBytes } = clip;
-    const { outputPath, localPath, encodeDurationMs } = await renderClip({
-        clip,
-        localSourcePath,
-        workDirectory,
-        words,
-        signal,
-    });
-    const replacedBytes = previousOutputBytes ?? 0;
-    const { STORAGE_DRIVER: storageDriver } = getEnvironment();
-    const { bytes: outputBytes, storageDurationMs } = await storeProcessedVideoFile(
-        { key: outputPath, localPath, signal },
-        (bytes) =>
-            runVideoStorageTransaction(
-                { userId, byteDelta: bytes - replacedBytes },
+interface StoredPoster {
+    posterPath: string;
+    posterBytes: number;
+}
+
+/** A poster that cannot be stored only costs the link preview its image, like a failed frame. */
+async function storePoster(
+    clip: Clip,
+    poster: LocalClipFile | null,
+    signal: AbortSignal,
+): Promise<StoredPoster | null> {
+    if (poster === null) {
+        return null;
+    }
+
+    try {
+        const storage = getFileStorage();
+        const posterBytes = await storage.storeLocalFile(poster.storagePath, poster.localPath, {
+            signal,
+        });
+        return { posterPath: poster.storagePath, posterBytes };
+    } catch (error) {
+        if (signal.aborted === true) {
+            throw error;
+        }
+
+        logger.warn({ clipId: clip.id, error }, "Could not store the clip poster");
+        return null;
+    }
+}
+
+interface StoredClipFiles {
+    video: LocalClipFile;
+    poster: StoredPoster | null;
+    encodeDurationMs: number;
+}
+
+async function storeVideoAndRecord(
+    clip: Clip,
+    input: RenderPendingClipsInput,
+    files: StoredClipFiles,
+): Promise<void> {
+    const { userId, signal } = input;
+    const { video, poster, encodeDurationMs } = files;
+    const outputPath = video.storagePath;
+    const posterPath = poster?.posterPath ?? null;
+    const posterBytes = poster?.posterBytes ?? 0;
+    const replacedBytes = clip.outputBytes ?? 0;
+
+    const { bytes: videoBytes, storageDurationMs } = await storeProcessedVideoFile(
+        { key: outputPath, localPath: video.localPath, signal },
+        (storedVideoBytes) => {
+            const outputBytes = storedVideoBytes + posterBytes;
+
+            return runVideoStorageTransaction(
+                { userId, byteDelta: outputBytes - replacedBytes },
                 (transaction) =>
-                    recordRenderedClip(clipId, { outputPath, outputBytes: bytes }, transaction),
-            ),
+                    recordRenderedClip(
+                        clip.id,
+                        { outputPath, outputBytes, posterPath },
+                        transaction,
+                    ),
+            );
+        },
     );
+    const { STORAGE_DRIVER: storageDriver } = getEnvironment();
     logger.info(
-        { clipId, encodeDurationMs, storageDurationMs, storageDriver, outputBytes },
+        {
+            clipId: clip.id,
+            encodeDurationMs,
+            storageDurationMs,
+            storageDriver,
+            outputBytes: videoBytes + posterBytes,
+        },
         "Clip rendered and stored",
     );
+}
+
+async function renderAndStoreClip(clip: Clip, input: RenderPendingClipsInput): Promise<void> {
+    const { localSourcePath, workDirectory, words, signal } = input;
+    const rendered = await renderClip({ clip, localSourcePath, workDirectory, words, signal });
+    const poster = await storePoster(clip, rendered.poster, signal);
+
+    try {
+        await storeVideoAndRecord(clip, input, {
+            video: rendered.video,
+            poster,
+            encodeDurationMs: rendered.encodeDurationMs,
+        });
+    } catch (error) {
+        // The clip has no row pointing at the poster, so nothing else would ever remove it.
+        if (poster !== null) {
+            await getFileStorage().deleteFile(poster.posterPath);
+        }
+
+        throw error;
+    }
 }
 
 /** Returns whether the clip ended up rendered. */
@@ -88,11 +163,12 @@ async function renderAll(
 ): Promise<number> {
     const clips = input.clips.filter((clip) => clip.status === "pending");
     const { processingStartedAt } = input.run;
-    const { CLIP_RENDER_CONCURRENCY: concurrency } = getEnvironment();
+    // Keep an extra clip in flight so storage writes can overlap the next encode.
+    const lanes = getClipRenderCapacity().concurrency + 1;
     let readyCount = input.clips.filter((clip) => clip.status === "done").length;
     let finishedCount = 0;
 
-    await runLanesToTheEnd(clips, concurrency, async (clip): Promise<void> => {
+    await runLanesToTheEnd(clips, lanes, async (clip): Promise<void> => {
         const isRendered = await renderOneClip(clip, input);
         finishedCount += 1;
         onProgress((finishedCount / clips.length) * PERCENT);

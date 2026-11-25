@@ -1,7 +1,7 @@
 import ArrowRightIcon from "~icons/lucide/arrow-right";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { signInSchema } from "#/modules/auth/model/auth-forms";
@@ -20,6 +20,7 @@ import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 /** In page order; each field's input id matches its name. */
 const FIELD_NAMES = ["email", "password"] as const;
@@ -44,9 +45,12 @@ export function SignInScreen({
     const captcha = useCaptcha(captchaSiteKey);
     const queryClient = useQueryClient();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    // Set by the sign-up confirmation's link, so the person only types the password.
+    const signUpEmail = useLocation({ select: (location) => location.state.signInEmail });
     const form = useForm({
-        defaultValues: { email: "", password: "" },
-        validators: { onSubmit: signInSchema },
+        defaultValues: { email: signUpEmail ?? "", password: "" },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: signInSchema },
         onSubmitInvalid: ({ formApi }) => focusFirstInvalidField(FIELD_NAMES, formApi),
         onSubmit: async ({ value }) => {
             setErrorMessage(null);

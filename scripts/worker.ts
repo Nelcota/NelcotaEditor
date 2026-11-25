@@ -18,6 +18,7 @@ import { startIdleTicketClosing } from "#/modules/support/server/close-idle-tick
 import { startSupportEmailWorker } from "#/modules/support/server/support-email-queue.server";
 import { findVideoById } from "#/modules/video-records/server/video-progress.server";
 import { getEnvironment } from "#/shared/server/env.server";
+import { getClipRenderCapacity } from "#/shared/server/clip-render-capacity.server";
 import { getJobQueue, setJobQueueRole } from "#/shared/server/job-queue.server";
 import { logger, withLogContext } from "#/shared/server/logger.server";
 
@@ -166,11 +167,10 @@ async function startWorker(): Promise<void> {
     await ensureProcessVideoQueue();
     const {
         WORKER_CONCURRENCY: workerConcurrency,
-        CLIP_RENDER_CONCURRENCY: renderConcurrency,
-        CLIP_RENDER_THREADS: renderThreads,
         CLIP_RENDER_MAX_FPS: renderMaxFramesPerSecond,
         TRANSCRIPTION_CONCURRENCY: transcriptionConcurrency,
     } = getEnvironment();
+    const { cpuBudget, concurrency, decoderThreads, encoderThreads } = getClipRenderCapacity();
 
     // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
     // their video's lock is free, so a start never touches the active runs of other replicas.
@@ -187,8 +187,10 @@ async function startWorker(): Promise<void> {
     logger.info(
         {
             workerConcurrency,
-            renderConcurrency,
-            renderThreads,
+            renderCpuBudget: cpuBudget,
+            renderConcurrency: concurrency,
+            renderDecoderThreads: Number(decoderThreads),
+            renderEncoderThreads: Number(encoderThreads),
             renderMaxFramesPerSecond: renderMaxFramesPerSecond ?? null,
             transcriptionConcurrency,
         },

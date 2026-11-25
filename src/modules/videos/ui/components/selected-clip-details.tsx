@@ -6,12 +6,12 @@ import { RetryClipButton } from "#/modules/videos/ui/components/retry-clip-butto
 import { ShareClipButton } from "#/modules/videos/ui/components/share-clip-button";
 import { OpenInStudioLink } from "#/modules/videos/ui/components/open-in-studio-link";
 
-/** Brilho picked the moment, so the score and the reason are presented as Brilho's. */
-function BrilhoReason({ clip }: { clip: ClipView }) {
+/** The score and why the moment was picked, next to each other. */
+function ClipReason({ clip }: { clip: ClipView }) {
     return (
         <p className="max-w-prose text-sm">
             <span className="font-medium">
-                Brilho deu {clip.score}/{SCORE_SCALE}
+                Nota {clip.score}/{SCORE_SCALE}
             </span>
             {clip.reason.length > 0 && (
                 <span className="text-muted-foreground">: {clip.reason}</span>
@@ -55,7 +55,7 @@ function ClipActions({ videoId, clip, canRetry }: SelectedClipDetailsProps) {
 export function SelectedClipDetails({ videoId, clip, canRetry }: SelectedClipDetailsProps) {
     return (
         <div aria-live="polite" className="grid gap-4">
-            <BrilhoReason clip={clip} />
+            <ClipReason clip={clip} />
             <div className="flex flex-wrap gap-2">
                 <ClipActions videoId={videoId} clip={clip} canRetry={canRetry} />
             </div>

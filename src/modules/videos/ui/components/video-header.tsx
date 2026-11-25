@@ -2,8 +2,6 @@ import CalendarIcon from "~icons/lucide/calendar";
 import ClockIcon from "~icons/lucide/clock";
 import ArrowUpRightIcon from "~icons/lucide/arrow-up-right";
 import UploadIcon from "~icons/lucide/upload";
-import ChevronLeftIcon from "~icons/lucide/chevron-left";
-import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { isVideoFinished } from "#/modules/video-records/model/video-status";
 import type { VideoSummary } from "#/modules/videos/model/video-views";
@@ -14,19 +12,6 @@ import { cn } from "#/shared/ui/cn";
 import { formatClock, formatDate } from "#/shared/ui/format";
 
 const SECURE_URL_PREFIX = "https://";
-
-/** Phones only: there is no sidebar, so this is the way back to the list. */
-function BackToList() {
-    return (
-        <Link
-            to="/videos"
-            className="-ms-1 inline-flex h-10 w-fit items-center gap-1 rounded-xl pe-2 text-meta font-medium text-muted-foreground outline-none transition-[color,scale] hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] md:hidden"
-        >
-            <ChevronLeftIcon aria-hidden="true" className="size-5" />
-            Vídeos
-        </Link>
-    );
-}
 
 /** YouTube videos link back to the original; uploaded files just say where they came from. */
 function SourceLink({ video }: { video: VideoSummary }) {
@@ -92,7 +77,6 @@ export function VideoHeader({ video, isInspectorShown }: VideoHeaderProps): Reac
 
     return (
         <header className="grid gap-2">
-            <BackToList />
             <div className="flex items-start gap-4">
                 <div className="grid min-w-0 flex-1 gap-1.5">
                     <h1

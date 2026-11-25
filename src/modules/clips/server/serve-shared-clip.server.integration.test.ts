@@ -5,7 +5,10 @@ import { appSwitches } from "#/modules/app-switches/app-switches.schema";
 import { saveAppSwitch } from "#/modules/app-switches/server/app-switches.server";
 import { user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
-import { serveSharedClip } from "#/modules/clips/server/serve-shared-clip.server";
+import {
+    serveSharedClip,
+    serveSharedClipPoster,
+} from "#/modules/clips/server/serve-shared-clip.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { getFileStorage } from "#/shared/server/file-storage/get-file-storage.server";
 
@@ -15,11 +18,21 @@ const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
 const SHARE_TOKEN_BYTES = 24;
 
-/** A rendered clip with a public link and a file on the test storage; returns the link's token. */
-async function insertSharedClip(): Promise<string> {
+/**
+ * A rendered clip with a public link and its files on the test storage; returns the link's token.
+ * Without a poster it stands for a clip rendered before posters existed.
+ */
+async function insertSharedClip({ hasPoster }: { hasPoster: boolean }): Promise<string> {
     const userId = randomUUID();
     const videoId = randomUUID();
     const outputPath = `videos/${videoId}/clips/shared.mp4`;
+    const posterPath = `videos/${videoId}/clips/shared.jpg`;
+    let storedPosterPath: string | null = null;
+
+    if (hasPoster === true) {
+        storedPosterPath = posterPath;
+    }
+
     const shareToken = randomBytes(SHARE_TOKEN_BYTES).toString("base64url");
     await db.insert(user).values({
         id: userId,
@@ -45,9 +58,11 @@ async function insertSharedClip(): Promise<string> {
         score: 80,
         status: "done",
         outputPath,
+        posterPath: storedPosterPath,
         shareToken,
     });
     await getFileStorage().storeStream(outputPath, new Blob(["clip"]).stream());
+    await getFileStorage().storeStream(posterPath, new Blob(["poster"]).stream());
 
     return shareToken;
 }
@@ -58,18 +73,18 @@ function requestSharedClip(shareToken: string): Promise<Response> {
     return serveSharedClip(request, shareToken);
 }
 
+beforeEach(async () => {
+    await db.delete(appSwitches);
+});
+
+afterAll(async () => {
+    await db.delete(appSwitches);
+    await db.$client.end();
+});
+
 describe("serveSharedClip", () => {
-    beforeEach(async () => {
-        await db.delete(appSwitches);
-    });
-
-    afterAll(async () => {
-        await db.delete(appSwitches);
-        await db.$client.end();
-    });
-
     it("serves a shared clip while sharing is on", async () => {
-        const shareToken = await insertSharedClip();
+        const shareToken = await insertSharedClip({ hasPoster: true });
 
         const response = await requestSharedClip(shareToken);
 
@@ -77,10 +92,41 @@ describe("serveSharedClip", () => {
     });
 
     it("stops links already sent while sharing is paused", async () => {
-        const shareToken = await insertSharedClip();
+        const shareToken = await insertSharedClip({ hasPoster: true });
         await saveAppSwitch({ key: "clip-sharing", isEnabled: false, adminId: randomUUID() });
 
         const response = await requestSharedClip(shareToken);
+
+        expect(response.status).toBe(HTTP_NOT_FOUND);
+    });
+});
+
+describe("serveSharedClipPoster", () => {
+    it("serves the poster of a shared clip", async () => {
+        const shareToken = await insertSharedClip({ hasPoster: true });
+        const request = new Request(`http://localhost/api/share/${shareToken}/poster`);
+
+        const response = await serveSharedClipPoster(request, shareToken);
+
+        expect(response.status).toBe(HTTP_OK);
+        expect(response.headers.get("Content-Type")).toBe("image/jpeg");
+    });
+
+    it("answers 404 for a clip rendered before posters existed", async () => {
+        const shareToken = await insertSharedClip({ hasPoster: false });
+        const request = new Request(`http://localhost/api/share/${shareToken}/poster`);
+
+        const response = await serveSharedClipPoster(request, shareToken);
+
+        expect(response.status).toBe(HTTP_NOT_FOUND);
+    });
+
+    it("answers 404 while sharing is paused", async () => {
+        const shareToken = await insertSharedClip({ hasPoster: true });
+        await saveAppSwitch({ key: "clip-sharing", isEnabled: false, adminId: randomUUID() });
+        const request = new Request(`http://localhost/api/share/${shareToken}/poster`);
+
+        const response = await serveSharedClipPoster(request, shareToken);
 
         expect(response.status).toBe(HTTP_NOT_FOUND);
     });

@@ -71,4 +71,18 @@ describe("countDraftChanges", () => {
 
         assert.equal(changes, 1);
     });
+
+    it("counts a caption preset that changes style, colour and font as one change", () => {
+        const applied = appliedDraft(TRANSCRIPT_CUES);
+        const draft: StudioDraft = {
+            ...applied,
+            captionStyle: "classic",
+            captionColor: "green",
+            captionFont: "bebas-neue",
+        };
+
+        const changes = countDraftChanges(draft, applied);
+
+        assert.equal(changes, 1);
+    });
 });

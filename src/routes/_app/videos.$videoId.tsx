@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { StudioTab } from "#/modules/studio/ui/screens/studio-tab";
 import { loadVideoPageTitle } from "#/modules/videos/model/load-video-page-title";
 import { VideoDetailsScreen } from "#/modules/videos/ui/screens/video-details-screen";
+import { VideoNotFoundScreen } from "#/modules/videos/ui/screens/video-not-found-screen";
 import { videoPageSearchSchema } from "#/modules/videos/model/video-page-search";
 
 export const Route = createFileRoute("/_app/videos/$videoId")({
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_app/videos/$videoId")({
         return { meta: [{ title: `${loaderData?.title ?? "Vídeo"} · Nelcota` }] };
     },
     component: VideoDetailsRoute,
+    notFoundComponent: VideoNotFoundScreen,
 });
 
 function VideoDetailsRoute(): ReactNode {

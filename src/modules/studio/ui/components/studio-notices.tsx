@@ -1,6 +1,8 @@
 import WifiOffIcon from "~icons/lucide/wifi-off";
+import XIcon from "~icons/lucide/x";
 import type { ReactNode } from "react";
 import type { ClipView } from "#/modules/clips/model/clip-view";
+import { Button } from "#/shared/ui/button";
 import { DownloadLink } from "#/shared/ui/download-link";
 import { RetryRenderButton } from "#/modules/studio/ui/components/retry-render-button";
 import { Progress } from "#/shared/ui/progress";
@@ -43,7 +45,7 @@ export function RenderFailedBanner({ videoId, clip }: RenderFailedBannerProps): 
             <p className="min-w-0 flex-1 text-sm">
                 <span className="font-semibold">Não foi possível refazer o corte.</span>{" "}
                 <span className="text-muted-foreground">
-                    Guarda barrou a renderização. Suas alterações continuam aqui.
+                    A renderização falhou. Suas alterações continuam aqui.
                 </span>
             </p>
             <RetryRenderButton videoId={videoId} clipId={clip.id} />
@@ -51,7 +53,13 @@ export function RenderFailedBanner({ videoId, clip }: RenderFailedBannerProps): 
     );
 }
 
-export function RenderedNotice({ clip }: { clip: ClipView }): ReactNode {
+interface RenderedNoticeProps {
+    clip: ClipView;
+    /** It pushes the editor down, so it goes away once read. */
+    onDismiss: () => void;
+}
+
+export function RenderedNotice({ clip, onDismiss }: RenderedNoticeProps): ReactNode {
     return (
         <div
             role="status"
@@ -63,6 +71,9 @@ export function RenderedNotice({ clip }: { clip: ClipView }): ReactNode {
                 <span className="text-muted-foreground">O arquivo para baixar já é o novo.</span>
             </p>
             <DownloadLink href={clip.downloadUrl} label="Baixar corte" emphasis="secondary" />
+            <Button variant="ghost" size="icon-sm" aria-label="Fechar aviso" onClick={onDismiss}>
+                <XIcon aria-hidden="true" />
+            </Button>
         </div>
     );
 }

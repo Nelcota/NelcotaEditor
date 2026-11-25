@@ -69,7 +69,7 @@ function TranscriptContent({ videoId, currentSeconds, onSeek }: TranscriptConten
     if (transcript === null) {
         return (
             <p className="text-sm text-muted-foreground">
-                A transcrição aparece aqui quando a Tinta terminar.
+                A transcrição aparece aqui quando a transcrição terminar.
             </p>
         );
     }

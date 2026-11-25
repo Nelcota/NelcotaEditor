@@ -1,8 +1,8 @@
 import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
 import { toCueKey } from "#/modules/studio/model/cue-key";
 
-const SETTING_KEYS = [
-    "aspectRatio",
+// One style pick (a preset) sets several of these at once, so the caption look counts as one change.
+const CAPTION_LOOK_KEYS = [
     "captionStyle",
     "captionColor",
     "captionSize",
@@ -20,10 +20,21 @@ function countCueChanges(draftCues: Array<CaptionCue>, appliedCues: Array<Captio
     return Math.max(added, removed);
 }
 
-/** How many edits are not in the rendered file yet: the trim counts once, each setting once. */
+/**
+ * How many edits are not in the rendered file yet: the trim counts once, the format once, the
+ * caption look once and each caption once.
+ */
 export function countDraftChanges(draft: StudioDraft, applied: StudioDraft): number {
-    const settingChanges = SETTING_KEYS.filter((key) => draft[key] !== applied[key]).length;
+    let settingChanges = 0;
     let trimChanges = 0;
+
+    if (draft.aspectRatio !== applied.aspectRatio) {
+        settingChanges += 1;
+    }
+
+    if (CAPTION_LOOK_KEYS.some((key) => draft[key] !== applied[key]) === true) {
+        settingChanges += 1;
+    }
 
     if (draft.startSeconds !== applied.startSeconds || draft.endSeconds !== applied.endSeconds) {
         trimChanges = 1;

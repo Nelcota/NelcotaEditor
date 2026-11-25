@@ -58,7 +58,7 @@ const STEPS = [
         title: "Revisar",
         hint: "Conferir e gerar",
         heading: "Tudo certo?",
-        description: "Confira e gere os cortes. A turma avisa quando ficarem prontos.",
+        description: "Confira e gere os cortes. Avisamos no sino quando ficarem prontos.",
     },
 ] as const;
 

@@ -24,6 +24,7 @@ import { TextField } from "#/shared/ui/text-field";
 import { useSteps } from "#/shared/ui/use-steps";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { focusWhenShown } from "#/shared/ui/focus-when-shown";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 const STEPS = [
     {
@@ -56,7 +57,8 @@ function useDeleteAccountForm() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { password: "" },
-        validators: { onSubmit: deleteAccountSchema },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: deleteAccountSchema },
         onSubmit: async ({ value }) => {
             setErrorMessage(null);
             const failure = await runAuthRequest(() =>

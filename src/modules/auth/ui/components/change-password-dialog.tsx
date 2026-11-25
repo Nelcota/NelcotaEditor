@@ -24,6 +24,7 @@ import { TextField } from "#/shared/ui/text-field";
 import { useSteps } from "#/shared/ui/use-steps";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { focusWhenShown } from "#/shared/ui/focus-when-shown";
+import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
 
 const STEPS = [
     {
@@ -67,7 +68,8 @@ function useChangePasswordForm(callbacks: ChangePasswordCallbacks) {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const form = useForm({
         defaultValues: { currentPassword: "", newPassword: "" },
-        validators: { onSubmit: changePasswordSchema },
+        validationLogic: FORM_VALIDATION_LOGIC,
+        validators: { onDynamic: changePasswordSchema },
         onSubmit: async ({ value, formApi }) => {
             setErrorMessage(null);
             const failure = await runAuthRequest(() =>

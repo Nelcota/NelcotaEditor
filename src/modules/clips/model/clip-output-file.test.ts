@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "vitest";
-import { buildClipOutputFileName } from "#/modules/clips/model/clip-output-file";
+import {
+    buildClipOutputFileName,
+    toClipPosterFileName,
+} from "#/modules/clips/model/clip-output-file";
 
 const CLIP_ID = "6f1c2f0e-6a43-4d8e-9a39-0c2b8f0f4a11";
 
@@ -27,5 +30,17 @@ describe("buildClipOutputFileName", () => {
         for (const version of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
             assert.throws(() => buildClipOutputFileName(CLIP_ID, version), RangeError);
         }
+    });
+});
+
+describe("toClipPosterFileName", () => {
+    it("names the poster after its render with a jpg extension", () => {
+        const posterFile = toClipPosterFileName(`${CLIP_ID}-v2.mp4`);
+
+        assert.equal(posterFile, `${CLIP_ID}-v2.jpg`);
+    });
+
+    it("rejects a file that is not a rendered clip", () => {
+        assert.throws(() => toClipPosterFileName("thumbnail.jpg"), RangeError);
     });
 });
