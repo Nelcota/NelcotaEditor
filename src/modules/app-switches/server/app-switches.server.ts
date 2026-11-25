@@ -38,7 +38,7 @@ export async function readAppSwitchStates(): Promise<AppSwitchStates> {
 
 /** Throws the switch's own message when a feature people use is turned off. */
 export async function assertFeatureEnabled(
-    key: Exclude<AppSwitchKey, "video-processing" | "maintenance-mode">,
+    key: Exclude<AppSwitchKey, "video-processing" | "maintenance-mode" | "email-verification">,
 ): Promise<void> {
     if ((await isAppSwitchEnabled(key)) === true) {
         return;
