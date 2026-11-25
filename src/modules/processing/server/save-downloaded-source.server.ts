@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
-import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
-import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
+import { runVideoStorageTransaction } from "#/modules/processing/server/video-storage-transaction.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 
 interface DownloadedSource {
@@ -31,11 +30,15 @@ export async function saveDownloadedSource(source: DownloadedSource): Promise<vo
         );
     }
 
-    await runVideoStartTransaction(userId, async ({ transaction }) => {
-        await assertStorageAvailable({ userId, incomingBytes: sourceBytes }, transaction);
-        await transaction
+    await runVideoStorageTransaction({ userId, byteDelta: sourceBytes }, async (transaction) => {
+        const rows = await transaction
             .update(videos)
             .set({ sourcePath, sourceBytes, durationSeconds })
-            .where(eq(videos.id, videoId));
+            .where(eq(videos.id, videoId))
+            .returning({ id: videos.id });
+
+        if (rows.length === 0) {
+            throw new Error(`Video ${videoId} disappeared before its source could be recorded`);
+        }
     });
 }

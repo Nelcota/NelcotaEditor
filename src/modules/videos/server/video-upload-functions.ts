@@ -34,7 +34,15 @@ export const startVideoUpload = createServerFn({ method: "POST" })
             lifetimeSeconds: UPLOAD_LINK_LIFETIME_SECONDS,
         });
 
-        return { uploadId: upload.id, uploadUrl: storageUrl ?? appUploadUrl(upload.id) };
+        if (storageUrl === null) {
+            return { uploadId: upload.id, uploadUrl: appUploadUrl(upload.id) };
+        }
+
+        return {
+            uploadId: upload.id,
+            uploadUrl: storageUrl,
+            uploadHeaders: { "If-None-Match": "*" },
+        };
     });
 
 /** Checks the file that arrived and turns the upload into a queued video. */

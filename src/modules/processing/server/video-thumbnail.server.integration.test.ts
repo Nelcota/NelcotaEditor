@@ -77,6 +77,7 @@ describe("ensureVideoThumbnail", () => {
         await ensureVideoThumbnail({
             video: await readVideo(videoId),
             localSourcePath: path.join(workDirectory, "source.mp4"),
+            sourceBytes: SOURCE_BYTES,
             durationSeconds: DURATION_SECONDS,
             workDirectory,
             signal: new AbortController().signal,

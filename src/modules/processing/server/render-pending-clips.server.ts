@@ -1,7 +1,13 @@
-import { renderClip, setClipStatus } from "#/modules/clips/server/render-clip.server";
+import {
+    recordRenderedClip,
+    renderClip,
+    setClipStatus,
+} from "#/modules/clips/server/render-clip.server";
 import type { Clip } from "#/modules/clips/clips.schema";
 import { toOverallPercent } from "#/modules/processing/model/processing-stages";
 import { runLanesToTheEnd } from "#/modules/processing/server/run-lanes-to-the-end.server";
+import { storeProcessedVideoFile } from "#/modules/processing/server/store-processed-video-file.server";
+import { runVideoStorageTransaction } from "#/modules/processing/server/video-storage-transaction.server";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { updateVideoStage } from "#/modules/video-records/server/video-progress.server";
 import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
@@ -15,6 +21,7 @@ const PERCENT = 100;
 
 interface RenderPendingClipsInput {
     run: VideoRun;
+    userId: string;
     /** A local copy of the source that ffmpeg can read. */
     localSourcePath: string;
     /** The run's folder; renders are written here before they are stored. */
@@ -24,18 +31,35 @@ interface RenderPendingClipsInput {
     signal: AbortSignal;
 }
 
+async function renderAndStoreClip(clip: Clip, input: RenderPendingClipsInput): Promise<void> {
+    const { userId, localSourcePath, workDirectory, words, signal } = input;
+    const { outputPath, localPath } = await renderClip({
+        clip,
+        localSourcePath,
+        workDirectory,
+        words,
+        signal,
+    });
+    const replacedBytes = clip.outputBytes ?? 0;
+
+    await storeProcessedVideoFile({ key: outputPath, localPath, signal }, (outputBytes) =>
+        runVideoStorageTransaction(
+            { userId, byteDelta: outputBytes - replacedBytes },
+            (transaction) => recordRenderedClip(clip.id, { outputPath, outputBytes }, transaction),
+        ),
+    );
+}
+
 /** Returns whether the clip ended up rendered. */
 async function renderOneClip(clip: Clip, input: RenderPendingClipsInput): Promise<boolean> {
-    const { run, localSourcePath, workDirectory, words, signal } = input;
+    const { run, signal } = input;
     const videoId = run.videoId;
 
-    if (clip.status === "done") {
-        return true;
-    }
+    signal.throwIfAborted();
 
     try {
         await setClipStatus(clip.id, "rendering");
-        await renderClip({ clip, localSourcePath, workDirectory, words, signal });
+        await renderAndStoreClip(clip, input);
         return true;
     } catch (error) {
         if (signal.aborted === true) {
@@ -55,7 +79,8 @@ async function renderAll(
     input: RenderPendingClipsInput,
     onProgress: (percent: number) => void,
 ): Promise<number> {
-    const clips = input.clips;
+    const clips = input.clips.filter((clip) => clip.status === "pending");
+    const readyCount = input.clips.filter((clip) => clip.status === "done").length;
     let finishedCount = 0;
     const outcomes = await runLanesToTheEnd(clips, RENDER_CONCURRENCY, async (clip) => {
         const isRendered = await renderOneClip(clip, input);
@@ -64,10 +89,10 @@ async function renderAll(
         return isRendered;
     });
 
-    return outcomes.filter((isRendered) => isRendered === true).length;
+    return readyCount + outcomes.filter((isRendered) => isRendered === true).length;
 }
 
-/** Renders every clip that is not done yet, so a retry only redoes what failed. */
+/** Renders the pending clips selected for this run and keeps previously completed outputs. */
 export async function renderPendingClips(input: RenderPendingClipsInput): Promise<void> {
     const { run, clips } = input;
 

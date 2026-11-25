@@ -148,8 +148,11 @@ export async function shouldStopVideoRun(run: VideoRun): Promise<boolean> {
  * Only a cancel the user asked for, and only for the run it was asked of: a run that stops late
  * must not cancel a video the user retried in the meantime.
  */
-export async function markVideoCancelled(run: VideoRun): Promise<void> {
-    await db
+export async function markVideoCancelled(
+    run: VideoRun,
+    executor: DatabaseExecutor = db,
+): Promise<boolean> {
+    const rows = await executor
         .update(videos)
         .set({
             status: "cancelled",
@@ -164,14 +167,31 @@ export async function markVideoCancelled(run: VideoRun): Promise<void> {
                 isCurrentRun(run),
                 canMoveVideoTo("cancelled"),
             ),
-        );
+        )
+        .returning({ id: videos.id });
+
+    return rows.length > 0;
 }
 
-export async function markVideoFailed(run: VideoRun, errorMessage: string): Promise<void> {
-    await db
+export async function markVideoFailed(
+    run: VideoRun,
+    errorMessage: string,
+    executor: DatabaseExecutor = db,
+): Promise<boolean> {
+    const rows = await executor
         .update(videos)
         .set({ status: "failed", errorMessage, cancelRequested: false, finishedAt: new Date() })
-        .where(and(eq(videos.id, run.videoId), isCurrentRun(run), canMoveVideoTo("failed")));
+        .where(
+            and(
+                eq(videos.id, run.videoId),
+                eq(videos.cancelRequested, false),
+                isCurrentRun(run),
+                canMoveVideoTo("failed"),
+            ),
+        )
+        .returning({ id: videos.id });
+
+    return rows.length > 0;
 }
 
 /**
@@ -248,7 +268,11 @@ export async function saveVideoSource(
     // Stored with the path, so the usage screen and the quota sum the database, not the disk.
     await db
         .update(videos)
-        .set({ sourcePath, sourceBytes, durationSeconds })
+        .set({
+            sourcePath,
+            sourceBytes: sql`greatest(${videos.sourceBytes}, ${sourceBytes})`,
+            durationSeconds,
+        })
         .where(eq(videos.id, videoId));
 }
 

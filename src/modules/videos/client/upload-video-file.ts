@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { TranscriptionLanguage } from "#/modules/preferences/model/preferences";
 import type { ClipLength } from "#/modules/video-records/model/clip-length";
+import type { StartedVideoUpload } from "#/modules/videos/model/video-upload-input";
 import { UploadCancelledError } from "#/modules/videos/model/upload-cancelled-error";
 import {
     cancelVideoUpload,
@@ -53,8 +54,7 @@ function readUploadFailure(request: XMLHttpRequest): UploadFailedError {
     return new UploadFailedError(UNKNOWN_ERROR_MESSAGE);
 }
 
-interface FileTarget {
-    uploadUrl: string;
+interface FileTarget extends Pick<StartedVideoUpload, "uploadUrl" | "uploadHeaders"> {
     file: File;
     signal: AbortSignal;
 }
@@ -64,7 +64,7 @@ interface FileTarget {
  * either a signed storage link (no cookies needed) or the app's own route (same origin).
  */
 function sendFile(target: FileTarget, onProgress: (percent: number) => void): Promise<void> {
-    const { uploadUrl, file, signal } = target;
+    const { uploadUrl, uploadHeaders, file, signal } = target;
 
     return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
@@ -75,6 +75,11 @@ function sendFile(target: FileTarget, onProgress: (percent: number) => void): Pr
             signal.removeEventListener("abort", abortRequest),
         );
         request.open("PUT", uploadUrl);
+
+        for (const [header, value] of Object.entries(uploadHeaders ?? {})) {
+            request.setRequestHeader(header, value);
+        }
+
         request.upload.addEventListener("progress", (event) => {
             if (event.lengthComputable === true && event.total > 0) {
                 onProgress(Math.round((event.loaded / event.total) * PERCENT));
@@ -153,7 +158,7 @@ export async function uploadVideoFile(
 
     try {
         assertNotCancelled(signal);
-        await sendFile({ uploadUrl: started.uploadUrl, file, signal }, onProgress);
+        await sendFile({ ...started, file, signal }, onProgress);
         assertNotCancelled(signal);
     } catch (error) {
         await releaseUpload(uploadId);

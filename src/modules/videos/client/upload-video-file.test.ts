@@ -22,6 +22,7 @@ const UPLOAD_ID = "upload-1";
 class PendingRequest extends EventTarget {
     static latest: PendingRequest | null = null;
     upload = new EventTarget();
+    headers = new Headers();
     status = 0;
     responseText = "";
 
@@ -33,6 +34,10 @@ class PendingRequest extends EventTarget {
     open(): void {}
 
     send(): void {}
+
+    setRequestHeader(name: string, value: string): void {
+        this.headers.set(name, value);
+    }
 
     abort(): void {
         this.dispatchEvent(new Event("abort"));
@@ -66,6 +71,28 @@ afterEach(() => {
 });
 
 describe("uploadVideoFile", () => {
+    it("sends the precondition supplied for a direct upload", async () => {
+        vi.mocked(startVideoUpload).mockResolvedValue({
+            uploadId: UPLOAD_ID,
+            uploadUrl: "https://storage.example.com/upload-1",
+            uploadHeaders: { "If-None-Match": "*" },
+        });
+        vi.mocked(completeVideoUpload).mockResolvedValue({ videoId: UPLOAD_ID });
+        const upload = uploadVideoFile(buildInput(), () => {}, new AbortController().signal);
+        await vi.waitFor(() => expect(PendingRequest.latest).not.toBeNull());
+        const request = PendingRequest.latest;
+
+        if (request === null) {
+            throw new Error("The upload did not start");
+        }
+
+        expect(request.headers.get("if-none-match")).toBe("*");
+        request.status = 200;
+        request.dispatchEvent(new Event("load"));
+        request.dispatchEvent(new Event("loadend"));
+        await expect(upload).resolves.toBe(UPLOAD_ID);
+    });
+
     it("stops the transfer and frees the reservation when cancelled", async () => {
         const controller = new AbortController();
         const upload = uploadVideoFile(buildInput(), () => {}, controller.signal);

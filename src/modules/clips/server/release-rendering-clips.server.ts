@@ -10,8 +10,9 @@ import type { ClipStatus } from "#/modules/clips/model/clip-status";
 export async function releaseRenderingClips(
     videoId: string,
     nextStatus: Extract<ClipStatus, "pending" | "failed">,
+    executor: Pick<typeof db, "update"> = db,
 ): Promise<void> {
-    await db
+    await executor
         .update(clips)
         .set({ status: nextStatus })
         .where(and(eq(clips.videoId, videoId), eq(clips.status, "rendering")));

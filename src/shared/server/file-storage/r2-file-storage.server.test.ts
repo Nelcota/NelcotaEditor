@@ -103,7 +103,7 @@ describe("createR2FileStorage respondWithFile", () => {
 });
 
 describe("createR2FileStorage createUploadUrl", () => {
-    it("signs a PUT that only takes a body of the declared size", async () => {
+    it("signs a PUT that only creates a new object of the declared size", async () => {
         const uploadUrl = await storage.createUploadUrl("videos/abc/source.mp4", {
             sizeBytes: 1234,
             lifetimeSeconds: 3600,
@@ -112,6 +112,7 @@ describe("createR2FileStorage createUploadUrl", () => {
         const location = new URL(uploadUrl ?? "");
         expect(location.pathname).toBe("/nelcota-media/videos/abc/source.mp4");
         expect(location.searchParams.get("X-Amz-SignedHeaders")).toContain("content-length");
+        expect(location.searchParams.get("X-Amz-SignedHeaders")).toContain("if-none-match");
         expect(location.searchParams.get("X-Amz-Expires")).toBe("3600");
     });
 });

@@ -34,7 +34,7 @@ const DOWNLOADED_FILE_PREFIX = "stored-";
 const SPOOL_FOLDER_NAME = "spool";
 const KEY_SEGMENT_SEPARATOR = "/";
 const FORBIDDEN_KEY_SEGMENTS = new Set(["", ".", ".."]);
-const SIGNED_UPLOAD_HEADERS = new Set(["content-length"]);
+const SIGNED_UPLOAD_HEADERS = new Set(["content-length", "if-none-match"]);
 
 export interface R2Settings {
     accountId: string;
@@ -177,8 +177,7 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
     }
 
     /**
-     * Content-Length is signed, so R2 refuses a body of any other size: the browser cannot send
-     * more than the space it reserved.
+     * R2 enforces the reserved size and refuses any later write while the original exists.
      */
     function createUploadUrl(key: string, slot: UploadSlot): Promise<string | null> {
         assertValidKey(key);
@@ -189,6 +188,7 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
                 Bucket: bucket,
                 Key: key,
                 ContentLength: slot.sizeBytes,
+                IfNoneMatch: "*",
             }),
             { expiresIn: slot.lifetimeSeconds, signableHeaders: SIGNED_UPLOAD_HEADERS },
         );

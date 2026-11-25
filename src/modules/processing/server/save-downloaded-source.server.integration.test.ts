@@ -96,4 +96,31 @@ describe("saveDownloadedSource", () => {
 
         assert.equal(await readSourceBytes(videoId), downloadBytes);
     });
+
+    test("leaves room for an upload that already reserved the remaining space", async () => {
+        const userId = await createTestUser();
+        const uploadId = randomUUID();
+        const reservedBytes = 1_024;
+        const downloadBytes = getDownloadBytes();
+        await insertVideo(userId, getQuotaBytes() - downloadBytes);
+        const videoId = await insertVideo(userId, null);
+        await db.execute(
+            sql`insert into video_uploads
+                (id, user_id, source_path, declared_bytes, title, requested_clip_count, clip_length,
+                 transcription_language, expires_at)
+                values (${uploadId}, ${userId}, ${`videos/${uploadId}/source.mp4`}, ${reservedBytes},
+                        'Test upload', 3, 'minute', '', now() + interval '1 hour')`,
+        );
+
+        const save = saveDownloadedSource({
+            videoId,
+            userId,
+            sourcePath: `videos/${videoId}/source.mp4`,
+            sourceBytes: downloadBytes,
+            durationSeconds: DURATION_SECONDS,
+        });
+
+        await assert.rejects(save, { name: "StorageQuotaExceededError" });
+        assert.equal(await readSourceBytes(videoId), null);
+    });
 });

@@ -24,6 +24,7 @@ export const startedVideoUploadSchema = z.object({
     uploadId: z.uuid(),
     /** Where the browser sends the file with PUT: a signed storage link, or the app's own route. */
     uploadUrl: z.string().min(1),
+    uploadHeaders: z.object({ "If-None-Match": z.literal("*") }).optional(),
 });
 
 export type StartedVideoUpload = z.infer<typeof startedVideoUploadSchema>;
