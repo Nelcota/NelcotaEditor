@@ -11,10 +11,11 @@ import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
-import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
+import { buildCaptchaHeaders } from "#/modules/auth/client/captcha-headers";
+import { CaptchaField } from "#/shared/ui/captcha-field";
 import { CheckEmailCard } from "#/modules/auth/ui/components/check-email-card";
-import { HoneypotField } from "#/modules/auth/ui/components/honeypot-field";
-import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
+import { HoneypotField } from "#/shared/ui/honeypot-field";
+import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/shared/ui/use-captcha";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
@@ -58,7 +59,7 @@ export function SignUpScreen({ captchaSiteKey }: SignUpScreenProps): ReactNode {
                 return;
             }
 
-            const fetchOptions = { headers: captcha.buildHeaders() };
+            const fetchOptions = { headers: buildCaptchaHeaders(captcha.readToken()) };
             // The link signs the person in and lands on /sign-in, which forwards a session to the
             // app; a failed link lands there with ?error.
             const failure = await runAuthRequest(() =>

@@ -5,8 +5,9 @@ import { forgotPasswordSchema } from "#/modules/auth/model/auth-forms";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
-import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
-import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
+import { buildCaptchaHeaders } from "#/modules/auth/client/captcha-headers";
+import { CaptchaField } from "#/shared/ui/captcha-field";
+import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/shared/ui/use-captcha";
 import { Alert } from "#/shared/ui/alert";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -60,7 +61,7 @@ export function ForgotPasswordScreen({ captchaSiteKey }: ForgotPasswordScreenPro
                 return;
             }
 
-            const fetchOptions = { headers: captcha.buildHeaders() };
+            const fetchOptions = { headers: buildCaptchaHeaders(captcha.readToken()) };
             const failure = await runAuthRequest(() =>
                 authClient.requestPasswordReset({
                     email: value.email,
