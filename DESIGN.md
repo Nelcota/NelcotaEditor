@@ -21,10 +21,13 @@ breadcrumb and for screen readers only. Light stays available through the toggle
 - **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
 - **Clips** are cards with the primary download button; a finished video's page opens with the summary
   bubble and its settings as tags.
-- **Entrar / Criar conta** (direction B, 2026-11-23): the form wears the public site (`.theme-site`:
-  lavender page, white fields, Geist, the bracketed eyebrow and the light/heavy title), so the step
-  from the site keeps its look; from lg the dark app sits beside it (`.theme-app`): the link box and
-  four finished clips, using the site's Pexels frames in `public/auth/`. Phones show the form only.
+- **Entrar:** a single centered column up to 32rem wide holds the brand, form, and account and
+  support links. The form uses large labels and controls with a 3.75rem minimum height for the
+  sign-in button.
+- **Criar conta:** the form and sign-up states follow the app theme. On wide windows they sit beside
+  captures of the Studio and the Formatos Virais gallery from a local demo account. The Studio uses
+  the credited generic-format photo and demo captions. On phones the form and account states take
+  the full width.
 
 ## Format previews
 
@@ -37,7 +40,7 @@ or a phone mockup. The cropped WebP files in `public/viral-formats/` use the
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Split screen | [Pavel Danilyuk](https://www.pexels.com/photo/a-female-coffee-barista-making-coffee-6612646/), [Esra Afşar](https://www.pexels.com/photo/barista-preparing-espresso-in-cafe-setting-32078567/)                   |
 | Ranking      | [Ben Khatry](https://www.pexels.com/photo/young-man-engaging-in-a-podcast-recording-36917949/)                                                                                                                   |
-| This or that | [minchephoto photography](https://www.pexels.com/photo/a-hot-coffee-on-a-ceramic-cup-7491911/), [Khadijah Karaca](https://www.pexels.com/photo/close-up-of-milk-being-poured-into-a-glass-with-coffee-17497896/) |
+| Contrast     | [minchephoto photography](https://www.pexels.com/photo/a-hot-coffee-on-a-ceramic-cup-7491911/), [Khadijah Karaca](https://www.pexels.com/photo/close-up-of-milk-being-poured-into-a-glass-with-coffee-17497896/) |
 | Generic      | [SHVETS production](https://www.pexels.com/photo/young-woman-filming-video-in-light-apartment-7516247/)                                                                                                          |
 | App          | [Nadin Romanova](https://www.pexels.com/photo/scenic-alpine-lake-and-majestic-mountains-31567332/)                                                                                                               |
 
@@ -57,9 +60,9 @@ or a phone mockup. The cropped WebP files in `public/viral-formats/` use the
 | `background` (dark: charcoal)         | The rounded panel                                      |
 | `card` (a step above the panel)       | Filled boxes: search, table head, cards, sidebar cards |
 | `secondary` / `muted` / `accent`      | Pills, tracks, hover fills                             |
-| `primary` / `primary-solid` (blue)    | Primary buttons, current section, progress, focus      |
-| `primary-ink`                         | Blue text, links and the sidebar icons                 |
-| `muted-foreground`                    | Secondary text                                         |
+| `primary` / `primary-solid`           | Primary buttons, current section, progress, focus      |
+| `primary-ink`                         | Emphasized text, links and active navigation icons     |
+| `muted-foreground`                    | Secondary text and inactive navigation icons           |
 | `success` (green) / `warning` (amber) | Finished videos, storage bars / warnings               |
 | `destructive` (red)                   | Failures and delete                                    |
 
@@ -186,6 +189,9 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Shell:** top bar 56px; sidebar 288px on the frame; the panel fills the rest with 8px of frame on
   its trailing and bottom sides, 14px corners. Plain pages pad 32px inside the panel (16px on phones);
   the video page pads its column 32px and its inspector 24px.
+- **Desktop sidebar:** spans the window from top to bottom. Editor Oculto and Cortes stay near the
+  top, and Geral sits by the account menu at the bottom. On short windows the links scroll within
+  the sidebar, with the brand controls and the expanded account menu outside the scrolling area.
 - **Reading width:** paragraphs (page descriptions, clip reasons, empty states) stop at about 65
   characters (`max-w-prose`).
 - **Control heights:** 40px for buttons, inputs, selects, chips and search in toolbars and cards; 44px for

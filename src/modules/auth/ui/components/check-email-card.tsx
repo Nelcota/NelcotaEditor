@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { AuthCard } from "#/modules/auth/ui/components/auth-card";
+import { AuthEntryLayout } from "#/modules/auth/ui/components/auth-entry-layout";
 import { Alert } from "#/shared/ui/alert";
 import { Button } from "#/shared/ui/button";
 
@@ -16,13 +16,14 @@ interface CheckEmailCardProps {
  */
 export function CheckEmailCard({ email, onChangeEmail }: CheckEmailCardProps): ReactNode {
     return (
-        <AuthCard
-            eyebrow="Confirme seu email"
-            title={{ lead: "Falta só", emphasis: "confirmar seu email" }}
-            description={`Enviamos um link para ${email}. Abra para ativar sua conta.`}
-            footer={{ text: "Já confirmou?", linkLabel: "Entrar", linkTo: "/sign-in" }}
+        <AuthEntryLayout
+            title="Falta só confirmar seu email"
+            accountLink={{ text: "Já confirmou?", label: "Entrar", to: "/sign-in" }}
         >
             <div className="grid gap-4">
+                <p className="text-muted-foreground [overflow-wrap:anywhere]">
+                    Enviamos um link para {email}. Abra para ativar sua conta.
+                </p>
                 <Alert tone="info">
                     Não chegou? Confira o spam. O link vale por 1 hora; entrar com seu email e senha
                     envia outro.
@@ -38,6 +39,6 @@ export function CheckEmailCard({ email, onChangeEmail }: CheckEmailCardProps): R
                     </Button>
                 </div>
             </div>
-        </AuthCard>
+        </AuthEntryLayout>
     );
 }

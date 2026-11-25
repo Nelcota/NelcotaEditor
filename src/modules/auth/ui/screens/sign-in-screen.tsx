@@ -9,18 +9,22 @@ import { toSignInNotice } from "#/modules/auth/model/sign-in-notice";
 import type { SignInSearch } from "#/modules/auth/model/sign-in-search";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
-import { AuthCard } from "#/modules/auth/ui/components/auth-card";
+import { AuthEntryLayout } from "#/modules/auth/ui/components/auth-entry-layout";
 import { buildCaptchaHeaders } from "#/modules/auth/client/captcha-headers";
 import { CaptchaField } from "#/shared/ui/captcha-field";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/shared/ui/use-captcha";
 import { Alert } from "#/shared/ui/alert";
-import { Button } from "#/shared/ui/button";
+import { Button, textLinkClass } from "#/shared/ui/button";
+import { cn } from "#/shared/ui/cn";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { toErrorMessages } from "#/shared/ui/form-errors";
 import { TextField } from "#/shared/ui/text-field";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { FORM_VALIDATION_LOGIC } from "#/shared/ui/form-validation-logic";
+
+const SIGN_IN_TITLE = "Entrar na sua conta";
+const CONNECT_CLAUDE_TITLE = "Entre para conectar o Claude";
 
 /** In page order; each field's input id matches its name. */
 const FIELD_NAMES = ["email", "password"] as const;
@@ -39,17 +43,11 @@ interface SignInScreenProps {
     isAuthorizingApp?: boolean;
 }
 
-const SIGN_IN_TITLE = { lead: "Que bom", emphasis: "te ver de novo" };
-const CONNECT_CLAUDE_TITLE = { lead: "Entre para", emphasis: "conectar o Claude" };
-
-export function SignInScreen({
+function useSignInForm({
     captchaSiteKey,
-    search,
     redirectTarget,
-    isAuthorizingApp = false,
-}: SignInScreenProps): ReactNode {
-    const notice = toSignInNotice(search);
-    const track = useTrackPromise();
+    isAuthorizingApp,
+}: Pick<SignInScreenProps, "captchaSiteKey" | "redirectTarget" | "isAuthorizingApp">) {
     const router = useRouter();
     const captcha = useCaptcha(captchaSiteKey);
     const queryClient = useQueryClient();
@@ -91,22 +89,38 @@ export function SignInScreen({
         },
     });
 
+    return { form, captcha, errorMessage };
+}
+
+export function SignInScreen({
+    captchaSiteKey,
+    search,
+    redirectTarget,
+    isAuthorizingApp = false,
+}: SignInScreenProps): ReactNode {
+    const { form, captcha, errorMessage } = useSignInForm({
+        captchaSiteKey,
+        redirectTarget,
+        isAuthorizingApp,
+    });
+    const notice = toSignInNotice(search);
     let title = SIGN_IN_TITLE;
 
     if (isAuthorizingApp === true) {
         title = CONNECT_CLAUDE_TITLE;
     }
+    const track = useTrackPromise();
 
     return (
-        <AuthCard
-            eyebrow="Entrar"
+        <AuthEntryLayout
             title={title}
-            description="Seus vídeos e cortes estão te esperando."
-            footer={{ text: "Ainda não tem conta?", linkLabel: "Criar conta", linkTo: "/sign-up" }}
+            layout="centered"
+            accountLink={{ text: "Ainda não tem conta?", label: "Criar conta", to: "/sign-up" }}
         >
             <form
+                method="post"
                 noValidate
-                className="grid gap-4"
+                className="grid gap-6 [&_[data-slot=alert]]:text-base"
                 onSubmit={(event) => {
                     event.preventDefault();
                     track(form.handleSubmit());
@@ -117,12 +131,15 @@ export function SignInScreen({
                     {(field) => (
                         <TextField
                             id="email"
+                            name="email"
                             label="Email"
                             type="email"
-                            autoComplete="email"
+                            autoComplete="username"
+                            required
                             spellCheck={false}
                             autoCapitalize="none"
                             enterKeyHint="next"
+                            fieldSize="large"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -134,10 +151,13 @@ export function SignInScreen({
                     {(field) => (
                         <TextField
                             id="password"
+                            name="password"
                             label="Senha"
                             type="password"
                             autoComplete="current-password"
+                            required
                             enterKeyHint="go"
+                            fieldSize="large"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -145,12 +165,11 @@ export function SignInScreen({
                         />
                     )}
                 </form.Field>
-                <Link
-                    to="/forgot-password"
-                    className="justify-self-start rounded text-sm font-semibold text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-99"
-                >
-                    Esqueci minha senha
-                </Link>
+                <div className="justify-self-end">
+                    <Link to="/forgot-password" className={cn(textLinkClass, "text-lg")}>
+                        Esqueci minha senha
+                    </Link>
+                </div>
                 <CaptchaField captcha={captcha} />
                 <FormAlert message={errorMessage} />
                 <form.Subscribe selector={(state) => state.isSubmitting}>
@@ -158,26 +177,16 @@ export function SignInScreen({
                         <Button
                             type="submit"
                             size="lg"
-                            className="h-11"
-                            disabled={isSubmitting}
-                            aria-busy={isSubmitting}
+                            className="h-auto min-h-15 justify-between py-3 text-lg font-semibold"
+                            isLoading={isSubmitting}
+                            loadingLabel="Entrando…"
                         >
-                            {isSubmitting === true && "Entrando…"}
-                            {isSubmitting === false && "Entrar"}
-                            {isSubmitting === false && <ArrowRightIcon aria-hidden="true" />}
+                            Entrar
+                            <ArrowRightIcon aria-hidden="true" className="size-5" />
                         </Button>
                     )}
                 </form.Subscribe>
             </form>
-            <p className="text-center text-sm text-foreground/65">
-                Não consegue entrar?{" "}
-                <Link
-                    to="/contact"
-                    className="inline-block rounded font-semibold text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-99"
-                >
-                    Fale com o suporte
-                </Link>
-            </p>
-        </AuthCard>
+        </AuthEntryLayout>
     );
 }

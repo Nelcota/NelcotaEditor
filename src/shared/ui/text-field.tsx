@@ -11,10 +11,30 @@ import {
     resolveInputType,
 } from "#/shared/ui/password-visibility";
 
+const FIELD_SIZE_CLASSES = {
+    default: {
+        label: "",
+        input: "h-11",
+        password: "pr-28",
+        toggle: "text-sm",
+        hint: "text-xs",
+        error: "text-sm",
+    },
+    large: {
+        label: "text-lg leading-tight",
+        input: "h-15 px-4 text-lg",
+        password: "pr-36",
+        toggle: "text-lg [&>svg]:size-5",
+        hint: "text-sm",
+        error: "text-base",
+    },
+} as const;
+
 interface TextFieldProps extends Omit<ComponentProps<"input">, "onChange"> {
     id: string;
     label: string;
     errors: Array<string>;
+    fieldSize?: keyof typeof FIELD_SIZE_CLASSES;
     hint?: string;
     onValueChange: (value: string) => void;
 }
@@ -23,6 +43,7 @@ interface PasswordVisibilityToggleProps {
     inputId: string;
     isPasswordVisible: boolean;
     onToggle: () => void;
+    className: string;
 }
 
 /** The error when there is one, otherwise the hint, so screen readers read what is on screen. */
@@ -51,6 +72,7 @@ function PasswordVisibilityToggle({
     inputId,
     isPasswordVisible,
     onToggle,
+    className,
 }: PasswordVisibilityToggleProps): ReactNode {
     const [hasToggled, setHasToggled] = useState(false);
     const copy = getPasswordVisibilityCopy(isPasswordVisible);
@@ -65,7 +87,10 @@ function PasswordVisibilityToggle({
                     setHasToggled(true);
                     onToggle();
                 }}
-                className="absolute inset-y-1 right-1 inline-flex items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-[color,background-color,scale] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]"
+                className={cn(
+                    "absolute inset-y-1 right-1 inline-flex items-center gap-1.5 rounded-md px-2.5 font-medium text-muted-foreground transition-[color,background-color,scale] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99]",
+                    className,
+                )}
             >
                 <VisibilityIcon isPasswordVisible={isPasswordVisible} />
                 {copy.buttonText}
@@ -82,6 +107,7 @@ export function TextField({
     id,
     label,
     errors,
+    fieldSize = "default",
     hint,
     onValueChange,
     type,
@@ -92,10 +118,13 @@ export function TextField({
     const errorId = `${id}-error`;
     const hasErrors = errors.length > 0;
     const isPassword = isPasswordInputType(type);
+    const sizeClasses = FIELD_SIZE_CLASSES[fieldSize];
 
     return (
         <div className="grid gap-2">
-            <Label htmlFor={id}>{label}</Label>
+            <Label htmlFor={id} className={sizeClasses.label}>
+                {label}
+            </Label>
             <div className="relative">
                 <Input
                     id={id}
@@ -104,8 +133,9 @@ export function TextField({
                     aria-describedby={describedBy(hasErrors, id, hint !== undefined)}
                     onChange={(event) => onValueChange(event.target.value)}
                     className={cn(
-                        "h-11",
-                        isPassword === true && "pr-28 [&::-ms-clear]:hidden [&::-ms-reveal]:hidden",
+                        sizeClasses.input,
+                        isPassword === true && sizeClasses.password,
+                        isPassword === true && "[&::-ms-clear]:hidden [&::-ms-reveal]:hidden",
                         className,
                     )}
                     {...inputProps}
@@ -115,16 +145,17 @@ export function TextField({
                         inputId={id}
                         isPasswordVisible={isPasswordVisible}
                         onToggle={() => setIsPasswordVisible((isVisible) => isVisible === false)}
+                        className={sizeClasses.toggle}
                     />
                 )}
             </div>
             {hint !== undefined && hasErrors === false && (
-                <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+                <p id={`${id}-hint`} className={cn(sizeClasses.hint, "text-muted-foreground")}>
                     {hint}
                 </p>
             )}
             {hasErrors === true && (
-                <p id={errorId} className="text-sm text-destructive">
+                <p id={errorId} className={cn(sizeClasses.error, "text-destructive")}>
                     {errors.join(" ")}
                 </p>
             )}

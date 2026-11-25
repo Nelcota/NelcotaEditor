@@ -2,64 +2,133 @@ import type { ReactNode } from "react";
 import type { ViralFormatId } from "#/modules/viral-formats/model/viral-formats";
 import { cn } from "#/shared/ui/cn";
 
-const RANKING_POSITIONS = [1, 2, 3, 4, 5] as const;
-const BLOCK_CLASS = "rounded-lg bg-foreground/10";
+const COVER_PHOTOS = {
+    "split-presenter": { width: 448, height: 352 },
+    "split-espresso": { width: 448, height: 352 },
+    "ranking-presenter": { width: 448, height: 704 },
+    "comparison-hot": { width: 224, height: 704 },
+    "comparison-iced": { width: 224, height: 704 },
+    "generic-presenter": { width: 448, height: 704 },
+    "app-destination": { width: 288, height: 352 },
+} as const;
 
-/** Each format's layout drawn in blocks, in place of its demo video until one is published. */
-const COVER_LAYOUTS: Record<ViralFormatId, () => ReactNode> = {
-    "split-screen": () => (
+const RANKING_ITEMS = [
+    { position: 1, label: "Luz natural" },
+    { position: 2, label: "Microfone" },
+    { position: 3, label: "Tripé" },
+    { position: 4, label: "Enquadramento" },
+    { position: 5, label: "Cenário" },
+] as const;
+
+type PhotoLoading = "eager" | "lazy";
+
+interface FormatPhotoProps {
+    name: keyof typeof COVER_PHOTOS;
+    loading: PhotoLoading;
+    className?: string;
+}
+
+function FormatPhoto({ name, loading, className }: FormatPhotoProps): ReactNode {
+    const { width, height } = COVER_PHOTOS[name];
+
+    return (
+        <img
+            src={`/viral-formats/${name}.webp`}
+            alt=""
+            width={width}
+            height={height}
+            loading={loading}
+            className={cn("size-full min-h-0 object-cover", className)}
+        />
+    );
+}
+
+interface CoverLayoutProps {
+    loading: PhotoLoading;
+}
+
+function RankingCover({ loading }: CoverLayoutProps): ReactNode {
+    return (
+        <div className="relative size-full overflow-hidden rounded-lg">
+            <FormatPhoto name="ranking-presenter" loading={loading} />
+            <ol className="absolute inset-x-2 bottom-2 grid gap-0.5">
+                {RANKING_ITEMS.map(({ position, label }) => (
+                    <li
+                        key={position}
+                        className={cn(
+                            "flex items-center gap-1.5 rounded px-1.5 text-xs leading-5 font-bold tabular-nums",
+                            position === 1 && "bg-primary-solid text-primary-foreground",
+                            position !== 1 && "bg-stage/90 text-white",
+                        )}
+                    >
+                        <span>{position}</span>
+                        {label}
+                    </li>
+                ))}
+            </ol>
+        </div>
+    );
+}
+
+function AppCover({ loading }: CoverLayoutProps): ReactNode {
+    return (
+        <div className="mx-auto grid h-full w-3/4 grid-rows-[auto_minmax(0,1fr)] gap-1.5 rounded-xl border-2 border-stage-foreground/35 bg-stage p-1.5">
+            <div className="mx-auto h-1 w-1/3 rounded-full bg-stage-foreground/35" />
+            <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-md bg-white text-primary-foreground">
+                <span className="px-2 py-2 text-xs leading-tight font-bold">Dolomitas</span>
+                <FormatPhoto name="app-destination" loading={loading} />
+                <div className="grid gap-0.5 p-2 text-xs leading-tight">
+                    <span className="font-bold">Lago di Braies</span>
+                    <span className="text-primary-foreground/75">Rota circular</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const COVER_LAYOUTS: Record<ViralFormatId, (props: CoverLayoutProps) => ReactNode> = {
+    "split-screen": ({ loading }) => (
         <div className="grid size-full grid-rows-2 gap-1.5">
-            <div className={BLOCK_CLASS} />
-            <div className="rounded-lg bg-primary/25" />
+            <FormatPhoto name="split-presenter" loading={loading} className="rounded-lg" />
+            <FormatPhoto name="split-espresso" loading={loading} className="rounded-lg" />
         </div>
     ),
-    ranking: () => (
-        <ol className="grid size-full content-center gap-1.5">
-            {RANKING_POSITIONS.map((position) => (
-                <li
-                    key={position}
-                    className={cn(
-                        "flex h-5 items-center rounded-md px-2 text-xs font-bold tabular-nums",
-                        position === 1 && "bg-primary-solid text-primary-foreground",
-                        position !== 1 && "bg-foreground/10 text-muted-foreground",
-                    )}
-                >
-                    {position}
-                </li>
-            ))}
-        </ol>
-    ),
-    "this-or-that": () => (
+    ranking: RankingCover,
+    "this-or-that": ({ loading }) => (
         <div className="relative grid size-full grid-cols-2 gap-1.5">
-            <div className={BLOCK_CLASS} />
-            <div className="rounded-lg bg-primary/25" />
+            <FormatPhoto name="comparison-hot" loading={loading} className="rounded-lg" />
+            <FormatPhoto name="comparison-iced" loading={loading} className="rounded-lg" />
             <span className="absolute inset-x-0 top-1/2 mx-auto grid size-7 -translate-y-1/2 place-items-center rounded-full bg-primary-solid text-xs font-bold text-primary-foreground">
                 OU
             </span>
-        </div>
-    ),
-    generic: () => (
-        <div className="grid size-full grid-rows-[1fr_auto] gap-2">
-            <div className={BLOCK_CLASS} />
-            <div className="mx-auto h-3 w-3/4 rounded-full bg-primary/40" />
-        </div>
-    ),
-    app: () => (
-        <div className="grid size-full place-items-center">
-            <div className="grid h-full w-3/5 grid-rows-[auto_1fr] gap-1 rounded-xl border-2 border-foreground/20 p-1.5">
-                <div className="mx-auto h-1 w-1/3 rounded-full bg-foreground/20" />
-                <div className="rounded-md bg-primary/25" />
+            <div className="absolute inset-x-0 bottom-3 grid grid-cols-2 justify-items-center gap-1.5 text-xs font-bold text-white">
+                <span className="rounded bg-stage/90 px-1.5">Quente</span>
+                <span className="rounded bg-stage/90 px-1.5">Gelado</span>
             </div>
         </div>
     ),
+    generic: ({ loading }) => (
+        <div className="relative size-full overflow-hidden rounded-lg">
+            <FormatPhoto name="generic-presenter" loading={loading} />
+            <div className="absolute inset-x-2 bottom-5 text-center text-sm font-extrabold text-white">
+                <span className="rounded bg-stage/90 px-1.5 py-0.5">A luz muda tudo.</span>
+            </div>
+        </div>
+    ),
+    app: AppCover,
 };
 
 interface FormatCoverProps {
     formatId: ViralFormatId;
     className?: string;
+    loading?: PhotoLoading;
 }
 
-export function FormatCover({ formatId, className }: FormatCoverProps): ReactNode {
+export function FormatCover({
+    formatId,
+    className,
+    loading = "eager",
+}: FormatCoverProps): ReactNode {
     const Layout = COVER_LAYOUTS[formatId];
 
     return (
@@ -67,7 +136,7 @@ export function FormatCover({ formatId, className }: FormatCoverProps): ReactNod
             aria-hidden="true"
             className={cn("aspect-clip-card w-full rounded-xl bg-stage p-3", className)}
         >
-            <Layout />
+            <Layout loading={loading} />
         </div>
     );
 }

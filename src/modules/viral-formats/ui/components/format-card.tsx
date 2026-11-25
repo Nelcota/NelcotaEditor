@@ -11,8 +11,8 @@ interface FormatCardProps {
 /** One format in the row: its layout, name and line; the whole card opens it. */
 export function FormatCard({ format, onOpen }: FormatCardProps): ReactNode {
     return (
-        <li className="relative grid w-44 shrink-0 gap-2.5 sm:w-52">
-            <FormatCover formatId={format.id} />
+        <li className="relative grid w-44 shrink-0 content-start gap-2.5 sm:w-52">
+            <FormatCover formatId={format.id} loading="lazy" />
             <div className="grid gap-0.5">
                 <button
                     type="button"

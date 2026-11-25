@@ -5,10 +5,11 @@ import type { ReactNode } from "react";
 import {
     ADMIN_SECTION,
     ADMIN_SUB_SECTIONS,
+    GENERAL_NAV_GROUP,
     GETTING_STARTED_SECTION,
-    NAV_GROUPS,
     SECTION_LINK_ACTIVE_OPTIONS,
     SUPPORT_SECTION,
+    WORK_NAV_GROUPS,
     getSectionState,
     isAdminSubSectionCurrent,
 } from "#/modules/shell/model/nav-sections";
@@ -205,17 +206,17 @@ export function SidebarNav(): ReactNode {
     const pathname = useLocation({ select: (location) => location.pathname });
     const routeContext = appRoute.useRouteContext();
     const user = routeContext.user;
-    const lastIndex = NAV_GROUPS.length - 1;
 
     return (
-        <nav aria-label="Seções" className="grid gap-4">
-            {NAV_GROUPS.map((group, index) => (
-                <SidebarGroup key={group.label} group={group} pathname={pathname}>
-                    {index === lastIndex && user.isAdmin === true && (
-                        <AdminGroup pathname={pathname} />
-                    )}
-                </SidebarGroup>
-            ))}
+        <nav aria-label="Seções" className="flex min-h-full flex-col justify-between gap-4">
+            <div className="grid gap-4">
+                {WORK_NAV_GROUPS.map((group) => (
+                    <SidebarGroup key={group.label} group={group} pathname={pathname} />
+                ))}
+            </div>
+            <SidebarGroup group={GENERAL_NAV_GROUP} pathname={pathname}>
+                {user.isAdmin === true && <AdminGroup pathname={pathname} />}
+            </SidebarGroup>
         </nav>
     );
 }

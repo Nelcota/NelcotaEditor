@@ -135,16 +135,20 @@ export const ADMIN_SECTION: NavSection = {
 };
 
 /** The sidebar, as in the Editor Oculto guide: each area starts with its own "Comece por aqui". */
-export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
+export const WORK_NAV_GROUPS: ReadonlyArray<NavGroup> = [
     {
         label: "Editor Oculto",
         sections: [GETTING_STARTED_SECTION, CLAUDE_SECTION, FORMATS_SECTION, EDITS_SECTION],
     },
     { label: "Cortes", sections: [CLIPS_GETTING_STARTED_SECTION, CLIPS_SECTION, OVERVIEW_SECTION] },
-    { label: "Geral", sections: [ACCOUNT_SECTION, SUPPORT_SECTION] },
 ];
 
-export const NAV_SECTIONS: ReadonlyArray<NavSection> = NAV_GROUPS.flatMap(
+export const GENERAL_NAV_GROUP: NavGroup = {
+    label: "Geral",
+    sections: [ACCOUNT_SECTION, SUPPORT_SECTION],
+};
+
+export const WORK_NAV_SECTIONS: ReadonlyArray<NavSection> = WORK_NAV_GROUPS.flatMap(
     (group) => group.sections,
 );
 

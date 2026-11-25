@@ -20,8 +20,8 @@ interface AppSidebarProps {
 
 export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactNode {
     return (
-        <div className="flex h-full min-h-0 flex-col gap-2 px-2.5 pt-2 pb-2">
-            <div className="flex h-12 items-center gap-1 ps-2.5">
+        <div className="flex h-full min-h-0 flex-col gap-2 py-4">
+            <div className="flex h-12 shrink-0 items-center gap-1 ps-5 pe-2.5">
                 <Link
                     to="/getting-started"
                     aria-label="Editor Oculto, ir para o início"
@@ -42,10 +42,10 @@ export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactN
                     </Button>
                 </HintTooltip>
             </div>
-            <div className="relative min-h-0 flex-1 overflow-y-auto pt-1">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2.5 py-1">
                 <SidebarNav />
             </div>
-            {accountMenu}
+            <div className="shrink-0 px-2.5">{accountMenu}</div>
         </div>
     );
 }
