@@ -1,3 +1,4 @@
+import { adminUserIdInputSchema } from "#/modules/admin/model/admin-search";
 import { getFreshSessionUser } from "#/modules/auth/server/get-session-user.server";
 import { respondWithUserAvatar } from "#/modules/auth/server/avatar-routes.server";
 import { logger } from "#/shared/server/logger.server";
@@ -16,5 +17,11 @@ export async function serveAdminUserAvatar(request: Request, userId: string): Pr
         return new Response(null, { status: HTTP_NOT_FOUND });
     }
 
-    return respondWithUserAvatar(request, userId);
+    const result = adminUserIdInputSchema.safeParse({ userId });
+
+    if (result.success === false) {
+        return new Response(null, { status: HTTP_NOT_FOUND });
+    }
+
+    return respondWithUserAvatar(request, result.data.userId, "admin");
 }

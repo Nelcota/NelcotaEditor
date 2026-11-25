@@ -70,6 +70,13 @@ describe("serveAdminUserAvatar", () => {
         const response = await serveAdminUserAvatar(requestAvatar(admin.headers), ownerId);
 
         expect(response.status).toBe(HTTP_OK);
+        expect(response.headers.get("cache-control")).toBe("private, no-store");
+        expect(new Uint8Array(await response.arrayBuffer())).toEqual(PNG_SIGNATURE);
+
+        await db.update(user).set({ role: "user" }).where(eq(user.id, admin.userId));
+        const afterRevocation = await serveAdminUserAvatar(requestAvatar(admin.headers), ownerId);
+
+        expect(afterRevocation.status).toBe(HTTP_NOT_FOUND);
     });
 
     it("answers 404 to a signed-in person who is not an admin", async () => {

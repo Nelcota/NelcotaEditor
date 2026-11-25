@@ -124,24 +124,38 @@ export async function handleAvatarUpload(request: Request): Promise<Response> {
     return storeAvatar(user.id, upload);
 }
 
-function buildPhotoHeaders(extension: AvatarPhotoExtension): Headers {
+const AVATAR_CACHE_CONTROL = {
+    owner: "private, max-age=31536000, immutable",
+    admin: "private, no-store",
+} as const;
+
+type AvatarAccess = keyof typeof AVATAR_CACHE_CONTROL;
+
+function buildPhotoHeaders(extension: AvatarPhotoExtension, access: AvatarAccess): Headers {
     return new Headers({
         "Content-Type": AVATAR_CONTENT_TYPES[extension],
-        // The URL carries a version, so a new upload is a new URL.
-        "Cache-Control": "private, max-age=31536000, immutable",
+        "Cache-Control": AVATAR_CACHE_CONTROL[access],
         "X-Content-Type-Options": "nosniff",
     });
 }
 
 /** The user's uploaded photo, or 404 when they have none. Callers check who may see it. */
-export async function respondWithUserAvatar(request: Request, userId: string): Promise<Response> {
+export async function respondWithUserAvatar(
+    request: Request,
+    userId: string,
+    access: AvatarAccess = "owner",
+): Promise<Response> {
     const extension = readPhotoExtension(await findUserImage(userId));
 
     if (extension === null) {
         return new Response(null, { status: HTTP_NOT_FOUND });
     }
 
-    return respondWithAvatarPhoto(request, { userId, extension }, buildPhotoHeaders(extension));
+    return respondWithAvatarPhoto(
+        request,
+        { userId, extension, shouldProxy: access === "admin" },
+        buildPhotoHeaders(extension, access),
+    );
 }
 
 /** GET /api/account/avatar — the signed-in user's own photo. */
