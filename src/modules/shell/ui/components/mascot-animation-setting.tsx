@@ -1,23 +1,25 @@
 import { useId } from "react";
 import type { ReactNode } from "react";
 import { SettingsRow } from "#/shared/ui/settings-row";
+import { Switch } from "#/shared/ui/switch";
 import { useMascotAnimations } from "#/shared/ui/use-mascot-animations";
 
 export function MascotAnimationSetting(): ReactNode {
-    const inputId = useId();
+    const labelId = useId();
+    const descriptionId = `${labelId}-description`;
     const { isEnabled, toggle } = useMascotAnimations();
 
     return (
         <SettingsRow
-            label={<label htmlFor={inputId}>Animações dos mascotes</label>}
-            description="Esta opção vale para este navegador."
+            labelId={labelId}
+            label="Animações dos mascotes"
+            description={<span id={descriptionId}>Esta opção vale para este navegador.</span>}
         >
-            <input
-                id={inputId}
-                type="checkbox"
+            <Switch
+                aria-labelledby={labelId}
+                aria-describedby={descriptionId}
                 checked={isEnabled}
-                onChange={toggle}
-                className="size-6 rounded-sm accent-primary-solid focus-visible:ring-4 focus-visible:ring-ring"
+                onCheckedChange={toggle}
             />
         </SettingsRow>
     );

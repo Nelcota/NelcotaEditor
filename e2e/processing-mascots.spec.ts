@@ -93,6 +93,7 @@ test("animates the processing crew and brand by default and saves the setting", 
     await expect(steps).toHaveCount(4);
     await expect(getMascot(download)).toHaveCSS("animation-name", "crew-download");
     await expect(getMascot(download)).toHaveCSS("animation-iteration-count", "infinite");
+    await expect(getMascot(download)).toHaveCSS("animation-play-state", "running");
     await expect(getMascot(download)).toHaveCSS("width", "80px");
     await expect(getMascot(transcription)).toHaveCSS("animation-name", "crew-idle");
     await expect(brand).toHaveCSS("animation-name", "brand-float");
@@ -112,12 +113,13 @@ test("animates the processing crew and brand by default and saves the setting", 
     expect(await panel.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
         true,
     );
-    await expect(cancel).toBeVisible();
+    await cancel.scrollIntoViewIfNeeded();
+    await expect(cancel).toBeInViewport();
 
     await page.setViewportSize(desktop);
     await openPage(page, "/account");
     const appearance = page.getByRole("region", { name: "Aparência" });
-    const preference = appearance.getByRole("checkbox", { name: "Animações dos mascotes" });
+    const preference = appearance.getByRole("switch", { name: "Animações dos mascotes" });
     await expect(preference).toBeChecked();
     await preference.focus();
     await preference.press("Space");
@@ -133,6 +135,44 @@ test("animates the processing crew and brand by default and saves the setting", 
 
     await openPage(page, "/account");
     await expect(preference).not.toBeChecked();
-    await preference.check();
+    await preference.click();
+    await expect(preference).toBeChecked();
+    await expect(brand).toHaveCSS("animation-name", "mascot-opacity");
+});
+
+test("can turn off mascot animations when storage refuses writes", async ({ page }) => {
+    await page.addInitScript(() => {
+        const setItem: unknown = Object.getOwnPropertyDescriptor(
+            Storage.prototype,
+            "setItem",
+        )?.value;
+
+        if (typeof setItem !== "function") {
+            throw new Error("Browser storage cannot be instrumented");
+        }
+
+        Storage.prototype.setItem = function (this: Storage, key: string, value: string): void {
+            if (key === "nelcota:mascot-animations-disabled") {
+                throw new DOMException("Storage quota exceeded", "QuotaExceededError");
+            }
+
+            Reflect.apply(setItem, this, [key, value]);
+        };
+    });
+    await useOwnClientAddress(page);
+    await signUp(page, createTestAccount());
+    await openPage(page, "/account");
+
+    const preference = page.getByRole("switch", { name: "Animações dos mascotes" });
+    const brand = getMascot(page.getByRole("link", { name: "Nelcota, ir para o início" }));
+    await expect(preference).toBeChecked();
+    await expect(brand).toHaveCSS("animation-name", "mascot-opacity");
+
+    await preference.press("Space");
+    await expect(preference).not.toBeChecked();
+    await expect(brand).toHaveCSS("animation-name", "none");
+
+    await preference.press("Space");
+    await expect(preference).toBeChecked();
     await expect(brand).toHaveCSS("animation-name", "mascot-opacity");
 });
