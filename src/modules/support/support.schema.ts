@@ -15,6 +15,7 @@ import {
     MAX_SUBJECT_LENGTH,
     MESSAGE_AUTHOR_KINDS,
     TICKET_STATUSES,
+    TICKET_TOPICS,
 } from "#/modules/support/model/support-ticket";
 import { videos } from "#/modules/video-records/video-records.schema";
 
@@ -22,6 +23,7 @@ const FIRST_TICKET_NUMBER = 1000;
 
 /** Constant values written into the CHECKs; never user input. */
 const TICKET_STATUS_LIST = TICKET_STATUSES.map((status) => `'${status}'`).join(", ");
+const TICKET_TOPIC_LIST = TICKET_TOPICS.map((topic) => `'${topic}'`).join(", ");
 const AUTHOR_KIND_LIST = MESSAGE_AUTHOR_KINDS.map((kind) => `'${kind}'`).join(", ");
 
 export const supportTickets = pgTable(
@@ -41,6 +43,8 @@ export const supportTickets = pgTable(
         contactEmail: text("contact_email"),
         videoId: uuid("video_id").references(() => videos.id, { onDelete: "set null" }),
         subject: text("subject").notNull(),
+        // Tickets from before the Editor Oculto areas were all about clips.
+        topic: text("topic", { enum: TICKET_TOPICS }).notNull().default("clips"),
         status: text("status", { enum: TICKET_STATUSES }).notNull().default("open"),
         /** An admin answered and the owner has not opened the ticket since. */
         hasUnreadReply: boolean("has_unread_reply").notNull().default(false),
@@ -55,6 +59,10 @@ export const supportTickets = pgTable(
         check(
             "support_tickets_status_known",
             sql`${table.status} in (${sql.raw(TICKET_STATUS_LIST)})`,
+        ),
+        check(
+            "support_tickets_topic_known",
+            sql`${table.topic} in (${sql.raw(TICKET_TOPIC_LIST)})`,
         ),
         check(
             "support_tickets_subject_length",

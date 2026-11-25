@@ -23,7 +23,12 @@ import { createTestAccount, createTestVideo } from "#/modules/support/server/sup
 // Runs against the test database from .env.test: bun run test:integration
 
 function openSimpleTicket(userId: string, subject: string = "Vídeo travou"): Promise<string> {
-    return openTicket(userId, { subject, message: "Ficou parado em Baixando.", videoId: null });
+    return openTicket(userId, {
+        topic: "clips",
+        subject,
+        message: "Ficou parado em Baixando.",
+        videoId: null,
+    });
 }
 
 beforeEach(async () => {
@@ -48,11 +53,32 @@ describe("openTicket", () => {
         ]);
     });
 
+    it("keeps the topic the person chose", async () => {
+        const userId = await createTestAccount();
+
+        const ticketId = await openTicket(userId, {
+            topic: "editor",
+            subject: "Formato cortou o final",
+            message: "O Ranking parou no número 2.",
+            videoId: null,
+        });
+
+        const ticket = await findCustomerTicket({ userId, ticketId });
+        const page = await listCustomerTickets(userId, null);
+        expect(ticket?.topic).toBe("editor");
+        expect(page.rows.map((row) => row.topic)).toEqual(["editor"]);
+    });
+
     it("links a video of the person's own", async () => {
         const userId = await createTestAccount();
         const videoId = await createTestVideo(userId);
 
-        const ticketId = await openTicket(userId, { subject: "Falhou", message: "Ajuda", videoId });
+        const ticketId = await openTicket(userId, {
+            topic: "clips",
+            subject: "Falhou",
+            message: "Ajuda",
+            videoId,
+        });
 
         const ticket = await findCustomerTicket({ userId, ticketId });
         expect(ticket?.video).toMatchObject({ id: videoId, title: "Live de domingo" });
@@ -63,7 +89,12 @@ describe("openTicket", () => {
         const strangerVideoId = await createTestVideo(await createTestAccount());
 
         await expect(
-            openTicket(userId, { subject: "Falhou", message: "Ajuda", videoId: strangerVideoId }),
+            openTicket(userId, {
+                topic: "clips",
+                subject: "Falhou",
+                message: "Ajuda",
+                videoId: strangerVideoId,
+            }),
         ).rejects.toThrow(TicketVideoNotFoundError);
     });
 

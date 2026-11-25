@@ -13,6 +13,7 @@ import {
 import type {
     TicketCursor,
     TicketStatus,
+    TicketTopic,
     newTicketSchema,
 } from "#/modules/support/model/support-ticket";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
@@ -47,9 +48,11 @@ interface OwnedTicketRow {
     id: string;
     number: number;
     subject: string;
+    topic: TicketTopic;
     status: TicketStatus;
     hasUnreadReply: boolean;
     lastMessageAt: string;
+    createdAt: Date;
     videoId: string | null;
     videoTitle: string | null;
     videoStatus: VideoStatus | null;
@@ -62,9 +65,11 @@ async function findOwnedTicketRow(owned: OwnedTicket): Promise<OwnedTicketRow | 
             id: supportTickets.id,
             number: supportTickets.number,
             subject: supportTickets.subject,
+            topic: supportTickets.topic,
             status: supportTickets.status,
             hasUnreadReply: supportTickets.hasUnreadReply,
             lastMessageAt: ticketActivityTime,
+            createdAt: supportTickets.createdAt,
             videoId: videos.id,
             videoTitle: videos.title,
             videoStatus: videos.status,
@@ -109,7 +114,12 @@ export async function openTicket(userId: string, ticket: NewTicket): Promise<str
 
         const inserted = await transaction
             .insert(supportTickets)
-            .values({ userId, videoId: ticket.videoId, subject: ticket.subject })
+            .values({
+                userId,
+                videoId: ticket.videoId,
+                subject: ticket.subject,
+                topic: ticket.topic,
+            })
             .returning({ id: supportTickets.id });
         const ticketId = inserted[0]?.id;
 
@@ -138,6 +148,7 @@ export async function listCustomerTickets(
             id: supportTickets.id,
             number: supportTickets.number,
             subject: supportTickets.subject,
+            topic: supportTickets.topic,
             status: supportTickets.status,
             hasUnreadReply: supportTickets.hasUnreadReply,
             lastMessageAt: ticketActivityTime,
@@ -182,7 +193,9 @@ export async function findCustomerTicket(
         id: ticket.id,
         number: ticket.number,
         subject: ticket.subject,
+        topic: ticket.topic,
         status: ticket.status,
+        createdAt: ticket.createdAt.toISOString(),
         unreadReplyAt,
         video,
         messages: await listTicketMessages(ticket.id, "customer"),

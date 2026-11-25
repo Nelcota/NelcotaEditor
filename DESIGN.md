@@ -26,6 +26,21 @@ breadcrumb and for screen readers only. Light stays available through the toggle
   from the site keeps its look; from lg the dark app sits beside it (`.theme-app`): the link box and
   four finished clips, using the site's Pexels frames in `public/auth/`. Phones show the form only.
 
+## Format previews
+
+The featured format, gallery cards and format dialogs share the same stills. Each preview uses its
+own editing layout, such as stacked shots, a ranked list, side-by-side options, a burned-in caption
+or a phone mockup. The cropped WebP files in `public/viral-formats/` use the
+[Pexels license](https://www.pexels.com/license/).
+
+| Preview      | Photo credits                                                                                                                                                                                                    |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Split screen | [Pavel Danilyuk](https://www.pexels.com/photo/a-female-coffee-barista-making-coffee-6612646/), [Esra Afşar](https://www.pexels.com/photo/barista-preparing-espresso-in-cafe-setting-32078567/)                   |
+| Ranking      | [Ben Khatry](https://www.pexels.com/photo/young-man-engaging-in-a-podcast-recording-36917949/)                                                                                                                   |
+| This or that | [minchephoto photography](https://www.pexels.com/photo/a-hot-coffee-on-a-ceramic-cup-7491911/), [Khadijah Karaca](https://www.pexels.com/photo/close-up-of-milk-being-poured-into-a-glass-with-coffee-17497896/) |
+| Generic      | [SHVETS production](https://www.pexels.com/photo/young-woman-filming-video-in-light-apartment-7516247/)                                                                                                          |
+| App          | [Nadin Romanova](https://www.pexels.com/photo/scenic-alpine-lake-and-majestic-mountains-31567332/)                                                                                                               |
+
 ## Principles
 
 - **One obvious next step.** Each screen has one primary action in ink (`primary-solid`). Everything else is
@@ -293,3 +308,4 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-25 | "Comece por aqui" (`/getting-started`, from the Editor Oculto prototype): first in the sidebar under an "Editor Oculto" label with a done/total pill, also in the collapsed rail; the page has the welcome lesson beside a checklist of four steps, the Claude links and "Enviar meu primeiro vídeo". The checklist is kept per person in the browser; the lesson says it is not published until its video exists | The owner asked for the prototype's first screen; no Etapa 1 exists yet, so the button starts a video |
 | 2026-11-25 | Stage 1 of joining the Editor Oculto prototype: the sidebar follows its guide (groups Editor Oculto, Cortes, Geral; no Início, Vídeos or storage card), "/" opens Comece por aqui, the link box moves to Meus cortes, and Etapa 1, Formatos Virais, Minhas edições and the Cortes Comece por aqui arrive. Where nothing works yet (the Claude connection, editing, lessons), the page says so instead of simulating it | The owner chose the guide's menu and asked for real pages over the prototype's simulations; tokens, Pix and the Cortes lock come next |
 | 2026-11-25 | Claude's logo (`ClaudeLogo`, simple-icons, in its own orange `--claude`) marks every place about the person's Claude: Etapa 1's picture and sidebar item, the not-connected notice on Formatos Virais and the three Claude links on Comece por aqui. It keeps its colour over the lime icon tint | The owner asked for the real logo in place of the asterisk; a brand mark in the action colour would read as ours |
+| 2026-11-25 | Suporte direction B (board `design/explore/support`): "Como podemos ajudar?" with the two areas, Editor Oculto and Cortes, as doors that start a conversation; "Suas conversas" as a table (Nº, Assunto, Área, Situação, Atualizada) that drops columns as it narrows; a conversation opens as a timeline with its number, area, opening date, video and "Meu problema foi resolvido"; states read Aguardando suporte, Respondido and Resolvido; "ticket" becomes "conversa" in the copy | The owner picked B from three directions after the prototype's support; the area lets the team split the queue |

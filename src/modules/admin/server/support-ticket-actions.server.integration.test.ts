@@ -37,7 +37,12 @@ async function readQueuedSupportEmails(
 }
 
 function openSimpleTicket(userId: string): Promise<string> {
-    return openTicket(userId, { subject: "Vídeo travou", message: "Ajuda", videoId: null });
+    return openTicket(userId, {
+        topic: "clips",
+        subject: "Vídeo travou",
+        message: "Ajuda",
+        videoId: null,
+    });
 }
 
 afterAll(async () => {

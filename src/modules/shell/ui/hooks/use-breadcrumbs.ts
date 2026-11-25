@@ -53,7 +53,7 @@ const FIXED_CRUMBS: Readonly<Record<string, ReadonlyArray<Crumb>>> = {
     "/admin/features": [ADMIN_CRUMB, { label: "Recursos" }],
     "/admin/support": [ADMIN_CRUMB, { label: "Suporte" }],
     "/support": [{ label: "Suporte" }],
-    "/support/new": [SUPPORT_CRUMB, { label: "Abrir ticket" }],
+    "/support/new": [SUPPORT_CRUMB, { label: "Nova conversa" }],
 };
 
 /** "/videos/" and "/videos" are the same page. */
@@ -117,7 +117,7 @@ export function useBreadcrumbs(): ReadonlyArray<Crumb> {
     }
 
     if (TICKET_PAGE_PATTERN.test(pathname) === true) {
-        return [SUPPORT_CRUMB, { label: "Ticket" }];
+        return [SUPPORT_CRUMB, { label: "Conversa" }];
     }
 
     if (ADMIN_USER_PATTERN.test(pathname) === true) {

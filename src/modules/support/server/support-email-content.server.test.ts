@@ -10,7 +10,7 @@ describe("buildSupportEmail", () => {
             replyText: null,
         });
 
-        expect(email.subject).toBe("Respondemos seu ticket #1042");
+        expect(email.subject).toBe("Respondemos sua conversa #1042");
         expect(email.html).toContain('href="https://app.example/support/abc"');
     });
 

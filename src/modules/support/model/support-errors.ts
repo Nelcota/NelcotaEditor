@@ -4,7 +4,7 @@ import { UserFacingError } from "#/shared/server/user-facing-error";
 export class TooManyOpenTicketsError extends UserFacingError {
     constructor() {
         super(
-            `Você já tem ${MAX_OPEN_TICKETS_PER_PERSON} tickets ativos. Feche um antes de abrir ou reabrir outro.`,
+            `Você já tem ${MAX_OPEN_TICKETS_PER_PERSON} conversas abertas. Marque uma como resolvida antes de abrir ou reabrir outra.`,
         );
         this.name = "TooManyOpenTicketsError";
     }

@@ -41,15 +41,15 @@ const NO_REPLY_NOTE = "Este email não recebe respostas.";
 
 /** An account holder gets a link only: the answer stays behind their sign-in. */
 function buildAccountEmail(job: SupportEmailJob, url: string): SupportEmailContent {
-    const intro = `Respondemos seu ticket #${job.ticketNumber}. Abra o ticket para ler a resposta e continuar a conversa.`;
+    const intro = `Respondemos sua conversa #${job.ticketNumber}. Abra a conversa para ler a resposta e continuar.`;
     const link = escapeHtml(url);
 
     return {
-        subject: `Respondemos seu ticket #${job.ticketNumber}`,
+        subject: `Respondemos sua conversa #${job.ticketNumber}`,
         html: [
             WRAPPER_START,
             `${PARAGRAPH_START}${escapeHtml(intro)}</p>`,
-            `<p style="margin:24px 0"><a href="${link}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold">Abrir ticket</a></p>`,
+            `<p style="margin:24px 0"><a href="${link}" style="display:inline-block;background:#C4F800;color:#0D0D0C;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold">Abrir conversa</a></p>`,
             `${NOTE_START}${NO_REPLY_NOTE}</p>`,
             "</div>",
         ].join(""),

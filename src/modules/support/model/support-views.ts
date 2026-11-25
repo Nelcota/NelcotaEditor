@@ -2,6 +2,7 @@ import type {
     MessageAuthorKind,
     TicketCursor,
     TicketStatus,
+    TicketTopic,
 } from "#/modules/support/model/support-ticket";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 
@@ -24,6 +25,7 @@ export interface CustomerTicketRow {
     id: string;
     number: number;
     subject: string;
+    topic: TicketTopic;
     status: TicketStatus;
     hasUnreadReply: boolean;
     lastMessageAt: string;
@@ -40,7 +42,9 @@ export interface CustomerTicketDetails {
     id: string;
     number: number;
     subject: string;
+    topic: TicketTopic;
     status: TicketStatus;
+    createdAt: string;
     unreadReplyAt: string | null;
     video: TicketVideo | null;
     messages: Array<TicketMessageView>;
