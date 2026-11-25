@@ -1,7 +1,7 @@
 import ArrowLeftIcon from "~icons/lucide/arrow-left";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, isNotFound } from "@tanstack/react-router";
 import type { ComponentType, ReactNode } from "react";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { VideoHeader } from "#/modules/videos/ui/components/video-header";
@@ -16,12 +16,15 @@ import type { VideoDetails } from "#/modules/videos/model/video-views";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { EmptyState } from "#/shared/ui/empty-state";
+import { NotFoundScreen } from "#/shared/ui/not-found-screen";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { AsyncButton } from "#/shared/ui/async-button";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
 import { useVideoTabNavigation } from "#/modules/videos/ui/hooks/use-video-tab-navigation";
 
 const SKELETON_CLIP_COUNT = 4;
+const LOAD_FALLBACK_MESSAGE = "Confira sua conexão e tente de novo.";
 
 // One shrinkable track: without it the grid sizes to its widest child (the tab list) and pushes
 // the menu and the last tab past a 320px screen.
@@ -153,10 +156,15 @@ export function VideoDetailsScreen({ videoId, search, StudioTab }: VideoDetailsS
     const detailsQuery = useQuery(videoDetailsQueryOptions(videoId));
     const details = detailsQuery.data;
 
+    // Deleted in another tab while this page was open: the poll answers not found over old data.
+    if (isNotFound(detailsQuery.error) === true) {
+        return <NotFoundScreen />;
+    }
+
     if (detailsQuery.isError === true && details === undefined) {
         return (
             <LoadErrorState
-                message={detailsQuery.error.message}
+                message={toErrorMessage(detailsQuery.error, LOAD_FALLBACK_MESSAGE)}
                 onRetry={async () => {
                     await detailsQuery.refetch();
                 }}

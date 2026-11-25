@@ -10,6 +10,8 @@ import { invalidateVideoQueries } from "#/modules/videos/model/video-queries";
 import { Button } from "#/shared/ui/button";
 import { cn } from "#/shared/ui/cn";
 import { FormAlert } from "#/shared/ui/form-alert";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
+import { RESUME_FALLBACK_MESSAGE } from "#/modules/videos/model/video-action-messages";
 
 interface PanelCopy {
     title: string;
@@ -78,7 +80,9 @@ export function ResumePanel({ video, mascotRef }: ResumePanelProps): ReactNode {
                 <p className="text-sm text-muted-foreground">
                     {video.errorMessage ?? copy.fallbackDescription}
                 </p>
-                {resume.isError === true && <FormAlert message={resume.error.message} />}
+                {resume.isError === true && (
+                    <FormAlert message={toErrorMessage(resume.error, RESUME_FALLBACK_MESSAGE)} />
+                )}
             </div>
             <Button
                 onClick={() => resume.mutate()}

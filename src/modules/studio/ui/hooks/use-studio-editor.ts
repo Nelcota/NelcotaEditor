@@ -4,9 +4,10 @@ import { studioDraftSchema } from "#/modules/clips/model/clip-studio";
 import type { CaptionCue, StudioDraft } from "#/modules/clips/model/clip-studio";
 import type { ClipStudioState, ClipStudioView } from "#/modules/studio/model/clip-studio-view";
 import { renderClipDraft } from "#/modules/studio/server/clip-studio-functions";
-import { getClipStudioSnapshot } from "#/modules/studio/server/clip-studio-snapshot-functions";
+import { clipStudioQueryKey, clipStudioQueryOptions } from "#/modules/studio/model/studio-queries";
 import { replaceCueAt, resetAllCues } from "#/modules/studio/model/cue-editing";
 import { readDraftBackup } from "#/modules/studio/client/draft-backup";
+import { pickStartingDraft } from "#/modules/studio/model/pick-starting-draft";
 import { countDraftChanges } from "#/modules/studio/model/draft-changes";
 import { DraftNotSavedError } from "#/modules/studio/model/draft-not-saved-error";
 import { trimDraft } from "#/modules/studio/model/draft-trim";
@@ -46,22 +47,12 @@ export interface StudioEditor {
     redo: () => void;
     updateSettings: (settings: Partial<DraftSettings>) => void;
     trim: (startSeconds: number, endSeconds: number) => void;
-    replaceCue: (index: number, replacement: Array<CaptionCue>) => void;
+    /** False when the edit was refused; editError says why. */
+    replaceCue: (index: number, replacement: Array<CaptionCue>) => boolean;
     resetAllCaptions: () => void;
     render: () => Promise<RenderOutcome>;
     keepMine: () => Promise<void>;
     takeTheirs: () => Promise<void>;
-}
-
-/** The newest edits: a backup made on top of the server's version wins, then the saved draft. */
-function pickStartingDraft(studio: ClipStudioView): StudioDraft {
-    const backup = readDraftBackup(studio.clip.id);
-
-    if (backup !== null && backup.baseVersion === studio.draftVersion) {
-        return backup.draft;
-    }
-
-    return studio.draft ?? studio.applied;
 }
 
 /** Everything the Studio can do to one clip's draft, with undo, autosave and render. */
@@ -69,9 +60,13 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
     const queryClient = useQueryClient();
     const clipId = studio.clip.id;
     const savedDraft = studio.draft ?? studio.applied;
-    const [history, dispatch] = useReducer(studioHistoryReducer, studio, (initial) =>
-        createHistory(pickStartingDraft(initial)),
+    const [start] = useState(() =>
+        pickStartingDraft(
+            { savedDraft, draftVersion: studio.draftVersion },
+            readDraftBackup(clipId),
+        ),
     );
+    const [history, dispatch] = useReducer(studioHistoryReducer, start.draft, createHistory);
     const [editError, setEditError] = useState<string | null>(null);
     const draft = history.present;
     // The Studio re-renders every frame while playing; this compares every cue, so only redo it on edits.
@@ -80,16 +75,17 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         videoId,
         clipId,
         draft,
-        initialVersion: studio.draftVersion,
+        initialVersion: start.version,
+        serverVersion: studio.draftVersion,
         savedDraft,
     });
 
     // A step that changes nothing (a click on the option already picked) must not fill the undo list.
     // A step the server would reject (a word too long, too many cues) is refused here with the
     // reason, instead of failing every autosave later with a generic message.
-    const apply = (next: StudioDraft): void => {
+    const apply = (next: StudioDraft): boolean => {
         if (JSON.stringify(next) === JSON.stringify(draft)) {
-            return;
+            return true;
         }
 
         const validation = studioDraftSchema.safeParse(next);
@@ -97,15 +93,21 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
         if (validation.success === false) {
             const firstIssue = validation.error.issues[0];
             setEditError(firstIssue?.message ?? INVALID_EDIT_MESSAGE);
-            return;
+            return false;
         }
 
         setEditError(null);
         dispatch({ type: "apply", draft: next });
+        return true;
     };
 
+    // Through the cache, so the Studio's applied draft moves on with it: a direct call left the
+    // screen comparing against the old one, counting changes the other tab already rendered.
     const fetchLatest = async (): Promise<ClipStudioState> => {
-        const snapshot = await getClipStudioSnapshot({ data: { videoId, clipId } });
+        const snapshot = await queryClient.fetchQuery({
+            ...clipStudioQueryOptions(videoId, clipId),
+            staleTime: 0,
+        });
         return toClipStudioState(snapshot, studio.words);
     };
 
@@ -129,9 +131,13 @@ export function useStudioEditor(videoId: string, studio: ClipStudioView): Studio
             return "conflict";
         }
 
-        // Rendering moved the version on and made this draft the applied one.
+        // Rendering moved the version on and made this draft the applied one. The cached snapshot
+        // must follow, or reopening the clip would start from the old version and conflict.
         autosave.resync(autosave.readVersion() + 1, draft);
-        await invalidateVideoQueries(queryClient);
+        await Promise.all([
+            invalidateVideoQueries(queryClient),
+            queryClient.invalidateQueries({ queryKey: clipStudioQueryKey(videoId, clipId) }),
+        ]);
         return "queued";
     };
 

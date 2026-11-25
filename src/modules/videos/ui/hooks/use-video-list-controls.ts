@@ -1,46 +1,34 @@
-import type { OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { useState } from "react";
-import { VIDEOS_PER_PAGE } from "#/modules/videos/model/video-list-filter";
-import type { VideoFilter } from "#/modules/videos/model/video-list-filter";
 import { DEFAULT_VIDEO_SORT } from "#/modules/videos/model/video-sort";
 import type { VideoSort } from "#/modules/videos/model/video-sort";
-
-const FIRST_PAGE: PaginationState = { pageIndex: 0, pageSize: VIDEOS_PER_PAGE };
+import { useSearchDraft } from "#/modules/videos/ui/hooks/use-search-draft";
 
 export interface VideoListControls {
+    /** What the field shows, answered on every key. */
+    draft: string;
+    /** What the server searches, once typing pauses. */
     query: string;
     sort: VideoSort;
-    pagination: PaginationState;
-    changeQuery: (query: string) => void;
+    changeDraft: (draft: string) => void;
     changeSort: (sort: VideoSort) => void;
-    changePagination: OnChangeFn<PaginationState>;
+    clearQuery: () => void;
 }
 
-/** Search, sort and page of the list; any change to what is listed starts again on page one. */
-export function useVideoListControls(filter: VideoFilter): VideoListControls {
+/** Search and order of the list; each change asks the server for a new first page. */
+export function useVideoListControls(): VideoListControls {
     const [query, setQuery] = useState("");
     const [sort, setSort] = useState<VideoSort>(DEFAULT_VIDEO_SORT);
-    const [pagination, setPagination] = useState<PaginationState>(FIRST_PAGE);
-    const [paginatedFilter, setPaginatedFilter] = useState(filter);
-
-    // Adjusting state while rendering, not in an effect, so the old page never flashes.
-    if (paginatedFilter !== filter) {
-        setPaginatedFilter(filter);
-        setPagination(FIRST_PAGE);
-    }
+    const searchDraft = useSearchDraft(query, setQuery);
 
     return {
+        draft: searchDraft.draft,
         query,
         sort,
-        pagination,
-        changeQuery: (nextQuery) => {
-            setQuery(nextQuery);
-            setPagination(FIRST_PAGE);
+        changeDraft: searchDraft.setDraft,
+        changeSort: setSort,
+        clearQuery: () => {
+            searchDraft.setDraft("");
+            setQuery("");
         },
-        changeSort: (nextSort) => {
-            setSort(nextSort);
-            setPagination(FIRST_PAGE);
-        },
-        changePagination: setPagination,
     };
 }

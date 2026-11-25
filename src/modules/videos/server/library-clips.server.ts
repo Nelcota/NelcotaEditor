@@ -14,19 +14,13 @@ import type {
 import type { LibraryClip } from "#/modules/videos/model/video-views";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { normalizeForSearch } from "#/shared/ui/normalize-for-search";
-
-// The combining accents NFD splits off, so "Edição" matches "edicao" as in normalizeForSearch.
-const COMBINING_MARKS_PATTERN = "[̀-ͯ]";
+import { normalizeForSearchSql } from "#/modules/videos/server/normalize-for-search-sql.server";
 
 /**
  * JavaScript dates keep milliseconds and Postgres keeps microseconds; the cursor goes through the
  * browser as an ISO string, so the order and the comparison both use the millisecond value.
  */
 const createdAtMilliseconds = sql`date_trunc('milliseconds', ${clips.createdAt})`;
-
-function normalizeColumn(column: SQL | typeof clips.title): SQL {
-    return sql`lower(regexp_replace(normalize(${column}, NFD), ${COMBINING_MARKS_PATTERN}, '', 'g'))`;
-}
 
 function matchesSearch(query: string): SQL | undefined {
     const normalizedQuery = normalizeForSearch(query);
@@ -36,8 +30,8 @@ function matchesSearch(query: string): SQL | undefined {
     }
 
     return or(
-        sql`strpos(${normalizeColumn(clips.title)}, ${normalizedQuery}) > 0`,
-        sql`strpos(${normalizeColumn(sql`${videos.title}`)}, ${normalizedQuery}) > 0`,
+        sql`strpos(${normalizeForSearchSql(clips.title)}, ${normalizedQuery}) > 0`,
+        sql`strpos(${normalizeForSearchSql(videos.title)}, ${normalizedQuery}) > 0`,
     );
 }
 

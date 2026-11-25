@@ -22,9 +22,25 @@ function withProgress(video: VideoSummary, progress: VideoProgress | undefined):
     };
 }
 
+/** The polled numbers written into any list of videos; the same list when nothing moved. */
+export function writeVideoProgress(
+    list: Array<VideoSummary>,
+    progress: Array<VideoProgress>,
+): Array<VideoSummary> {
+    const progressById = new Map(progress.map((entry) => [entry.id, entry]));
+    const merged = list.map((video) => withProgress(video, progressById.get(video.id)));
+
+    if (merged.every((video, index) => video === list[index]) === true) {
+        return list;
+    }
+
+    return merged;
+}
+
 /**
- * The list with the polled numbers written in, or null when it must be fetched again: a video
- * finished, moved to another stage (its thumbnail, original and counts change with it) or is gone.
+ * The watched list with the polled numbers written in, or null when it must be fetched again: a
+ * video finished, moved to another stage (its thumbnail, original and counts change with it) or is
+ * gone.
  */
 export function mergeVideoProgress(
     list: Array<VideoSummary>,
@@ -42,11 +58,5 @@ export function mergeVideoProgress(
         return null;
     }
 
-    const merged = list.map((video) => withProgress(video, progressById.get(video.id)));
-
-    if (merged.every((video, index) => video === list[index]) === true) {
-        return list;
-    }
-
-    return merged;
+    return writeVideoProgress(list, progress);
 }

@@ -1,5 +1,6 @@
 import ClapperboardIcon from "~icons/lucide/clapperboard";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
+import SearchXIcon from "~icons/lucide/search-x";
 import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
@@ -16,12 +17,18 @@ import { StudioFrame } from "#/modules/studio/ui/components/studio-frame";
 import { StudioWorkspace } from "#/modules/studio/ui/components/studio-workspace";
 import type { ClipStudioState } from "#/modules/studio/model/clip-studio-view";
 import { toClipStudioState } from "#/modules/studio/model/to-clip-studio-state";
+import { pickStudioClip } from "#/modules/studio/model/pick-studio-clip";
+import type { StudioClipPick } from "#/modules/studio/model/pick-studio-clip";
+import type { ClipView } from "#/modules/clips/model/clip-view";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
 import { Skeleton } from "#/shared/ui/skeleton";
 import { STAGE_CREW } from "#/modules/videos/model/stage-crew";
 import { Mascot } from "#/shared/ui/mascot";
+import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
+
+const LOAD_FALLBACK_MESSAGE = "Confira sua conexão e tente de novo.";
 
 function StudioLoading(): ReactNode {
     return (
@@ -53,12 +60,49 @@ function NotReady({ details, onShowClips }: Pick<StudioTabProps, "details" | "on
     );
 }
 
+interface ClipMissingProps {
+    bestClip: ClipView;
+    onSelectClip: (clipId: string) => void;
+    onShowClips: () => void;
+}
+
+/** A link to a clip this video no longer has: say so instead of editing another one. */
+function ClipMissing({ bestClip, onSelectClip, onShowClips }: ClipMissingProps): ReactNode {
+    return (
+        <EmptyState
+            art={<SearchXIcon className="size-8 text-muted-foreground" aria-hidden="true" />}
+            title="Corte não encontrado"
+            description="O link pode estar incompleto ou este vídeo não tem mais esse corte."
+            action={
+                <div className="flex flex-wrap justify-center gap-2">
+                    <Button variant="secondary" onClick={() => onSelectClip(bestClip.id)}>
+                        Abrir o melhor corte
+                    </Button>
+                    <Button variant="ghost" onClick={onShowClips}>
+                        <ClapperboardIcon aria-hidden="true" />
+                        Ver os cortes
+                    </Button>
+                </div>
+            }
+        />
+    );
+}
+
+function toSelectedClip(pick: StudioClipPick): ClipView | undefined {
+    if (pick.kind === "found") {
+        return pick.clip;
+    }
+
+    return undefined;
+}
+
 /** The Studio tab: picks the clip, loads what it needs and hands it to the workspace. */
 export function StudioTab({ details, clipId, onSelectClip, onShowClips }: StudioTabProps) {
     const track = useTrackPromise();
     const video = details.video;
     const rankedClips = rankClips(details.clips);
-    const selectedClip = rankedClips.find((clip) => clip.id === clipId) ?? rankedClips[0];
+    const pick = pickStudioClip(rankedClips, clipId);
+    const selectedClip = toSelectedClip(pick);
     const queryClient = useQueryClient();
     const selectedClipId = selectedClip?.id ?? null;
     const studioQuery = useQuery({
@@ -99,6 +143,18 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
         );
     }, [isFinished, queryClient, track, video.id, selectedClipId]);
 
+    if (pick.kind === "missing") {
+        return (
+            <StudioFrame videoId={video.id} clipId={undefined}>
+                <ClipMissing
+                    bestClip={pick.bestClip}
+                    onSelectClip={onSelectClip}
+                    onShowClips={onShowClips}
+                />
+            </StudioFrame>
+        );
+    }
+
     if (selectedClip === undefined) {
         return (
             <StudioFrame videoId={video.id} clipId={clipId}>
@@ -115,7 +171,7 @@ export function StudioTab({ details, clipId, onSelectClip, onShowClips }: Studio
                 <EmptyState
                     art={<Mascot index={STAGE_CREW.failed} className="size-14" />}
                     title="Não foi possível abrir o Studio"
-                    description={loadError.message}
+                    description={toErrorMessage(loadError, LOAD_FALLBACK_MESSAGE)}
                     action={
                         <Button
                             variant="secondary"

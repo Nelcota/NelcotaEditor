@@ -1,145 +1,132 @@
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { cn } from "#/shared/ui/cn";
-import type { VideoSummary } from "#/modules/videos/model/video-views";
 import { LibraryToolbar } from "#/modules/videos/ui/components/library-toolbar";
 import { useLibraryFilter } from "#/modules/videos/ui/hooks/use-library-filter";
 import { useStageAnnouncement } from "#/modules/videos/ui/hooks/use-stage-announcement";
 import { useVideoListControls } from "#/modules/videos/ui/hooks/use-video-list-controls";
-import { useVideoPage } from "#/modules/videos/ui/hooks/use-video-page";
-import { useVideosQuery } from "#/modules/videos/ui/hooks/use-videos-query";
-import { ALL_FILTER, countVideosByFilter } from "#/modules/videos/model/video-list-filter";
-import { VIDEO_TABLE_COLUMNS, VideoListRow } from "#/modules/videos/ui/components/video-list-row";
+import { useVideoProgressWatch } from "#/modules/videos/ui/hooks/use-video-progress-watch";
+import { ALL_FILTER } from "#/modules/videos/model/video-list-filter";
+import type { VideoCounts, VideoListPage } from "#/modules/videos/model/video-list-page";
+import {
+    videoCountsQueryOptions,
+    videoListQueryOptions,
+} from "#/modules/videos/model/video-queries";
+import { VideoListResults } from "#/modules/videos/ui/components/video-list-results";
 import {
     FirstVideoEmptyState,
     NoMatchState,
     VideoListLoadError,
     VideoListLoading,
 } from "#/modules/videos/ui/components/video-list-states";
-import { VideoPager } from "#/modules/videos/ui/components/video-pager";
 import { pluralize } from "#/shared/ui/pluralize";
 
-function describeTotal(shownCount: number, totalCount: number): string {
-    if (shownCount === totalCount) {
+function describeTotal(loadedCount: number, totalCount: number): string {
+    if (loadedCount >= totalCount) {
         return `${totalCount} ${pluralize(totalCount, "vídeo", "vídeos")}`;
     }
 
-    return `${shownCount} de ${totalCount} vídeos`;
+    return `${loadedCount} de ${totalCount} vídeos`;
 }
 
-const TABLE_HEADINGS = [
-    { id: "video", label: "Vídeo" },
-    { id: "status", label: "Status" },
-    { id: "source", label: "Origem" },
-    { id: "clips", label: "Cortes" },
-    { id: "progress", label: "Progresso" },
-    { id: "created", label: "Enviado" },
-    { id: "actions", label: "" },
-];
+/** Nothing until the first page arrives, so the status never reads a count of zero meanwhile. */
+function describeLoaded(loadedCount: number, firstPage: VideoListPage | undefined): string {
+    if (firstPage === undefined) {
+        return "";
+    }
 
-/** The column names over the rows; the rows say the same to screen readers, so it is hidden. */
-function TableHead(): ReactNode {
-    return (
-        <div
-            aria-hidden="true"
-            className={cn(
-                "hidden h-11 items-center gap-x-4 bg-card px-4 text-xs font-semibold text-muted-foreground @4xl:grid",
-                VIDEO_TABLE_COLUMNS,
-            )}
-        >
-            {TABLE_HEADINGS.map((heading) => (
-                <span key={heading.id}>{heading.label}</span>
-            ))}
-        </div>
-    );
+    return `${describeTotal(loadedCount, firstPage.totalCount)}.`;
 }
 
 interface FilterableVideoListProps {
-    videos: Array<VideoSummary>;
+    counts: VideoCounts;
     action?: ReactNode;
 }
 
-/** Search, status and order over one table of rows. */
-function FilterableVideoList({ videos, action }: FilterableVideoListProps): ReactNode {
+/** Search, status and order, all answered by the server, over one table of rows. */
+function FilterableVideoList({ counts, action }: FilterableVideoListProps): ReactNode {
     const libraryFilter = useLibraryFilter();
     const filter = libraryFilter.filter;
-    const controls = useVideoListControls(filter);
-    const page = useVideoPage({ videos, filter, controls });
-    const announcement = useStageAnnouncement(page.videos);
-    const pagination = controls.pagination;
-    const matchingCount = page.matchingCount;
+    const controls = useVideoListControls();
+    const listQuery = useInfiniteQuery(
+        videoListQueryOptions({ query: controls.query, filter, sort: controls.sort }),
+    );
+    // The poll sees every video at work, so one that finishes outside this filter is still heard.
+    const announcement = useStageAnnouncement(useVideoProgressWatch());
+    const pages = listQuery.data?.pages ?? [];
+    const firstPage = pages[0];
+    const videos = pages.flatMap((page) => page.items);
 
     return (
         <div className="grid gap-4">
             <LibraryToolbar
-                query={controls.query}
-                onQueryChange={controls.changeQuery}
+                query={controls.draft}
+                onQueryChange={controls.changeDraft}
                 filter={filter}
                 onFilterChange={libraryFilter.changeFilter}
-                counts={countVideosByFilter(videos)}
+                counts={counts}
                 sort={controls.sort}
                 onSortChange={controls.changeSort}
                 action={action}
             />
             <p role="status" className="sr-only">
-                {describeTotal(matchingCount, videos.length)}. {announcement}
+                {describeLoaded(videos.length, firstPage)} {announcement}
             </p>
-            {matchingCount === 0 && (
-                <div>
-                    <NoMatchState
-                        query={controls.query}
-                        onClear={() => {
-                            controls.changeQuery("");
-                            libraryFilter.changeFilter(ALL_FILTER);
-                        }}
-                    />
-                </div>
-            )}
-            {matchingCount > 0 && (
-                <div className="@container overflow-hidden rounded-2xl border">
-                    <TableHead />
-                    <ul aria-label="Seus vídeos" className="divide-y @4xl:border-t">
-                        {page.videos.map((video) => (
-                            <VideoListRow key={video.id} video={video} />
-                        ))}
-                    </ul>
-                </div>
-            )}
-            <div>
-                <VideoPager
-                    pageIndex={page.pageIndex}
-                    pageCount={page.pageCount}
-                    itemCount={matchingCount}
-                    onPageChange={(pageIndex) =>
-                        controls.changePagination({ ...pagination, pageIndex })
-                    }
+            {listQuery.isError === true && firstPage === undefined && (
+                <VideoListLoadError
+                    onRetry={async () => {
+                        await listQuery.refetch();
+                    }}
                 />
-            </div>
+            )}
+            {listQuery.isPending === true && <VideoListLoading />}
+            {firstPage !== undefined && firstPage.totalCount === 0 && (
+                <NoMatchState
+                    query={controls.query}
+                    onClear={() => {
+                        controls.clearQuery();
+                        libraryFilter.changeFilter(ALL_FILTER);
+                    }}
+                />
+            )}
+            {videos.length > 0 && (
+                <VideoListResults
+                    videos={videos}
+                    nextPage={{
+                        hasNextPage: listQuery.hasNextPage,
+                        isFetching: listQuery.isFetchingNextPage,
+                        hasFailed: listQuery.isFetchNextPageError,
+                        onLoadMore: async () => {
+                            await listQuery.fetchNextPage();
+                        },
+                    }}
+                />
+            )}
         </div>
     );
 }
 
 /** The Vídeos page body: loading, the first-video welcome, the load error or the table itself. */
 export function VideoList({ action }: { action?: ReactNode }): ReactNode {
-    const videosQuery = useVideosQuery();
-    const videos = videosQuery.data;
+    const countsQuery = useQuery(videoCountsQueryOptions());
+    const counts = countsQuery.data;
 
-    if (videosQuery.isError === true && videos === undefined) {
+    if (countsQuery.isError === true && counts === undefined) {
         return (
             <div>
                 <VideoListLoadError
                     onRetry={async () => {
-                        await videosQuery.refetch();
+                        await countsQuery.refetch();
                     }}
                 />
             </div>
         );
     }
 
-    if (videos === undefined) {
+    if (counts === undefined) {
         return <VideoListLoading />;
     }
 
-    if (videos.length === 0) {
+    if (counts.all === 0) {
         return (
             <div>
                 <FirstVideoEmptyState />
@@ -147,5 +134,5 @@ export function VideoList({ action }: { action?: ReactNode }): ReactNode {
         );
     }
 
-    return <FilterableVideoList videos={videos} action={action} />;
+    return <FilterableVideoList counts={counts} action={action} />;
 }

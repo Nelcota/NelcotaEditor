@@ -1,9 +1,49 @@
 import { groupWordsIntoCues, wordsInsideRange } from "#/modules/clips/model/caption-cues";
+import { TIME_TOLERANCE_SECONDS } from "#/modules/clips/model/clip-studio";
 import type { CaptionCue, CaptionWord, StudioDraft } from "#/modules/clips/model/clip-studio";
 
 interface TimeRange {
     startSeconds: number;
     endSeconds: number;
+}
+
+interface PreviousEnd {
+    endSeconds: number;
+    /** Each transcript word's own end, by its start: what a cut word had before the cut. */
+    transcriptEndByStart: ReadonlyMap<number, number>;
+}
+
+function isAtEdge(seconds: number, edgeSeconds: number): boolean {
+    return Math.abs(seconds - edgeSeconds) <= TIME_TOLERANCE_SECONDS;
+}
+
+/** A word the previous end cut short gets the transcript's end back; others keep their timing. */
+function restoreWordEnd(word: CaptionWord, previousEnd: PreviousEnd): CaptionWord {
+    const transcriptEnd = previousEnd.transcriptEndByStart.get(word.startSeconds);
+
+    if (
+        transcriptEnd === undefined ||
+        isAtEdge(word.endSeconds, previousEnd.endSeconds) === false
+    ) {
+        return word;
+    }
+
+    return { ...word, endSeconds: Math.max(word.endSeconds, transcriptEnd) };
+}
+
+/**
+ * Undoes what the previous end cut from a cue, so growing the end again gives the last word its
+ * length back; the new range then cuts it again where needed.
+ */
+function restoreCutCue(cue: CaptionCue, previousEnd: PreviousEnd): CaptionCue {
+    const words = cue.words.map((word) => restoreWordEnd(word, previousEnd));
+    const lastWord = words.at(-1);
+
+    if (lastWord === undefined || isAtEdge(cue.endSeconds, previousEnd.endSeconds) === false) {
+        return { ...cue, words };
+    }
+
+    return { ...cue, endSeconds: Math.max(cue.endSeconds, lastWord.endSeconds), words };
 }
 
 /**
@@ -56,8 +96,12 @@ export function trimDraft(
     range: TimeRange,
     words: Array<CaptionWord>,
 ): StudioDraft {
+    const previousEnd: PreviousEnd = {
+        endSeconds: draft.endSeconds,
+        transcriptEndByStart: new Map(words.map((word) => [word.startSeconds, word.endSeconds])),
+    };
     const keptCues = draft.cues
-        .map((cue) => clipCueToRange(cue, range))
+        .map((cue) => clipCueToRange(restoreCutCue(cue, previousEnd), range))
         .filter((cue): cue is CaptionCue => cue !== null);
     const addedCues = groupWordsIntoCues(newlyIncludedWords(words, draft, range));
     const cues = [...keptCues, ...addedCues].toSorted(

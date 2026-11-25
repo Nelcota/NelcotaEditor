@@ -44,7 +44,8 @@ interface CueEditorProps {
     index: number;
     cue: CaptionCue;
     words: Array<CaptionWord>;
-    onReplace: (replacement: Array<CaptionCue>) => void;
+    /** False when the edit was refused (its reason shows elsewhere); the editor then stays open. */
+    onReplace: (replacement: Array<CaptionCue>) => boolean;
     /** Brings the cue back to the transcript; the list offers the undo. */
     onResetToOriginal: () => void;
     onClose: () => void;
@@ -125,20 +126,21 @@ export function CueEditor(props: CueEditorProps): ReactNode {
     const originalText = cueText({ ...cue, words: transcriptWordsOf(cue, words) });
     const limits = cueLimits(draft, index);
 
-    const commitText = (): CaptionCue | null => {
+    /** Whether the text was taken; a refused edit keeps the field open with what was typed. */
+    const commitText = (): boolean => {
         const edited = editCueText(cue, text);
 
         if (edited === null) {
             onReplace([]);
             onClose();
-            return null;
+            return true;
         }
 
-        if (cueText(edited) !== cueText(cue)) {
-            onReplace([edited]);
+        if (cueText(edited) === cueText(cue)) {
+            return true;
         }
 
-        return edited;
+        return onReplace([edited]);
     };
 
     const commitTime = (edge: "start" | "end", typed: string): void => {
@@ -220,8 +222,7 @@ export function CueEditor(props: CueEditorProps): ReactNode {
                 onChange={(event) => setText(event.target.value)}
                 onBlur={() => commitText()}
                 onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                        commitText();
+                    if (event.key === "Enter" && commitText() === true) {
                         onClose();
                     }
 

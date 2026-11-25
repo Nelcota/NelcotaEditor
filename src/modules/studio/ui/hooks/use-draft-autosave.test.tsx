@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import type { RenderHookResult } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { StudioDraft } from "#/modules/clips/model/clip-studio";
-import { readDraftBackup } from "#/modules/studio/client/draft-backup";
+import { readDraftBackup, writeDraftBackup } from "#/modules/studio/client/draft-backup";
 import type { SaveDraftResult } from "#/modules/studio/model/clip-studio-view";
 import { clipDraftLeaveSaveKey, clipStudioQueryKey } from "#/modules/studio/model/studio-queries";
 import { saveClipDraft } from "#/modules/studio/server/clip-studio-functions";
@@ -40,6 +40,8 @@ const EDITED_DRAFT: StudioDraft = { ...SAVED_DRAFT, captionColor: "green" };
 
 interface AutosaveProps {
     draft: StudioDraft;
+    serverVersion?: number;
+    savedDraft?: StudioDraft;
 }
 
 function renderAutosave(queryClient: QueryClient): RenderHookResult<DraftAutosave, AutosaveProps> {
@@ -48,13 +50,14 @@ function renderAutosave(queryClient: QueryClient): RenderHookResult<DraftAutosav
     );
 
     return renderHook(
-        ({ draft }: AutosaveProps) =>
+        ({ draft, serverVersion, savedDraft }: AutosaveProps) =>
             useDraftAutosave({
                 videoId: VIDEO_ID,
                 clipId: CLIP_ID,
                 draft,
                 initialVersion: 3,
-                savedDraft: SAVED_DRAFT,
+                serverVersion: serverVersion ?? 3,
+                savedDraft: savedDraft ?? SAVED_DRAFT,
             }),
         { wrapper, initialProps: { draft: SAVED_DRAFT } },
     );
@@ -163,5 +166,62 @@ describe("useDraftAutosave", () => {
         await waitFor(() => {
             expect(readDraftBackup(CLIP_ID)?.draft).toEqual(EDITED_DRAFT);
         });
+    });
+
+    it("builds on the server's newer version once it holds the draft on screen", async () => {
+        const queryClient = new QueryClient();
+        const rendered = renderAutosave(queryClient);
+        // A render moved the version on; the refetched snapshot carries an equal, new draft.
+        rendered.rerender({ draft: SAVED_DRAFT, serverVersion: 5, savedDraft: { ...SAVED_DRAFT } });
+
+        rendered.rerender({ draft: EDITED_DRAFT, serverVersion: 5 });
+        const outcome = await rendered.result.current.flush();
+
+        expect(outcome).toBe("saved");
+        expect(saveClipDraft).toHaveBeenLastCalledWith({
+            data: { videoId: VIDEO_ID, clipId: CLIP_ID, expectedVersion: 5, draft: EDITED_DRAFT },
+        });
+    });
+
+    it("keeps and sends an edit still waiting for its delay when the page is closed", async () => {
+        const queryClient = new QueryClient();
+        const rendered = renderAutosave(queryClient);
+        rendered.rerender({ draft: EDITED_DRAFT });
+
+        window.dispatchEvent(new Event("pagehide"));
+
+        expect(readDraftBackup(CLIP_ID)?.draft).toEqual(EDITED_DRAFT);
+        await waitFor(() => {
+            expect(saveClipDraft).toHaveBeenCalledWith({
+                data: {
+                    videoId: VIDEO_ID,
+                    clipId: CLIP_ID,
+                    expectedVersion: 3,
+                    draft: EDITED_DRAFT,
+                },
+                fetch: expect.any(Function),
+            });
+        });
+        const browserFetch = vi.fn<typeof fetch>().mockResolvedValue(new Response(null));
+        vi.stubGlobal("fetch", browserFetch);
+        const sentFetch = vi.mocked(saveClipDraft).mock.calls.at(-1)?.[0]?.fetch;
+
+        if (sentFetch === undefined) {
+            throw new Error("The save was sent without its own fetch");
+        }
+
+        await sentFetch("/_serverFn/save", { method: "POST" });
+
+        expect(browserFetch.mock.calls.at(-1)?.[1]?.keepalive).toBe(true);
+    });
+
+    it("forgets the browser backup once the server's draft is taken", () => {
+        const queryClient = new QueryClient();
+        const rendered = renderAutosave(queryClient);
+        writeDraftBackup(CLIP_ID, { baseVersion: 3, draft: EDITED_DRAFT });
+
+        act(() => rendered.result.current.resync(5, SAVED_DRAFT));
+
+        expect(readDraftBackup(CLIP_ID)).toBeNull();
     });
 });

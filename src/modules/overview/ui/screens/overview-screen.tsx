@@ -55,7 +55,12 @@ function OverviewContent({
     const overviewQuery = useQuery(overviewQueryOptions(periodDays));
     const stats = overviewQuery.data;
 
-    if (overviewQuery.isError === true && stats === undefined) {
+    // While a new period loads, the old one's numbers stay on screen, through every retry. Once
+    // the first try fails they would pass for the new period's, so the error shows at once.
+    if (
+        (overviewQuery.isError === true && stats === undefined) ||
+        (overviewQuery.isPlaceholderData === true && overviewQuery.failureCount > 0)
+    ) {
         return (
             <OverviewLoadError
                 onRetry={async () => {
