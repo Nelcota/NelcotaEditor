@@ -28,6 +28,10 @@ const FORMAT_NAMES: Readonly<Record<EditFormat, string>> = {
     "split-screen": "Tela dividida",
 };
 
+export function toFormatName(format: EditFormat): string {
+    return FORMAT_NAMES[format];
+}
+
 /** "Tela dividida #2": the format and the person's count of edits in it. */
 export function toEditSessionTitle(format: EditFormat, number: number): string {
     if (Number.isSafeInteger(number) === false || number < 1) {
@@ -65,6 +69,8 @@ export interface SessionVideo {
     progressPercent: number;
     durationSeconds: number | null;
     sourceBytes: number | null;
+    /** A frame the worker took, once the file was read; null before that. */
+    thumbnailUrl: string | null;
     isReady: boolean;
     hasFailed: boolean;
 }

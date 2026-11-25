@@ -25,7 +25,6 @@ import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppClaudeRouteImport } from './routes/_app/claude'
 import { Route as AppClipsRouteImport } from './routes/_app/clips'
 import { Route as AppClipsGettingStartedRouteImport } from './routes/_app/clips-getting-started'
-import { Route as AppEditsRouteImport } from './routes/_app/edits'
 import { Route as AppFormatsRouteImport } from './routes/_app/formats'
 import { Route as AppGettingStartedRouteImport } from './routes/_app/getting-started'
 import { Route as AppOverviewRouteImport } from './routes/_app/overview'
@@ -39,6 +38,8 @@ import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppAdminFeaturesRouteImport } from './routes/_app/admin/features'
 import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
 import { Route as AppAdminVideosRouteImport } from './routes/_app/admin/videos'
+import { Route as AppEditsIndexRouteImport } from './routes/_app/edits.index'
+import { Route as AppEditsSessionIdRouteImport } from './routes/_app/edits.$sessionId'
 import { Route as AppSupportIndexRouteImport } from './routes/_app/support/index'
 import { Route as AppSupportTicketIdRouteImport } from './routes/_app/support/$ticketId'
 import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
@@ -140,11 +141,6 @@ const AppClipsGettingStartedRoute = AppClipsGettingStartedRouteImport.update({
   path: '/clips-getting-started',
   getParentRoute: () => AppRoute,
 } as any)
-const AppEditsRoute = AppEditsRouteImport.update({
-  id: '/edits',
-  path: '/edits',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppFormatsRoute = AppFormatsRouteImport.update({
   id: '/formats',
   path: '/formats',
@@ -209,6 +205,16 @@ const AppAdminVideosRoute = AppAdminVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
   getParentRoute: () => AppAdminRoute,
+} as any)
+const AppEditsIndexRoute = AppEditsIndexRouteImport.update({
+  id: '/edits/',
+  path: '/edits/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEditsSessionIdRoute = AppEditsSessionIdRouteImport.update({
+  id: '/edits/$sessionId',
+  path: '/edits/$sessionId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSupportIndexRoute = AppSupportIndexRouteImport.update({
   id: '/support/',
@@ -336,7 +342,6 @@ export interface FileRoutesByFullPath {
   '/claude': typeof AppClaudeRoute
   '/clips': typeof AppClipsRoute
   '/clips-getting-started': typeof AppClipsGettingStartedRoute
-  '/edits': typeof AppEditsRoute
   '/formats': typeof AppFormatsRoute
   '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
@@ -349,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/support': typeof AppAdminSupportRouteWithChildren
   '/admin/videos': typeof AppAdminVideosRoute
+  '/edits/$sessionId': typeof AppEditsSessionIdRoute
   '/support/$ticketId': typeof AppSupportTicketIdRoute
   '/support/new': typeof AppSupportNewRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
@@ -357,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/admin/': typeof AppAdminIndexRoute
+  '/edits/': typeof AppEditsIndexRoute
   '/support/': typeof AppSupportIndexRoute
   '/videos/': typeof AppVideosIndexRoute
   '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
@@ -386,7 +393,6 @@ export interface FileRoutesByTo {
   '/claude': typeof AppClaudeRoute
   '/clips': typeof AppClipsRoute
   '/clips-getting-started': typeof AppClipsGettingStartedRoute
-  '/edits': typeof AppEditsRoute
   '/formats': typeof AppFormatsRoute
   '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
@@ -399,6 +405,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/videos': typeof AppAdminVideosRoute
+  '/edits/$sessionId': typeof AppEditsSessionIdRoute
   '/support/$ticketId': typeof AppSupportTicketIdRoute
   '/support/new': typeof AppSupportNewRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
@@ -407,6 +414,7 @@ export interface FileRoutesByTo {
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/admin': typeof AppAdminIndexRoute
+  '/edits': typeof AppEditsIndexRoute
   '/support': typeof AppSupportIndexRoute
   '/videos': typeof AppVideosIndexRoute
   '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
@@ -439,7 +447,6 @@ export interface FileRoutesById {
   '/_app/claude': typeof AppClaudeRoute
   '/_app/clips': typeof AppClipsRoute
   '/_app/clips-getting-started': typeof AppClipsGettingStartedRoute
-  '/_app/edits': typeof AppEditsRoute
   '/_app/formats': typeof AppFormatsRoute
   '/_app/getting-started': typeof AppGettingStartedRoute
   '/_app/overview': typeof AppOverviewRoute
@@ -453,6 +460,7 @@ export interface FileRoutesById {
   '/_app/admin/features': typeof AppAdminFeaturesRoute
   '/_app/admin/support': typeof AppAdminSupportRouteWithChildren
   '/_app/admin/videos': typeof AppAdminVideosRoute
+  '/_app/edits/$sessionId': typeof AppEditsSessionIdRoute
   '/_app/support/$ticketId': typeof AppSupportTicketIdRoute
   '/_app/support/new': typeof AppSupportNewRoute
   '/_app/videos/$videoId': typeof AppVideosVideoIdRoute
@@ -461,6 +469,7 @@ export interface FileRoutesById {
   '/api/share/$token': typeof ApiShareTokenRoute
   '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/edits/': typeof AppEditsIndexRoute
   '/_app/support/': typeof AppSupportIndexRoute
   '/_app/videos/': typeof AppVideosIndexRoute
   '/_app/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
@@ -494,7 +503,6 @@ export interface FileRouteTypes {
     | '/claude'
     | '/clips'
     | '/clips-getting-started'
-    | '/edits'
     | '/formats'
     | '/getting-started'
     | '/overview'
@@ -507,6 +515,7 @@ export interface FileRouteTypes {
     | '/admin/features'
     | '/admin/support'
     | '/admin/videos'
+    | '/edits/$sessionId'
     | '/support/$ticketId'
     | '/support/new'
     | '/videos/$videoId'
@@ -515,6 +524,7 @@ export interface FileRouteTypes {
     | '/api/share/$token'
     | '/api/webhooks/asaas'
     | '/admin/'
+    | '/edits/'
     | '/support/'
     | '/videos/'
     | '/admin/support/$ticketId'
@@ -544,7 +554,6 @@ export interface FileRouteTypes {
     | '/claude'
     | '/clips'
     | '/clips-getting-started'
-    | '/edits'
     | '/formats'
     | '/getting-started'
     | '/overview'
@@ -557,6 +566,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/features'
     | '/admin/videos'
+    | '/edits/$sessionId'
     | '/support/$ticketId'
     | '/support/new'
     | '/videos/$videoId'
@@ -565,6 +575,7 @@ export interface FileRouteTypes {
     | '/api/share/$token'
     | '/api/webhooks/asaas'
     | '/admin'
+    | '/edits'
     | '/support'
     | '/videos'
     | '/admin/support/$ticketId'
@@ -596,7 +607,6 @@ export interface FileRouteTypes {
     | '/_app/claude'
     | '/_app/clips'
     | '/_app/clips-getting-started'
-    | '/_app/edits'
     | '/_app/formats'
     | '/_app/getting-started'
     | '/_app/overview'
@@ -610,6 +620,7 @@ export interface FileRouteTypes {
     | '/_app/admin/features'
     | '/_app/admin/support'
     | '/_app/admin/videos'
+    | '/_app/edits/$sessionId'
     | '/_app/support/$ticketId'
     | '/_app/support/new'
     | '/_app/videos/$videoId'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/api/share/$token'
     | '/api/webhooks/asaas'
     | '/_app/admin/'
+    | '/_app/edits/'
     | '/_app/support/'
     | '/_app/videos/'
     | '/_app/admin/support/$ticketId'
@@ -776,13 +788,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClipsGettingStartedRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/edits': {
-      id: '/_app/edits'
-      path: '/edits'
-      fullPath: '/edits'
-      preLoaderRoute: typeof AppEditsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/formats': {
       id: '/_app/formats'
       path: '/formats'
@@ -873,6 +878,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/videos'
       preLoaderRoute: typeof AppAdminVideosRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/edits/': {
+      id: '/_app/edits/'
+      path: '/edits'
+      fullPath: '/edits/'
+      preLoaderRoute: typeof AppEditsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/edits/$sessionId': {
+      id: '/_app/edits/$sessionId'
+      path: '/edits/$sessionId'
+      fullPath: '/edits/$sessionId'
+      preLoaderRoute: typeof AppEditsSessionIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/support/': {
       id: '/_app/support/'
@@ -1067,16 +1086,17 @@ interface AppRouteChildren {
   AppClaudeRoute: typeof AppClaudeRoute
   AppClipsRoute: typeof AppClipsRoute
   AppClipsGettingStartedRoute: typeof AppClipsGettingStartedRoute
-  AppEditsRoute: typeof AppEditsRoute
   AppFormatsRoute: typeof AppFormatsRoute
   AppGettingStartedRoute: typeof AppGettingStartedRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppPreferencesRoute: typeof AppPreferencesRoute
   AppUsageRoute: typeof AppUsageRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppEditsSessionIdRoute: typeof AppEditsSessionIdRoute
   AppSupportTicketIdRoute: typeof AppSupportTicketIdRoute
   AppSupportNewRoute: typeof AppSupportNewRoute
   AppVideosVideoIdRoute: typeof AppVideosVideoIdRoute
+  AppEditsIndexRoute: typeof AppEditsIndexRoute
   AppSupportIndexRoute: typeof AppSupportIndexRoute
   AppVideosIndexRoute: typeof AppVideosIndexRoute
 }
@@ -1088,16 +1108,17 @@ const AppRouteChildren: AppRouteChildren = {
   AppClaudeRoute: AppClaudeRoute,
   AppClipsRoute: AppClipsRoute,
   AppClipsGettingStartedRoute: AppClipsGettingStartedRoute,
-  AppEditsRoute: AppEditsRoute,
   AppFormatsRoute: AppFormatsRoute,
   AppGettingStartedRoute: AppGettingStartedRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppPreferencesRoute: AppPreferencesRoute,
   AppUsageRoute: AppUsageRoute,
   AppIndexRoute: AppIndexRoute,
+  AppEditsSessionIdRoute: AppEditsSessionIdRoute,
   AppSupportTicketIdRoute: AppSupportTicketIdRoute,
   AppSupportNewRoute: AppSupportNewRoute,
   AppVideosVideoIdRoute: AppVideosVideoIdRoute,
+  AppEditsIndexRoute: AppEditsIndexRoute,
   AppSupportIndexRoute: AppSupportIndexRoute,
   AppVideosIndexRoute: AppVideosIndexRoute,
 }

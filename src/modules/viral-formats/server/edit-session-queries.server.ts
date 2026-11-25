@@ -22,6 +22,15 @@ import {
     editSessions,
 } from "#/modules/viral-formats/viral-formats.schema";
 
+/** The videos module serves the frame to its owner; null until the worker took one. */
+function toThumbnailUrl(videoId: string, thumbnailPath: string | null): string | null {
+    if (thumbnailPath === null) {
+        return null;
+    }
+
+    return `/api/videos/${videoId}/thumbnail`;
+}
+
 type SessionRow = Pick<
     typeof editSessions.$inferSelect,
     "id" | "format" | "number" | "status" | "createdAt"
@@ -83,6 +92,7 @@ async function listSessionVideos(sessionId: string): Promise<Array<SessionVideo>
             progressPercent: videos.progressPercent,
             durationSeconds: videos.durationSeconds,
             sourceBytes: videos.sourceBytes,
+            thumbnailPath: videos.thumbnailPath,
         })
         .from(editSessionVideos)
         .innerJoin(videos, eq(videos.id, editSessionVideos.videoId))
@@ -90,8 +100,9 @@ async function listSessionVideos(sessionId: string): Promise<Array<SessionVideo>
         .orderBy(asc(editSessionVideos.createdAt))
         .limit(MAX_SESSION_VIDEOS);
 
-    return rows.map((row) => ({
+    return rows.map(({ thumbnailPath, ...row }) => ({
         ...row,
+        thumbnailUrl: toThumbnailUrl(row.id, thumbnailPath),
         isReady: row.status === "done",
         hasFailed: row.status === "failed" || row.status === "cancelled",
     }));
