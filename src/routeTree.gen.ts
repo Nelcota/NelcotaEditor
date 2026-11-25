@@ -44,6 +44,7 @@ import { Route as ApiClipsClipIdFileRouteImport } from './routes/api/clips/$clip
 import { Route as ApiVideosVideoIdCaptionsRouteImport } from './routes/api/videos/$videoId/captions'
 import { Route as ApiVideosVideoIdSourceRouteImport } from './routes/api/videos/$videoId/source'
 import { Route as ApiVideosVideoIdThumbnailRouteImport } from './routes/api/videos/$videoId/thumbnail'
+import { Route as ApiAdminUsersUserIdAvatarRouteImport } from './routes/api/admin/users/$userId/avatar'
 import { Route as ApiVideosUploadsUploadIdFileRouteImport } from './routes/api/videos/uploads/$uploadId/file'
 
 const AppRoute = AppRouteImport.update({
@@ -222,6 +223,12 @@ const ApiVideosVideoIdThumbnailRoute =
     path: '/api/videos/$videoId/thumbnail',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminUsersUserIdAvatarRoute =
+  ApiAdminUsersUserIdAvatarRouteImport.update({
+    id: '/api/admin/users/$userId/avatar',
+    path: '/api/admin/users/$userId/avatar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiVideosUploadsUploadIdFileRoute =
   ApiVideosUploadsUploadIdFileRouteImport.update({
     id: '/api/videos/uploads/$uploadId/file',
@@ -264,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
   '/admin/support/': typeof AppAdminSupportIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
+  '/api/admin/users/$userId/avatar': typeof ApiAdminUsersUserIdAvatarRoute
   '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRoutesByTo {
@@ -299,6 +307,7 @@ export interface FileRoutesByTo {
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
   '/admin/support': typeof AppAdminSupportIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
+  '/api/admin/users/$userId/avatar': typeof ApiAdminUsersUserIdAvatarRoute
   '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRoutesById {
@@ -338,6 +347,7 @@ export interface FileRoutesById {
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
   '/_app/admin/support/': typeof AppAdminSupportIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
+  '/api/admin/users/$userId/avatar': typeof ApiAdminUsersUserIdAvatarRoute
   '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRouteTypes {
@@ -377,6 +387,7 @@ export interface FileRouteTypes {
     | '/api/videos/$videoId/thumbnail'
     | '/admin/support/'
     | '/admin/users/'
+    | '/api/admin/users/$userId/avatar'
     | '/api/videos/uploads/$uploadId/file'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -412,6 +423,7 @@ export interface FileRouteTypes {
     | '/api/videos/$videoId/thumbnail'
     | '/admin/support'
     | '/admin/users'
+    | '/api/admin/users/$userId/avatar'
     | '/api/videos/uploads/$uploadId/file'
   id:
     | '__root__'
@@ -450,6 +462,7 @@ export interface FileRouteTypes {
     | '/api/videos/$videoId/thumbnail'
     | '/_app/admin/support/'
     | '/_app/admin/users/'
+    | '/api/admin/users/$userId/avatar'
     | '/api/videos/uploads/$uploadId/file'
   fileRoutesById: FileRoutesById
 }
@@ -469,6 +482,7 @@ export interface RootRouteChildren {
   ApiVideosVideoIdCaptionsRoute: typeof ApiVideosVideoIdCaptionsRoute
   ApiVideosVideoIdSourceRoute: typeof ApiVideosVideoIdSourceRoute
   ApiVideosVideoIdThumbnailRoute: typeof ApiVideosVideoIdThumbnailRoute
+  ApiAdminUsersUserIdAvatarRoute: typeof ApiAdminUsersUserIdAvatarRoute
   ApiVideosUploadsUploadIdFileRoute: typeof ApiVideosUploadsUploadIdFileRoute
 }
 
@@ -719,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVideosVideoIdThumbnailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/users/$userId/avatar': {
+      id: '/api/admin/users/$userId/avatar'
+      path: '/api/admin/users/$userId/avatar'
+      fullPath: '/api/admin/users/$userId/avatar'
+      preLoaderRoute: typeof ApiAdminUsersUserIdAvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/videos/uploads/$uploadId/file': {
       id: '/api/videos/uploads/$uploadId/file'
       path: '/api/videos/uploads/$uploadId/file'
@@ -813,6 +834,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVideosVideoIdCaptionsRoute: ApiVideosVideoIdCaptionsRoute,
   ApiVideosVideoIdSourceRoute: ApiVideosVideoIdSourceRoute,
   ApiVideosVideoIdThumbnailRoute: ApiVideosVideoIdThumbnailRoute,
+  ApiAdminUsersUserIdAvatarRoute: ApiAdminUsersUserIdAvatarRoute,
   ApiVideosUploadsUploadIdFileRoute: ApiVideosUploadsUploadIdFileRoute,
 }
 export const routeTree = rootRouteImport
