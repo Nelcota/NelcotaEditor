@@ -28,6 +28,17 @@ export function getClientIpHeaders(): Array<string> {
     return [DIRECT_CLIENT_IP_HEADER];
 }
 
+/** The address the rate limiter keys on, read from a request prepareAuthRequest returned. */
+export function readClientIp(request: Request): string | null {
+    const [header] = getClientIpHeaders();
+
+    if (header === undefined) {
+        return null;
+    }
+
+    return request.headers.get(header);
+}
+
 const METHODS_WITHOUT_BODY = new Set(["GET", "HEAD"]);
 
 function assertDeclaredLengthFits(request: Request): void {

@@ -25,6 +25,19 @@ async function postToAuth(path: string): Promise<Response> {
     return auth.handler(request);
 }
 
+// auth.api skips the rate limiter, and both checks fail before Better Auth reads the database.
+async function answerSignUp(body: {
+    name: string;
+    email: string;
+    password: string;
+}): Promise<{ status: number; body: unknown }> {
+    const response = await auth.api.signUpEmail({ body, asResponse: true });
+
+    return { status: response.status, body: await response.json() };
+}
+
+const createUserHook = auth.options.databaseHooks?.user?.create?.before;
+
 describe("raw auth routes", () => {
     const routesOnlyServerCodeMayUse = [
         "/admin/set-user-password",
@@ -75,31 +88,73 @@ describe("sign-up honeypot", () => {
         website: "https://spam.example",
     };
 
-    // auth.api skips the rate limiter, and the unit tests reach no database: answering at all
-    // shows the sign-up stopped before storing anything.
-    test("answers a filled honeypot as a successful sign-up", async () => {
-        vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const personBody = { ...botBody, website: "" };
+    const signUpContext = { path: "/sign-up/email", body: botBody };
+    const newUser = {
+        id: "user-1",
+        email: "bot@example.com",
+        emailVerified: false,
+        name: "Bot",
+        createdAt: new Date("2026-11-23T12:00:00Z"),
+        updatedAt: new Date("2026-11-23T12:00:00Z"),
+    };
 
-        const result = await auth.api.signUpEmail({ body: botBody });
+    test("rejects an invalid email the same way with the honeypot filled", async () => {
+        const invalidEmail = { email: "not-an-email" };
 
-        assert.equal(result.token, null);
-        assert.equal(result.user.email, "bot@example.com");
+        const caught = await answerSignUp({ ...botBody, ...invalidEmail });
+        const person = await answerSignUp({ ...personBody, ...invalidEmail });
+
+        assert.equal(caught.status, 400);
+        assert.deepEqual(caught, person);
+    });
+
+    test("rejects a short password the same way with the honeypot filled", async () => {
+        const shortPassword = { password: "curta" };
+
+        const caught = await answerSignUp({ ...botBody, ...shortPassword });
+        const person = await answerSignUp({ ...personBody, ...shortPassword });
+
+        assert.equal(caught.status, 400);
+        assert.deepEqual(caught, person);
     });
 
     test("lets a sign-up with an empty honeypot through to the database", async () => {
-        const personBody = { ...botBody, website: "" };
-
         await assert.rejects(auth.api.signUpEmail({ body: personBody }), /from "user"/);
     });
 
-    test("logs a filled honeypot at warn", async () => {
+    test("stops user creation with a 403 when the honeypot is filled", async () => {
+        vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+        if (createUserHook === undefined) {
+            assert.fail("The user create hook is missing");
+        }
+
+        await assert.rejects(createUserHook(newUser, signUpContext), { statusCode: 403 });
+    });
+
+    test("rejects a blank name with the honeypot filled as it does without it", async () => {
+        if (createUserHook === undefined) {
+            assert.fail("The user create hook is missing");
+        }
+
+        await assert.rejects(createUserHook({ ...newUser, name: " " }, signUpContext), {
+            message: "Digite seu nome.",
+        });
+    });
+
+    test("logs a filled honeypot at warn without the email", async () => {
         const written: Array<string> = [];
         vi.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
             written.push(String(chunk));
             return true;
         });
 
-        await auth.api.signUpEmail({ body: botBody });
+        if (createUserHook === undefined) {
+            assert.fail("The user create hook is missing");
+        }
+
+        await assert.rejects(createUserHook(newUser, signUpContext));
 
         assert.ok(written.some((line) => line.includes('"message":"Sign-up honeypot filled"')));
         assert.equal(
@@ -126,7 +181,7 @@ describe("account name hooks", () => {
             assert.fail("The user create hook is missing");
         }
 
-        const result = await createHook(newUser);
+        const result = await createHook(newUser, null);
 
         assert.deepEqual(result, { data: { name: "Ana Souza" } });
     });

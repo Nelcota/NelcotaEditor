@@ -39,15 +39,14 @@ import { AUTH_RATE_LIMIT } from "#/modules/auth/server/auth-rate-limit.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
 import { keepImpersonatedSessionExpiry } from "#/modules/auth/server/impersonation-session.server";
 import {
-    buildFakeSignUpResponse,
-    isHoneypotFilled,
+    isHoneypotFilledInRequest,
+    rejectHoneypotSignUp,
 } from "#/modules/auth/server/sign-up-honeypot.server";
 import {
     AccountHasWorkingVideosError,
     deleteAccountWithFiles,
 } from "#/modules/video-records/server/delete-user-videos.server";
 import { getEnvironment, InvalidEnvironmentError } from "#/shared/server/env.server";
-import { logger } from "#/shared/server/logger.server";
 
 const MIN_SECRET_LENGTH = 32;
 const SESSION_COOKIE_CACHE_SECONDS = 5 * 60;
@@ -119,8 +118,28 @@ async function trimNameWithinLimit(fields: {
     return { data: { name: trimmedName } };
 }
 
+/** The name is checked first, so a caught bot with a bad name gets the same error as a person. */
+async function checkNewUser(
+    newUser: { name?: unknown },
+    context: { path?: string; body?: unknown } | null,
+): Promise<{ data: { name: string } } | undefined> {
+    const result = await trimNameWithinLimit(newUser);
+    rejectHoneypotSignUp(context);
+    return result;
+}
+
+async function notifyOwnerOfSignUpAttempt(
+    attempt: { user: User },
+    request: Request | undefined,
+): Promise<void> {
+    if ((await isHoneypotFilledInRequest(request)) === true) {
+        return;
+    }
+
+    await queueExistingAccountEmail(attempt);
+}
+
 const DELETE_USER_PATH = "/delete-user";
-const SIGN_UP_PATH = "/sign-up/email";
 
 const deleteUserBodySchema = z.object({ password: z.string().min(1) });
 
@@ -136,19 +155,9 @@ function requirePasswordToDeleteUser(body: unknown): void {
     }
 }
 
-/** Runs before the captcha plugin's hook, so a caught bot never costs a Turnstile check. */
 const runBeforeAuthHooks = createAuthMiddleware(async (ctx) => {
     if (ctx.path === DELETE_USER_PATH) {
         requirePasswordToDeleteUser(ctx.body);
-    }
-
-    if (ctx.path === SIGN_UP_PATH && isHoneypotFilled(ctx.body) === true) {
-        logger.warn("Sign-up honeypot filled");
-        const body = ctx.body;
-
-        return ctx.json(
-            buildFakeSignUpResponse({ body, userId: crypto.randomUUID(), now: new Date() }),
-        );
     }
 
     return undefined;
@@ -193,7 +202,7 @@ export const auth = betterAuth({
         requireEmailVerification: true,
         sendResetPassword: queueResetPasswordEmail,
         revokeSessionsOnPasswordReset: true,
-        onExistingUserSignUp: queueExistingAccountEmail,
+        onExistingUserSignUp: notifyOwnerOfSignUpAttempt,
     },
     emailVerification: {
         sendVerificationEmail: queueVerificationEmail,
@@ -224,7 +233,7 @@ export const auth = betterAuth({
     },
     databaseHooks: {
         user: {
-            create: { before: trimNameWithinLimit },
+            create: { before: checkNewUser },
             update: { before: trimNameWithinLimit },
         },
         session: {
@@ -238,5 +247,5 @@ export const auth = betterAuth({
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
     // The admin plugin comes first: after the captcha spread, TypeScript would lose the fields it
     // adds to the user and session types.
-    plugins: [adminPlugin, ...buildCaptchaPlugins(), tanstackStartCookies()],
+    plugins: [adminPlugin, ...buildCaptchaPlugins(environment), tanstackStartCookies()],
 });
