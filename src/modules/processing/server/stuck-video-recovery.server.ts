@@ -48,7 +48,7 @@ async function resumeStuckVideo(video: VideoWithoutJob): Promise<void> {
         return;
     }
 
-    const failedJobCount = await countFailedRunJobs(video.id);
+    const failedJobCount = await countFailedRunJobs(toVideoRun(video));
 
     if (failedJobCount >= MAX_FAILED_JOBS_PER_RUN) {
         await failUnprocessableVideo(video, failedJobCount);
