@@ -177,11 +177,21 @@
                 ["b", B],
                 ["c", C],
             ]);
-            const VIEWS = new Set(["thread", "new", "phone"]);
             const option = OPTIONS.get(params.get("o"));
-            const view = params.get("v");
 
-            if (option === undefined || VIEWS.has(view) === false) {
+            if (option === undefined) {
+                throw new Error("Use ?o=a|b|c&v=thread|new|phone");
+            }
+
+            const VIEWS = new Map([
+                ["thread", option.thread],
+                ["new", option.new],
+                ["phone", option.phone],
+            ]);
+            const view = params.get("v");
+            const renderView = VIEWS.get(view);
+
+            if (renderView === undefined) {
                 throw new Error("Use ?o=a|b|c&v=thread|new|phone");
             }
 
@@ -189,8 +199,7 @@
                 document.body.classList.add("is-phone");
             }
 
-            document.getElementById("root").innerHTML =
-                `<div class="panel">${option[view]()}</div>`;
+            document.getElementById("root").innerHTML = `<div class="panel">${renderView()}</div>`;
         </script>
     </body>
 </html>
