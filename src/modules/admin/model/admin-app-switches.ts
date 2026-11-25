@@ -44,6 +44,7 @@ export const APP_SWITCH_GROUPS: ReadonlyArray<AppSwitchGroup> = [
     { title: "Contas", keys: ["sign-up", "email-verification"] },
     { title: "Envio de vídeos", keys: ["youtube-links", "file-uploads"] },
     { title: "Processamento e cortes", keys: ["video-processing", "clip-sharing"] },
+    { title: "Atendimento", keys: ["support"] },
     { title: "Sistema", keys: ["maintenance-mode"] },
 ];
 
@@ -88,6 +89,13 @@ export const APP_SWITCH_COPY: Readonly<Record<AppSwitchKey, AppSwitchCopy>> = {
         label: "Processamento de vídeos",
         description:
             "Desligado, os vídeos novos esperam na fila. Os que já estão sendo processados terminam.",
+        confirmation: null,
+        confirmWhenEnabled: false,
+    },
+    support: {
+        label: "Suporte",
+        description:
+            "Desligado, ninguém abre nem responde tickets e o formulário de contato avisa. Admins continuam respondendo.",
         confirmation: null,
         confirmWhenEnabled: false,
     },

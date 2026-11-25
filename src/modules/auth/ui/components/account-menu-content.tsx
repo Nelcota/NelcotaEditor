@@ -1,3 +1,4 @@
+import CircleHelpIcon from "~icons/lucide/circle-help";
 import ImageUpIcon from "~icons/lucide/image-up";
 import LogOutIcon from "~icons/lucide/log-out";
 import ShieldIcon from "~icons/lucide/shield";
@@ -73,7 +74,13 @@ export function AccountMenuContent({
                     </Link>
                 </DropdownMenuItem>
             )}
-            {/* Phones have no room for Admin in the tab bar, so it lives here. */}
+            {/* Phones have no room for Suporte or Admin in the tab bar, so they live here. */}
+            <DropdownMenuItem asChild className="md:hidden">
+                <Link to="/support">
+                    <CircleHelpIcon aria-hidden="true" />
+                    Suporte
+                </Link>
+            </DropdownMenuItem>
             {user.isAdmin === true && (
                 <DropdownMenuItem asChild className="md:hidden">
                     <Link to="/admin">

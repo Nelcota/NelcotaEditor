@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as MaintenanceRouteImport } from './routes/maintenance'
@@ -25,12 +26,18 @@ import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
 import { Route as AppUsageRouteImport } from './routes/_app/usage'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppAdminFeaturesRouteImport } from './routes/_app/admin/features'
+import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
 import { Route as AppAdminVideosRouteImport } from './routes/_app/admin/videos'
+import { Route as AppSupportIndexRouteImport } from './routes/_app/support/index'
+import { Route as AppSupportTicketIdRouteImport } from './routes/_app/support/$ticketId'
+import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
 import { Route as AppVideosIndexRouteImport } from './routes/_app/videos.index'
 import { Route as AppVideosVideoIdRouteImport } from './routes/_app/videos.$videoId'
 import { Route as ApiAccountAvatarRouteImport } from './routes/api/account/avatar'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiShareTokenRouteImport } from './routes/api/share/$token'
+import { Route as AppAdminSupportIndexRouteImport } from './routes/_app/admin/support/index'
+import { Route as AppAdminSupportTicketIdRouteImport } from './routes/_app/admin/support/$ticketId'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ApiClipsClipIdFileRouteImport } from './routes/api/clips/$clipId/file'
@@ -41,6 +48,11 @@ import { Route as ApiVideosUploadsUploadIdFileRouteImport } from './routes/api/v
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -118,10 +130,30 @@ const AppAdminFeaturesRoute = AppAdminFeaturesRouteImport.update({
   path: '/features',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminSupportRoute = AppAdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminVideosRoute = AppAdminVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
   getParentRoute: () => AppAdminRoute,
+} as any)
+const AppSupportIndexRoute = AppSupportIndexRouteImport.update({
+  id: '/support/',
+  path: '/support/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSupportTicketIdRoute = AppSupportTicketIdRouteImport.update({
+  id: '/support/$ticketId',
+  path: '/support/$ticketId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSupportNewRoute = AppSupportNewRouteImport.update({
+  id: '/support/new',
+  path: '/support/new',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppVideosIndexRoute = AppVideosIndexRouteImport.update({
   id: '/videos/',
@@ -147,6 +179,16 @@ const ApiShareTokenRoute = ApiShareTokenRouteImport.update({
   id: '/api/share/$token',
   path: '/api/share/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppAdminSupportIndexRoute = AppAdminSupportIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAdminSupportRoute,
+} as any)
+const AppAdminSupportTicketIdRoute = AppAdminSupportTicketIdRouteImport.update({
+  id: '/$ticketId',
+  path: '/$ticketId',
+  getParentRoute: () => AppAdminSupportRoute,
 } as any)
 const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
   id: '/users/',
@@ -189,6 +231,7 @@ const ApiVideosUploadsUploadIdFileRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
   '/maintenance': typeof MaintenanceRoute
@@ -202,22 +245,29 @@ export interface FileRoutesByFullPath {
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
   '/admin/features': typeof AppAdminFeaturesRoute
+  '/admin/support': typeof AppAdminSupportRouteWithChildren
   '/admin/videos': typeof AppAdminVideosRoute
+  '/support/$ticketId': typeof AppSupportTicketIdRoute
+  '/support/new': typeof AppSupportNewRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/admin/': typeof AppAdminIndexRoute
+  '/support/': typeof AppSupportIndexRoute
   '/videos/': typeof AppVideosIndexRoute
+  '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
+  '/admin/support/': typeof AppAdminSupportIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
   '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRoutesByTo {
+  '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
   '/maintenance': typeof MaintenanceRoute
@@ -232,23 +282,29 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/videos': typeof AppAdminVideosRoute
+  '/support/$ticketId': typeof AppSupportTicketIdRoute
+  '/support/new': typeof AppSupportNewRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/admin': typeof AppAdminIndexRoute
+  '/support': typeof AppSupportIndexRoute
   '/videos': typeof AppVideosIndexRoute
+  '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
+  '/admin/support': typeof AppAdminSupportIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
   '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/health': typeof HealthRoute
   '/maintenance': typeof MaintenanceRoute
@@ -263,18 +319,24 @@ export interface FileRoutesById {
   '/_app/usage': typeof AppUsageRoute
   '/_app/': typeof AppIndexRoute
   '/_app/admin/features': typeof AppAdminFeaturesRoute
+  '/_app/admin/support': typeof AppAdminSupportRouteWithChildren
   '/_app/admin/videos': typeof AppAdminVideosRoute
+  '/_app/support/$ticketId': typeof AppSupportTicketIdRoute
+  '/_app/support/new': typeof AppSupportNewRoute
   '/_app/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/support/': typeof AppSupportIndexRoute
   '/_app/videos/': typeof AppVideosIndexRoute
+  '/_app/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
   '/api/videos/$videoId/thumbnail': typeof ApiVideosVideoIdThumbnailRoute
+  '/_app/admin/support/': typeof AppAdminSupportIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/api/videos/uploads/$uploadId/file': typeof ApiVideosUploadsUploadIdFileRoute
 }
@@ -282,6 +344,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/contact'
     | '/forgot-password'
     | '/health'
     | '/maintenance'
@@ -295,22 +358,29 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/usage'
     | '/admin/features'
+    | '/admin/support'
     | '/admin/videos'
+    | '/support/$ticketId'
+    | '/support/new'
     | '/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
     | '/admin/'
+    | '/support/'
     | '/videos/'
+    | '/admin/support/$ticketId'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
+    | '/admin/support/'
     | '/admin/users/'
     | '/api/videos/uploads/$uploadId/file'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/contact'
     | '/forgot-password'
     | '/health'
     | '/maintenance'
@@ -325,22 +395,28 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/features'
     | '/admin/videos'
+    | '/support/$ticketId'
+    | '/support/new'
     | '/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
     | '/admin'
+    | '/support'
     | '/videos'
+    | '/admin/support/$ticketId'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
+    | '/admin/support'
     | '/admin/users'
     | '/api/videos/uploads/$uploadId/file'
   id:
     | '__root__'
     | '/_app'
+    | '/contact'
     | '/forgot-password'
     | '/health'
     | '/maintenance'
@@ -355,24 +431,31 @@ export interface FileRouteTypes {
     | '/_app/usage'
     | '/_app/'
     | '/_app/admin/features'
+    | '/_app/admin/support'
     | '/_app/admin/videos'
+    | '/_app/support/$ticketId'
+    | '/_app/support/new'
     | '/_app/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
     | '/_app/admin/'
+    | '/_app/support/'
     | '/_app/videos/'
+    | '/_app/admin/support/$ticketId'
     | '/_app/admin/users/$userId'
     | '/api/clips/$clipId/file'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
     | '/api/videos/$videoId/thumbnail'
+    | '/_app/admin/support/'
     | '/_app/admin/users/'
     | '/api/videos/uploads/$uploadId/file'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  ContactRoute: typeof ContactRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   HealthRoute: typeof HealthRoute
   MaintenanceRoute: typeof MaintenanceRoute
@@ -396,6 +479,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -503,12 +593,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminFeaturesRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/support': {
+      id: '/_app/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AppAdminSupportRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/videos': {
       id: '/_app/admin/videos'
       path: '/videos'
       fullPath: '/admin/videos'
       preLoaderRoute: typeof AppAdminVideosRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/support/': {
+      id: '/_app/support/'
+      path: '/support'
+      fullPath: '/support/'
+      preLoaderRoute: typeof AppSupportIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/support/$ticketId': {
+      id: '/_app/support/$ticketId'
+      path: '/support/$ticketId'
+      fullPath: '/support/$ticketId'
+      preLoaderRoute: typeof AppSupportTicketIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/support/new': {
+      id: '/_app/support/new'
+      path: '/support/new'
+      fullPath: '/support/new'
+      preLoaderRoute: typeof AppSupportNewRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/videos/': {
       id: '/_app/videos/'
@@ -544,6 +662,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/share/$token'
       preLoaderRoute: typeof ApiShareTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/admin/support/': {
+      id: '/_app/admin/support/'
+      path: '/'
+      fullPath: '/admin/support/'
+      preLoaderRoute: typeof AppAdminSupportIndexRouteImport
+      parentRoute: typeof AppAdminSupportRoute
+    }
+    '/_app/admin/support/$ticketId': {
+      id: '/_app/admin/support/$ticketId'
+      path: '/$ticketId'
+      fullPath: '/admin/support/$ticketId'
+      preLoaderRoute: typeof AppAdminSupportTicketIdRouteImport
+      parentRoute: typeof AppAdminSupportRoute
     }
     '/_app/admin/users/': {
       id: '/_app/admin/users/'
@@ -597,8 +729,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppAdminSupportRouteChildren {
+  AppAdminSupportTicketIdRoute: typeof AppAdminSupportTicketIdRoute
+  AppAdminSupportIndexRoute: typeof AppAdminSupportIndexRoute
+}
+
+const AppAdminSupportRouteChildren: AppAdminSupportRouteChildren = {
+  AppAdminSupportTicketIdRoute: AppAdminSupportTicketIdRoute,
+  AppAdminSupportIndexRoute: AppAdminSupportIndexRoute,
+}
+
+const AppAdminSupportRouteWithChildren = AppAdminSupportRoute._addFileChildren(
+  AppAdminSupportRouteChildren,
+)
+
 interface AppAdminRouteChildren {
   AppAdminFeaturesRoute: typeof AppAdminFeaturesRoute
+  AppAdminSupportRoute: typeof AppAdminSupportRouteWithChildren
   AppAdminVideosRoute: typeof AppAdminVideosRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
   AppAdminUsersUserIdRoute: typeof AppAdminUsersUserIdRoute
@@ -607,6 +754,7 @@ interface AppAdminRouteChildren {
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminFeaturesRoute: AppAdminFeaturesRoute,
+  AppAdminSupportRoute: AppAdminSupportRouteWithChildren,
   AppAdminVideosRoute: AppAdminVideosRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
   AppAdminUsersUserIdRoute: AppAdminUsersUserIdRoute,
@@ -625,7 +773,10 @@ interface AppRouteChildren {
   AppPreferencesRoute: typeof AppPreferencesRoute
   AppUsageRoute: typeof AppUsageRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppSupportTicketIdRoute: typeof AppSupportTicketIdRoute
+  AppSupportNewRoute: typeof AppSupportNewRoute
   AppVideosVideoIdRoute: typeof AppVideosVideoIdRoute
+  AppSupportIndexRoute: typeof AppSupportIndexRoute
   AppVideosIndexRoute: typeof AppVideosIndexRoute
 }
 
@@ -637,7 +788,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppPreferencesRoute: AppPreferencesRoute,
   AppUsageRoute: AppUsageRoute,
   AppIndexRoute: AppIndexRoute,
+  AppSupportTicketIdRoute: AppSupportTicketIdRoute,
+  AppSupportNewRoute: AppSupportNewRoute,
   AppVideosVideoIdRoute: AppVideosVideoIdRoute,
+  AppSupportIndexRoute: AppSupportIndexRoute,
   AppVideosIndexRoute: AppVideosIndexRoute,
 }
 
@@ -645,6 +799,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  ContactRoute: ContactRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   HealthRoute: HealthRoute,
   MaintenanceRoute: MaintenanceRoute,

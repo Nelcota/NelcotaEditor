@@ -10,8 +10,9 @@ import type { SignInSearch } from "#/modules/auth/model/sign-in-search";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AuthCard } from "#/modules/auth/ui/components/auth-card";
-import { CaptchaField } from "#/modules/auth/ui/components/captcha-field";
-import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/modules/auth/ui/hooks/use-captcha";
+import { buildCaptchaHeaders } from "#/modules/auth/client/captcha-headers";
+import { CaptchaField } from "#/shared/ui/captcha-field";
+import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/shared/ui/use-captcha";
 import { Alert } from "#/shared/ui/alert";
 import { Button } from "#/shared/ui/button";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -55,7 +56,7 @@ export function SignInScreen({
                 return;
             }
 
-            const fetchOptions = { headers: captcha.buildHeaders() };
+            const fetchOptions = { headers: buildCaptchaHeaders(captcha.readToken()) };
             const failure = await runAuthRequest(() =>
                 authClient.signIn.email({ ...value, fetchOptions }),
             );
@@ -144,6 +145,15 @@ export function SignInScreen({
                     )}
                 </form.Subscribe>
             </form>
+            <p className="text-center text-sm text-foreground/65">
+                Não consegue entrar?{" "}
+                <Link
+                    to="/contact"
+                    className="inline-block rounded font-semibold text-primary-ink underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-99"
+                >
+                    Fale com o suporte
+                </Link>
+            </p>
         </AuthCard>
     );
 }

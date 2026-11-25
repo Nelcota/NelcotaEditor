@@ -8,6 +8,7 @@ export const APP_SWITCH_KEYS = [
     "file-uploads",
     "clip-sharing",
     "video-processing",
+    "support",
     "maintenance-mode",
 ] as const;
 
@@ -25,6 +26,7 @@ export const DEFAULT_APP_SWITCH_STATES: AppSwitchStates = {
     "file-uploads": true,
     "clip-sharing": true,
     "video-processing": true,
+    support: true,
     "maintenance-mode": false,
 };
 

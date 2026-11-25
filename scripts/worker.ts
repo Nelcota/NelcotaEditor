@@ -13,6 +13,8 @@ import {
     processVideoJobSchema,
 } from "#/modules/processing/server/video-processing-queue.server";
 import { createVideoWorkSync } from "#/modules/processing/server/video-work-switch.server";
+import { startIdleTicketClosing } from "#/modules/support/server/close-idle-tickets.server";
+import { startSupportEmailWorker } from "#/modules/support/server/support-email-queue.server";
 import { findVideoById } from "#/modules/video-records/server/video-progress.server";
 import { getEnvironment } from "#/shared/server/env.server";
 import { getJobQueue, setJobQueueRole } from "#/shared/server/job-queue.server";
@@ -166,6 +168,8 @@ async function startWorker(): Promise<void> {
     await syncVideoWork();
     scheduleVideoWorkSync();
     await startStuckVideoRecovery();
+    await startSupportEmailWorker();
+    await startIdleTicketClosing();
     await startExpiredUploadSweep();
     await startAuthEmailWorker();
     logger.info({ workerConcurrency }, "Worker ready");

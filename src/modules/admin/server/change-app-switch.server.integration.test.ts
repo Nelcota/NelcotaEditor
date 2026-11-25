@@ -7,6 +7,7 @@ import { listAdminAppSwitches } from "#/modules/admin/server/admin-app-switch-ro
 import { changeAppSwitch } from "#/modules/admin/server/change-app-switch.server";
 import { requireAdmin } from "#/modules/admin/server/require-admin.server";
 import { appSwitches } from "#/modules/app-switches/app-switches.schema";
+import { APP_SWITCH_KEYS } from "#/modules/app-switches/model/app-switch";
 import { isAppSwitchEnabled } from "#/modules/app-switches/server/app-switches.server";
 import { ADMIN_ROLE, user } from "#/modules/auth/auth.schema";
 import { auth } from "#/modules/auth/server/auth.server";
@@ -104,7 +105,7 @@ describe("changeAppSwitch", () => {
 
         const switches = await listAdminAppSwitches();
 
-        expect(switches).toHaveLength(7);
+        expect(switches.map((appSwitch) => appSwitch.key)).toEqual(APP_SWITCH_KEYS);
         expect(switches.find((appSwitch) => appSwitch.key === "sign-up")).toMatchObject({
             isEnabled: false,
             changedByName: "Admin Teste",
