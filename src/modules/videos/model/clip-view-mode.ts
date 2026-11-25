@@ -8,7 +8,3 @@ export const CLIP_VIEW_MODE_LABELS: Record<ClipViewMode, string> = {
     grid: "Grade",
     table: "Tabela",
 };
-
-export function isClipViewMode(value: string): value is ClipViewMode {
-    return CLIP_VIEW_MODES.some((mode) => mode === value);
-}

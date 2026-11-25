@@ -1,9 +1,11 @@
+import CalendarIcon from "~icons/lucide/calendar";
+import type { ReactNode } from "react";
 import {
     OVERVIEW_PERIOD_DAYS,
     overviewPeriodSchema,
 } from "#/modules/overview/model/overview-period";
 import type { OverviewPeriodDays } from "#/modules/overview/model/overview-period";
-import { SegmentedControl } from "#/shared/ui/segmented-control";
+import { ToolbarSelect } from "#/shared/ui/toolbar-select";
 
 interface PeriodPickerProps {
     value: OverviewPeriodDays;
@@ -12,21 +14,15 @@ interface PeriodPickerProps {
 
 const PERIOD_OPTIONS = OVERVIEW_PERIOD_DAYS.map((periodDays) => ({
     value: String(periodDays),
-    label: (
-        <>
-            {/* Three full labels overflow a 375 px phone; screen readers still hear them. */}
-            <span className="max-sm:sr-only">Últimos </span>
-            {periodDays} dias
-        </>
-    ),
-    ariaLabel: `Últimos ${periodDays} dias`,
+    label: `Últimos ${periodDays} dias`,
 }));
 
-/** The same pill choice as the sort controls: a short choice that changes what the page shows. */
-export function PeriodPicker({ value, onChange }: PeriodPickerProps) {
+/** The same select as the lists' filters and orders: a short choice that changes the page. */
+export function PeriodPicker({ value, onChange }: PeriodPickerProps): ReactNode {
     return (
-        <SegmentedControl
+        <ToolbarSelect
             label="Período"
+            icon={CalendarIcon}
             value={String(value)}
             options={PERIOD_OPTIONS}
             onValueChange={(next) => {
@@ -38,7 +34,6 @@ export function PeriodPicker({ value, onChange }: PeriodPickerProps) {
 
                 onChange(result.data);
             }}
-            className="w-full whitespace-nowrap [&>button]:px-3 sm:w-fit"
         />
     );
 }

@@ -86,8 +86,8 @@ export function AdminUsersScreen(props: AdminUsersScreenProps): ReactNode {
     return (
         <section aria-label="Contas" className="grid gap-4">
             <SearchField
-                label="Buscar contas"
-                placeholder="Nome ou email"
+                label="Buscar contas por nome ou email"
+                placeholder="Pesquisar"
                 value={searchDraft.draft}
                 onValueChange={searchDraft.setDraft}
             />

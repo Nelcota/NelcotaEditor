@@ -28,7 +28,7 @@ function TranscriptToolbar({ query, onQueryChange, fullText }: TranscriptToolbar
         <div className="flex flex-wrap items-center gap-2">
             <SearchField
                 label={SEARCH_LABEL}
-                placeholder={SEARCH_LABEL}
+                placeholder="Pesquisar"
                 value={query}
                 onValueChange={onQueryChange}
             />

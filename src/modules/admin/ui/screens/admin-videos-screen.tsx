@@ -1,11 +1,5 @@
-import CircleCheckIcon from "~icons/lucide/circle-check";
-import ClockIcon from "~icons/lucide/clock";
-import CircleAlertIcon from "~icons/lucide/circle-alert";
-import BanIcon from "~icons/lucide/ban";
-import HourglassIcon from "~icons/lucide/hourglass";
-import LayoutGridIcon from "~icons/lucide/layout-grid";
+import ListFilterIcon from "~icons/lucide/list-filter";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
     ADMIN_VIDEO_FILTERS,
@@ -20,15 +14,11 @@ import { AdminLoadError, AdminLoading } from "#/modules/admin/ui/components/admi
 import { AdminVideoList } from "#/modules/admin/ui/components/admin-video-list";
 import { useSearchDraft } from "#/modules/admin/ui/hooks/use-search-draft";
 import { SearchField } from "#/shared/ui/search-field";
+import { ToolbarSelect } from "#/shared/ui/toolbar-select";
 import { EmptyState } from "#/shared/ui/empty-state";
-import type { IconComponent } from "#/shared/ui/icon-component";
 import { Mascot } from "#/shared/ui/mascot";
 import { BRAND_MASCOT_INDEX } from "#/shared/ui/mascot";
-import { toAriaCurrent } from "#/shared/ui/to-aria-current";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
-
-const CHIP_CLASS =
-    "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-[color,background-color,border-color,box-shadow,scale] hover:bg-secondary focus-visible:ring-4 focus-visible:ring-ring motion-safe:active:scale-[0.99] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background aria-[current=page]:hover:bg-foreground/90 [&>svg]:size-5";
 
 const FILTER_LABELS: Record<AdminVideoFilter, string> = {
     all: "Todos",
@@ -39,14 +29,10 @@ const FILTER_LABELS: Record<AdminVideoFilter, string> = {
     done: "Prontos",
 };
 
-const FILTER_ICONS: Record<AdminVideoFilter, IconComponent> = {
-    all: LayoutGridIcon,
-    working: HourglassIcon,
-    queued: ClockIcon,
-    failed: CircleAlertIcon,
-    cancelled: BanIcon,
-    done: CircleCheckIcon,
-};
+const FILTER_OPTIONS = ADMIN_VIDEO_FILTERS.map((value) => ({
+    value,
+    label: FILTER_LABELS[value],
+}));
 
 function toFilterSearch(filter: AdminVideoFilter | undefined): AdminVideoFilter | undefined {
     if (filter === DEFAULT_ADMIN_VIDEO_FILTER) {
@@ -63,36 +49,6 @@ function toAdminVideosSearch(search: AdminVideosSearch): AdminVideosSearch {
         page: toPageSearch(search.page),
         filter: toFilterSearch(search.filter),
     };
-}
-
-interface FilterChipsProps {
-    filter: AdminVideoFilter;
-    query: string;
-}
-
-function FilterChips({ filter, query }: FilterChipsProps): ReactNode {
-    return (
-        <nav aria-label="Filtrar por situação" className="flex flex-wrap gap-1.5">
-            {ADMIN_VIDEO_FILTERS.map((option) => {
-                const Icon = FILTER_ICONS[option];
-
-                return (
-                    <Link
-                        key={option}
-                        to="/admin/videos"
-                        search={{ q: toQuerySearch(query), filter: toFilterSearch(option) }}
-                        // "Todos" leaves the filter unset; without this it would match every filter.
-                        activeOptions={{ explicitUndefined: true }}
-                        aria-current={toAriaCurrent(option === filter)}
-                        className={CHIP_CLASS}
-                    >
-                        <Icon aria-hidden="true" />
-                        {FILTER_LABELS[option]}
-                    </Link>
-                );
-            })}
-        </nav>
-    );
 }
 
 interface ResultsProps {
@@ -170,14 +126,22 @@ export function AdminVideosScreen(props: AdminVideosScreenProps): ReactNode {
 
     return (
         <section aria-label="Vídeos de todas as contas" className="grid gap-4">
-            <div className="grid gap-3">
+            <div className="flex flex-wrap items-center gap-2">
                 <SearchField
-                    label="Buscar vídeos"
-                    placeholder="Título, nome ou email do dono"
+                    label="Buscar vídeos por título, nome ou email do dono"
+                    placeholder="Pesquisar"
                     value={searchDraft.draft}
                     onValueChange={searchDraft.setDraft}
                 />
-                <FilterChips filter={search.filter ?? DEFAULT_ADMIN_VIDEO_FILTER} query={query} />
+                <ToolbarSelect
+                    label="Filtrar por situação"
+                    icon={ListFilterIcon}
+                    value={search.filter ?? DEFAULT_ADMIN_VIDEO_FILTER}
+                    options={FILTER_OPTIONS}
+                    onValueChange={(filter) =>
+                        onSearchChange(toAdminVideosSearch({ q: query, filter, page: 1 }))
+                    }
+                />
             </div>
             <VideoResults search={search} onSearchChange={onSearchChange} />
         </section>

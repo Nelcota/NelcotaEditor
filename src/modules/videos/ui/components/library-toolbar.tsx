@@ -4,9 +4,10 @@ import type { ReactNode } from "react";
 import { SearchField } from "#/shared/ui/search-field";
 import { VIDEO_FILTERS, VIDEO_FILTER_LABELS } from "#/modules/videos/model/video-list-filter";
 import type { VideoFilter } from "#/modules/videos/model/video-list-filter";
-import { VIDEO_SORTS, VIDEO_SORT_LABELS, toVideoSort } from "#/modules/videos/model/video-sort";
+import { VIDEO_SORTS, VIDEO_SORT_LABELS } from "#/modules/videos/model/video-sort";
 import type { VideoSort } from "#/modules/videos/model/video-sort";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
+import { ToolbarSelect } from "#/shared/ui/toolbar-select";
+import type { ToolbarSelectOption } from "#/shared/ui/toolbar-select";
 
 interface LibraryToolbarProps {
     query: string;
@@ -20,17 +21,29 @@ interface LibraryToolbarProps {
     action?: ReactNode;
 }
 
-/** The reference's "Filtros" and "Colunas" buttons: a filled box with blue text and icon. */
-export const TOOLBAR_SELECT_TRIGGER_CLASS =
-    "h-10 w-full rounded-xl border-transparent bg-card font-semibold text-primary-ink hover:border-input/40 hover:bg-accent sm:w-auto";
-
 /** An empty status is noise; "Todos" and the one in use always stay, so nobody gets stranded. */
 function isFilterShown(option: VideoFilter, filter: VideoFilter, count: number): boolean {
     return option === "all" || option === filter || count > 0;
 }
 
-function toVideoFilter(value: string): VideoFilter {
-    return VIDEO_FILTERS.find((filter) => filter === value) ?? "all";
+const SORT_OPTIONS = VIDEO_SORTS.map((value) => ({ value, label: VIDEO_SORT_LABELS[value] }));
+
+/** Each status with its count; the trigger shows both, like "Todos 5". */
+function toFilterOptions(
+    filter: VideoFilter,
+    counts: Record<VideoFilter, number>,
+): Array<ToolbarSelectOption<VideoFilter>> {
+    const shown = VIDEO_FILTERS.filter((option) => isFilterShown(option, filter, counts[option]));
+
+    return shown.map((option) => ({
+        value: option,
+        label: (
+            <>
+                {VIDEO_FILTER_LABELS[option]}
+                <span className="text-xs text-muted-foreground tabular-nums">{counts[option]}</span>
+            </>
+        ),
+    }));
 }
 
 /** Search, the status filter and the order on the leading side; the main button trailing. */
@@ -47,46 +60,20 @@ export function LibraryToolbar(props: LibraryToolbarProps): ReactNode {
                 onValueChange={onQueryChange}
             />
             <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-                <Select
+                <ToolbarSelect
+                    label="Filtrar por situação"
+                    icon={ListFilterIcon}
                     value={filter}
-                    onValueChange={(value) => onFilterChange(toVideoFilter(value))}
-                >
-                    <SelectTrigger
-                        aria-label="Filtrar por situação"
-                        className={TOOLBAR_SELECT_TRIGGER_CLASS}
-                    >
-                        <ListFilterIcon aria-hidden="true" className="size-4 text-primary-ink" />
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent position="popper" align="start">
-                        {VIDEO_FILTERS.filter((option) =>
-                            isFilterShown(option, filter, counts[option]),
-                        ).map((option) => (
-                            <SelectItem key={option} value={option}>
-                                {VIDEO_FILTER_LABELS[option]}
-                                <span className="text-xs text-muted-foreground tabular-nums">
-                                    {counts[option]}
-                                </span>
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select value={sort} onValueChange={(value) => onSortChange(toVideoSort(value))}>
-                    <SelectTrigger
-                        aria-label="Ordenar vídeos"
-                        className={TOOLBAR_SELECT_TRIGGER_CLASS}
-                    >
-                        <ArrowUpDownIcon aria-hidden="true" className="size-4 text-primary-ink" />
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent position="popper" align="start">
-                        {VIDEO_SORTS.map((option) => (
-                            <SelectItem key={option} value={option}>
-                                {VIDEO_SORT_LABELS[option]}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    options={toFilterOptions(filter, counts)}
+                    onValueChange={onFilterChange}
+                />
+                <ToolbarSelect
+                    label="Ordenar vídeos"
+                    icon={ArrowUpDownIcon}
+                    value={sort}
+                    options={SORT_OPTIONS}
+                    onValueChange={onSortChange}
+                />
             </div>
             <span className="hidden flex-1 sm:block" />
             {action}

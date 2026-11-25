@@ -9,7 +9,3 @@ export const VIDEO_SORT_LABELS: Record<VideoSort, string> = {
     oldest: "Antigos",
     title: "De A a Z",
 };
-
-export function toVideoSort(value: string): VideoSort {
-    return VIDEO_SORTS.find((sort) => sort === value) ?? DEFAULT_VIDEO_SORT;
-}
