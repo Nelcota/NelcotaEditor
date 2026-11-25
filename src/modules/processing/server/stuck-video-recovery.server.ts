@@ -1,5 +1,7 @@
 import { inArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
+import { releaseRenderingClips } from "#/modules/clips/server/release-rendering-clips.server";
+import { countFailedRunJobs } from "#/modules/processing/server/count-failed-run-jobs.server";
 import { findVideosWithoutJob } from "#/modules/processing/server/find-videos-without-job.server";
 import type { VideoWithoutJob } from "#/modules/processing/server/find-videos-without-job.server";
 import { enqueueVideoProcessing } from "#/modules/processing/server/video-processing-queue.server";
@@ -7,6 +9,7 @@ import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-stat
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import {
     markVideoCancelled,
+    markVideoFailed,
     toVideoRun,
 } from "#/modules/video-records/server/video-progress.server";
 import { videos } from "#/modules/video-records/video-records.schema";
@@ -21,15 +24,44 @@ const EVERY_FIVE_MINUTES = "*/5 * * * *";
 // finished status turns into a no-op.
 const RESUMABLE_ON_START_STATUSES: Array<VideoStatus> = ["queued", ...WORKING_VIDEO_STATUSES];
 
-/** Queued again with its owner as the group, so one person's videos still run one at a time. */
-async function requeueOrCancel(stuckVideos: Array<VideoWithoutJob>): Promise<void> {
-    for (const video of stuckVideos) {
-        if (video.cancelRequested === true) {
-            await markVideoCancelled(toVideoRun(video));
-            continue;
-        }
+// A video that kills the worker (out of memory, a native crash) would otherwise be queued again
+// after every crash, taking the worker down for everyone each time.
+const MAX_FAILED_JOBS_PER_RUN = 3;
+const UNPROCESSABLE_VIDEO_MESSAGE =
+    "Não foi possível processar este vídeo. Tente com outro arquivo ou link.";
 
-        await enqueueVideoProcessing({ videoId: video.id, userId: video.userId }, null);
+async function failUnprocessableVideo(
+    video: VideoWithoutJob,
+    failedJobCount: number,
+): Promise<void> {
+    const videoId = video.id;
+
+    await releaseRenderingClips(videoId, "failed");
+    await markVideoFailed(toVideoRun(video), UNPROCESSABLE_VIDEO_MESSAGE);
+    logger.warn({ videoId, failedJobCount }, "Video failed after its jobs kept dying");
+}
+
+/** Queued again with its owner as the group, so one person's videos still run one at a time. */
+async function resumeStuckVideo(video: VideoWithoutJob): Promise<void> {
+    if (video.cancelRequested === true) {
+        await markVideoCancelled(toVideoRun(video));
+        return;
+    }
+
+    const failedJobCount = await countFailedRunJobs(video.id);
+
+    if (failedJobCount >= MAX_FAILED_JOBS_PER_RUN) {
+        await failUnprocessableVideo(video, failedJobCount);
+        return;
+    }
+
+    await enqueueVideoProcessing({ videoId: video.id, userId: video.userId }, null);
+}
+
+/** Cancels, fails or queues again each video whose job died; one at a time, the list is capped. */
+export async function resumeStuckVideos(stuckVideos: Array<VideoWithoutJob>): Promise<void> {
+    for (const video of stuckVideos) {
+        await resumeStuckVideo(video);
     }
 }
 
@@ -48,7 +80,7 @@ export async function requeueInterruptedVideos(): Promise<void> {
         .from(videos)
         .where(inArray(videos.status, RESUMABLE_ON_START_STATUSES));
 
-    await requeueOrCancel(interrupted);
+    await resumeStuckVideos(interrupted);
 
     if (interrupted.length > 0) {
         logger.info({ videoCount: interrupted.length }, "Interrupted videos requeued");
@@ -57,7 +89,7 @@ export async function requeueInterruptedVideos(): Promise<void> {
 
 async function findAndRequeueStuckVideos(): Promise<void> {
     const stuckVideos = await findVideosWithoutJob();
-    await requeueOrCancel(stuckVideos);
+    await resumeStuckVideos(stuckVideos);
 
     if (stuckVideos.length > 0) {
         logger.warn({ videoCount: stuckVideos.length }, "Stuck videos requeued");
