@@ -1,5 +1,4 @@
 import PanelLeftIcon from "~icons/lucide/panel-left";
-import SquarePlusIcon from "~icons/lucide/square-plus";
 import { Link, useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ActivityBell } from "#/modules/shell/ui/components/activity-bell";
@@ -50,20 +49,10 @@ export function SectionRail({ onExpand }: { onExpand: () => void }): ReactNode {
                     size="icon-sm"
                     onClick={onExpand}
                     aria-label={SHOW_LABEL}
-                    className="text-primary-ink hover:text-primary-ink"
+                    className="mb-2 text-primary-ink hover:text-primary-ink"
                 >
                     <PanelLeftIcon aria-hidden="true" />
                 </Button>
-            </HintTooltip>
-            <HintTooltip label="Novo vídeo">
-                <Link
-                    to="/videos"
-                    search={{ newVideo: true }}
-                    aria-label="Novo vídeo"
-                    className="my-2 grid size-11 place-items-center rounded-xl bg-primary-solid text-primary-foreground outline-none transition-[background-color,scale] hover:bg-primary-solid-hover focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-frame motion-safe:active:scale-[0.99]"
-                >
-                    <SquarePlusIcon aria-hidden="true" className="size-5" />
-                </Link>
             </HintTooltip>
             {sections.map((section) => (
                 <RailLink key={section.path} section={section} pathname={pathname} />

@@ -4,7 +4,7 @@ Nelcota turns long videos into vertical short clips with captions. Since 2026-11
 owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
 (the owner asked for nothing bluish) and blue as the one action colour (it was the brand green until
 2026-11-23). The frame holds the
-sidebar: the Editor Oculto logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
+sidebar: the Editor Oculto logo, the bell (videos being cut) and the collapse button;
 the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
 (used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
 rounded panel holds the breadcrumb bar (theme toggle trailing) and the page; page titles live in the
@@ -180,7 +180,7 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Edge lines** (gridline pass, 2026-11-21, redrawn 2026-11-23 after the creators redesign; set by
   Claude at the person's request): measured on ink, not boxes, within 1px.
     - Sidebar (288px, enlarged 2026-11-23 at the owner's request): 44px rows with 15px labels and
-      22px icons. Boxes 10px in (new video card, rows, storage card, account), icon column centred
+      22px icons. Boxes 10px in (rows, storage card, account), icon column centred
       at 33, labels at 56, trailing line 22px in (counts, the upload glyph, the account menu glyph,
       the storage card's numbers). The two cards pad 11px to take back their 1px border, so their
       content starts on the icons' leading edge (22). The brand header pairs the 40px ghost tile
@@ -286,3 +286,4 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-25 | Suporte (board "Suporte: tickets dentro do Nelcota"): a Suporte item at the foot of the sidebar list with a blue dot for an unread answer (in the account menu on phones); tickets are a conversation with Aberto, Respondido and Fechado; a failed video offers "Relatar problema" with the video picked; Admin gets a Suporte tab with the queue beside the open ticket and its account, video and error, and the Admin folder counts the tickets waiting; people who cannot sign in reach a public Contato form, in the site's look, from Entrar | The owner wanted people to ask for help inside the app; tickets tied to a video spare a round of questions, and the public form follows the usual way out for a locked account |
 | 2026-11-25 | UX pass as a first-time user: crew names only next to their mascot or role; Início lists the last three videos under the shortcuts; quick counts use the same pills as the other short choices (wizard and Conta), "Curtos" reads "30 segundos"; storage shares are of the quota ("<1%" for a little); finished videos leave the list's progress cell empty; unknown addresses keep the app layout for signed-in people; forms validate on submit, then on change | A new person met six unexplained names, an empty Início after their first video and numbers that looked broken; the rest repeated what a pill or label already said |
 | 2026-11-25 | Brand becomes Editor Oculto: its symbol as logo and favicon, the name in titles and copy, lime `#C4F800` buttons with graphite text; in light, text, rings and thin fills use a deep lime (5.5:1) | The owner asked to bring the Editor Oculto prototype's identity in; lime on white is 1.25:1 |
+| 2026-11-25 | The "Novo vídeo" card leaves the sidebar; new videos start from Início's link box and the Vídeos page | The owner asked to remove it |

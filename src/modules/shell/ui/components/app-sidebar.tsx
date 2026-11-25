@@ -2,7 +2,6 @@ import PanelLeftIcon from "~icons/lucide/panel-left";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ActivityBell } from "#/modules/shell/ui/components/activity-bell";
-import { NewVideoCard } from "#/modules/shell/ui/components/new-video-card";
 import { SidebarNav } from "#/modules/shell/ui/components/sidebar-nav";
 import { StorageCard } from "#/modules/shell/ui/components/storage-card";
 import { BrandLogo } from "#/shared/ui/brand-logo";
@@ -12,8 +11,8 @@ import { HintTooltip } from "#/shared/ui/hint-tooltip";
 const HIDE_LABEL = "Recolher a barra lateral";
 
 /**
- * The sidebar on the window frame, in the reference's order: logo, bell and collapse; the new
- * video card; the sections; then, at the foot, the storage card and the person.
+ * The sidebar on the window frame, in the reference's order: logo, bell and collapse; the
+ * sections; then, at the foot, the storage card and the person.
  */
 interface AppSidebarProps {
     onCollapse: () => void;
@@ -44,7 +43,6 @@ export function AppSidebar({ onCollapse, accountMenu }: AppSidebarProps): ReactN
                     </Button>
                 </HintTooltip>
             </div>
-            <NewVideoCard />
             <div className="relative min-h-0 flex-1 overflow-y-auto pt-1">
                 <SidebarNav />
             </div>
