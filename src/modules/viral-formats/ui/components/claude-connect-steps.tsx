@@ -2,16 +2,18 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { CopyTextButton } from "#/shared/ui/copy-text-button";
 import { Spinner } from "#/shared/ui/spinner";
+import { OpenClaudeConnectorForm } from "#/modules/viral-formats/ui/components/open-claude-connector-form";
 
 const STRONG_CLASS = "font-semibold text-foreground";
 
 /**
- * How to add Editor Oculto to Claude as a custom connector. Claude offers no link that adds a
- * connector for the person, so the address is copied and pasted.
+ * How to add Editor Oculto to Claude as a custom connector. Claude's link opens its connector form
+ * but cannot fill in the address, so the address is copied and pasted.
  */
 export function ClaudeConnectSteps({ mcpUrl }: { mcpUrl: string }): ReactNode {
     return (
         <div className="grid gap-5">
+            <OpenClaudeConnectorForm mcpUrl={mcpUrl} />
             <div className="grid gap-2">
                 <p className="text-sm font-medium">Endereço do Editor Oculto</p>
                 <div className="flex flex-wrap items-center gap-2">
@@ -34,12 +36,13 @@ export function ClaudeConnectSteps({ mcpUrl }: { mcpUrl: string }): ReactNode {
                     mostra como.
                 </li>
                 <li>
-                    No claude.ai, abra <span className={STRONG_CLASS}>Customize › Connectors</span>{" "}
-                    e clique em <span className={STRONG_CLASS}>Add custom connector</span>.
+                    Clique em <span className={STRONG_CLASS}>Conectar ao Claude</span>. Sem o botão,
+                    abra <span className={STRONG_CLASS}>Customize › Connectors</span> e clique em{" "}
+                    <span className={STRONG_CLASS}>Add custom connector</span>.
                 </li>
                 <li>
-                    Dê o nome <span className={STRONG_CLASS}>Editor Oculto</span>, cole o endereço e
-                    clique em <span className={STRONG_CLASS}>Add</span>.
+                    Confira o nome <span className={STRONG_CLASS}>Editor Oculto</span>, cole o
+                    endereço e clique em <span className={STRONG_CLASS}>Add</span>.
                 </li>
                 <li>
                     Clique em <span className={STRONG_CLASS}>Connect</span>, entre com sua conta do
