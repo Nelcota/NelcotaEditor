@@ -48,7 +48,7 @@ export function PageBar({ children }: { children?: ReactNode }): ReactNode {
                     {crumbs.map((crumb, index) => (
                         <li
                             key={`${crumb.to ?? "current"}-${crumb.label}`}
-                            className="flex min-w-0 items-center gap-2 last:shrink"
+                            className="flex shrink-0 items-center gap-2 last:min-w-0 last:shrink"
                         >
                             {index > 0 && (
                                 <ChevronRightIcon
