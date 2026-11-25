@@ -19,7 +19,7 @@ function ConnectClaudeNotice(): ReactNode {
             tone="info"
             icon={ClaudeLogo}
             action={
-                <Button asChild variant="secondary" size="sm">
+                <Button asChild size="sm" className="font-bold">
                     <Link to="/claude">Conectar</Link>
                 </Button>
             }
