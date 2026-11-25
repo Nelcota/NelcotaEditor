@@ -15,21 +15,13 @@ const TURNSTILE_KEYS = {
 };
 
 describe("parseEnvironment", () => {
-    it("rejects production without the Turnstile keys", () => {
+    // The worker parses this schema in production and never holds the keys; auth requires them.
+    it("accepts production without the Turnstile keys", () => {
         const variables = { ...BASE_VARIABLES, NODE_ENV: "production" };
 
-        expect(() => parseEnvironment(variables)).toThrow(InvalidEnvironmentError);
-    });
+        const environment = parseEnvironment(variables);
 
-    it("rejects production with empty Turnstile keys", () => {
-        const variables = {
-            ...BASE_VARIABLES,
-            NODE_ENV: "production",
-            TURNSTILE_SITE_KEY: "",
-            TURNSTILE_SECRET_KEY: "",
-        };
-
-        expect(() => parseEnvironment(variables)).toThrow(/TURNSTILE_SECRET_KEY/);
+        expect(environment.TURNSTILE_SECRET_KEY).toBeUndefined();
     });
 
     it("accepts production with both Turnstile keys", () => {
@@ -46,9 +38,10 @@ describe("parseEnvironment", () => {
         expect(environment.TURNSTILE_SITE_KEY).toBeUndefined();
     });
 
-    it("rejects only one Turnstile key outside production", () => {
+    it("rejects only one Turnstile key", () => {
         const variables = { ...BASE_VARIABLES, TURNSTILE_SITE_KEY: "site-key" };
 
+        expect(() => parseEnvironment(variables)).toThrow(InvalidEnvironmentError);
         expect(() => parseEnvironment(variables)).toThrow(/TURNSTILE_SECRET_KEY/);
     });
 });

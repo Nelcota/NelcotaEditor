@@ -100,19 +100,15 @@ function checkAuthUrl(environment: BaseEnvironment, context: z.RefinementCtx): v
 const TURNSTILE_VARIABLE_NAMES = ["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"] as const;
 
 /**
- * Without both keys sign-up and sign-in skip the captcha, so production refuses to start rather
- * than run unprotected. Development and tests may leave both unset; one key without the other
- * would either break sign-up or skip the check silently.
+ * One key without the other would either break sign-up or skip the check silently. Production
+ * requires both only where the captcha is built (buildCaptchaPlugins), since the worker parses
+ * this schema too and never holds the keys.
  */
 function checkTurnstileKeys(environment: BaseEnvironment, context: z.RefinementCtx): void {
     const siteKey = environment.TURNSTILE_SITE_KEY;
     const secretKey = environment.TURNSTILE_SECRET_KEY;
 
-    if (siteKey !== undefined && secretKey !== undefined) {
-        return;
-    }
-
-    if (environment.NODE_ENV !== PRODUCTION && siteKey === undefined && secretKey === undefined) {
+    if ((siteKey === undefined) === (secretKey === undefined)) {
         return;
     }
 
@@ -120,7 +116,7 @@ function checkTurnstileKeys(environment: BaseEnvironment, context: z.RefinementC
         context.addIssue({
             code: "custom",
             path: [variableName],
-            message: "Set both Turnstile keys (required in production)",
+            message: "Set both Turnstile keys or neither",
         });
     }
 }

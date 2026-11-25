@@ -247,5 +247,5 @@ export const auth = betterAuth({
     // tanstackStartCookies must stay last: it sets the cookies the other plugins produce.
     // The admin plugin comes first: after the captcha spread, TypeScript would lose the fields it
     // adds to the user and session types.
-    plugins: [adminPlugin, ...buildCaptchaPlugins(), tanstackStartCookies()],
+    plugins: [adminPlugin, ...buildCaptchaPlugins(environment), tanstackStartCookies()],
 });
