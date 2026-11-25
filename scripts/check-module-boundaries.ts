@@ -64,13 +64,15 @@ const ALLOWED_EXCEPTIONS: ReadonlyArray<AllowedException> = [
     },
 ];
 
-// Routes only route: the router, React, module screens and handlers, and the API wrapper.
+// Routes only route: the router, React, module screens and handlers, the API wrapper and the
+// health check.
 const ROUTE_IMPORT_PREFIXES = [
     "@tanstack/react-router",
     "@tanstack/react-query",
     "react",
     "#/modules/",
     "#/shared/server/handle-api-route.server",
+    "#/shared/server/health-check.server",
     "#/styles.css?url",
 ];
 

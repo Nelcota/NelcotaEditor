@@ -74,6 +74,11 @@ export function parseByteRange(
         return undefined;
     }
 
+    // RFC 9110: a last position before the first makes the header invalid, so it is ignored.
+    if (startText.length > 0 && endText.length > 0 && Number(endText) < Number(startText)) {
+        return undefined;
+    }
+
     if (fileSize === 0) {
         return null;
     }
