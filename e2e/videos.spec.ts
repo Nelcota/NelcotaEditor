@@ -8,10 +8,19 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("shows a first-time library and opens the new video dialog", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 760 });
     await openPage(page, "/videos");
+    const crew = page.getByRole("list", { name: "Etapas do processamento" });
+    await expect(crew.getByRole("listitem")).toHaveText([
+        /Faísca.*baixa o vídeo/,
+        /Tinta.*transcreve a fala/,
+        /Brilho.*escolhe os momentos/,
+        /Brasa.*faz os cortes/,
+    ]);
+    expect(await crew.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
     await expectNoAccessibilityViolations(page);
 
-    await page.getByRole("link", { name: "Novo vídeo" }).first().click();
+    await page.getByRole("link", { name: "Enviar o primeiro vídeo" }).click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>Primeiro vídeo · 3 direções</title>
+        <link rel="stylesheet" href="option.css" />
+        <style>
+            body {
+                padding: 40px 32px 80px;
+            }
+            .wrap {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                gap: 36px;
+            }
+            section {
+                display: grid;
+                gap: 12px;
+            }
+            section h2 {
+                font-size: 20px;
+                font-weight: 700;
+            }
+            section p {
+                color: var(--muted-foreground);
+                max-width: 70ch;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 240px;
+                gap: 16px;
+                align-items: start;
+            }
+            .shots img {
+                width: 100%;
+                border-radius: 14px;
+                border: 1px solid var(--border);
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <section>
+                <h2>Hoje</h2>
+                <p>
+                    Nel e a equipe empilhados, saudação, parágrafo longo que lista a equipe em texto
+                    corrido.
+                </p>
+                <div class="shots">
+                    <img src="renders/current.png" alt="" /><img
+                        src="renders/phone-current.png"
+                        alt=""
+                    />
+                </div>
+            </section>
+            <section>
+                <h2>A · Equipe em fila</h2>
+                <p>
+                    Título diz a ação. A equipe vira quatro passos com nome e o que faz, em vez do
+                    parágrafo. Mesmo botão.
+                </p>
+                <div class="shots">
+                    <img src="renders/a.png" alt="" /><img src="renders/phone-a.png" alt="" />
+                </div>
+            </section>
+            <section>
+                <h2>B · Campo direto</h2>
+                <p>
+                    O campo do link já está na tela; Continuar abre o assistente com o link
+                    preenchido. Arquivo como segunda opção. A equipe vira uma linha.
+                </p>
+                <div class="shots">
+                    <img src="renders/b.png" alt="" /><img src="renders/phone-b.png" alt="" />
+                </div>
+            </section>
+            <section>
+                <h2>C · Lado a lado</h2>
+                <p>
+                    Texto e botão alinhados à esquerda, a equipe em lista à direita. Cartão sólido
+                    em vez de borda tracejada.
+                </p>
+                <div class="shots">
+                    <img src="renders/c.png" alt="" /><img src="renders/phone-c.png" alt="" />
+                </div>
+            </section>
+        </div>
+    </body>
+</html>
