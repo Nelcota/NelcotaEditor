@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
-import type { ViralFormatId } from "#/modules/viral-formats/model/viral-formats";
+import {
+    FORMAT_EXAMPLE_HEIGHT,
+    FORMAT_EXAMPLE_WIDTH,
+} from "#/modules/viral-formats/model/viral-formats";
+import type { ViralFormat, ViralFormatId } from "#/modules/viral-formats/model/viral-formats";
 import { cn } from "#/shared/ui/cn";
 
 const COVER_PHOTOS = {
     "split-presenter": { width: 448, height: 352 },
     "split-espresso": { width: 448, height: 352 },
     "ranking-presenter": { width: 448, height: 704 },
-    "contrast-example-poster": { width: 720, height: 1280 },
-    "generic-presenter": { width: 448, height: 704 },
 } as const;
 
 const RANKING_ITEMS = [
@@ -68,7 +70,7 @@ function RankingCover({ loading }: CoverLayoutProps): ReactNode {
     );
 }
 
-const COVER_LAYOUTS: Record<ViralFormatId, (props: CoverLayoutProps) => ReactNode> = {
+const COVER_LAYOUTS: Partial<Record<ViralFormatId, (props: CoverLayoutProps) => ReactNode>> = {
     "split-screen": ({ loading }) => (
         <div className="grid size-full grid-rows-2 gap-1.5">
             <FormatPhoto name="split-presenter" loading={loading} className="rounded-lg" />
@@ -76,38 +78,34 @@ const COVER_LAYOUTS: Record<ViralFormatId, (props: CoverLayoutProps) => ReactNod
         </div>
     ),
     ranking: RankingCover,
-    "this-or-that": ({ loading }) => (
-        <FormatPhoto name="contrast-example-poster" loading={loading} className="rounded-lg" />
-    ),
-    generic: ({ loading }) => (
-        <div className="relative size-full overflow-hidden rounded-lg">
-            <FormatPhoto name="generic-presenter" loading={loading} />
-            <div className="absolute inset-x-2 bottom-5 text-center text-sm font-extrabold text-white">
-                <span className="rounded bg-stage/90 px-1.5 py-0.5">A luz muda tudo.</span>
-            </div>
-        </div>
-    ),
 };
 
 interface FormatCoverProps {
-    formatId: ViralFormatId;
+    format: ViralFormat;
     className?: string;
     loading?: PhotoLoading;
 }
 
-export function FormatCover({
-    formatId,
-    className,
-    loading = "eager",
-}: FormatCoverProps): ReactNode {
-    const Layout = COVER_LAYOUTS[formatId];
+export function FormatCover({ format, className, loading = "eager" }: FormatCoverProps): ReactNode {
+    const Layout = COVER_LAYOUTS[format.id];
+    const example = format.example;
 
     return (
         <div
             aria-hidden="true"
             className={cn("aspect-clip-card w-full rounded-xl bg-stage p-3", className)}
         >
-            <Layout loading={loading} />
+            {example !== undefined && (
+                <img
+                    src={example.posterUrl}
+                    alt=""
+                    width={FORMAT_EXAMPLE_WIDTH}
+                    height={FORMAT_EXAMPLE_HEIGHT}
+                    loading={loading}
+                    className="size-full min-h-0 rounded-lg object-cover"
+                />
+            )}
+            {example === undefined && Layout !== undefined && <Layout loading={loading} />}
         </div>
     );
 }

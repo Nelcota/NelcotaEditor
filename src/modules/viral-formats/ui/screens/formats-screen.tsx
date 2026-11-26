@@ -77,7 +77,7 @@ function FeaturedFormat({ format, onOpen }: FeaturedFormatProps): ReactNode {
                     </Button>
                 </div>
             </div>
-            <FormatCover formatId={format.id} className="max-md:hidden" />
+            <FormatCover format={format} className="max-md:hidden" />
         </section>
     );
 }

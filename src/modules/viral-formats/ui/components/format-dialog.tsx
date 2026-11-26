@@ -2,6 +2,7 @@ import ArrowRightIcon from "~icons/lucide/arrow-right";
 import CircleCheckIcon from "~icons/lucide/circle-check";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { isEditFormat } from "#/modules/viral-formats/model/edit-status";
 import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
 import { ChooseFormatButton } from "#/modules/viral-formats/ui/components/choose-format-button";
 import { FormatPreview } from "#/modules/viral-formats/ui/components/format-preview";
@@ -55,6 +56,8 @@ function ConnectFirst(): ReactNode {
  * happens in the person's Claude; choosing a format opens a batch for the raw videos.
  */
 export function FormatDialog({ format, isClaudeConnected, onClose }: FormatDialogProps): ReactNode {
+    const shouldConnectClaude = isClaudeConnected === false && isEditFormat(format.id) === true;
+
     function closeOnDismiss(isOpen: boolean): void {
         if (isOpen === true) {
             return;
@@ -88,8 +91,8 @@ export function FormatDialog({ format, isClaudeConnected, onClose }: FormatDialo
                             ))}
                         </ul>
                     </div>
-                    {isClaudeConnected === false && <ConnectFirst />}
-                    {isClaudeConnected === true && (
+                    {shouldConnectClaude === true && <ConnectFirst />}
+                    {shouldConnectClaude === false && (
                         <ChooseFormatButton format={format}>
                             <BackButton />
                         </ChooseFormatButton>

@@ -31,10 +31,11 @@ breadcrumb and for screen readers only. Light stays available through the toggle
 
 ## Format previews
 
-The featured format, gallery cards and format dialogs share the same stills. Each preview uses its
-own editing layout, such as stacked shots, a ranked list or a burned-in caption. Contraste shows a
-frame of the owner's own example video, which its dialog plays. The other cropped WebP files in
-`public/viral-formats/` use the [Pexels license](https://www.pexels.com/license/).
+The featured format, gallery cards and format dialogs share the same stills. Contraste, Dinâmico
+gamificado and Hacking use frames from the owner's examples as their covers. Their dialogs play the
+full vertical videos on demand and offer Portuguese captions. The dialogs show whether each format
+is available for editing before prompting anyone to connect Claude. The stock photos use the
+[Pexels license](https://www.pexels.com/license/).
 
 | Preview      | Photo credits                                                                                                                                                                                  |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,4 +1,7 @@
-export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "generic";
+export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "generic" | "hacking";
+
+export const FORMAT_EXAMPLE_WIDTH = 720;
+export const FORMAT_EXAMPLE_HEIGHT = 1280;
 
 /** Free formats are open to everyone; each month a new one arrives for subscribers only. */
 export type FormatAccess = "free" | "subscriber";
@@ -69,14 +72,37 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     {
         id: "generic",
         access: "free",
-        name: "Genérico",
-        tagline: "Talking head limpo com legenda.",
+        name: "Dinâmico gamificado",
+        tagline: "Cortes rápidos e efeitos no ritmo da fala.",
         description:
-            "O formato coringa: você falando para a câmera, com cortes secos, zoom nos momentos fortes e legenda. Serve para quase todo conteúdo.",
+            "Você fala para a câmera enquanto cortes, textos e efeitos destacam as partes mais importantes.",
         highlights: [
-            "Remove gaguejos, pausas e repetições",
-            "Zoom nos trechos de ênfase",
-            "Legenda grande e fácil de ler no celular",
+            "Palavras-chave em destaque na legenda",
+            "Ícones e efeitos sonoros pontuam a fala",
+            "Mudanças de enquadramento nos momentos de ênfase",
         ],
+        example: {
+            videoUrl: "/viral-formats/dynamic-gamified-example.mp4",
+            posterUrl: "/viral-formats/dynamic-gamified-example-poster.webp",
+            captionsUrl: "/viral-formats/dynamic-gamified-example.vtt",
+        },
+    },
+    {
+        id: "hacking",
+        access: "free",
+        name: "Hacking",
+        tagline: "Dicas e ferramentas em uma sequência numerada.",
+        description:
+            "Apresente uma lista de dicas ou ferramentas com números no topo da tela e um destaque visual para cada item.",
+        highlights: [
+            "Números mostram o progresso da lista",
+            "Ícones identificam as ferramentas",
+            "Tema da lista em destaque na tela",
+        ],
+        example: {
+            videoUrl: "/viral-formats/hacking-example.mp4",
+            posterUrl: "/viral-formats/hacking-example-poster.webp",
+            captionsUrl: "/viral-formats/hacking-example.vtt",
+        },
     },
 ];
