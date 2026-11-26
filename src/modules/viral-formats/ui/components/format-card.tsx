@@ -1,4 +1,5 @@
 import PlayIcon from "~icons/lucide/play";
+import { useId } from "react";
 import type { ReactNode } from "react";
 import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
 import { FormatCover } from "#/modules/viral-formats/ui/components/format-cover";
@@ -8,20 +9,25 @@ interface FormatCardProps {
     onOpen: (format: ViralFormat) => void;
 }
 
-/** One format in the row: its layout, name and line; the whole card opens it. */
+/**
+ * One format in the row: its layout, name and line; the whole card opens it. The button is its own
+ * layer over the card, named by the visible title, rather than a stretched ::after: Safari makes a
+ * button the containing block of its absolute pseudo-elements, which left only the title clickable.
+ */
 export function FormatCard({ format, onOpen }: FormatCardProps): ReactNode {
+    const nameId = useId();
+    const taglineId = useId();
+
     return (
-        <li className="relative grid w-44 shrink-0 content-start gap-2.5 sm:w-52">
+        <li className="relative grid w-44 shrink-0 content-start gap-2.5 transition-[scale] sm:w-52 motion-safe:has-[button:active]:scale-99">
             <FormatCover formatId={format.id} loading="lazy" />
             <div className="grid gap-0.5">
-                <button
-                    type="button"
-                    onClick={() => onOpen(format)}
-                    className="text-start font-bold outline-none after:absolute after:inset-0 after:rounded-xl after:transition-[box-shadow] focus-visible:after:ring-4 focus-visible:after:ring-ring motion-safe:active:scale-99"
-                >
+                <p id={nameId} className="font-bold">
                     {format.name}
-                </button>
-                <span className="text-meta text-muted-foreground">{format.tagline}</span>
+                </p>
+                <p id={taglineId} className="text-meta text-muted-foreground">
+                    {format.tagline}
+                </p>
             </div>
             <span
                 aria-hidden="true"
@@ -29,6 +35,13 @@ export function FormatCard({ format, onOpen }: FormatCardProps): ReactNode {
             >
                 <PlayIcon className="ms-0.5 size-4 fill-current *:fill-current" />
             </span>
+            <button
+                type="button"
+                aria-labelledby={nameId}
+                aria-describedby={taglineId}
+                onClick={() => onOpen(format)}
+                className="absolute inset-0 rounded-xl outline-none focus-visible:ring-4 focus-visible:ring-ring"
+            />
         </li>
     );
 }
