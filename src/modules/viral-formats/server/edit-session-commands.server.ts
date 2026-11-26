@@ -50,7 +50,7 @@ export class EditSessionNotesFullError extends UserFacingError {
 
 export class EditSessionEmptyError extends UserFacingError {
     constructor() {
-        super("Envie pelo menos um vídeo antes de começar a editar.");
+        super("Adicione pelo menos um vídeo para preparar o pedido.");
         this.name = "EditSessionEmptyError";
     }
 }

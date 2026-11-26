@@ -1,10 +1,11 @@
 import FilmIcon from "~icons/lucide/film";
-import XIcon from "~icons/lucide/x";
 import type { ReactNode } from "react";
 import type { SessionVideo } from "#/modules/viral-formats/model/edit-session";
 import { EDIT_STATUS_LABELS } from "#/modules/viral-formats/model/edit-status";
 import type { EditView } from "#/modules/viral-formats/model/edit-view";
 import { toEditFileUrl } from "#/modules/viral-formats/model/edit-view";
+import { SessionDeleteVideoButton } from "#/modules/viral-formats/ui/components/session-delete-video-button";
+import type { SessionVideoDeletion } from "#/modules/viral-formats/ui/components/session-delete-video-button";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 import { formatBytes } from "#/shared/ui/format";
 import { Spinner } from "#/shared/ui/spinner";
@@ -20,9 +21,7 @@ interface SessionVideoCardProps {
     video: SessionVideo;
     /** The edit Claude made of it, once there is one. */
     edit: EditView | undefined;
-    /** Only while the batch is open; null hides the button. */
-    onRemove: (() => void) | null;
-    isRemoving: boolean;
+    deletion: SessionVideoDeletion | null;
 }
 
 function describePreparation(video: SessionVideo): string {
@@ -65,14 +64,9 @@ function EditState({ edit }: { edit: EditView }): ReactNode {
 }
 
 /** One raw video of the batch: its frame, name, how its preparation goes and, later, its edit. */
-export function SessionVideoCard({
-    video,
-    edit,
-    onRemove,
-    isRemoving,
-}: SessionVideoCardProps): ReactNode {
+export function SessionVideoCard({ video, edit, deletion }: SessionVideoCardProps): ReactNode {
     return (
-        <li className="relative grid content-start gap-2">
+        <li className="relative grid min-w-0 content-start gap-2">
             <div className="grid aspect-clip-card place-items-center overflow-hidden rounded-xl bg-secondary">
                 {video.thumbnailUrl !== null && (
                     <img
@@ -87,9 +81,7 @@ export function SessionVideoCard({
                 )}
             </div>
             <div className="grid min-w-0 gap-0.5">
-                <p className="truncate text-sm font-bold" title={video.title}>
-                    {video.title}
-                </p>
+                <p className="text-sm font-bold [overflow-wrap:anywhere]">{video.title}</p>
                 <p className="flex items-center gap-1.5 text-meta text-muted-foreground tabular-nums">
                     {video.isReady === false && video.hasFailed === false && (
                         <Spinner className="size-3.5 shrink-0" />
@@ -98,18 +90,7 @@ export function SessionVideoCard({
                 </p>
                 {edit !== undefined && <EditState edit={edit} />}
             </div>
-            {onRemove !== null && (
-                <button
-                    type="button"
-                    onClick={onRemove}
-                    disabled={isRemoving}
-                    aria-busy={isRemoving}
-                    aria-label={`Tirar ${video.title} da edição`}
-                    className="absolute end-2 top-2 grid size-8 place-items-center rounded-full bg-stage/80 text-white outline-none transition-[background-color,scale] hover:bg-stage focus-visible:ring-4 focus-visible:ring-ring motion-safe:enabled:active:scale-99 pointer-coarse:size-11"
-                >
-                    <XIcon aria-hidden="true" className="size-4" />
-                </button>
-            )}
+            {deletion !== null && <SessionDeleteVideoButton video={video} deletion={deletion} />}
         </li>
     );
 }

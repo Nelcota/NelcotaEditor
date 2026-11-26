@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import type { APIRequestContext, Page } from "@playwright/test";
 import { z } from "zod";
@@ -108,6 +109,52 @@ test("signs a signed-out person in before asking for consent", async ({
 });
 
 const EDITABLE_FORMATS = ["Contraste", "Dinâmico gamificado", "Hacking", "Ranking"] as const;
+const PREPARE_REQUEST_LABEL = "Preparar pedido para o Claude";
+const UPLOAD_FIXTURE = "public/viral-formats/contrast-example.mp4";
+
+async function verifyFilePickerFocus(page: Page): Promise<void> {
+    await page.emulateMedia({ forcedColors: "active" });
+    const uploads = page.getByRole("region", { name: "Vídeos do lote" });
+    const backLink = uploads.locator("../..").getByRole("link", { name: "Minhas edições" });
+    await backLink.focus();
+    await page.keyboard.press("Tab");
+
+    const fileInput = page.getByLabel("Selecionar vídeos");
+    await expect(fileInput).toBeFocused();
+    const dropzone = fileInput.locator("..");
+    await expect(dropzone).toHaveCSS("outline-style", "solid");
+    await expect(dropzone).toHaveCSS("outline-width", "2px");
+    await page.emulateMedia({ forcedColors: "none" });
+}
+
+async function verifyVideoDeletion(page: Page): Promise<void> {
+    const title = "entrevista-para-o-editor-oculto-camera-dois-versao-final-tomada-07";
+    const uploads = page.getByRole("region", { name: "Vídeos do lote" });
+    const trigger = uploads.getByRole("button", { name: `Excluir vídeo ${title}` });
+    const confirmation = page.getByRole("alertdialog", { name: "Excluir vídeo?" });
+
+    await page.getByLabel("Selecionar vídeos").setInputFiles({
+        name: `${title}.mp4`,
+        mimeType: "video/mp4",
+        buffer: await readFile(UPLOAD_FIXTURE),
+    });
+    const videoTitle = uploads.getByText(title, { exact: true });
+    await expect(videoTitle).toHaveCSS("overflow-wrap", "anywhere");
+    expect(await videoTitle.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+
+    await trigger.press("Enter");
+    await expect(confirmation.getByRole("button", { name: "Cancelar" })).toBeFocused();
+    await expect(confirmation).toContainText("será apagado do Editor Oculto");
+    await expectNoAccessibilityViolations(page);
+    await page.keyboard.press("Escape");
+    await expect(trigger).toBeFocused();
+    await expect(videoTitle).toBeVisible();
+
+    await trigger.press("Enter");
+    await confirmation.getByRole("button", { name: "Excluir vídeo", exact: true }).press("Enter");
+    await expect(page.getByLabel("Selecionar vídeos")).toBeVisible();
+    await expect(uploads.getByRole("heading", { name: "Vídeos do lote" })).toBeFocused();
+}
 
 for (const format of EDITABLE_FORMATS) {
     test(`opens a ${format} batch and sends its uploaded video to Claude`, async ({
@@ -129,21 +176,22 @@ for (const format of EDITABLE_FORMATS) {
         await page.getByRole("button", { name: "Escolher formato" }).click();
 
         await expect(page.getByRole("heading", { name: `${format} #1` })).toBeVisible();
-        await expect(
-            page.getByRole("button", { name: "Começar a editar", exact: true }),
-        ).toBeDisabled();
+        const prepareRequest = page.getByRole("button", { name: PREPARE_REQUEST_LABEL });
+        await expect(prepareRequest).toBeDisabled();
+
         if (format === "Dinâmico gamificado") {
             await page.setViewportSize({ width: 320, height: 780 });
+            await verifyFilePickerFocus(page);
+            await verifyVideoDeletion(page);
             await page.getByLabel("Ajuste para o lote (opcional)").fill("Use legendas amarelas.");
         }
 
         await expectNoAccessibilityViolations(page);
-        await page
-            .getByLabel("Selecionar vídeos")
-            .setInputFiles("public/viral-formats/contrast-example.mp4");
+        await page.getByLabel("Selecionar vídeos").setInputFiles(UPLOAD_FIXTURE);
         await expect(page.getByLabel("Adicionar vídeos")).toBeVisible();
-        await page.getByRole("button", { name: "Começar a editar 1 vídeo" }).click();
+        await prepareRequest.click();
         await expect(page.getByRole("button", { name: "Copiar pedido" })).toBeVisible();
+
         if (format === "Dinâmico gamificado") {
             await expect(page.getByRole("heading", { name: "Continue no Claude" })).toBeFocused();
             await expect(page.getByText("Use legendas amarelas.")).toBeVisible();

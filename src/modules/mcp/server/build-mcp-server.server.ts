@@ -18,6 +18,7 @@ import { VIRAL_FORMATS } from "#/modules/viral-formats/model/viral-formats";
 import { createFormatEdit } from "#/modules/viral-formats/server/create-format-edit.server";
 import type { FormatEditRequest } from "#/modules/viral-formats/server/create-format-edit.server";
 import { findUserEdit, listUserEdits } from "#/modules/viral-formats/server/edit-queries.server";
+import { EDIT_SESSION_REQUEST_LABEL } from "#/modules/viral-formats/model/edit-session";
 import { listQueuedEditSessions } from "#/modules/viral-formats/server/edit-session-queries.server";
 
 const SERVER_NAME = "editor-oculto";
@@ -51,7 +52,7 @@ const SPLIT_SCREEN_GUIDE = [
 ].join(" ");
 
 const EDIT_QUEUE_GUIDE = [
-    "Lists the batches the person prepared in Editor Oculto and sent to edit (they clicked Começar a editar), oldest first.",
+    `Lists the batches the person queued in Editor Oculto by clicking "${EDIT_SESSION_REQUEST_LABEL}", oldest first.`,
     "Each batch has a format, the person's adjustments (apply them to every video of the batch) and its raw videos.",
     "Edit each video that is transcribed and has no edit yet: read its transcript with get_video_transcript, then call the format's edit tool with the batch's sessionId.",
     "Use create_split_screen_edit for split-screen (Tela dividida), create_contrast_edit for this-or-that (Contraste), create_gamified_edit for generic (Dinâmico gamificado), create_hacking_edit for hacking (Hacking), and create_ranking_edit for ranking (Ranking).",

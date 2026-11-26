@@ -28,6 +28,7 @@ export function SessionDropzone({ onFiles, variant }: SessionDropzoneProps): Rea
         <div
             className={cn(
                 "group relative rounded-xl has-[input:focus-visible]:ring-4 has-[input:focus-visible]:ring-ring",
+                "forced-colors:has-[input:focus-visible]:outline-2 forced-colors:has-[input:focus-visible]:outline-offset-2 forced-colors:has-[input:focus-visible]:outline-[CanvasText]",
                 isEmpty &&
                     "grid min-h-56 place-items-center content-center gap-4 rounded-2xl border border-dashed border-input bg-background px-4 py-8 text-center transition-colors has-[input:hover]:border-primary-ink has-[input:hover]:bg-primary/5",
             )}

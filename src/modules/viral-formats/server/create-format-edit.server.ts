@@ -6,6 +6,7 @@ import { findTranscriptWords } from "#/modules/transcription/server/find-transcr
 import { videos } from "#/modules/video-records/video-records.schema";
 import type { ContrastPlan } from "#/modules/viral-formats/model/contrast-plan";
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
+import { EDIT_SESSION_REQUEST_LABEL } from "#/modules/viral-formats/model/edit-session";
 import type { GamifiedPlan } from "#/modules/viral-formats/model/gamified-plan";
 import type { HackingPlan } from "#/modules/viral-formats/model/hacking-plan";
 import type { PresenterPlan } from "#/modules/viral-formats/model/presenter-plan";
@@ -138,7 +139,7 @@ async function findQueuedSessionEdit(
 
     if (session.status !== "queued") {
         throw new InvalidEditPlanError(
-            "The person has not sent that batch to edit yet. Ask them to click Começar a editar.",
+            `The person has not queued that batch yet. Ask them to click "${EDIT_SESSION_REQUEST_LABEL}".`,
         );
     }
 
