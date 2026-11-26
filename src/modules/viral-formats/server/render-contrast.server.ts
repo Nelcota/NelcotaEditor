@@ -14,7 +14,7 @@ interface ContrastRenderInput extends PresenterRenderInput {
 export async function renderContrast(input: ContrastRenderInput): Promise<string> {
     const { plan, workDirectory } = input;
     await writeFile(path.join(workDirectory, OVERLAY_FILE_NAME), buildContrastOverlay(plan));
-    const outputName = await cutPresenter(input, OVERLAY_FILE_NAME);
+    const outputName = await cutPresenter(input, { overlayName: OVERLAY_FILE_NAME });
 
     return path.join(workDirectory, outputName);
 }

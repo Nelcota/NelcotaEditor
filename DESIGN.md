@@ -42,6 +42,10 @@ Contraste uses the same batch flow as Tela dividida. Its renders keep the presen
 frame, with the topic at the top and two verdict labels during each comparison. The active verdict
 and the option's name change when the presenter moves to the next option.
 
+Dinâmico gamificado uses the same batch flow. Its vertical renders keep the clean takes, group the
+transcript into short captions, colour the selected words and pair each timed label and icon with a
+brief zoom and a quiet chime mixed under the voice.
+
 | Preview      | Photo credits                                                                                                                                                                                  |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Split screen | [Pavel Danilyuk](https://www.pexels.com/photo/a-female-coffee-barista-making-coffee-6612646/), [Esra Afşar](https://www.pexels.com/photo/barista-preparing-espresso-in-cafe-setting-32078567/) |

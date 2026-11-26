@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
     MAX_CUT_SECONDS,
     measureCutSeconds,
+    overlayTextSchema,
     presenterPlanSchema,
 } from "#/modules/viral-formats/model/presenter-plan";
 
@@ -10,18 +11,12 @@ const MAX_OVERLAY_LENGTH = 44;
 const MIN_VISIBLE_SECONDS = 0.25;
 const MIN_TAKE_SECONDS = 0.04;
 const overlaySecondsSchema = z.number().finite().min(0).max(MAX_CUT_SECONDS);
-// ASS treats braces and backslashes as tags. One line prevents additional events in the file.
-const overlayTextSchema = z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_OVERLAY_LENGTH)
-    .regex(/^[^\p{Cc}\p{Cf}\p{Zl}\p{Zp}{}\\]+$/u);
+const comparisonTextSchema = overlayTextSchema.max(MAX_OVERLAY_LENGTH);
 
 const comparisonSchema = z.object({
     start: overlaySecondsSchema.describe("Start in seconds of the edited video."),
     end: overlaySecondsSchema.describe("End in seconds of the edited video."),
-    label: overlayTextSchema.describe("Short name of the option as discussed by the presenter."),
+    label: comparisonTextSchema.describe("Short name of the option as discussed by the presenter."),
     verdict: z.enum(["good", "bad"]).describe("The presenter's verdict on this option."),
 });
 
@@ -39,7 +34,9 @@ function haveOrderedComparisons(
 
 export const contrastPlanSchema = presenterPlanSchema
     .extend({
-        topic: overlayTextSchema.describe("Short heading in the same language as the presenter."),
+        topic: comparisonTextSchema.describe(
+            "Short heading in the same language as the presenter.",
+        ),
         comparisons: z.array(comparisonSchema).min(1).max(MAX_COMPARISONS),
     })
     .refine((plan) => plan.takes.every((take) => take.end - take.start >= MIN_TAKE_SECONDS), {

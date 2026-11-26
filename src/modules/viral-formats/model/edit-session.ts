@@ -28,6 +28,7 @@ export const MAX_LISTED_SESSIONS = 30;
 const FORMAT_NAMES: Readonly<Record<EditFormat, string>> = {
     "split-screen": "Tela dividida",
     "this-or-that": "Contraste",
+    generic: "Dinâmico gamificado",
 };
 
 export function toFormatName(format: EditFormat): string {

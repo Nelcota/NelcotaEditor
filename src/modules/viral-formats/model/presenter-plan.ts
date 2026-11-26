@@ -7,6 +7,13 @@ export const MAX_CUT_SECONDS = 3 * 60;
 
 export const sourceSecondsSchema = z.number().finite().nonnegative().max(MAX_SOURCE_SECONDS);
 
+// ASS treats braces and backslashes as tags. Text must not open a tag or start a new event.
+export const overlayTextSchema = z
+    .string()
+    .trim()
+    .min(1)
+    .regex(/^[^\p{Cc}\p{Cf}\p{Zl}\p{Zp}{}\\]+$/u);
+
 const takeSchema = z
     .object({
         start: sourceSecondsSchema.describe("Start of the kept take, in seconds of the raw video."),

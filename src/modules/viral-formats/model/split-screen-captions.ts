@@ -4,10 +4,8 @@ import {
     buildAssOverlay,
     toAssTime,
 } from "#/modules/viral-formats/model/ass-overlay";
-import type {
-    CutWord,
-    SplitScreenPiece,
-} from "#/modules/viral-formats/model/split-screen-timeline";
+import type { CutWord } from "#/modules/viral-formats/model/presenter-timeline";
+import type { SplitScreenPiece } from "#/modules/viral-formats/model/split-screen-timeline";
 
 /** The seam between the example on top and the presenter below (the format's REC-01). */
 export const TOP_PANEL_HEIGHT = 952;

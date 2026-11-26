@@ -10,6 +10,7 @@ import { MCP_RESOURCE } from "#/modules/auth/server/auth.server";
 import { contrastPlanSchema } from "#/modules/viral-formats/model/contrast-plan";
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
 import { isEditFormat } from "#/modules/viral-formats/model/edit-status";
+import { gamifiedPlanSchema } from "#/modules/viral-formats/model/gamified-plan";
 import { splitScreenPlanSchema } from "#/modules/viral-formats/model/split-screen-plan";
 import { VIRAL_FORMATS } from "#/modules/viral-formats/model/viral-formats";
 import { createFormatEdit } from "#/modules/viral-formats/server/create-format-edit.server";
@@ -51,7 +52,7 @@ const EDIT_QUEUE_GUIDE = [
     "Lists the batches the person prepared in Editor Oculto and sent to edit (they clicked Começar a editar), oldest first.",
     "Each batch has a format, the person's adjustments (apply them to every video of the batch) and its raw videos.",
     "Edit each video that is transcribed and has no edit yet: read its transcript with get_video_transcript, then call the format's edit tool with the batch's sessionId.",
-    "Use create_split_screen_edit for split-screen (Tela dividida) and create_contrast_edit for this-or-that (Contraste).",
+    "Use create_split_screen_edit for split-screen (Tela dividida), create_contrast_edit for this-or-that (Contraste), and create_gamified_edit for generic (Dinâmico gamificado).",
     "A video that is not transcribed yet is still being prepared; edit it on a later call.",
 ].join(" ");
 
@@ -62,6 +63,14 @@ const CONTRAST_GUIDE = [
     "Use non-overlapping comparisons in edited time, after subtracting the cuts. Leave the intro and closing clear of comparison labels unless the speaker is evaluating an option there.",
     "When the person sent a batch, follow its adjustments and pass its sessionId from list_edit_queue.",
     "The render runs in the background; check it with get_edit.",
+].join(" ");
+
+const GAMIFIED_GUIDE = [
+    "Edits a talking-head video in Dinâmico gamificado: quick cuts, short captions with coloured keywords, and a brief zoom, icon and cue sound on selected highlights.",
+    "Read get_video_transcript first. Keep clean takes in playback order. Drop restarts and long pauses without cutting words, reactions or the final call to action.",
+    "Choose individual spoken keywords for the captions. Add a few short highlights grounded in the transcript. Use step for instructions, tip for useful advice, and emphasis for a turning point or result. Avoid repeating a caption verbatim in a highlight.",
+    "Highlights use edited seconds, after subtracting the cuts. Keep them in order, without overlap, and use the speaker's language for labels.",
+    "When the person sent a batch, follow its adjustments and pass its sessionId from list_edit_queue. Check the background render with get_edit.",
 ].join(" ");
 
 const editIdInputSchema = z.object({
@@ -191,6 +200,16 @@ function registerEditTools(server: McpServer, userId: string): void {
             inputSchema: contrastPlanSchema,
         },
         async (plan) => await queueEditResult(userId, { format: "this-or-that", plan }),
+    );
+
+    server.registerTool(
+        "create_gamified_edit",
+        {
+            title: "Editar em Dinâmico gamificado",
+            description: GAMIFIED_GUIDE,
+            inputSchema: gamifiedPlanSchema,
+        },
+        async (plan) => await queueEditResult(userId, { format: "generic", plan }),
     );
 
     server.registerTool(

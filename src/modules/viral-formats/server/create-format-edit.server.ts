@@ -6,6 +6,7 @@ import { findTranscriptWords } from "#/modules/transcription/server/find-transcr
 import { videos } from "#/modules/video-records/video-records.schema";
 import type { ContrastPlan } from "#/modules/viral-formats/model/contrast-plan";
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
+import type { GamifiedPlan } from "#/modules/viral-formats/model/gamified-plan";
 import type { PresenterPlan } from "#/modules/viral-formats/model/presenter-plan";
 import { listSplitScreenSourceIds } from "#/modules/viral-formats/model/split-screen-plan";
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
@@ -24,7 +25,8 @@ type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export type FormatEditRequest =
     | { format: "split-screen"; plan: SplitScreenPlan }
-    | { format: "this-or-that"; plan: ContrastPlan };
+    | { format: "this-or-that"; plan: ContrastPlan }
+    | { format: "generic"; plan: GamifiedPlan };
 
 interface PlanVideo {
     id: string;

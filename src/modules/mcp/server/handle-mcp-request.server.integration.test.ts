@@ -45,6 +45,25 @@ const toolResultSchema = z.object({
     }),
 });
 
+const EDIT_TOOL_CASES = [
+    {
+        format: "this-or-that",
+        tool: "create_contrast_edit",
+        fields: {
+            topic: "Fones de ouvido",
+            comparisons: [{ start: 1, end: 3, label: "Com fio", verdict: "good" }],
+        },
+    },
+    {
+        format: "generic",
+        tool: "create_gamified_edit",
+        fields: {
+            keywords: ["Bom"],
+            highlights: [{ start: 1, end: 3, label: "Primeira dica", kind: "tip" }],
+        },
+    },
+] as const;
+
 function toCookieHeaders(setCookieHeaders: Headers): Headers {
     const cookie = setCookieHeaders
         .getSetCookie()
@@ -278,34 +297,35 @@ describe("handleMcpRequest", () => {
         expect(response.status).toBe(HTTP_UNAUTHORIZED);
     });
 
-    it("queues a Contraste edit through the connected Claude tool", async () => {
-        const person = await signIn();
-        const videoId = await createVideo(person.userId, "Comparison");
-        await db
-            .update(videos)
-            .set({ sourcePath: `videos/${videoId}/source.mp4`, durationSeconds: 10 })
-            .where(eq(videos.id, videoId));
-        await db
-            .insert(transcripts)
-            .values({ videoId, words: [{ text: "Bom", startSeconds: 1, endSeconds: 1.5 }] });
-        const accessToken = await connectClaude(person);
-        const answer = await readToolText(
-            await callTool(accessToken, "create_contrast_edit", {
-                videoId,
-                title: "Comparison",
-                topic: "Fones de ouvido",
-                takes: [{ start: 0, end: 5 }],
-                comparisons: [{ start: 1, end: 3, label: "Com fio", verdict: "good" }],
-            }),
-        );
+    for (const { format, tool, fields } of EDIT_TOOL_CASES) {
+        it(`queues ${format} through the connected Claude tool`, async () => {
+            const person = await signIn();
+            const videoId = await createVideo(person.userId, "Comparison");
+            await db
+                .update(videos)
+                .set({ sourcePath: `videos/${videoId}/source.mp4`, durationSeconds: 10 })
+                .where(eq(videos.id, videoId));
+            await db
+                .insert(transcripts)
+                .values({ videoId, words: [{ text: "Bom", startSeconds: 1, endSeconds: 1.5 }] });
+            const accessToken = await connectClaude(person);
+            const answer = await readToolText(
+                await callTool(accessToken, tool, {
+                    videoId,
+                    title: "Comparison",
+                    takes: [{ start: 0, end: 5 }],
+                    ...fields,
+                }),
+            );
 
-        expect(answer.isError).toBe(false);
-        const result = z
-            .object({ editId: z.uuid(), status: z.literal("queued") })
-            .parse(JSON.parse(answer.text));
-        const edit = await readToolText(
-            await callTool(accessToken, "get_edit", { editId: result.editId }),
-        );
-        expect(JSON.parse(edit.text)).toMatchObject({ format: "this-or-that", status: "queued" });
-    });
+            expect(answer.isError).toBe(false);
+            const result = z
+                .object({ editId: z.uuid(), status: z.literal("queued") })
+                .parse(JSON.parse(answer.text));
+            const edit = await readToolText(
+                await callTool(accessToken, "get_edit", { editId: result.editId }),
+            );
+            expect(JSON.parse(edit.text)).toMatchObject({ format, status: "queued" });
+        });
+    }
 });

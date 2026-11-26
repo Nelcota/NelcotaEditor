@@ -2,6 +2,7 @@ import { mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "#/db/database.server";
+import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { contrastPlanSchema } from "#/modules/viral-formats/model/contrast-plan";
 import {
     InvalidEditJobError,
@@ -9,6 +10,7 @@ import {
 } from "#/modules/viral-formats/model/edit-errors";
 import { findTranscriptWords } from "#/modules/transcription/server/find-transcript-words.server";
 import { videos } from "#/modules/video-records/video-records.schema";
+import { gamifiedPlanSchema } from "#/modules/viral-formats/model/gamified-plan";
 import {
     listSplitScreenSourceIds,
     splitScreenPlanSchema,
@@ -19,6 +21,7 @@ import {
     renderEditJobSchema,
 } from "#/modules/viral-formats/server/edit-render-queue.server";
 import { renderContrast } from "#/modules/viral-formats/server/render-contrast.server";
+import { renderGamified } from "#/modules/viral-formats/server/render-gamified.server";
 import { renderSplitScreen } from "#/modules/viral-formats/server/render-split-screen.server";
 import type { Edit } from "#/modules/viral-formats/viral-formats.schema";
 import { edits } from "#/modules/viral-formats/viral-formats.schema";
@@ -71,35 +74,48 @@ async function prepareLocalVideos(
 async function renderEdit(edit: Edit, workDirectory: string, signal: AbortSignal): Promise<string> {
     const { userId, videoId, format } = edit;
 
-    if (format === "this-or-that") {
-        const plan = contrastPlanSchema.parse(edit.plan);
-        const localPaths = await prepareLocalVideos(userId, [videoId], workDirectory);
+    if (format === "split-screen") {
+        const plan = splitScreenPlanSchema.parse(edit.plan);
+        const localPaths = await prepareLocalVideos(
+            userId,
+            [videoId, ...listSplitScreenSourceIds(plan)],
+            workDirectory,
+        );
         const rawVideoPath = requireLocalVideo(localPaths, videoId);
+        const words = await requireTranscript(videoId);
 
-        return await renderContrast({ plan, rawVideoPath, workDirectory, signal });
+        return await renderSplitScreen({
+            plan,
+            words,
+            rawVideoPath,
+            examplePaths: localPaths,
+            workDirectory,
+            signal,
+        });
     }
 
-    const plan = splitScreenPlanSchema.parse(edit.plan);
-    const localPaths = await prepareLocalVideos(
-        userId,
-        [videoId, ...listSplitScreenSourceIds(plan)],
-        workDirectory,
-    );
+    const localPaths = await prepareLocalVideos(userId, [videoId], workDirectory);
     const rawVideoPath = requireLocalVideo(localPaths, videoId);
+
+    if (format === "generic") {
+        const plan = gamifiedPlanSchema.parse(edit.plan);
+        const words = await requireTranscript(videoId);
+
+        return await renderGamified({ plan, words, rawVideoPath, workDirectory, signal });
+    }
+
+    const plan = contrastPlanSchema.parse(edit.plan);
+    return await renderContrast({ plan, rawVideoPath, workDirectory, signal });
+}
+
+async function requireTranscript(videoId: string): Promise<ReadonlyArray<TranscriptWord>> {
     const words = await findTranscriptWords(videoId);
 
     if (words === null) {
         throw new MissingEditSourceError(videoId);
     }
 
-    return await renderSplitScreen({
-        plan,
-        words,
-        rawVideoPath,
-        examplePaths: localPaths,
-        workDirectory,
-        signal,
-    });
+    return words;
 }
 
 function requireLocalVideo(localPaths: ReadonlyMap<string, string>, videoId: string): string {

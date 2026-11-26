@@ -31,6 +31,12 @@ export interface PresenterRenderInput extends RenderWorkspace {
     rawVideoPath: string;
 }
 
+interface PresenterEffects {
+    overlayName: string;
+    videoFilter?: string;
+    soundSource?: string;
+}
+
 export function toRenderSeconds(value: number): string {
     return value.toFixed(TIME_DECIMALS);
 }
@@ -45,7 +51,35 @@ export async function runFormatFfmpeg(
     });
 }
 
-function buildPresenterFilter(plan: PresenterPlan, overlayName: string | null): string {
+function buildAudioFilters(soundSource: string | undefined): Array<string> {
+    if (soundSource === undefined) {
+        return [`[ca]${VOICE_LOUDNESS}[a]`];
+    }
+
+    return [
+        `[ca]${VOICE_LOUDNESS},aresample=48000[voice]`,
+        `${soundSource}[sound]`,
+        "[voice][sound]amix=inputs=2:duration=first:normalize=0[a]",
+    ];
+}
+
+function buildVideoFilters(effects: PresenterEffects | null): string {
+    const filters = [
+        `[cv]crop=w='min(iw,ih*9/16)':h='min(ih,iw*16/9)',scale=${FRAME_WIDTH}:${FRAME_HEIGHT},fps=${FRAMES_PER_SECOND},setsar=1`,
+    ];
+
+    if (effects?.videoFilter !== undefined) {
+        filters.push(effects.videoFilter);
+    }
+
+    if (effects !== null) {
+        filters.push(`ass=${effects.overlayName}`);
+    }
+
+    return `${filters.join(",")}[v]`;
+}
+
+function buildPresenterFilter(plan: PresenterPlan, effects: PresenterEffects | null): string {
     const takes = plan.takes;
     const trims = takes.map(
         (take, index) =>
@@ -53,31 +87,23 @@ function buildPresenterFilter(plan: PresenterPlan, overlayName: string | null): 
             `[0:a]atrim=start=${toRenderSeconds(take.start)}:end=${toRenderSeconds(take.end)},asetpts=PTS-STARTPTS[a${index}]`,
     );
     const concatInputs = takes.map((_take, index) => `[v${index}][a${index}]`).join("");
-    const videoFilters = [
-        `[cv]crop=w='min(iw,ih*9/16)':h='min(ih,iw*16/9)',scale=${FRAME_WIDTH}:${FRAME_HEIGHT},fps=${FRAMES_PER_SECOND},setsar=1`,
-    ];
-
-    if (overlayName !== null) {
-        videoFilters.push(`ass=${overlayName}`);
-    }
-
     return [
         ...trims,
         `${concatInputs}concat=n=${takes.length}:v=1:a=1[cv][ca]`,
-        `${videoFilters.join(",")}[v]`,
-        `[ca]${VOICE_LOUDNESS}[a]`,
+        buildVideoFilters(effects),
+        ...buildAudioFilters(effects?.soundSource),
     ].join(";");
 }
 
 /** The kept takes, one after the other, with a 9:16 crop and an even voice level. */
 export async function cutPresenter(
     input: PresenterRenderInput,
-    overlayName: string | null = null,
+    effects: PresenterEffects | null = null,
 ): Promise<string> {
-    const filter = buildPresenterFilter(input.plan, overlayName);
+    const filter = buildPresenterFilter(input.plan, effects);
     let outputName = PRESENTER_FILE_NAME;
 
-    if (overlayName !== null) {
+    if (effects !== null) {
         outputName = OUTPUT_FILE_NAME;
     }
 
