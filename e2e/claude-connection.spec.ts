@@ -129,12 +129,28 @@ for (const format of EDITABLE_FORMATS) {
         await page.getByRole("button", { name: "Escolher formato" }).click();
 
         await expect(page.getByRole("heading", { name: `${format} #1` })).toBeVisible();
+        await expect(
+            page.getByRole("button", { name: "Começar a editar", exact: true }),
+        ).toBeDisabled();
+        if (format === "Dinâmico gamificado") {
+            await page.setViewportSize({ width: 320, height: 780 });
+            await page.getByLabel("Ajuste para o lote (opcional)").fill("Use legendas amarelas.");
+        }
+
         await expectNoAccessibilityViolations(page);
         await page
-            .getByLabel("Suba seus vídeos brutos")
+            .getByLabel("Selecionar vídeos")
             .setInputFiles("public/viral-formats/contrast-example.mp4");
+        await expect(page.getByLabel("Adicionar vídeos")).toBeVisible();
         await page.getByRole("button", { name: "Começar a editar 1 vídeo" }).click();
         await expect(page.getByRole("button", { name: "Copiar pedido" })).toBeVisible();
+        if (format === "Dinâmico gamificado") {
+            await expect(page.getByRole("heading", { name: "Continue no Claude" })).toBeFocused();
+            await expect(page.getByText("Use legendas amarelas.")).toBeVisible();
+            await page.reload({ waitUntil: "networkidle" });
+            await expect(page.getByText("Use legendas amarelas.")).toBeVisible();
+            await expectNoAccessibilityViolations(page);
+        }
     });
 }
 

@@ -52,9 +52,18 @@ export const createEditSessionInputSchema = z.object({ format: z.enum(EDIT_FORMA
 
 export const sessionVideoInputSchema = z.object({ sessionId: z.uuid(), videoId: z.uuid() });
 
+export const sessionAdjustmentSchema = z
+    .string()
+    .trim()
+    .max(MAX_SESSION_NOTE_LENGTH, {
+        error: `Use até ${MAX_SESSION_NOTE_LENGTH} caracteres.`,
+    });
 export const sessionNoteInputSchema = z.object({
     sessionId: z.uuid(),
-    body: z.string().trim().min(1).max(MAX_SESSION_NOTE_LENGTH),
+    body: sessionAdjustmentSchema.min(1),
+});
+export const queueEditSessionInputSchema = editSessionIdInputSchema.extend({
+    adjustment: sessionAdjustmentSchema.default(""),
 });
 
 export interface EditSessionSummary {

@@ -1,3 +1,4 @@
+import FilmIcon from "~icons/lucide/film";
 import XIcon from "~icons/lucide/x";
 import type { ReactNode } from "react";
 import type { SessionVideo } from "#/modules/viral-formats/model/edit-session";
@@ -72,7 +73,7 @@ export function SessionVideoCard({
 }: SessionVideoCardProps): ReactNode {
     return (
         <li className="relative grid content-start gap-2">
-            <div className="aspect-clip-card overflow-hidden rounded-xl bg-stage">
+            <div className="grid aspect-clip-card place-items-center overflow-hidden rounded-xl bg-secondary">
                 {video.thumbnailUrl !== null && (
                     <img
                         src={video.thumbnailUrl}
@@ -80,6 +81,9 @@ export function SessionVideoCard({
                         className="size-full object-cover"
                         loading="lazy"
                     />
+                )}
+                {video.thumbnailUrl === null && (
+                    <FilmIcon aria-hidden="true" className="size-7 text-muted-foreground" />
                 )}
             </div>
             <div className="grid min-w-0 gap-0.5">
@@ -101,7 +105,7 @@ export function SessionVideoCard({
                     disabled={isRemoving}
                     aria-busy={isRemoving}
                     aria-label={`Tirar ${video.title} da edição`}
-                    className="absolute end-2 top-2 grid size-8 place-items-center rounded-full bg-stage/80 text-white outline-none transition-[background-color,scale] hover:bg-stage focus-visible:ring-4 focus-visible:ring-ring motion-safe:enabled:active:scale-99"
+                    className="absolute end-2 top-2 grid size-8 place-items-center rounded-full bg-stage/80 text-white outline-none transition-[background-color,scale] hover:bg-stage focus-visible:ring-4 focus-visible:ring-ring motion-safe:enabled:active:scale-99 pointer-coarse:size-11"
                 >
                     <XIcon aria-hidden="true" className="size-4" />
                 </button>

@@ -42,6 +42,15 @@ The subscription offer gives the monthly price its own space beside the benefit 
 lime button for checkout. The price and payment terms stack below the benefit in narrow containers,
 and the button takes the full row on phones.
 
+The batch workspace groups uploads and their progress in a video panel. The Claude panel holds one
+optional adjustment field and one action to queue the videos and save the adjustment together.
+The panels stack in narrow containers. Once a batch is queued, the Claude panel shows the request to
+copy and its saved adjustments.
+
+Use the unmodified Claude Spark in Clay from the [Anthropic press kit](https://www.anthropic.com/press-kit)
+to identify Claude in the integration, connection prompts and batch handoff. The same mark stays
+Clay in both themes. Each placement has its own text label.
+
 Contraste uses the same batch flow as Tela dividida. Its renders keep the presenter in a vertical
 frame, with the topic at the top and two verdict labels during each comparison. The active verdict
 and the option's name change when the presenter moves to the next option.
@@ -333,7 +342,7 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-25 | The "Novo vídeo" card leaves the sidebar; new videos start from Início's link box and the Vídeos page | The owner asked to remove it |
 | 2026-11-25 | "Comece por aqui" (`/getting-started`, from the Editor Oculto prototype): first in the sidebar under an "Editor Oculto" label with a done/total pill, also in the collapsed rail; the page has the welcome lesson beside a checklist of four steps, the Claude links and "Enviar meu primeiro vídeo". The checklist is kept per person in the browser; the lesson says it is not published until its video exists | The owner asked for the prototype's first screen; no Etapa 1 exists yet, so the button starts a video |
 | 2026-11-25 | Stage 1 of joining the Editor Oculto prototype: the sidebar follows its guide (groups Editor Oculto, Cortes, Geral; no Início, Vídeos or storage card), "/" opens Comece por aqui, the link box moves to Meus cortes, and Etapa 1, Formatos Virais, Minhas edições and the Cortes Comece por aqui arrive. Where nothing works yet (the Claude connection, editing, lessons), the page says so instead of simulating it | The owner chose the guide's menu and asked for real pages over the prototype's simulations; tokens, Pix and the Cortes lock come next |
-| 2026-11-25 | Claude's logo (`ClaudeLogo`, simple-icons, in its own orange `--claude`) marks every place about the person's Claude: Etapa 1's picture and sidebar item, the not-connected notice on Formatos Virais and the three Claude links on Comece por aqui. It keeps its colour over the lime icon tint | The owner asked for the real logo in place of the asterisk; a brand mark in the action colour would read as ours |
+| 2026-11-25 | Claude's mark identifies Etapa 1, its sidebar item, the connection notice in Formatos Virais and the Claude links on Comece por aqui | The owner asked to replace the asterisk with the Claude mark |
 | 2026-11-25 | Suporte direction B (board `design/explore/support`): "Como podemos ajudar?" with the two areas, Editor Oculto and Cortes, as doors that start a conversation; "Suas conversas" as a table (Nº, Assunto, Área, Situação, Atualizada) that drops columns as it narrows; a conversation opens as a timeline with its number, area, opening date, video and "Meu problema foi resolvido"; states read Aguardando suporte, Respondido and Resolvido; "ticket" becomes "conversa" in the copy | The owner picked B from three directions after the prototype's support; the area lets the team split the queue |
 | 2026-11-25 | Meus cortes redone: eyebrow Cortes and "Cole um link. O Editor corta.", one card that makes clips (YouTube link, Quantos cortes, Duração, the order in one line, Enviar arquivo and Gerar cortes, starting from the saved preferences), Vídeos recentes, then Seus cortes with the library | The owner asked for a better Meus cortes without questions; the card follows the prototype's, without tokens until they exist |
 | 2026-11-25 | Etapa 1 connects the person's Claude for real: Editor Oculto is an MCP server at /api/mcp with Better Auth's MCP plugin as its OAuth provider (Claude registers itself; the person signs in at /oauth/sign-in and approves at /oauth/consent). Etapa 1 shows the address to paste into Claude's custom connectors, waits for the connection and then offers to disconnect; Formatos Virais drop the connect notice once Claude is in. The first tools only read: the formats, the person's videos and a video's transcript | The owner chose option A: Claude decides the edit and our worker renders; claude.ai offers no one-click install, so the address is copied |

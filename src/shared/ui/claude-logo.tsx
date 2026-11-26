@@ -1,11 +1,10 @@
-import ClaudeIcon from "~icons/simple-icons/claude";
 import type { ReactNode, SVGProps } from "react";
-import { cn } from "#/shared/ui/cn";
 
-/**
- * Claude's mark in its own orange, wherever the page talks about the person's Claude. The colour
- * wins over the tint that sidebars and notices give their icons: it is a brand, not a state.
- */
-export function ClaudeLogo({ className, ...props }: SVGProps<SVGSVGElement>): ReactNode {
-    return <ClaudeIcon aria-hidden="true" {...props} className={cn("text-claude!", className)} />;
+/** The unmodified Claude Spark in Clay from Anthropic's press kit. */
+export function ClaudeLogo(props: SVGProps<SVGSVGElement>): ReactNode {
+    return (
+        <svg {...props} viewBox="0 0 94 94" aria-hidden="true" focusable="false">
+            <image href="/claude-spark.svg" width="94" height="94" />
+        </svg>
+    );
 }

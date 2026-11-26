@@ -1,10 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { MAX_SESSION_VIDEOS } from "#/modules/viral-formats/model/edit-session";
 import type { EditSessionView } from "#/modules/viral-formats/model/edit-session";
 import { invalidateEditSessionQueries } from "#/modules/viral-formats/model/edit-session-queries";
 import { PendingUploadCard } from "#/modules/viral-formats/ui/components/pending-upload-card";
-import { SessionDropzone } from "#/modules/viral-formats/ui/components/session-dropzone";
 import { SessionVideoCard } from "#/modules/viral-formats/ui/components/session-video-card";
 import type { PendingUpload } from "#/modules/viral-formats/ui/hooks/use-batch-upload";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -15,7 +13,6 @@ const REMOVE_ERROR_MESSAGE = "Não foi possível tirar o vídeo. Tente de novo."
 interface SessionVideoGridProps {
     session: EditSessionView;
     pending: Array<PendingUpload>;
-    onFiles: (files: Array<File>) => void;
     onDismiss: (key: string) => void;
     /**
      * Deletes the raw video, which takes it out of the batch too (the link cascades). One call, so
@@ -24,9 +21,9 @@ interface SessionVideoGridProps {
     deleteVideo: (videoId: string) => Promise<void>;
 }
 
-/** The batch's raw videos, the ones still on their way, and room for more while it is open. */
+/** The batch's raw videos and the ones still on their way. */
 export function SessionVideoGrid(props: SessionVideoGridProps): ReactNode {
-    const { session, pending, onFiles, onDismiss, deleteVideo } = props;
+    const { session, pending, onDismiss, deleteVideo } = props;
     const queryClient = useQueryClient();
     const editsByVideo = new Map(session.edits.map((edit) => [edit.videoId, edit]));
     const remove = useMutation({
@@ -44,7 +41,7 @@ export function SessionVideoGrid(props: SessionVideoGridProps): ReactNode {
 
     return (
         <div className="grid gap-3">
-            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+            <ul className="grid grid-cols-2 gap-x-3 gap-y-5 @lg/videos:grid-cols-3 @2xl/videos:grid-cols-4">
                 {session.videos.map((video) => (
                     <SessionVideoCard
                         key={video.id}
@@ -61,12 +58,6 @@ export function SessionVideoGrid(props: SessionVideoGridProps): ReactNode {
                         onDismiss={() => onDismiss(upload.key)}
                     />
                 ))}
-                {session.status === "collecting" &&
-                    session.videos.length + pending.length < MAX_SESSION_VIDEOS && (
-                        <li>
-                            <SessionDropzone variant="tile" onFiles={onFiles} />
-                        </li>
-                    )}
             </ul>
             {remove.isError === true && (
                 <FormAlert message={toErrorMessage(remove.error, REMOVE_ERROR_MESSAGE)} />

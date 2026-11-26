@@ -1,102 +1,91 @@
-import PlayIcon from "~icons/lucide/play";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
-import type { EditSessionView } from "#/modules/viral-formats/model/edit-session";
-import { invalidateEditSessionQueries } from "#/modules/viral-formats/model/edit-session-queries";
-import { queueMyEditSession } from "#/modules/viral-formats/server/edit-session-functions";
-import { Button } from "#/shared/ui/button";
+import { useEffect, useRef } from "react";
+import type { ReactNode, RefObject } from "react";
+import type { EditSessionView, SessionNote } from "#/modules/viral-formats/model/edit-session";
+import { SessionAdjustments } from "#/modules/viral-formats/ui/components/session-adjustments";
+import { SessionRequestForm } from "#/modules/viral-formats/ui/components/session-request-form";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 import { CopyTextButton } from "#/shared/ui/copy-text-button";
-import { FormAlert } from "#/shared/ui/form-alert";
-import { pluralize } from "#/shared/ui/pluralize";
-import { toErrorMessage } from "#/shared/ui/to-error-message";
 
 const CLAUDE_REQUEST = "Edite a minha fila do Editor Oculto.";
-const FALLBACK_ERROR_MESSAGE = "Não foi possível mandar para o Claude. Tente de novo.";
-const UPLOADS_RUNNING_MESSAGE = "Espere os envios terminarem para começar a editar.";
-
-interface SessionActionsProps {
-    session: EditSessionView;
-    uploadsRunning: number;
-}
-
-function describeQueue(videoCount: number): string {
-    if (videoCount === 0) {
-        return "Nenhum vídeo enviado ainda";
-    }
-
-    return `${videoCount} ${pluralize(videoCount, "vídeo", "vídeos")} na fila`;
-}
 
 /** After the batch is sent: what to tell Claude, ready to copy. */
-function QueuedForClaude(): ReactNode {
+function QueuedForClaude({
+    headingRef,
+    notes,
+}: {
+    headingRef: RefObject<HTMLHeadingElement | null>;
+    notes: ReadonlyArray<SessionNote>;
+}): ReactNode {
     return (
-        <div className="grid gap-3 rounded-2xl border border-card-border p-4 sm:p-5">
-            <p className="font-bold">Na fila do Claude</p>
-            <p className="text-sm text-muted-foreground">
-                Abra o seu Claude e peça a edição. Os vídeos prontos aparecem aqui e em Minhas
-                edições.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-                <code className="min-w-56 flex-1 rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm">
-                    {CLAUDE_REQUEST}
-                </code>
-                <CopyTextButton text={CLAUDE_REQUEST} label="Copiar pedido" />
+        <div className="grid gap-4">
+            <div className="grid gap-1.5">
+                <h2
+                    ref={headingRef}
+                    tabIndex={-1}
+                    id="session-actions"
+                    className="flex items-center gap-2.5 text-lg leading-tight font-bold"
+                >
+                    <ClaudeLogo className="size-5 shrink-0" />
+                    Continue no Claude
+                </h2>
+                <p className="text-sm text-pretty text-muted-foreground">
+                    Copie o pedido abaixo e envie no Claude. Os vídeos prontos aparecem nesta
+                    página.
+                </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-                O Claude ainda não está conectado?{" "}
+            <div className="grid min-w-0 gap-2">
+                <p className="rounded-xl border border-card-border bg-background p-3 text-sm">
+                    {CLAUDE_REQUEST}
+                </p>
+                <CopyTextButton
+                    text={CLAUDE_REQUEST}
+                    label="Copiar pedido"
+                    className="h-11 w-full"
+                />
+            </div>
+            <p className="text-xs text-muted-foreground">
+                Precisa de ajuda?{" "}
                 <Link
                     to="/claude"
                     className="font-semibold text-primary-ink underline underline-offset-4"
                 >
-                    Etapa 1
+                    Conectar Claude
                 </Link>
             </p>
+            <SessionAdjustments notes={notes} />
         </div>
     );
 }
 
-/** The bottom of a batch: how many videos it holds and, while open, sending it to Claude. */
-export function SessionActions({ session, uploadsRunning }: SessionActionsProps): ReactNode {
-    const queryClient = useQueryClient();
-    const videoCount = session.videos.length;
-    const start = useMutation({
-        mutationFn: async () => {
-            if (uploadsRunning > 0) {
-                throw new Error(UPLOADS_RUNNING_MESSAGE);
-            }
+export function SessionActions({
+    session,
+    uploadsRunning,
+}: {
+    session: EditSessionView;
+    uploadsRunning: number;
+}): ReactNode {
+    const isQueued = session.status === "queued";
+    const wasQueued = useRef(isQueued);
+    const headingRef = useRef<HTMLHeadingElement | null>(null);
 
-            await queueMyEditSession({ data: { sessionId: session.id } });
-        },
-        onSuccess: () => invalidateEditSessionQueries(queryClient),
-    });
+    useEffect(() => {
+        if (isQueued && wasQueued.current === false) {
+            headingRef.current?.focus();
+        }
 
-    if (session.status === "queued") {
-        return <QueuedForClaude />;
-    }
+        wasQueued.current = isQueued;
+    }, [isQueued]);
 
     return (
-        <div className="grid gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground tabular-nums">
-                    {describeQueue(videoCount)}
-                </p>
-                <Button
-                    type="button"
-                    size="lg"
-                    className="font-bold"
-                    disabled={start.isPending}
-                    aria-busy={start.isPending}
-                    onClick={() => start.mutate()}
-                >
-                    <PlayIcon aria-hidden="true" className="size-4 fill-current" />
-                    Começar a editar
-                    {videoCount > 0 && ` ${videoCount} ${pluralize(videoCount, "vídeo", "vídeos")}`}
-                </Button>
-            </div>
-            {start.isError === true && (
-                <FormAlert message={toErrorMessage(start.error, FALLBACK_ERROR_MESSAGE)} />
+        <section
+            aria-labelledby="session-actions"
+            className="min-w-0 rounded-2xl border border-card-border bg-card p-4 sm:p-5"
+        >
+            {isQueued && <QueuedForClaude headingRef={headingRef} notes={session.notes} />}
+            {isQueued === false && (
+                <SessionRequestForm session={session} uploadsRunning={uploadsRunning} />
             )}
-        </div>
+        </section>
     );
 }
