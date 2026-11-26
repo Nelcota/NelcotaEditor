@@ -38,6 +38,10 @@ show whether each format is available for editing before prompting anyone to con
 stock photos in gallery captures and the Ranking cover use the
 [Pexels license](https://www.pexels.com/license/).
 
+The subscription offer gives the monthly price its own space beside the benefit and uses the solid
+lime button for checkout. The price and payment terms stack below the benefit in narrow containers,
+and the button takes the full row on phones.
+
 Contraste uses the same batch flow as Tela dividida. Its renders keep the presenter in a vertical
 frame, with the topic at the top and two verdict labels during each comparison. The active verdict
 and the option's name change when the presenter moves to the next option.

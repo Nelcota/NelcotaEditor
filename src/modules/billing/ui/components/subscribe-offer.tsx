@@ -1,5 +1,10 @@
+import ArrowRightIcon from "~icons/lucide/arrow-right";
 import { useMutation } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import {
+    CENTS_PER_REAL,
+    SUBSCRIPTION_PRICE_CENTS,
+} from "#/modules/billing/model/subscription-plan";
 import { startMySubscription } from "#/modules/billing/server/subscription-functions";
 import type { SubscriptionView } from "#/modules/billing/model/subscription-view";
 import { Button } from "#/shared/ui/button";
@@ -9,6 +14,10 @@ import { toErrorMessage } from "#/shared/ui/to-error-message";
 
 const FALLBACK_ERROR_MESSAGE =
     "Não foi possível abrir o pagamento. Confira sua conexão e tente de novo.";
+const MONTHLY_PRICE = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+}).format(SUBSCRIPTION_PRICE_CENTS / CENTS_PER_REAL);
 
 function isWaitingForPayment(subscription: SubscriptionView | null): boolean {
     if (subscription === null || subscription.status !== "pending") {
@@ -31,26 +40,40 @@ export function SubscribeOffer({
 
     return (
         <div className="grid gap-3">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                <div className="grid min-w-0 flex-1 gap-0.5">
-                    <h2 id="subscription" className="font-bold">
-                        Assine e ganhe um formato novo todo mês
+            <div className="grid items-center gap-4 @2xl:grid-cols-[minmax(0,1fr)_auto] @2xl:gap-6">
+                <div className="grid min-w-0 gap-1">
+                    <h2 id="subscription" className="text-lg leading-tight font-bold">
+                        Um formato novo todo mês
                     </h2>
-                    <p className="text-sm text-muted-foreground">
-                        R$ 49,90 por mês no cartão. Os formatos novos são só para assinantes.
-                        Cancele quando quiser.
+                    <p className="text-sm text-pretty text-muted-foreground">
+                        Acesse todos os formatos exclusivos para assinantes.
                     </p>
                 </div>
-                <Button
-                    type="button"
-                    variant="outline"
-                    className="font-bold"
-                    disabled={checkout.isPending}
-                    aria-busy={checkout.isPending}
-                    onClick={() => checkout.mutate()}
-                >
-                    Assinar por R$ 49,90
-                </Button>
+                <div className="grid items-center gap-3 border-t border-card-border pt-4 @lg:grid-cols-[minmax(0,1fr)_auto] @lg:gap-5 @2xl:border-t-0 @2xl:border-s @2xl:pt-0 @2xl:ps-6">
+                    <div id="subscription-terms" className="grid gap-1">
+                        <p className="flex flex-wrap items-baseline gap-x-1.5">
+                            <span className="text-2xl leading-none font-bold tracking-tight tabular-nums">
+                                {MONTHLY_PRICE}
+                            </span>
+                            <span className="text-meta text-muted-foreground">por mês</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                            No cartão. Cancele quando quiser.
+                        </p>
+                    </div>
+                    <Button
+                        type="button"
+                        size="lg"
+                        className="font-bold"
+                        aria-describedby="subscription-terms"
+                        isLoading={checkout.isPending}
+                        loadingLabel="Abrindo pagamento…"
+                        onClick={() => checkout.mutate()}
+                    >
+                        Assinar
+                        <ArrowRightIcon aria-hidden="true" className="size-4" />
+                    </Button>
+                </div>
             </div>
             {isWaitingForPayment(subscription) === true && (
                 <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
