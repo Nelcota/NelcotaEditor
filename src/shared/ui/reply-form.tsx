@@ -24,6 +24,8 @@ interface ReplyFormProps {
     onSend: (message: string) => Promise<void>;
     /** Buttons beside Enviar resposta, such as closing the ticket. */
     secondaryAction?: ReactNode;
+    /** The send button's text; "Enviar resposta" by default. */
+    submitLabel?: string;
 }
 
 /** The answer box under a conversation: a text box, its errors and Enviar resposta. */
@@ -33,6 +35,7 @@ export function ReplyForm({
     hint,
     onSend,
     secondaryAction,
+    submitLabel = "Enviar resposta",
 }: ReplyFormProps): ReactNode {
     const track = useTrackPromise();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -83,7 +86,7 @@ export function ReplyForm({
                 <form.Subscribe selector={(state) => state.isSubmitting}>
                     {(isSubmitting) => (
                         <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
-                            Enviar resposta
+                            {submitLabel}
                         </Button>
                     )}
                 </form.Subscribe>

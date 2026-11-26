@@ -34,7 +34,7 @@ export function StandaloneMessageScreen({
     return (
         <main className="grid min-h-dvh place-items-center px-4 py-12">
             <div className="grid max-w-md justify-items-center gap-4 text-center">
-                <BrandMark className="size-16" />
+                <BrandMark className="h-14" />
                 <h1 className="text-title font-semibold tracking-[-0.02em]">{title}</h1>
                 <p className="text-muted-foreground">{description}</p>
                 <div className="mt-2 flex flex-wrap justify-center gap-2">

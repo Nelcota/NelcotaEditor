@@ -6,7 +6,7 @@ import { getCaptchaSiteKey } from "#/modules/auth/server/captcha-functions";
 import { ContactScreen } from "#/modules/support/ui/screens/contact-screen";
 
 export const Route = createFileRoute("/contact")({
-    head: () => ({ meta: [{ title: "Contato · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Contato · Editor Oculto" }] }),
     loader: async ({ context }) => {
         const [captchaSiteKey, switches] = await Promise.all([
             getCaptchaSiteKey(),

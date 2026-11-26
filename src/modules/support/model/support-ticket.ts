@@ -4,6 +4,16 @@ export const TICKET_STATUSES = ["open", "answered", "closed"] as const;
 
 export type TicketStatus = (typeof TICKET_STATUSES)[number];
 
+/** The two areas a conversation can be about; the team splits the queue by them. */
+export const TICKET_TOPICS = ["editor", "clips"] as const;
+
+export type TicketTopic = (typeof TICKET_TOPICS)[number];
+
+export const TICKET_TOPIC_LABELS: Readonly<Record<TicketTopic, string>> = {
+    editor: "Editor Oculto",
+    clips: "Cortes",
+};
+
 export const MESSAGE_AUTHOR_KINDS = ["customer", "staff"] as const;
 
 export type MessageAuthorKind = (typeof MESSAGE_AUTHOR_KINDS)[number];
@@ -18,12 +28,12 @@ export const SUPPORT_PAGE_SIZE = 25;
 /** What a guest ticket from the public form is called; guests write no subject. */
 export const GUEST_TICKET_SUBJECT = "Contato sem conta";
 /** Shown to customers for an admin whose account is gone. */
-export const STAFF_FALLBACK_NAME = "Suporte Nelcota";
+export const STAFF_FALLBACK_NAME = "Suporte Editor Oculto";
 
 export const TICKET_STATUS_LABELS: Readonly<Record<TicketStatus, string>> = {
-    open: "Aberto",
+    open: "Aguardando suporte",
     answered: "Respondido",
-    closed: "Fechado",
+    closed: "Resolvido",
 };
 
 const subjectSchema = z
@@ -40,6 +50,7 @@ export const messageBodySchema = z
 
 /** The form sends "" for no video; the server only ever sees a uuid or null. */
 export const newTicketSchema = z.object({
+    topic: z.enum(TICKET_TOPICS, "Escolha o tema da conversa."),
     subject: subjectSchema,
     message: messageBodySchema,
     videoId: z.union([z.uuid(), z.literal("").transform(() => null)]).nullable(),
@@ -67,5 +78,15 @@ export type TicketCursor = z.infer<typeof ticketCursorSchema>;
 
 export const ticketListInputSchema = z.object({ cursor: ticketCursorSchema.nullable() });
 
+/** The person's own list also searches: words in the subject or the conversation's number. */
+export const myTicketListInputSchema = ticketListInputSchema.extend({
+    query: z.string().trim().max(MAX_SUBJECT_LENGTH).default(""),
+});
+
+export type MyTicketListRequest = z.output<typeof myTicketListInputSchema>;
+
 /** "Relatar problema" on a failed video brings its id; anything else in the URL is ignored. */
-export const newTicketSearchSchema = z.object({ videoId: z.uuid().optional().catch(undefined) });
+export const newTicketSearchSchema = z.object({
+    videoId: z.uuid().optional().catch(undefined),
+    topic: z.enum(TICKET_TOPICS).optional().catch(undefined),
+});

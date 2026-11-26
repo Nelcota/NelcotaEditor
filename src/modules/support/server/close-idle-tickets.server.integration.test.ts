@@ -13,6 +13,7 @@ const DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 async function openAnsweredTicket(): Promise<string> {
     const ticketId = await openTicket(await createTestAccount(), {
+        topic: "clips",
         subject: "Ajuda",
         message: "Oi",
         videoId: null,
@@ -57,6 +58,7 @@ describe("closeIdleTickets", () => {
 
     it("never closes a ticket waiting for the team", async () => {
         const ticketId = await openTicket(await createTestAccount(), {
+            topic: "clips",
             subject: "Ajuda",
             message: "Oi",
             videoId: null,

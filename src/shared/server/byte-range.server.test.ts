@@ -32,6 +32,19 @@ describe("parseByteRange", () => {
         assert.equal(parseByteRange("bytes=2000-3000", FILE_SIZE), null);
     });
 
+    it("bounds an oversized decimal suffix before converting to a number", () => {
+        const suffix = "9".repeat(309);
+
+        assert.deepEqual(parseByteRange(`bytes=-${suffix}`, FILE_SIZE), { start: 0, end: 999 });
+    });
+
+    it("recognizes reversed positions beyond the safe integer limit", () => {
+        assert.equal(
+            parseByteRange("bytes=9007199254740993-9007199254740992", FILE_SIZE),
+            undefined,
+        );
+    });
+
     it("sends the whole file for a reversed range, which is not a valid range", () => {
         assert.equal(parseByteRange("bytes=500-100", FILE_SIZE), undefined);
         assert.equal(parseByteRange("bytes=5-3", 0), undefined);

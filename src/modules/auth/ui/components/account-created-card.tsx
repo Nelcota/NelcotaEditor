@@ -1,5 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { AuthCard } from "#/modules/auth/ui/components/auth-card";
+import { AuthEntryLayout } from "#/modules/auth/ui/components/auth-entry-layout";
+import { Button } from "#/shared/ui/button";
 
 /**
  * After sign-up while the email-verification switch is off. A taken email lands here too, so the
@@ -7,11 +9,13 @@ import { AuthCard } from "#/modules/auth/ui/components/auth-card";
  */
 export function AccountCreatedCard(): ReactNode {
     return (
-        <AuthCard
-            eyebrow="Criar conta"
-            title={{ lead: "Tudo", emphasis: "pronto" }}
-            description="Entre com seu email e senha para começar."
-            footer={{ text: "Próximo passo:", linkLabel: "Entrar", linkTo: "/sign-in" }}
-        />
+        <AuthEntryLayout title="Tudo pronto">
+            <p className="text-center text-muted-foreground">
+                Entre com seu email e senha para começar.
+            </p>
+            <Button asChild size="lg" className="h-12 font-semibold">
+                <Link to="/sign-in">Entrar</Link>
+            </Button>
+        </AuthEntryLayout>
     );
 }

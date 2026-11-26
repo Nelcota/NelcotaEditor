@@ -69,9 +69,9 @@ function CrewSteps(): ReactNode {
 export function FirstVideoEmptyState() {
     return (
         <EmptyState
-            art={<BrandMark className="mb-1 size-14" />}
+            art={<BrandMark className="mb-1 h-12" />}
             title="Envie seu primeiro vídeo"
-            description="Um link do YouTube ou um arquivo. O Nelcota cuida do resto."
+            description="Um link do YouTube ou um arquivo. O Editor Oculto cuida do resto."
             action={
                 <Button asChild size="lg" className="font-semibold">
                     <Link to="/videos" search={{ newVideo: true }}>

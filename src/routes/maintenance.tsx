@@ -3,7 +3,7 @@ import { appSwitchStatesQueryOptions } from "#/modules/app-switches/model/app-sw
 import { MaintenanceScreen } from "#/modules/app-switches/ui/screens/maintenance-screen";
 
 export const Route = createFileRoute("/maintenance")({
-    head: () => ({ meta: [{ title: "Em manutenção · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Em manutenção · Editor Oculto" }] }),
     beforeLoad: async ({ context }) => {
         const switches = await context.queryClient.fetchQuery({
             ...appSwitchStatesQueryOptions(),

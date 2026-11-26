@@ -6,6 +6,7 @@ import { UploadCancelledError } from "#/modules/videos/model/upload-cancelled-er
 import {
     cancelVideoUpload,
     completeVideoUpload,
+    startFormatVideoUpload,
     startVideoUpload,
 } from "#/modules/videos/server/video-upload-functions";
 
@@ -126,6 +127,33 @@ function assertNotCancelled(signal: AbortSignal): void {
     }
 }
 
+interface StartedTransfer {
+    started: StartedVideoUpload;
+    file: File;
+    signal: AbortSignal;
+}
+
+/** Sends the reserved file and confirms it; a failed or cancelled send frees the reservation. */
+async function finishUpload(
+    transfer: StartedTransfer,
+    onProgress: (percent: number) => void,
+): Promise<string> {
+    const { started, file, signal } = transfer;
+    const uploadId = started.uploadId;
+
+    try {
+        assertNotCancelled(signal);
+        await sendFile({ ...started, file, signal }, onProgress);
+        assertNotCancelled(signal);
+    } catch (error) {
+        await releaseUpload(uploadId);
+        throw error;
+    }
+
+    const completed = await completeVideoUpload({ data: { uploadId } });
+    return completed.videoId;
+}
+
 /**
  * Reserves the upload, sends the file where the server says, then confirms it. Cancelling through
  * the signal stops the transfer and frees the reservation, up to the confirmation, which is
@@ -154,17 +182,25 @@ export async function uploadVideoFile(
             language: input.language,
         },
     });
-    const uploadId = started.uploadId;
+    return await finishUpload({ started, file, signal }, onProgress);
+}
 
-    try {
-        assertNotCancelled(signal);
-        await sendFile({ ...started, file, signal }, onProgress);
-        assertNotCancelled(signal);
-    } catch (error) {
-        await releaseUpload(uploadId);
-        throw error;
+/**
+ * Uploads a raw video for a format edit: stored and transcribed, with no clip choices. Same
+ * cancelling and confirmation as uploadVideoFile. Resolves with the id of the created video.
+ */
+export async function uploadFormatVideoFile(
+    file: File,
+    onProgress: (percent: number) => void,
+    signal: AbortSignal,
+): Promise<string> {
+    if (file.size === 0) {
+        throw new UploadFailedError(EMPTY_FILE_MESSAGE);
     }
 
-    const completed = await completeVideoUpload({ data: { uploadId } });
-    return completed.videoId;
+    assertNotCancelled(signal);
+    const started = await startFormatVideoUpload({
+        data: { fileName: file.name, sizeBytes: file.size },
+    });
+    return await finishUpload({ started, file, signal }, onProgress);
 }

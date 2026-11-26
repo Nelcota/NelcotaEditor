@@ -29,6 +29,7 @@ interface TestVideo {
     status: VideoStatus;
     createdAt: Date;
     processingStartedAt: Date;
+    hasUnrecordedFirstFinish?: boolean;
 }
 
 async function insertVideo(testVideo: TestVideo): Promise<VideoRun> {
@@ -94,12 +95,32 @@ describe("markVideoDone", () => {
         assert.deepEqual((await readVideo(run.videoId)).firstFinishedAt, firstFinishedAt);
     });
 
-    test("leaves out a run that did not start with the video", async () => {
+    test("records the first successful finish after a failed first run", async () => {
         const now = new Date();
         const createdAt = new Date(now.getTime() - TEN_DAYS_IN_MILLISECONDS);
-        const run = await insertRenderingVideo(createdAt, now);
+        const firstRun = await insertRenderingVideo(createdAt, createdAt);
 
-        await markVideoDone(run);
+        assert.equal(await markVideoFailed(firstRun, "Test failure"), true);
+        assert.ok(await resetVideoToQueued(firstRun.videoId));
+        const queued = await readVideo(firstRun.videoId);
+        assert.equal(await markVideoDone(toVideoRun(queued)), true);
+
+        const finished = await readVideo(firstRun.videoId);
+        assert.ok(finished.firstFinishedAt instanceof Date);
+        assert.deepEqual(finished.firstFinishedAt, finished.finishedAt);
+    });
+
+    test("leaves a migrated first finish unknown after a new render", async () => {
+        const now = new Date();
+        const run = await insertVideo({
+            status: "done",
+            createdAt: now,
+            processingStartedAt: now,
+            hasUnrecordedFirstFinish: true,
+        });
+        assert.ok(await resetVideoToQueued(run.videoId));
+        const queued = await readVideo(run.videoId);
+        assert.equal(await markVideoDone(toVideoRun(queued)), true);
 
         assert.equal((await readVideo(run.videoId)).firstFinishedAt, null);
     });

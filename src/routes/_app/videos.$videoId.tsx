@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_app/videos/$videoId")({
             return {};
         }
 
-        return { meta: [{ title: `${loaderData?.title ?? "Vídeo"} · Nelcota` }] };
+        return { meta: [{ title: `${loaderData?.title ?? "Vídeo"} · Editor Oculto` }] };
     },
     component: VideoDetailsRoute,
     notFoundComponent: VideoNotFoundScreen,

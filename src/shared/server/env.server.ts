@@ -8,6 +8,7 @@ config({ path: ".env", quiet: true });
 
 const PRODUCTION = "production";
 const SECURE_PROTOCOL = "https:";
+export const BYTES_PER_GIBIBYTE = 1024 ** 3;
 const HEADER_NAME_PATTERN = /^[a-z0-9-]+$/;
 const DEFAULT_WORK_DIRECTORY = path.join(os.tmpdir(), "nelcota-work");
 const STORAGE_DRIVERS = ["disk", "r2"] as const;
@@ -65,12 +66,22 @@ const baseEnvironmentSchema = z.object({
     TRANSCRIPTION_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(3),
     DEEPSEEK_API_KEY: z.string().default(""),
     DEEPSEEK_MODEL: z.string().min(1).default("deepseek-chat"),
+    // Asaas sells the Editor Oculto subscription. Unset: the subscribe button explains it is not
+    // on sale and webhooks are refused. The sandbox URL is the default so a test key never charges.
+    ASAAS_API_URL: z.url().default("https://api-sandbox.asaas.com"),
+    ASAAS_API_KEY: optionalTextSchema,
+    // The token Asaas sends back in the asaas-access-token header (32 to 255 characters).
+    ASAAS_WEBHOOK_TOKEN: optionalTextSchema.pipe(z.string().min(32).max(255).optional()),
     // Unset: auth emails fail and stay queued for retries, so sign-up cannot finish. Only the
     // worker sends email; the web server queues it.
     RESEND_API_KEY: optionalTextSchema,
     EMAIL_FROM: z.string().trim().min(1).default("Nelcota <nao-responda@tela.nelcota.com>"),
     // Soft limit per user: the usage screen warns as it fills, nothing is blocked.
-    STORAGE_QUOTA_GIGABYTES: z.coerce.number().positive().default(20),
+    STORAGE_QUOTA_GIGABYTES: z.coerce
+        .number()
+        .min(1 / BYTES_PER_GIBIBYTE)
+        .max(Number.MAX_SAFE_INTEGER / BYTES_PER_GIBIBYTE)
+        .default(20),
     // Videos per worker, from different users. They share encoding and transcription capacity.
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(2),
     FFMPEG_CPU_BUDGET: optionalTextSchema.pipe(

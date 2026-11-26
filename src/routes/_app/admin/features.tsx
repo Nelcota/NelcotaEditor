@@ -3,7 +3,7 @@ import { adminAppSwitchesQueryOptions } from "#/modules/admin/model/admin-querie
 import { AdminAppSwitchesScreen } from "#/modules/admin/ui/screens/admin-app-switches-screen";
 
 export const Route = createFileRoute("/_app/admin/features")({
-    head: () => ({ meta: [{ title: "Recursos · Admin · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Recursos · Admin · Editor Oculto" }] }),
     loader: async ({ context }): Promise<void> => {
         await context.queryClient.prefetchQuery({
             ...adminAppSwitchesQueryOptions(),

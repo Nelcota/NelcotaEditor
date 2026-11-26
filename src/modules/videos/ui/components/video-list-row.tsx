@@ -101,10 +101,7 @@ function StatusPill({ video }: { video: VideoSummary }): ReactNode {
                 STATUS_PILL_CLASSES[status.tone],
             )}
         >
-            <Icon
-                aria-hidden="true"
-                className={cn(status.tone === "working" && "motion-safe:animate-spin")}
-            />
+            <Icon aria-hidden="true" className={cn(status.tone === "working" && "animate-spin")} />
             {status.label}
         </span>
     );
@@ -117,7 +114,7 @@ function SourceIcon({ video }: { video: VideoSummary }): ReactNode {
         return (
             <span
                 title={label}
-                className="grid size-7 place-items-center rounded-full bg-[#e5312c] text-white"
+                className="grid size-7 place-items-center rounded-full bg-youtube text-white"
             >
                 <YoutubeIcon aria-hidden="true" className="size-4" />
                 <span className="sr-only">{label}</span>

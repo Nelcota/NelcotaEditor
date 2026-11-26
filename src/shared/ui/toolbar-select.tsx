@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { ReactNode } from "react";
 import type { IconComponent } from "#/shared/ui/icon-component";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/select";
@@ -23,6 +24,8 @@ const TRIGGER_CLASS =
 /** A filter, order or view choice beside a list's search box, the same on every list. */
 export function ToolbarSelect<Value extends string>(props: ToolbarSelectProps<Value>): ReactNode {
     const { label, icon: Icon, value, options, onValueChange } = props;
+    const labelId = useId();
+    const valueId = useId();
 
     return (
         <Select
@@ -37,9 +40,14 @@ export function ToolbarSelect<Value extends string>(props: ToolbarSelectProps<Va
                 onValueChange(option.value);
             }}
         >
-            <SelectTrigger aria-label={label} className={TRIGGER_CLASS}>
+            {/* A combobox takes no name from its content: the label and the shown value name it,
+                so the name holds the visible text (WCAG 2.5.3). */}
+            <SelectTrigger aria-labelledby={`${labelId} ${valueId}`} className={TRIGGER_CLASS}>
                 <Icon aria-hidden="true" className="size-4 text-primary-ink" />
-                <SelectValue />
+                <span id={labelId} className="sr-only">
+                    {label}
+                </span>
+                <SelectValue id={valueId} />
             </SelectTrigger>
             <SelectContent position="popper" align="start">
                 {options.map((option) => (

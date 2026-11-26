@@ -9,7 +9,7 @@ import { OverviewScreen } from "#/modules/overview/ui/screens/overview-screen";
 import { FirstVideoEmptyState } from "#/modules/videos/ui/components/video-list-states";
 
 export const Route = createFileRoute("/_app/overview")({
-    head: () => ({ meta: [{ title: "Painel · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Painel · Editor Oculto" }] }),
     validateSearch: overviewSearchSchema,
     loaderDeps: ({ search }) => ({ period: search.period }),
     loader: async ({ context, deps }): Promise<void> => {

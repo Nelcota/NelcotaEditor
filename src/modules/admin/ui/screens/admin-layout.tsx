@@ -63,7 +63,7 @@ export function AdminLayout(): ReactNode {
             <div className="grid gap-6">
                 <PageHeader
                     title="Admin"
-                    description="Contas, vídeos, suporte, recursos e a saúde do processamento em todo o Nelcota."
+                    description="Contas, vídeos, suporte, recursos e a saúde do processamento em todo o Editor Oculto."
                 />
                 <AdminNav />
             </div>

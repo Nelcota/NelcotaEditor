@@ -9,7 +9,7 @@ import { AccountScreen } from "#/modules/shell/ui/screens/account-screen";
 import { usageQueryOptions } from "#/modules/videos/model/library-queries";
 
 export const Route = createFileRoute("/_app/account")({
-    head: () => ({ meta: [{ title: "Conta · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Conta · Editor Oculto" }] }),
     loader: async ({ context }): Promise<void> => {
         const queryClient = context.queryClient;
 

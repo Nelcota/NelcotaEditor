@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db/database.server";
 import { assertFeatureEnabled } from "#/modules/app-switches/server/app-switches.server";
@@ -34,7 +34,7 @@ export const setClipSharing = createServerFn({ method: "POST" })
             return;
         }
 
-        if (clip.status !== "done") {
+        if (clip.status !== "done" || clip.outputPath === null) {
             throw new UserFacingError("Só é possível compartilhar um corte que já está pronto.");
         }
 
@@ -42,5 +42,15 @@ export const setClipSharing = createServerFn({ method: "POST" })
 
         const shareToken = randomBytes(SHARE_TOKEN_BYTES).toString("base64url");
 
-        await db.update(clips).set({ shareToken }).where(eq(clips.id, clip.id));
+        const updated = await db
+            .update(clips)
+            .set({ shareToken })
+            .where(
+                and(eq(clips.id, clip.id), eq(clips.status, "done"), isNotNull(clips.outputPath)),
+            )
+            .returning({ id: clips.id });
+
+        if (updated.length === 0) {
+            throw new UserFacingError("Só é possível compartilhar um corte que já está pronto.");
+        }
     });

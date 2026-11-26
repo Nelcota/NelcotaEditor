@@ -2,7 +2,7 @@ import { toClipPosterSize } from "#/modules/clips/model/clip-poster-size";
 import { ASPECT_RATIO_SIZES } from "#/modules/clips/model/clip-format";
 import type { SharedClip } from "#/modules/clips/model/shared-clip";
 
-const SHARED_CLIP_DESCRIPTION = "Corte com legenda feito no Nelcota.";
+const SHARED_CLIP_DESCRIPTION = "Corte com legenda feito no Editor Oculto.";
 
 type HeadMeta =
     | { title: string }
@@ -36,7 +36,7 @@ export function buildSharedClipHead(clip: SharedClip): Array<HeadMeta> {
     const videoSize = ASPECT_RATIO_SIZES[clip.aspectRatio];
 
     return [
-        { title: `${clip.title} · Nelcota` },
+        { title: `${clip.title} · Editor Oculto` },
         { name: "description", content: SHARED_CLIP_DESCRIPTION },
         { name: "robots", content: "noindex" },
         { property: "og:type", content: "video.other" },

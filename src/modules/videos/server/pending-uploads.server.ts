@@ -16,7 +16,10 @@ type QueryExecutor = Pick<typeof db, "select">;
 type InsertExecutor = Pick<typeof db, "insert">;
 
 export interface PendingUploads {
+    /** Active uploads for clips, which hold one of the clip processing slots. */
     count: number;
+    /** Active uploads of raw videos for a format edit, which have slots of their own. */
+    formatCount: number;
     bytes: number;
 }
 
@@ -53,7 +56,12 @@ export async function summarizePendingUploads(
 
     const rows = await executor
         .select({
-            count: count(sql`case when ${videoUploads.cancelledAt} is null then 1 end`),
+            count: count(
+                sql`case when ${videoUploads.cancelledAt} is null and ${videoUploads.purpose} = 'clips' then 1 end`,
+            ),
+            formatCount: count(
+                sql`case when ${videoUploads.cancelledAt} is null and ${videoUploads.purpose} = 'format' then 1 end`,
+            ),
             bytes: sql<number>`coalesce(sum(${videoUploads.declaredBytes}), 0)::bigint`.mapWith(
                 Number,
             ),
@@ -63,10 +71,10 @@ export async function summarizePendingUploads(
     const row = rows[0];
 
     if (row === undefined) {
-        return { count: 0, bytes: 0 };
+        return { count: 0, formatCount: 0, bytes: 0 };
     }
 
-    return { count: row.count, bytes: row.bytes };
+    return { count: row.count, formatCount: row.formatCount, bytes: row.bytes };
 }
 
 /** An expired or cancelled upload, or another person's, reads as missing. */
@@ -134,6 +142,8 @@ export async function holdUploadOfDeletedVideo(
             // The video's size also counts its thumbnail, but the link never takes more than this.
             declaredBytes: Math.min(sourceBytes, MAX_UPLOAD_BYTES),
             title: video.title,
+            // A raw format video asks for no clips, which only a format upload row allows.
+            purpose: video.purpose,
             requestedClipCount: video.requestedClipCount,
             clipLength: video.clipLength,
             transcriptionLanguage: video.transcriptionLanguage ?? "",

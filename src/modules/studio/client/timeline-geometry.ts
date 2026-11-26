@@ -1,4 +1,5 @@
 import type { StudioDraft } from "#/modules/clips/model/clip-studio";
+import { MAX_VIDEO_DURATION_SECONDS } from "#/modules/video-records/model/video-status";
 
 // Enough room to see where the clip can grow; dragging an edge to the end of the window widens
 // it again. A wider margin shrinks the caption blocks until their words no longer fit.
@@ -35,7 +36,17 @@ export function computeTimelineWindow(
 export function toPercent(window: TimelineWindow, seconds: number): number {
     const span = window.toSeconds - window.fromSeconds;
 
-    return ((seconds - window.fromSeconds) / span) * PERCENT;
+    if (Number.isFinite(span) === false || span <= 0 || Number.isFinite(seconds) === false) {
+        return 0;
+    }
+
+    const percent = ((seconds - window.fromSeconds) / span) * PERCENT;
+
+    if (Number.isFinite(percent) === false) {
+        return 0;
+    }
+
+    return percent;
 }
 
 /** The part of the lane's box the time depends on. */
@@ -65,19 +76,27 @@ export function secondsInLane(window: TimelineWindow, rect: LaneBox, clientX: nu
 }
 
 export function tickSeconds(window: TimelineWindow): Array<number> {
+    const { fromSeconds, toSeconds } = window;
+
+    if (
+        Number.isFinite(fromSeconds) === false ||
+        Number.isFinite(toSeconds) === false ||
+        fromSeconds < 0 ||
+        toSeconds < fromSeconds ||
+        toSeconds > MAX_VIDEO_DURATION_SECONDS + 1
+    ) {
+        return [];
+    }
+
     let step = LONG_TICK_SECONDS;
 
-    if (window.toSeconds - window.fromSeconds <= SHORT_WINDOW_SECONDS) {
+    if (toSeconds - fromSeconds <= SHORT_WINDOW_SECONDS) {
         step = SHORT_TICK_SECONDS;
     }
 
     const ticks: Array<number> = [];
 
-    for (
-        let tick = Math.ceil(window.fromSeconds / step) * step;
-        tick <= window.toSeconds;
-        tick += step
-    ) {
+    for (let tick = Math.ceil(fromSeconds / step) * step; tick <= toSeconds; tick += step) {
         ticks.push(tick);
     }
 

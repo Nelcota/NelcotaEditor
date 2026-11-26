@@ -34,15 +34,30 @@ import { logger } from "#/shared/server/logger.server";
  * so the stage modules never depend on processing.
  */
 function saveStageProgress(
-    run: VideoRun,
+    video: Video,
     status: VideoStatus,
 ): (stagePercent: number) => Promise<void> {
-    return (stagePercent) => updateVideoStage(run, status, toOverallPercent(status, stagePercent));
+    const run = toVideoRun(video);
+
+    return (stagePercent) =>
+        updateVideoStage(run, status, toOverallPercent(status, stagePercent, video.purpose));
+}
+
+/** Marks the run done, unless a cancel arrived after its last step: that still wins over "done". */
+async function finishVideo(run: VideoRun, videoId: string): Promise<void> {
+    if ((await markVideoDone(run)) === false) {
+        // Records nothing unless this run was the one the user cancelled.
+        await finishStoppedVideo(run, null);
+        return;
+    }
+
+    logger.info({ videoId }, "Video processing completed");
 }
 
 /**
- * The whole pipeline: source → transcript → highlights → clips.
- * Every step skips work that is already saved, so running it again resumes where it stopped.
+ * The whole pipeline: source → transcript → highlights → clips (a format video stops after the
+ * transcript). Every step skips work that is already saved, so running it again resumes where it
+ * stopped.
  */
 async function runStages(video: Video, workDirectory: string, signal: AbortSignal): Promise<void> {
     const videoId = video.id;
@@ -59,9 +74,17 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
             workDirectory,
             language: video.transcriptionLanguage,
             signal,
-            saveProgress: saveStageProgress(run, "transcribing"),
+            saveProgress: saveStageProgress(video, "transcribing"),
         }),
     );
+
+    // A raw video for a format edit stops here: the person's Claude plans its edit from the
+    // transcript, so no highlights or clips are made (and no DeepSeek call is spent).
+    if (video.purpose === "format") {
+        signal.throwIfAborted();
+        await finishVideo(run, videoId);
+        return;
+    }
 
     signal.throwIfAborted();
     const clips = await measureVideoStage({ videoId, name: "highlights" }, () =>
@@ -70,7 +93,7 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
             words,
             durationSeconds: source.durationSeconds,
             signal,
-            saveProgress: saveStageProgress(run, "selecting"),
+            saveProgress: saveStageProgress(video, "selecting"),
         }),
     );
 
@@ -87,15 +110,7 @@ async function runStages(video: Video, workDirectory: string, signal: AbortSigna
         }),
     );
     signal.throwIfAborted();
-
-    // A cancel that arrived after the last step still wins over "done".
-    if ((await markVideoDone(run)) === false) {
-        // Records nothing unless this run was the one the user cancelled.
-        await finishStoppedVideo(run, null);
-        return;
-    }
-
-    logger.info({ videoId }, "Video processing completed");
+    await finishVideo(run, videoId);
 }
 
 async function runPipeline(video: Video, signal: AbortSignal): Promise<void> {
@@ -208,7 +223,11 @@ async function runAndRecord(video: Video, jobSignal: AbortSignal): Promise<void>
  * Read under the lock, after any earlier run let go of the video, so this run carries the start
  * time of the request it serves.
  */
-async function runIfStillQueued(videoId: string, signal: AbortSignal): Promise<void> {
+async function runIfStillQueued(
+    videoId: string,
+    signal: AbortSignal,
+    expectedRunStart: string | null | undefined,
+): Promise<void> {
     const video = await findVideoById(videoId);
 
     // Finished, cancelled or deleted while waiting in the queue: nothing to do.
@@ -216,7 +235,22 @@ async function runIfStillQueued(videoId: string, signal: AbortSignal): Promise<v
         return;
     }
 
+    const currentRunStart = video.processingStartedAt?.toISOString() ?? null;
+
+    if (expectedRunStart !== undefined && expectedRunStart !== currentRunStart) {
+        await enqueueCurrentRun(video, 0);
+        return;
+    }
+
     await runAndRecord(video, signal);
+}
+
+function enqueueCurrentRun(video: Video, startAfterSeconds: number): Promise<void> {
+    const { id: videoId, userId, processingStartedAt } = video;
+    return enqueueVideoProcessing(
+        { videoId, userId, processingStartedAt, startAfterSeconds },
+        null,
+    );
 }
 
 /**
@@ -230,18 +264,19 @@ async function retryWhenLockIsFree(videoId: string): Promise<void> {
         return;
     }
 
-    await enqueueVideoProcessing(
-        { videoId, userId: video.userId, startAfterSeconds: LOCKED_VIDEO_RETRY_SECONDS },
-        null,
-    );
+    await enqueueCurrentRun(video, LOCKED_VIDEO_RETRY_SECONDS);
     logger.info({ videoId }, "Video already processing in another run, retrying later");
 }
 
 /** Two workers (replicas, an overlapping restart) never process the same video at once. */
-export async function processVideo(videoId: string, signal: AbortSignal): Promise<void> {
+export async function processVideo(
+    videoId: string,
+    signal: AbortSignal,
+    expectedRunStart?: string | null,
+): Promise<void> {
     signal.throwIfAborted();
     const hasRun = await runWithVideoProcessingLock(videoId, () =>
-        runIfStillQueued(videoId, signal),
+        runIfStillQueued(videoId, signal, expectedRunStart),
     );
 
     if (hasRun === false) {

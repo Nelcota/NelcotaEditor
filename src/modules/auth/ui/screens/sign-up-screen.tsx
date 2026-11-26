@@ -12,7 +12,7 @@ import { toAuthErrorMessage } from "#/modules/auth/model/auth-error-message";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
 import { AccountCreatedCard } from "#/modules/auth/ui/components/account-created-card";
-import { AuthCard } from "#/modules/auth/ui/components/auth-card";
+import { AuthEntryLayout } from "#/modules/auth/ui/components/auth-entry-layout";
 import { buildCaptchaHeaders } from "#/modules/auth/client/captcha-headers";
 import { CaptchaField } from "#/shared/ui/captcha-field";
 import { CheckEmailCard } from "#/modules/auth/ui/components/check-email-card";
@@ -110,15 +110,14 @@ export function SignUpScreen({
     }
 
     return (
-        <AuthCard
-            eyebrow="Criar conta"
-            title={{ lead: "Comece a", emphasis: "cortar seus vídeos" }}
-            description="Transforme vídeos longos em cortes verticais com legenda."
-            footer={{ text: "Já tem conta?", linkLabel: "Entrar", linkTo: "/sign-in" }}
+        <AuthEntryLayout
+            title="Criar conta"
+            accountLink={{ text: "Já tem conta?", label: "Entrar", to: "/sign-in" }}
         >
             <form
+                method="post"
                 noValidate
-                className="grid gap-4"
+                className="grid gap-5"
                 onSubmit={(event) => {
                     event.preventDefault();
                     track(form.handleSubmit());
@@ -128,10 +127,13 @@ export function SignUpScreen({
                     {(field) => (
                         <TextField
                             id="name"
+                            name="name"
                             label="Nome"
                             autoComplete="name"
+                            required
                             autoCapitalize="words"
                             enterKeyHint="next"
+                            className="h-12"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -143,12 +145,15 @@ export function SignUpScreen({
                     {(field) => (
                         <TextField
                             id={EMAIL_FIELD_ID}
+                            name="email"
                             label="Email"
                             type="email"
-                            autoComplete="email"
+                            autoComplete="username"
+                            required
                             spellCheck={false}
                             autoCapitalize="none"
                             enterKeyHint="next"
+                            className="h-12"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -160,10 +165,13 @@ export function SignUpScreen({
                     {(field) => (
                         <TextField
                             id="password"
+                            name="password"
                             label="Senha"
                             type="password"
                             autoComplete="new-password"
+                            required
                             enterKeyHint="go"
+                            className="h-12"
                             hint={NEW_PASSWORD_HINT}
                             value={field.state.value}
                             onBlur={field.handleBlur}
@@ -188,17 +196,16 @@ export function SignUpScreen({
                         <Button
                             type="submit"
                             size="lg"
-                            className="h-11"
-                            disabled={isSubmitting}
-                            aria-busy={isSubmitting}
+                            className="h-12 font-semibold"
+                            isLoading={isSubmitting}
+                            loadingLabel="Criando conta…"
                         >
-                            {isSubmitting === true && "Criando conta…"}
-                            {isSubmitting === false && "Criar conta"}
-                            {isSubmitting === false && <ArrowRightIcon aria-hidden="true" />}
+                            Criar conta
+                            <ArrowRightIcon aria-hidden="true" className="size-4" />
                         </Button>
                     )}
                 </form.Subscribe>
             </form>
-        </AuthCard>
+        </AuthEntryLayout>
     );
 }

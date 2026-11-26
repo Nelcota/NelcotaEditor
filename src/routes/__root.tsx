@@ -14,7 +14,7 @@ interface RouterContext {
     queryClient: QueryClient;
 }
 
-const NOT_FOUND_TITLE = "Página não encontrada · Nelcota";
+const NOT_FOUND_TITLE = "Página não encontrada · Editor Oculto";
 
 interface MatchState {
     status: string;
@@ -46,7 +46,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         ],
         links: [
             { rel: "stylesheet", href: appCss },
-            { rel: "icon", type: "image/png", href: "/favicon.png" },
+            { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
         ],
         scripts: [THEME_HEAD_SCRIPT],
     }),

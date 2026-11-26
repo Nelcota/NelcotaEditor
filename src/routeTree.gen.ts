@@ -17,19 +17,29 @@ import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as DotwellKnownSplatRouteImport } from './routes/[.]well-known/$'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppClaudeRouteImport } from './routes/_app/claude'
 import { Route as AppClipsRouteImport } from './routes/_app/clips'
+import { Route as AppClipsGettingStartedRouteImport } from './routes/_app/clips-getting-started'
+import { Route as AppFormatsRouteImport } from './routes/_app/formats'
+import { Route as AppGettingStartedRouteImport } from './routes/_app/getting-started'
 import { Route as AppOverviewRouteImport } from './routes/_app/overview'
 import { Route as AppPreferencesRouteImport } from './routes/_app/preferences'
 import { Route as AppUsageRouteImport } from './routes/_app/usage'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as CTokenRouteImport } from './routes/c.$token'
+import { Route as OauthConsentRouteImport } from './routes/oauth.consent'
+import { Route as OauthSignInRouteImport } from './routes/oauth.sign-in'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppAdminFeaturesRouteImport } from './routes/_app/admin/features'
 import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
 import { Route as AppAdminVideosRouteImport } from './routes/_app/admin/videos'
+import { Route as AppEditsIndexRouteImport } from './routes/_app/edits.index'
+import { Route as AppEditsSessionIdRouteImport } from './routes/_app/edits.$sessionId'
 import { Route as AppSupportIndexRouteImport } from './routes/_app/support/index'
 import { Route as AppSupportTicketIdRouteImport } from './routes/_app/support/$ticketId'
 import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
@@ -38,11 +48,13 @@ import { Route as AppVideosVideoIdRouteImport } from './routes/_app/videos.$vide
 import { Route as ApiAccountAvatarRouteImport } from './routes/api/account/avatar'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiShareTokenRouteImport } from './routes/api/share/$token'
+import { Route as ApiWebhooksAsaasRouteImport } from './routes/api/webhooks/asaas'
 import { Route as AppAdminSupportIndexRouteImport } from './routes/_app/admin/support/index'
 import { Route as AppAdminSupportTicketIdRouteImport } from './routes/_app/admin/support/$ticketId'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as ApiClipsClipIdFileRouteImport } from './routes/api/clips/$clipId/file'
+import { Route as ApiEditsEditIdFileRouteImport } from './routes/api/edits/$editId/file'
 import { Route as ApiShareTokenPosterRouteImport } from './routes/api/share/$token_.poster'
 import { Route as ApiVideosVideoIdCaptionsRouteImport } from './routes/api/videos/$videoId/captions'
 import { Route as ApiVideosVideoIdSourceRouteImport } from './routes/api/videos/$videoId/source'
@@ -89,6 +101,11 @@ const SignUpRoute = SignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotwellKnownSplatRoute = DotwellKnownSplatRouteImport.update({
+  id: '/.well-known/$',
+  path: '/.well-known/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -109,9 +126,29 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClaudeRoute = AppClaudeRouteImport.update({
+  id: '/claude',
+  path: '/claude',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppClipsRoute = AppClipsRouteImport.update({
   id: '/clips',
   path: '/clips',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClipsGettingStartedRoute = AppClipsGettingStartedRouteImport.update({
+  id: '/clips-getting-started',
+  path: '/clips-getting-started',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFormatsRoute = AppFormatsRouteImport.update({
+  id: '/formats',
+  path: '/formats',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGettingStartedRoute = AppGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
   getParentRoute: () => AppRoute,
 } as any)
 const AppOverviewRoute = AppOverviewRouteImport.update({
@@ -129,9 +166,24 @@ const AppUsageRoute = AppUsageRouteImport.update({
   path: '/usage',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CTokenRoute = CTokenRouteImport.update({
   id: '/c/$token',
   path: '/c/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthConsentRoute = OauthConsentRouteImport.update({
+  id: '/oauth/consent',
+  path: '/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthSignInRoute = OauthSignInRouteImport.update({
+  id: '/oauth/sign-in',
+  path: '/oauth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
@@ -153,6 +205,16 @@ const AppAdminVideosRoute = AppAdminVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
   getParentRoute: () => AppAdminRoute,
+} as any)
+const AppEditsIndexRoute = AppEditsIndexRouteImport.update({
+  id: '/edits/',
+  path: '/edits/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEditsSessionIdRoute = AppEditsSessionIdRouteImport.update({
+  id: '/edits/$sessionId',
+  path: '/edits/$sessionId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSupportIndexRoute = AppSupportIndexRouteImport.update({
   id: '/support/',
@@ -194,6 +256,11 @@ const ApiShareTokenRoute = ApiShareTokenRouteImport.update({
   path: '/api/share/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksAsaasRoute = ApiWebhooksAsaasRouteImport.update({
+  id: '/api/webhooks/asaas',
+  path: '/api/webhooks/asaas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAdminSupportIndexRoute = AppAdminSupportIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -217,6 +284,11 @@ const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
 const ApiClipsClipIdFileRoute = ApiClipsClipIdFileRouteImport.update({
   id: '/api/clips/$clipId/file',
   path: '/api/clips/$clipId/file',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEditsEditIdFileRoute = ApiEditsEditIdFileRouteImport.update({
+  id: '/api/edits/$editId/file',
+  path: '/api/edits/$editId/file',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiShareTokenPosterRoute = ApiShareTokenPosterRouteImport.update({
@@ -263,29 +335,41 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
   '/$': typeof AppSplatRoute
   '/account': typeof AppAccountRoute
   '/admin': typeof AppAdminRouteWithChildren
+  '/claude': typeof AppClaudeRoute
   '/clips': typeof AppClipsRoute
+  '/clips-getting-started': typeof AppClipsGettingStartedRoute
+  '/formats': typeof AppFormatsRoute
+  '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/c/$token': typeof CTokenRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/oauth/sign-in': typeof OauthSignInRoute
   '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/support': typeof AppAdminSupportRouteWithChildren
   '/admin/videos': typeof AppAdminVideosRoute
+  '/edits/$sessionId': typeof AppEditsSessionIdRoute
   '/support/$ticketId': typeof AppSupportTicketIdRoute
   '/support/new': typeof AppSupportNewRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
+  '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/admin/': typeof AppAdminIndexRoute
+  '/edits/': typeof AppEditsIndexRoute
   '/support/': typeof AppSupportIndexRoute
   '/videos/': typeof AppVideosIndexRoute
   '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
+  '/api/edits/$editId/file': typeof ApiEditsEditIdFileRoute
   '/api/share/$token/poster': typeof ApiShareTokenPosterRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -303,28 +387,40 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
   '/$': typeof AppSplatRoute
   '/account': typeof AppAccountRoute
+  '/claude': typeof AppClaudeRoute
   '/clips': typeof AppClipsRoute
+  '/clips-getting-started': typeof AppClipsGettingStartedRoute
+  '/formats': typeof AppFormatsRoute
+  '/getting-started': typeof AppGettingStartedRoute
   '/overview': typeof AppOverviewRoute
   '/preferences': typeof AppPreferencesRoute
   '/usage': typeof AppUsageRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/c/$token': typeof CTokenRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/oauth/sign-in': typeof OauthSignInRoute
   '/': typeof AppIndexRoute
   '/admin/features': typeof AppAdminFeaturesRoute
   '/admin/videos': typeof AppAdminVideosRoute
+  '/edits/$sessionId': typeof AppEditsSessionIdRoute
   '/support/$ticketId': typeof AppSupportTicketIdRoute
   '/support/new': typeof AppSupportNewRoute
   '/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
+  '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/admin': typeof AppAdminIndexRoute
+  '/edits': typeof AppEditsIndexRoute
   '/support': typeof AppSupportIndexRoute
   '/videos': typeof AppVideosIndexRoute
   '/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
+  '/api/edits/$editId/file': typeof ApiEditsEditIdFileRoute
   '/api/share/$token/poster': typeof ApiShareTokenPosterRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -344,30 +440,42 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
   '/_app/$': typeof AppSplatRoute
   '/_app/account': typeof AppAccountRoute
   '/_app/admin': typeof AppAdminRouteWithChildren
+  '/_app/claude': typeof AppClaudeRoute
   '/_app/clips': typeof AppClipsRoute
+  '/_app/clips-getting-started': typeof AppClipsGettingStartedRoute
+  '/_app/formats': typeof AppFormatsRoute
+  '/_app/getting-started': typeof AppGettingStartedRoute
   '/_app/overview': typeof AppOverviewRoute
   '/_app/preferences': typeof AppPreferencesRoute
   '/_app/usage': typeof AppUsageRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/c/$token': typeof CTokenRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/oauth/sign-in': typeof OauthSignInRoute
   '/_app/': typeof AppIndexRoute
   '/_app/admin/features': typeof AppAdminFeaturesRoute
   '/_app/admin/support': typeof AppAdminSupportRouteWithChildren
   '/_app/admin/videos': typeof AppAdminVideosRoute
+  '/_app/edits/$sessionId': typeof AppEditsSessionIdRoute
   '/_app/support/$ticketId': typeof AppSupportTicketIdRoute
   '/_app/support/new': typeof AppSupportNewRoute
   '/_app/videos/$videoId': typeof AppVideosVideoIdRoute
   '/api/account/avatar': typeof ApiAccountAvatarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/share/$token': typeof ApiShareTokenRoute
+  '/api/webhooks/asaas': typeof ApiWebhooksAsaasRoute
   '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/edits/': typeof AppEditsIndexRoute
   '/_app/support/': typeof AppSupportIndexRoute
   '/_app/videos/': typeof AppVideosIndexRoute
   '/_app/admin/support/$ticketId': typeof AppAdminSupportTicketIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/api/clips/$clipId/file': typeof ApiClipsClipIdFileRoute
+  '/api/edits/$editId/file': typeof ApiEditsEditIdFileRoute
   '/api/share/$token_/poster': typeof ApiShareTokenPosterRoute
   '/api/videos/$videoId/captions': typeof ApiVideosVideoIdCaptionsRoute
   '/api/videos/$videoId/source': typeof ApiVideosVideoIdSourceRoute
@@ -388,29 +496,41 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/.well-known/$'
     | '/$'
     | '/account'
     | '/admin'
+    | '/claude'
     | '/clips'
+    | '/clips-getting-started'
+    | '/formats'
+    | '/getting-started'
     | '/overview'
     | '/preferences'
     | '/usage'
+    | '/api/mcp'
     | '/c/$token'
+    | '/oauth/consent'
+    | '/oauth/sign-in'
     | '/admin/features'
     | '/admin/support'
     | '/admin/videos'
+    | '/edits/$sessionId'
     | '/support/$ticketId'
     | '/support/new'
     | '/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
+    | '/api/webhooks/asaas'
     | '/admin/'
+    | '/edits/'
     | '/support/'
     | '/videos/'
     | '/admin/support/$ticketId'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
+    | '/api/edits/$editId/file'
     | '/api/share/$token/poster'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
@@ -428,28 +548,40 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/.well-known/$'
     | '/$'
     | '/account'
+    | '/claude'
     | '/clips'
+    | '/clips-getting-started'
+    | '/formats'
+    | '/getting-started'
     | '/overview'
     | '/preferences'
     | '/usage'
+    | '/api/mcp'
     | '/c/$token'
+    | '/oauth/consent'
+    | '/oauth/sign-in'
     | '/'
     | '/admin/features'
     | '/admin/videos'
+    | '/edits/$sessionId'
     | '/support/$ticketId'
     | '/support/new'
     | '/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
+    | '/api/webhooks/asaas'
     | '/admin'
+    | '/edits'
     | '/support'
     | '/videos'
     | '/admin/support/$ticketId'
     | '/admin/users/$userId'
     | '/api/clips/$clipId/file'
+    | '/api/edits/$editId/file'
     | '/api/share/$token/poster'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
@@ -468,30 +600,42 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/.well-known/$'
     | '/_app/$'
     | '/_app/account'
     | '/_app/admin'
+    | '/_app/claude'
     | '/_app/clips'
+    | '/_app/clips-getting-started'
+    | '/_app/formats'
+    | '/_app/getting-started'
     | '/_app/overview'
     | '/_app/preferences'
     | '/_app/usage'
+    | '/api/mcp'
     | '/c/$token'
+    | '/oauth/consent'
+    | '/oauth/sign-in'
     | '/_app/'
     | '/_app/admin/features'
     | '/_app/admin/support'
     | '/_app/admin/videos'
+    | '/_app/edits/$sessionId'
     | '/_app/support/$ticketId'
     | '/_app/support/new'
     | '/_app/videos/$videoId'
     | '/api/account/avatar'
     | '/api/auth/$'
     | '/api/share/$token'
+    | '/api/webhooks/asaas'
     | '/_app/admin/'
+    | '/_app/edits/'
     | '/_app/support/'
     | '/_app/videos/'
     | '/_app/admin/support/$ticketId'
     | '/_app/admin/users/$userId'
     | '/api/clips/$clipId/file'
+    | '/api/edits/$editId/file'
     | '/api/share/$token_/poster'
     | '/api/videos/$videoId/captions'
     | '/api/videos/$videoId/source'
@@ -511,11 +655,17 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  DotwellKnownSplatRoute: typeof DotwellKnownSplatRoute
+  ApiMcpRoute: typeof ApiMcpRoute
   CTokenRoute: typeof CTokenRoute
+  OauthConsentRoute: typeof OauthConsentRoute
+  OauthSignInRoute: typeof OauthSignInRoute
   ApiAccountAvatarRoute: typeof ApiAccountAvatarRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiShareTokenRoute: typeof ApiShareTokenRoute
+  ApiWebhooksAsaasRoute: typeof ApiWebhooksAsaasRoute
   ApiClipsClipIdFileRoute: typeof ApiClipsClipIdFileRoute
+  ApiEditsEditIdFileRoute: typeof ApiEditsEditIdFileRoute
   ApiShareTokenPosterRoute: typeof ApiShareTokenPosterRoute
   ApiVideosVideoIdCaptionsRoute: typeof ApiVideosVideoIdCaptionsRoute
   ApiVideosVideoIdSourceRoute: typeof ApiVideosVideoIdSourceRoute
@@ -582,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/$': {
+      id: '/.well-known/$'
+      path: '/.well-known/$'
+      fullPath: '/.well-known/$'
+      preLoaderRoute: typeof DotwellKnownSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/': {
       id: '/_app/'
       path: '/'
@@ -610,11 +767,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/claude': {
+      id: '/_app/claude'
+      path: '/claude'
+      fullPath: '/claude'
+      preLoaderRoute: typeof AppClaudeRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/clips': {
       id: '/_app/clips'
       path: '/clips'
       fullPath: '/clips'
       preLoaderRoute: typeof AppClipsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clips-getting-started': {
+      id: '/_app/clips-getting-started'
+      path: '/clips-getting-started'
+      fullPath: '/clips-getting-started'
+      preLoaderRoute: typeof AppClipsGettingStartedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/formats': {
+      id: '/_app/formats'
+      path: '/formats'
+      fullPath: '/formats'
+      preLoaderRoute: typeof AppFormatsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/getting-started': {
+      id: '/_app/getting-started'
+      path: '/getting-started'
+      fullPath: '/getting-started'
+      preLoaderRoute: typeof AppGettingStartedRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/overview': {
@@ -638,11 +823,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUsageRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/c/$token': {
       id: '/c/$token'
       path: '/c/$token'
       fullPath: '/c/$token'
       preLoaderRoute: typeof CTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/consent': {
+      id: '/oauth/consent'
+      path: '/oauth/consent'
+      fullPath: '/oauth/consent'
+      preLoaderRoute: typeof OauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/sign-in': {
+      id: '/oauth/sign-in'
+      path: '/oauth/sign-in'
+      fullPath: '/oauth/sign-in'
+      preLoaderRoute: typeof OauthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/admin/': {
@@ -672,6 +878,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/videos'
       preLoaderRoute: typeof AppAdminVideosRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/edits/': {
+      id: '/_app/edits/'
+      path: '/edits'
+      fullPath: '/edits/'
+      preLoaderRoute: typeof AppEditsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/edits/$sessionId': {
+      id: '/_app/edits/$sessionId'
+      path: '/edits/$sessionId'
+      fullPath: '/edits/$sessionId'
+      preLoaderRoute: typeof AppEditsSessionIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/support/': {
       id: '/_app/support/'
@@ -729,6 +949,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiShareTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/asaas': {
+      id: '/api/webhooks/asaas'
+      path: '/api/webhooks/asaas'
+      fullPath: '/api/webhooks/asaas'
+      preLoaderRoute: typeof ApiWebhooksAsaasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/admin/support/': {
       id: '/_app/admin/support/'
       path: '/'
@@ -762,6 +989,13 @@ declare module '@tanstack/react-router' {
       path: '/api/clips/$clipId/file'
       fullPath: '/api/clips/$clipId/file'
       preLoaderRoute: typeof ApiClipsClipIdFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/edits/$editId/file': {
+      id: '/api/edits/$editId/file'
+      path: '/api/edits/$editId/file'
+      fullPath: '/api/edits/$editId/file'
+      preLoaderRoute: typeof ApiEditsEditIdFileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/share/$token_/poster': {
@@ -849,14 +1083,20 @@ interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
   AppAccountRoute: typeof AppAccountRoute
   AppAdminRoute: typeof AppAdminRouteWithChildren
+  AppClaudeRoute: typeof AppClaudeRoute
   AppClipsRoute: typeof AppClipsRoute
+  AppClipsGettingStartedRoute: typeof AppClipsGettingStartedRoute
+  AppFormatsRoute: typeof AppFormatsRoute
+  AppGettingStartedRoute: typeof AppGettingStartedRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppPreferencesRoute: typeof AppPreferencesRoute
   AppUsageRoute: typeof AppUsageRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppEditsSessionIdRoute: typeof AppEditsSessionIdRoute
   AppSupportTicketIdRoute: typeof AppSupportTicketIdRoute
   AppSupportNewRoute: typeof AppSupportNewRoute
   AppVideosVideoIdRoute: typeof AppVideosVideoIdRoute
+  AppEditsIndexRoute: typeof AppEditsIndexRoute
   AppSupportIndexRoute: typeof AppSupportIndexRoute
   AppVideosIndexRoute: typeof AppVideosIndexRoute
 }
@@ -865,14 +1105,20 @@ const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
   AppAccountRoute: AppAccountRoute,
   AppAdminRoute: AppAdminRouteWithChildren,
+  AppClaudeRoute: AppClaudeRoute,
   AppClipsRoute: AppClipsRoute,
+  AppClipsGettingStartedRoute: AppClipsGettingStartedRoute,
+  AppFormatsRoute: AppFormatsRoute,
+  AppGettingStartedRoute: AppGettingStartedRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppPreferencesRoute: AppPreferencesRoute,
   AppUsageRoute: AppUsageRoute,
   AppIndexRoute: AppIndexRoute,
+  AppEditsSessionIdRoute: AppEditsSessionIdRoute,
   AppSupportTicketIdRoute: AppSupportTicketIdRoute,
   AppSupportNewRoute: AppSupportNewRoute,
   AppVideosVideoIdRoute: AppVideosVideoIdRoute,
+  AppEditsIndexRoute: AppEditsIndexRoute,
   AppSupportIndexRoute: AppSupportIndexRoute,
   AppVideosIndexRoute: AppVideosIndexRoute,
 }
@@ -888,11 +1134,17 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  DotwellKnownSplatRoute: DotwellKnownSplatRoute,
+  ApiMcpRoute: ApiMcpRoute,
   CTokenRoute: CTokenRoute,
+  OauthConsentRoute: OauthConsentRoute,
+  OauthSignInRoute: OauthSignInRoute,
   ApiAccountAvatarRoute: ApiAccountAvatarRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiShareTokenRoute: ApiShareTokenRoute,
+  ApiWebhooksAsaasRoute: ApiWebhooksAsaasRoute,
   ApiClipsClipIdFileRoute: ApiClipsClipIdFileRoute,
+  ApiEditsEditIdFileRoute: ApiEditsEditIdFileRoute,
   ApiShareTokenPosterRoute: ApiShareTokenPosterRoute,
   ApiVideosVideoIdCaptionsRoute: ApiVideosVideoIdCaptionsRoute,
   ApiVideosVideoIdSourceRoute: ApiVideosVideoIdSourceRoute,

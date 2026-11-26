@@ -17,7 +17,9 @@ import {
     removeExpiredUploads,
 } from "#/modules/videos/server/pending-uploads.server";
 import {
+    MAX_FORMAT_VIDEOS_IN_PROGRESS,
     MAX_VIDEOS_IN_PROGRESS,
+    TooManyFormatVideosInProgressError,
     TooManyVideosInProgressError,
 } from "#/modules/videos/server/processing-limit.server";
 import {
@@ -173,6 +175,39 @@ describe("video uploads", () => {
         const extra = reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
 
         await expect(extra).rejects.toThrow(TooManyVideosInProgressError);
+    });
+
+    it("lets raw format videos past the clip slots, asking for no clips", async () => {
+        const userId = await createTestUser();
+
+        for (let upload = 0; upload < MAX_VIDEOS_IN_PROGRESS; upload += 1) {
+            await reserveVideoUpload(userId, uploadInput(SMALL_UPLOAD_BYTES));
+        }
+
+        const formatUpload = await reserveVideoUpload(userId, {
+            ...uploadInput(SMALL_UPLOAD_BYTES),
+            clipCount: 0,
+            purpose: "format",
+        });
+
+        expect(formatUpload).toMatchObject({ purpose: "format", requestedClipCount: 0 });
+    });
+
+    it("refuses format videos past their own slots", async () => {
+        const userId = await createTestUser();
+        const formatInput = {
+            ...uploadInput(SMALL_UPLOAD_BYTES),
+            clipCount: 0,
+            purpose: "format" as const,
+        };
+
+        for (let upload = 0; upload < MAX_FORMAT_VIDEOS_IN_PROGRESS; upload += 1) {
+            await reserveVideoUpload(userId, formatInput);
+        }
+
+        await expect(reserveVideoUpload(userId, formatInput)).rejects.toThrow(
+            TooManyFormatVideosInProgressError,
+        );
     });
 
     it("refuses a declared size above 5 GB", async () => {
@@ -345,6 +380,22 @@ describe("video uploads", () => {
         const next = reserveVideoUpload(userId, uploadInput(FITTING_UPLOAD_BYTES));
 
         await expect(next).rejects.toThrow(StorageQuotaExceededError);
+    });
+
+    it("deletes a raw format video that was just uploaded", async () => {
+        const userId = await createTestUser();
+        const upload = await reserveVideoUpload(userId, {
+            ...uploadInput(SMALL_UPLOAD_BYTES),
+            clipCount: 0,
+            purpose: "format",
+        });
+        await sendFile(upload, SMALL_UPLOAD_BYTES);
+        const videoId = await confirmVideoUpload(upload.id, userId);
+        await db.update(videos).set({ status: "done" }).where(eq(videos.id, videoId));
+
+        await deleteVideoCoveringUploadLink({ id: videoId, userId });
+
+        expect(await countVideos(videoId)).toBe(0);
     });
 
     it("sweeps a file sent through the link of a deleted video", async () => {

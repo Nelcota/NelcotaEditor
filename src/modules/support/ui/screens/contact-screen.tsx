@@ -167,8 +167,8 @@ export function ContactScreen(props: ContactScreenProps): ReactNode {
     return (
         <main className="theme-site grid min-h-dvh grid-rows-[auto_1fr] gap-8 bg-background px-5 py-6 text-foreground sm:px-10">
             <span className="flex items-center gap-2.5 text-xl leading-none font-bold">
-                <BrandMark className="size-7" />
-                NELCOTA
+                <BrandMark className="h-7" />
+                Editor Oculto
             </span>
             <div className="grid w-full max-w-md content-center gap-6 justify-self-center">
                 <div className="grid gap-3">

@@ -110,7 +110,7 @@ export function AppLayout({
             </a>
             <div
                 className={cn(
-                    "flex min-h-dvh flex-col bg-frame md:grid md:h-dvh md:grid-cols-[288px_minmax(0,1fr)] md:py-2 md:pe-2",
+                    "flex min-h-dvh flex-col bg-frame md:grid md:h-dvh md:grid-cols-[288px_minmax(0,1fr)] md:pe-2",
                     isSidebarHidden === true && "md:grid-cols-[68px_minmax(0,1fr)]",
                 )}
             >
@@ -124,7 +124,7 @@ export function AppLayout({
                         <AppSidebar onCollapse={sidebar.toggle} accountMenu={accountMenu} />
                     </aside>
                 )}
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:rounded-frame md:border">
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:my-2 md:rounded-frame md:border">
                     <PageBar>
                         <ThemeToggle className="size-9 rounded-xl" />
                         {isVideoPage === true && <InspectorToggle className="max-lg:hidden" />}
@@ -139,7 +139,10 @@ export function AppLayout({
                         tabIndex={-1}
                         className={cn(
                             "relative grid min-h-0 min-w-0 flex-1 content-start grid-cols-[minmax(0,1fr)] outline-none md:overflow-y-auto",
-                            isVideoPage === false && "gap-6 px-4 pt-2 pb-28 md:px-8 md:pb-10",
+                            // Pages sit centred in the panel: in a column of at most 72rem, each
+                            // at its own width, so wide screens keep no empty strip on one side.
+                            isVideoPage === false &&
+                                "grid-cols-[minmax(0,72rem)] justify-center justify-items-center gap-6 px-4 pt-2 pb-28 md:px-8 md:pb-10 [&>*]:w-full",
                             isVideoPage === true && "pb-24 md:overflow-hidden md:pb-0",
                         )}
                     >

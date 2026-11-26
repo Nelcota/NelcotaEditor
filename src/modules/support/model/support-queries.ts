@@ -25,10 +25,10 @@ function shouldRetryTicketLoad(failureCount: number, error: Error): boolean {
     return failureCount < MAX_TICKET_LOAD_RETRIES;
 }
 
-export function myTicketsQueryOptions() {
+export function myTicketsQueryOptions(query: string = "") {
     return infiniteQueryOptions({
-        queryKey: [...SUPPORT_QUERY_KEY, "tickets"],
-        queryFn: ({ pageParam }) => listMyTickets({ data: { cursor: pageParam } }),
+        queryKey: [...SUPPORT_QUERY_KEY, "tickets", query],
+        queryFn: ({ pageParam }) => listMyTickets({ data: { cursor: pageParam, query } }),
         initialPageParam: FIRST_PAGE,
         getNextPageParam: (lastPage) => lastPage.nextCursor,
     });

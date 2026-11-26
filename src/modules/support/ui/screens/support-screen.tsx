@@ -1,79 +1,79 @@
-import PlusIcon from "~icons/lucide/plus";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useDeferredValue, useId, useState } from "react";
 import type { ReactNode } from "react";
 import { myTicketsQueryOptions } from "#/modules/support/model/support-queries";
-import { TicketList } from "#/modules/support/ui/components/ticket-list";
+import { TicketTable } from "#/modules/support/ui/components/ticket-table";
+import { TopicChoice } from "#/modules/support/ui/components/topic-choice";
 import { AsyncButton } from "#/shared/ui/async-button";
-import { Button } from "#/shared/ui/button";
-import { EmptyState } from "#/shared/ui/empty-state";
-import { BRAND_MASCOT_INDEX, Mascot } from "#/shared/ui/mascot";
-import { PageHeader } from "#/shared/ui/page-header";
+import { SearchField } from "#/shared/ui/search-field";
 import { Skeleton } from "#/shared/ui/skeleton";
 
 const SKELETON_ROW_COUNT = 3;
 
-function NewTicketLink(): ReactNode {
+function ConversationsLoading(): ReactNode {
     return (
-        <Button asChild>
-            <Link to="/support/new">
-                <PlusIcon aria-hidden="true" />
-                Abrir ticket
-            </Link>
-        </Button>
-    );
-}
-
-function SupportLoading(): ReactNode {
-    return (
-        <div role="status" className="grid max-w-3xl gap-3">
-            <span className="sr-only">Carregando seus tickets</span>
+        <div role="status" className="grid gap-2">
+            <span className="sr-only">Carregando suas conversas</span>
             {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
-                <Skeleton key={index} className="h-16 w-full rounded-xl" />
+                <Skeleton key={index} className="h-14 w-full rounded-xl" />
             ))}
         </div>
     );
 }
 
-/** The Suporte page: the person's tickets, newest activity first. */
-export function SupportScreen(): ReactNode {
-    const ticketsQuery = useInfiniteQuery(myTicketsQueryOptions());
+/** Below the doors: the person's conversations with their states, or one line when none yet. */
+function Conversations(): ReactNode {
+    const headingId = useId();
+    const [search, setSearch] = useState("");
+    // Typing stays responsive; the list follows once the text settles.
+    const query = useDeferredValue(search.trim());
+    const ticketsQuery = useInfiniteQuery({
+        ...myTicketsQueryOptions(query),
+        placeholderData: keepPreviousData,
+    });
     const pages = ticketsQuery.data?.pages ?? [];
     const tickets = pages.flatMap((page) => page.rows);
 
     return (
-        <div className="grid gap-6">
-            <PageHeader
-                title="Suporte"
-                description="Seus tickets com o suporte do Nelcota."
-                action={<NewTicketLink />}
-            />
-            {ticketsQuery.isPending === true && <SupportLoading />}
+        <section aria-labelledby={headingId} className="grid gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 id={headingId} className="text-lg font-bold">
+                    Suas conversas
+                </h2>
+                <SearchField
+                    label="Buscar nas suas conversas"
+                    placeholder="Buscar"
+                    value={search}
+                    onValueChange={setSearch}
+                />
+            </div>
+            {ticketsQuery.isPending === true && <ConversationsLoading />}
             {ticketsQuery.isError === true && pages.length === 0 && (
-                <EmptyState
-                    art={<Mascot index={BRAND_MASCOT_INDEX} className="size-14" />}
-                    title="Não foi possível carregar seus tickets"
-                    description="Confira sua conexão e tente de novo."
-                    action={
-                        <AsyncButton variant="outline" onAction={() => ticketsQuery.refetch()}>
-                            <RotateCwIcon aria-hidden="true" />
-                            Tentar de novo
-                        </AsyncButton>
-                    }
-                />
+                <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-card-border p-4">
+                    <p className="flex-1 text-muted-foreground">
+                        Não foi possível carregar suas conversas. Confira sua conexão.
+                    </p>
+                    <AsyncButton variant="secondary" onAction={() => ticketsQuery.refetch()}>
+                        <RotateCwIcon aria-hidden="true" />
+                        Tentar de novo
+                    </AsyncButton>
+                </div>
             )}
-            {ticketsQuery.isSuccess === true && tickets.length === 0 && (
-                <EmptyState
-                    art={<Mascot index={BRAND_MASCOT_INDEX} className="size-14" />}
-                    title="Nenhum ticket ainda"
-                    description="Abra um ticket quando precisar de ajuda com um vídeo ou com a conta."
-                    action={<NewTicketLink />}
-                />
+            {ticketsQuery.isSuccess === true && tickets.length === 0 && query.length === 0 && (
+                <p className="text-muted-foreground">
+                    Nenhuma conversa ainda. Escolha uma área acima para começar.
+                </p>
+            )}
+            {ticketsQuery.isSuccess === true && tickets.length === 0 && query.length > 0 && (
+                <p role="status" className="text-muted-foreground">
+                    Nenhuma conversa com “{query}”.
+                </p>
             )}
             {tickets.length > 0 && (
-                <TicketList
+                <TicketTable
                     tickets={tickets}
+                    labelledBy={headingId}
                     nextPage={{
                         hasNextPage: ticketsQuery.hasNextPage,
                         isFetching: ticketsQuery.isFetchingNextPage,
@@ -84,6 +84,27 @@ export function SupportScreen(): ReactNode {
                     }}
                 />
             )}
+        </section>
+    );
+}
+
+/** Suporte as a help desk: the two areas as doors on top, the conversations below. */
+export function SupportScreen(): ReactNode {
+    return (
+        <div className="grid max-w-5xl grid-cols-[minmax(0,1fr)] gap-8">
+            <header className="grid max-w-2xl gap-2">
+                <p className="text-xs font-bold tracking-eyebrow text-primary-ink uppercase">
+                    Geral
+                </p>
+                <h1 className="text-title font-extrabold tracking-[-0.02em] sm:text-4xl">
+                    Como podemos ajudar?
+                </h1>
+                <p className="max-w-xl text-pretty text-muted-foreground">
+                    Escolha a área. A conversa vai direto para quem cuida dela.
+                </p>
+            </header>
+            <TopicChoice />
+            <Conversations />
         </div>
     );
 }

@@ -1,0 +1,96 @@
+import FilmIcon from "~icons/lucide/film";
+import type { ReactNode } from "react";
+import type { SessionVideo } from "#/modules/viral-formats/model/edit-session";
+import { EDIT_STATUS_LABELS } from "#/modules/viral-formats/model/edit-status";
+import type { EditView } from "#/modules/viral-formats/model/edit-view";
+import { toEditFileUrl } from "#/modules/viral-formats/model/edit-view";
+import { SessionDeleteVideoButton } from "#/modules/viral-formats/ui/components/session-delete-video-button";
+import type { SessionVideoDeletion } from "#/modules/viral-formats/ui/components/session-delete-video-button";
+import type { VideoStatus } from "#/modules/video-records/model/video-status";
+import { formatBytes } from "#/shared/ui/format";
+import { Spinner } from "#/shared/ui/spinner";
+
+/** The step the worker is on, so the percent reads against something real. */
+const PREPARATION_STEP_LABELS: Partial<Record<VideoStatus, string>> = {
+    queued: "Na fila",
+    downloading: "Lendo o vídeo",
+    transcribing: "Transcrevendo o áudio",
+};
+
+interface SessionVideoCardProps {
+    video: SessionVideo;
+    /** The edit Claude made of it, once there is one. */
+    edit: EditView | undefined;
+    deletion: SessionVideoDeletion | null;
+}
+
+function describePreparation(video: SessionVideo): string {
+    if (video.hasFailed === true) {
+        return "Não deu para preparar este vídeo";
+    }
+
+    if (video.isReady === false) {
+        const stepLabel = PREPARATION_STEP_LABELS[video.status] ?? "Preparando";
+
+        return `${stepLabel} · ${video.progressPercent}%`;
+    }
+
+    if (video.sourceBytes === null) {
+        return "Pronto para editar";
+    }
+
+    return formatBytes(video.sourceBytes);
+}
+
+function EditState({ edit }: { edit: EditView }): ReactNode {
+    if (edit.status !== "done") {
+        return (
+            <span className="text-meta text-muted-foreground">
+                {EDIT_STATUS_LABELS[edit.status]}
+            </span>
+        );
+    }
+
+    return (
+        <a
+            href={toEditFileUrl(edit.id)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-sm text-meta font-semibold text-primary-ink underline underline-offset-4 outline-none focus-visible:ring-4 focus-visible:ring-ring"
+        >
+            Assistir a edição
+        </a>
+    );
+}
+
+/** One raw video of the batch: its frame, name, how its preparation goes and, later, its edit. */
+export function SessionVideoCard({ video, edit, deletion }: SessionVideoCardProps): ReactNode {
+    return (
+        <li className="relative grid min-w-0 content-start gap-2">
+            <div className="grid aspect-clip-card place-items-center overflow-hidden rounded-xl bg-secondary">
+                {video.thumbnailUrl !== null && (
+                    <img
+                        src={video.thumbnailUrl}
+                        alt=""
+                        className="size-full object-cover"
+                        loading="lazy"
+                    />
+                )}
+                {video.thumbnailUrl === null && (
+                    <FilmIcon aria-hidden="true" className="size-7 text-muted-foreground" />
+                )}
+            </div>
+            <div className="grid min-w-0 gap-0.5">
+                <p className="text-sm font-bold [overflow-wrap:anywhere]">{video.title}</p>
+                <p className="flex items-center gap-1.5 text-meta text-muted-foreground tabular-nums">
+                    {video.isReady === false && video.hasFailed === false && (
+                        <Spinner className="size-3.5 shrink-0" />
+                    )}
+                    {describePreparation(video)}
+                </p>
+                {edit !== undefined && <EditState edit={edit} />}
+            </div>
+            {deletion !== null && <SessionDeleteVideoButton video={video} deletion={deletion} />}
+        </li>
+    );
+}

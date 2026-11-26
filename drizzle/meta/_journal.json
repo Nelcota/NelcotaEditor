@@ -169,6 +169,90 @@
       "when": 1795613775477,
       "tag": "0023_clip_poster_path",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795617782168,
+      "tag": "0024_null_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795619014715,
+      "tag": "0025_finite_media_times",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795624236211,
+      "tag": "0026_support_ticket_topic",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1795627288721,
+      "tag": "0027_claude_oauth",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795628711028,
+      "tag": "0028_viral_format_edits",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795630764306,
+      "tag": "0029_editor_oculto_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795646600917,
+      "tag": "0030_format_videos",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795646790821,
+      "tag": "0031_edit_sessions",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795716792542,
+      "tag": "0032_enable_contrast_edits",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795719109304,
+      "tag": "0033_enable_gamified_edits",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795719981822,
+      "tag": "0034_enable_hacking_edits",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795722026045,
+      "tag": "0035_enable_ranking_edits",
+      "breakpoints": true
     }
   ]
 }

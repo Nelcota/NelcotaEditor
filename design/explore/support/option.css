@@ -1,0 +1,342 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap");
+
+/* Mirror of the dark tokens in src/styles.css (Editor Oculto lime). */
+:root {
+    color-scheme: dark;
+    --frame: oklch(0.185 0 0);
+    --background: oklch(0.215 0 0);
+    --foreground: oklch(0.96 0 0);
+    --card: oklch(0.245 0 0);
+    --popover: oklch(0.255 0 0);
+    --muted: oklch(0.26 0 0);
+    --muted-foreground: oklch(0.7 0 0);
+    --secondary: oklch(0.28 0 0);
+    --accent: oklch(0.31 0 0);
+    --brand: oklch(0.91 0.225 123.6);
+    --brand-ink: oklch(0.159 0.002 106.6);
+    --brand-hover: oklch(0.935 0.221 121.9);
+    --success: oklch(0.76 0.15 152);
+    --warning: oklch(0.8 0.14 75);
+    --claude: oklch(0.672 0.131 38.8);
+    --input: color-mix(in oklab, var(--foreground) 40%, var(--card));
+    --border: color-mix(in oklab, var(--foreground) 8%, transparent);
+    --card-border: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--frame);
+    color: var(--foreground);
+    font:
+        15px/1.5 Inter,
+        system-ui,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 16px;
+}
+
+svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.panel {
+    background: var(--background);
+    border-radius: 18px;
+    min-height: calc(100vh - 32px);
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.bar {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 28px;
+    font-size: 14px;
+    color: var(--muted-foreground);
+}
+
+.bar b {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.page {
+    padding: 4px 28px 28px;
+    display: grid;
+    gap: 20px;
+    align-content: start;
+}
+
+body.is-phone {
+    padding: 0;
+    width: 390px;
+}
+
+body.is-phone .panel {
+    border-radius: 0;
+    min-height: 100vh;
+}
+
+body.is-phone .bar,
+body.is-phone .page {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand);
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.lead {
+    color: var(--muted-foreground);
+    max-width: 62ch;
+}
+
+.muted {
+    color: var(--muted-foreground);
+}
+
+.meta {
+    font-size: 13px;
+    color: var(--muted-foreground);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    background: var(--brand);
+    color: var(--brand-ink);
+    white-space: nowrap;
+}
+
+.btn.sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+
+.btn.ghost {
+    background: var(--secondary);
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.btn.icon {
+    width: 40px;
+    padding: 0;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--secondary);
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
+.pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.pill.waiting {
+    color: var(--warning);
+    background: color-mix(in oklab, var(--warning) 14%, transparent);
+}
+
+.pill.answered {
+    color: var(--brand);
+    background: color-mix(in oklab, var(--brand) 14%, transparent);
+}
+
+.pill.done {
+    color: var(--muted-foreground);
+}
+
+.tile {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--secondary);
+    color: var(--foreground);
+    flex-shrink: 0;
+}
+
+.tile.lime {
+    background: var(--brand);
+    color: var(--brand-ink);
+}
+
+.tile.sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.input {
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--input);
+    background: var(--background);
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+
+.input.area {
+    height: 120px;
+    align-items: start;
+    padding-top: 12px;
+}
+
+.bubble {
+    max-width: 72%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    display: grid;
+    gap: 4px;
+}
+
+.bubble.me {
+    justify-self: end;
+    background: var(--brand);
+    color: var(--brand-ink);
+    border-bottom-right-radius: 4px;
+}
+
+.bubble.me .meta {
+    color: color-mix(in oklab, var(--brand-ink) 65%, transparent);
+}
+
+.bubble.them {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-bottom-left-radius: 4px;
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+    background: var(--secondary);
+    flex-shrink: 0;
+}
+
+.sep {
+    height: 1px;
+    background: var(--border);
+}
+
+.composer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--input);
+    border-radius: 14px;
+    padding: 6px 6px 6px 16px;
+    background: var(--background);
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+
+.composer > span:first-child {
+    flex: 1;
+}
+
+.unread {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand);
+    flex-shrink: 0;
+}
+
+.daymark {
+    justify-self: center;
+    font-size: 12px;
+    color: var(--muted-foreground);
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--card-border);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.chip.on {
+    border-color: var(--brand);
+    background: color-mix(in oklab, var(--brand) 12%, transparent);
+    color: var(--brand);
+}

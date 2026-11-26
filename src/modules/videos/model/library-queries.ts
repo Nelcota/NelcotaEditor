@@ -6,6 +6,7 @@ import type { LibraryClipCursor } from "#/modules/videos/model/library-clips-pag
 import { VIDEOS_QUERY_KEY } from "#/modules/videos/model/video-queries";
 
 const USAGE_KEY = "usage";
+const UNMEASURED_STORAGE_REFETCH_MS = 30_000;
 // The first page has no cursor; typed so later pages may carry one.
 const FIRST_PAGE: LibraryClipCursor | null = null;
 
@@ -40,5 +41,12 @@ export function usageQueryOptions() {
     return queryOptions({
         queryKey: [...VIDEOS_QUERY_KEY, USAGE_KEY],
         queryFn: () => getUsageSummary(),
+        refetchInterval: (query) => {
+            if (query.state.data?.storage.totalBytes === null) {
+                return UNMEASURED_STORAGE_REFETCH_MS;
+            }
+
+            return false;
+        },
     });
 }

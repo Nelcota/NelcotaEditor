@@ -3,7 +3,7 @@ import { myTicketsQueryOptions } from "#/modules/support/model/support-queries";
 import { SupportScreen } from "#/modules/support/ui/screens/support-screen";
 
 export const Route = createFileRoute("/_app/support/")({
-    head: () => ({ meta: [{ title: "Suporte · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Suporte · Editor Oculto" }] }),
     loader: async ({ context }): Promise<void> => {
         await context.queryClient.prefetchInfiniteQuery({
             ...myTicketsQueryOptions(),

@@ -39,6 +39,8 @@ async function failUnprocessableVideo(
 
 /** Queued again with its owner as the group, so one person's videos still run one at a time. */
 async function resumeStuckVideo(video: VideoWithoutJob): Promise<void> {
+    const { id: videoId, userId, processingStartedAt } = video;
+
     if (video.cancelRequested === true) {
         await finishStoppedVideo(toVideoRun(video), null);
         return;
@@ -51,7 +53,7 @@ async function resumeStuckVideo(video: VideoWithoutJob): Promise<void> {
         return;
     }
 
-    await enqueueVideoProcessing({ videoId: video.id, userId: video.userId }, null);
+    await enqueueVideoProcessing({ videoId, userId, processingStartedAt }, null);
 }
 
 /** Cancels, fails or queues again each video whose job died; one at a time, the list is capped. */

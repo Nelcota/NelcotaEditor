@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, test } from "vitest";
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
+import { countFailedRunJobs } from "#/modules/processing/server/count-failed-run-jobs.server";
 import type { VideoWithoutJob } from "#/modules/processing/server/find-videos-without-job.server";
 import { resumeStuckVideos } from "#/modules/processing/server/stuck-video-recovery.server";
 import {
@@ -118,6 +119,35 @@ describe("resumeStuckVideos", () => {
         const video = await insertStuckVideo();
         await insertFailedJobs(video.id, 3, new Date(Date.now() - ONE_DAY_IN_MILLISECONDS));
 
+        await resumeStuckVideos([video]);
+
+        assert.equal((await readVideo(video.id)).status, "transcribing");
+        assert.equal(await countQueuedJobs(video.id), 1);
+    });
+
+    test("counts stamped jobs in the current run and excludes recent failures from older runs", async () => {
+        const video = await insertStuckVideo();
+        const startedAt = video.processingStartedAt;
+        assert.ok(startedAt);
+        const earlier = new Date(startedAt.getTime() - 30_000);
+        const currentJob = JSON.stringify({
+            videoId: video.id,
+            runStartedAt: startedAt.toISOString(),
+        });
+        const oldJob = JSON.stringify({ videoId: video.id, runStartedAt: earlier.toISOString() });
+        await insertFailedJobs(video.id, 1, earlier);
+        await db.execute(sql`
+            insert into pgboss.job (name, state, singleton_key, created_on, data)
+            values
+                (${PROCESS_VIDEO_QUEUE}, 'failed', ${video.id}, ${earlier.toISOString()}::timestamptz, ${currentJob}::jsonb),
+                (${PROCESS_VIDEO_QUEUE}, 'failed', ${video.id}, now(), ${currentJob}::jsonb),
+                (${PROCESS_VIDEO_QUEUE}, 'failed', ${video.id}, now(), ${oldJob}::jsonb)
+        `);
+
+        assert.equal(
+            await countFailedRunJobs({ videoId: video.id, processingStartedAt: startedAt }),
+            2,
+        );
         await resumeStuckVideos([video]);
 
         assert.equal((await readVideo(video.id)).status, "transcribing");

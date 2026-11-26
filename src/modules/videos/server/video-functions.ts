@@ -125,6 +125,7 @@ export const createYoutubeVideo = createServerFn({ method: "POST" })
         await runVideoStartTransaction(userId, async ({ transaction, jobDatabase }) => {
             // The download size is unknown up front, so only an account that is already full is refused.
             await assertVideoStartAllowed({ userId, incomingBytes: 0 }, transaction);
+            const processingStartedAt = new Date();
             await transaction.insert(videos).values({
                 id: videoId,
                 userId,
@@ -135,9 +136,9 @@ export const createYoutubeVideo = createServerFn({ method: "POST" })
                 clipLength: data.clipLength,
                 // "" is stored as is: it means "detect automatically", unlike null (videos from before 0002).
                 transcriptionLanguage: data.language,
-                processingStartedAt: new Date(),
+                processingStartedAt,
             });
-            await enqueueVideoProcessing({ videoId, userId }, jobDatabase);
+            await enqueueVideoProcessing({ videoId, userId, processingStartedAt }, jobDatabase);
         });
         return { videoId };
     });

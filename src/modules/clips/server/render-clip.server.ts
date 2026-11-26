@@ -3,6 +3,7 @@ import path from "node:path";
 import { eq } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { buildAssSubtitles } from "#/modules/clips/model/build-ass-subtitles";
+import { readStoredCaptionCues } from "#/modules/clips/server/read-stored-caption-cues.server";
 import {
     groupWordsIntoCues,
     toClipRelativeCues,
@@ -76,7 +77,7 @@ function assertValidRange(clip: Clip): void {
 
 /** The Studio's edited captions when there are any; otherwise the transcript, grouped. */
 function resolveClipCues(clip: Clip, words: Array<TranscriptWord>): Array<CaptionCue> {
-    const editedCues = clip.captionCues;
+    const editedCues = readStoredCaptionCues(clip);
 
     if (editedCues !== null) {
         return editedCues;

@@ -4,7 +4,7 @@ import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import {
     newTicketSchema,
     ticketIdInputSchema,
-    ticketListInputSchema,
+    myTicketListInputSchema,
     ticketReadSchema,
     ticketReplySchema,
 } from "#/modules/support/model/support-ticket";
@@ -27,9 +27,9 @@ import {
 
 export const listMyTickets = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
-    .validator(ticketListInputSchema)
+    .validator(myTicketListInputSchema)
     .handler(async ({ context, data }): Promise<TicketPage<CustomerTicketRow>> =>
-        listCustomerTickets(context.user.id, data.cursor),
+        listCustomerTickets(context.user.id, data),
     );
 
 /** Another person's ticket answers 404, the same as one that does not exist. */
@@ -63,10 +63,7 @@ export const markMyTicketRead = createServerFn({ method: "POST" })
     .validator(ticketReadSchema)
     .handler(async ({ context, data }): Promise<void> => {
         const { ticketId, lastMessageAt } = data;
-        await markCustomerTicketRead(
-            { userId: context.user.id, ticketId },
-            new Date(lastMessageAt),
-        );
+        await markCustomerTicketRead({ userId: context.user.id, ticketId }, lastMessageAt);
     });
 
 export const replyToMyTicket = createServerFn({ method: "POST" })

@@ -47,6 +47,7 @@ async function insertVideoWithClips(
             endSeconds: 30,
             score: clip.score,
             status: "done" as const,
+            outputPath: `videos/${videoId}/clips/${position}.mp4`,
         })),
     );
 

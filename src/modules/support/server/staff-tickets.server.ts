@@ -10,7 +10,11 @@ import type {
     StaffTicketRow,
     TicketPage,
 } from "#/modules/support/model/support-views";
-import { afterTicketCursor, splitTicketPage } from "#/modules/support/server/ticket-pages.server";
+import {
+    afterTicketCursor,
+    splitTicketPage,
+    ticketActivityTime,
+} from "#/modules/support/server/ticket-pages.server";
 import type { TicketOrder } from "#/modules/support/server/ticket-pages.server";
 import {
     appendTicketMessage,
@@ -55,7 +59,7 @@ export async function listStaffTickets(query: StaffListQuery): Promise<TicketPag
             number: supportTickets.number,
             subject: supportTickets.subject,
             status: supportTickets.status,
-            lastMessageAt: supportTickets.lastMessageAt,
+            lastMessageAt: ticketActivityTime,
             customerName: user.name,
         })
         .from(supportTickets)
@@ -66,7 +70,7 @@ export async function listStaffTickets(query: StaffListQuery): Promise<TicketPag
     const { pageRows, nextCursor } = splitTicketPage(rows, SUPPORT_PAGE_SIZE);
 
     return {
-        rows: pageRows.map((row) => ({ ...row, lastMessageAt: row.lastMessageAt.toISOString() })),
+        rows: pageRows,
         nextCursor,
     };
 }

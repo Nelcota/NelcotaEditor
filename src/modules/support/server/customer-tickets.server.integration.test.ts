@@ -23,7 +23,12 @@ import { createTestAccount, createTestVideo } from "#/modules/support/server/sup
 // Runs against the test database from .env.test: bun run test:integration
 
 function openSimpleTicket(userId: string, subject: string = "Vídeo travou"): Promise<string> {
-    return openTicket(userId, { subject, message: "Ficou parado em Baixando.", videoId: null });
+    return openTicket(userId, {
+        topic: "clips",
+        subject,
+        message: "Ficou parado em Baixando.",
+        videoId: null,
+    });
 }
 
 beforeEach(async () => {
@@ -48,11 +53,32 @@ describe("openTicket", () => {
         ]);
     });
 
+    it("keeps the topic the person chose", async () => {
+        const userId = await createTestAccount();
+
+        const ticketId = await openTicket(userId, {
+            topic: "editor",
+            subject: "Formato cortou o final",
+            message: "O Ranking parou no número 2.",
+            videoId: null,
+        });
+
+        const ticket = await findCustomerTicket({ userId, ticketId });
+        const page = await listCustomerTickets(userId, { cursor: null, query: "" });
+        expect(ticket?.topic).toBe("editor");
+        expect(page.rows.map((row) => row.topic)).toEqual(["editor"]);
+    });
+
     it("links a video of the person's own", async () => {
         const userId = await createTestAccount();
         const videoId = await createTestVideo(userId);
 
-        const ticketId = await openTicket(userId, { subject: "Falhou", message: "Ajuda", videoId });
+        const ticketId = await openTicket(userId, {
+            topic: "clips",
+            subject: "Falhou",
+            message: "Ajuda",
+            videoId,
+        });
 
         const ticket = await findCustomerTicket({ userId, ticketId });
         expect(ticket?.video).toMatchObject({ id: videoId, title: "Live de domingo" });
@@ -63,7 +89,12 @@ describe("openTicket", () => {
         const strangerVideoId = await createTestVideo(await createTestAccount());
 
         await expect(
-            openTicket(userId, { subject: "Falhou", message: "Ajuda", videoId: strangerVideoId }),
+            openTicket(userId, {
+                topic: "clips",
+                subject: "Falhou",
+                message: "Ajuda",
+                videoId: strangerVideoId,
+            }),
         ).rejects.toThrow(TicketVideoNotFoundError);
     });
 
@@ -91,6 +122,40 @@ describe("openTicket", () => {
         await saveAppSwitch({ key: "support", isEnabled: false, adminId: randomUUID() });
 
         await expect(openSimpleTicket(userId)).rejects.toThrow(FeatureTurnedOffError);
+    });
+});
+
+describe("listCustomerTickets search", () => {
+    it("finds conversations by words in the subject", async () => {
+        const userId = await createTestAccount();
+        await openSimpleTicket(userId, "Legenda sumiu");
+        await openSimpleTicket(userId, "Vídeo travou");
+
+        const page = await listCustomerTickets(userId, { cursor: null, query: "legenda" });
+
+        expect(page.rows.map((row) => row.subject)).toEqual(["Legenda sumiu"]);
+    });
+
+    it("finds a conversation by its number", async () => {
+        const userId = await createTestAccount();
+        const ticketId = await openSimpleTicket(userId);
+        const ticket = await findCustomerTicket({ userId, ticketId });
+
+        const page = await listCustomerTickets(userId, {
+            cursor: null,
+            query: `#${ticket?.number}`,
+        });
+
+        expect(page.rows.map((row) => row.id)).toEqual([ticketId]);
+    });
+
+    it("treats LIKE wildcards as plain text", async () => {
+        const userId = await createTestAccount();
+        await openSimpleTicket(userId, "Vídeo travou");
+
+        const page = await listCustomerTickets(userId, { cursor: null, query: "%" });
+
+        expect(page.rows).toEqual([]);
     });
 });
 
@@ -123,7 +188,7 @@ describe("another person's ticket", () => {
         await openSimpleTicket(await createTestAccount());
         const userId = await createTestAccount();
 
-        expect((await listCustomerTickets(userId, null)).rows).toEqual([]);
+        expect((await listCustomerTickets(userId, { cursor: null, query: "" })).rows).toEqual([]);
     });
 });
 
@@ -148,7 +213,7 @@ describe("an answer from the team", () => {
         await db.transaction((transaction) =>
             replyAsStaff({ adminId, ticketId, body: "Complemento" }, transaction),
         );
-        await markCustomerTicketRead({ userId, ticketId }, new Date(unreadReplyAt));
+        await markCustomerTicketRead({ userId, ticketId }, unreadReplyAt);
         expect(await hasUnreadSupportReply(userId)).toBe(true);
 
         const latest = await findCustomerTicket({ userId, ticketId });
@@ -158,7 +223,7 @@ describe("an answer from the team", () => {
             throw new Error("The ticket had no new unread reply");
         }
 
-        await markCustomerTicketRead({ userId, ticketId }, new Date(latestUnreadReplyAt));
+        await markCustomerTicketRead({ userId, ticketId }, latestUnreadReplyAt);
         expect(await hasUnreadSupportReply(userId)).toBe(false);
     });
 

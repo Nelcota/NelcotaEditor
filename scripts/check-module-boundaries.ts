@@ -21,6 +21,9 @@ const MODULE_LAYOUT_HINT =
 
 const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>>> = {
     "app-switches": [],
+    billing: ["auth"],
+    "viral-formats": ["auth", "billing", "video-records", "transcription"],
+    mcp: ["auth", "video-records", "transcription", "videos", "viral-formats"],
     auth: ["app-switches"],
     "video-records": ["auth"],
     preferences: ["auth", "video-records"],
@@ -40,7 +43,16 @@ const ALLOWED_MODULE_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<string>
     ],
     studio: ["auth", "video-records", "transcription", "clips", "processing", "videos"],
     overview: ["auth", "video-records", "transcription", "clips", "videos"],
-    shell: ["admin", "app-switches", "support", "auth", "video-records", "preferences", "videos"],
+    shell: [
+        "admin",
+        "app-switches",
+        "support",
+        "auth",
+        "video-records",
+        "preferences",
+        "videos",
+        "viral-formats",
+    ],
     admin: ["app-switches", "support", "auth", "video-records", "clips", "videos"],
 };
 

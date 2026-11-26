@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ADMIN_PAGE_SIZE } from "#/modules/admin/model/admin-search";
+import { ADMIN_PAGE_SIZE, MAX_ADMIN_PAGE } from "#/modules/admin/model/admin-search";
 import { countAdminPages } from "#/modules/admin/model/count-admin-pages";
 
 describe("countAdminPages", () => {
@@ -17,5 +17,9 @@ describe("countAdminPages", () => {
 
     it("rejects a negative count", () => {
         expect(() => countAdminPages(-1)).toThrow(RangeError);
+    });
+
+    it("caps the last page at the server's page limit", () => {
+        expect(countAdminPages(ADMIN_PAGE_SIZE * MAX_ADMIN_PAGE + 1)).toBe(MAX_ADMIN_PAGE);
     });
 });

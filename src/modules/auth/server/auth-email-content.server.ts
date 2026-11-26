@@ -57,16 +57,16 @@ export function pickGreetingName(recipient: {
 const AUTH_EMAIL_COPY: Record<AuthEmailKind, (name: string | null) => AuthEmailCopy> = {
     // Always sent before the address is confirmed, so it never carries the typed name.
     "verify-email": () => ({
-        subject: "Confirme seu email no Nelcota",
+        subject: "Confirme seu email no Editor Oculto",
         paragraphs: [
             NEUTRAL_GREETING,
             `Para ativar sua conta, confirme seu email. ${LINK_LIFETIME_NOTE}`,
         ],
         buttonLabel: "Confirmar email",
-        closing: "Se você não criou uma conta no Nelcota, ignore este email.",
+        closing: "Se você não criou uma conta no Editor Oculto, ignore este email.",
     }),
     "reset-password": (name) => ({
-        subject: "Redefina sua senha do Nelcota",
+        subject: "Redefina sua senha do Editor Oculto",
         paragraphs: [
             greet(name),
             `Recebemos um pedido para redefinir sua senha. ${LINK_LIFETIME_NOTE}`,
@@ -78,7 +78,7 @@ const AUTH_EMAIL_COPY: Record<AuthEmailKind, (name: string | null) => AuthEmailC
         subject: "Tentativa de cadastro com seu email",
         paragraphs: [
             greet(name),
-            "Alguém tentou criar uma conta no Nelcota com este email, mas você já tem uma. Se foi você e esqueceu a senha, redefina pelo link abaixo.",
+            "Alguém tentou criar uma conta no Editor Oculto com este email, mas você já tem uma. Se foi você e esqueceu a senha, redefina pelo link abaixo.",
         ],
         buttonLabel: "Redefinir senha",
         closing: "Se não foi você, ignore este email. Nada mudou na sua conta.",
@@ -108,7 +108,7 @@ function buildHtml(copy: AuthEmailCopy, url: string): string {
     return [
         '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#18181b;max-width:560px">',
         paragraphs,
-        `<p style="margin:24px 0"><a href="${link}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold">${escapeHtml(copy.buttonLabel)}</a></p>`,
+        `<p style="margin:24px 0"><a href="${link}" style="display:inline-block;background:#C4F800;color:#0D0D0C;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold">${escapeHtml(copy.buttonLabel)}</a></p>`,
         `<p style="margin:0 0 16px;font-size:14px;color:#52525b">Se o botão não abrir, copie este endereço no navegador:<br>${link}</p>`,
         `<p style="margin:0;font-size:14px;color:#52525b">${escapeHtml(copy.closing)}</p>`,
         "</div>",

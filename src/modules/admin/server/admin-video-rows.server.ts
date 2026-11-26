@@ -4,7 +4,7 @@ import { db } from "#/db/database.server";
 import type { AdminVideoFilter, AdminVideoListInput } from "#/modules/admin/model/admin-search";
 import { ADMIN_PAGE_SIZE } from "#/modules/admin/model/admin-search";
 import type { AdminVideoPage, AdminVideoRow } from "#/modules/admin/model/admin-views";
-import { toContainsPattern } from "#/modules/admin/server/like-pattern.server";
+import { toContainsPattern } from "#/shared/server/like-pattern.server";
 import { user } from "#/modules/auth/auth.schema";
 import { clips } from "#/modules/clips/clips.schema";
 import { WORKING_VIDEO_STATUSES } from "#/modules/video-records/model/video-status";

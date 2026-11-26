@@ -34,7 +34,7 @@ function RecentVideoLink({ video }: { video: VideoSummary }): ReactNode {
     );
 }
 
-/** The last videos under the Início box, so a returning person picks up where they left off. */
+/** The last videos under the clip maker, so a returning person picks up where they left off. */
 export function RecentVideos(): ReactNode {
     const listQuery = useInfiniteQuery(videoListQueryOptions(RECENT_LIST_REQUEST));
     const firstPage = listQuery.data?.pages[0];
@@ -55,10 +55,10 @@ export function RecentVideos(): ReactNode {
     const recentVideos = firstPage.items.slice(0, RECENT_VIDEO_COUNT);
 
     return (
-        <section aria-labelledby="recent-videos-title" className="grid w-full max-w-3xl gap-2">
-            <div className="flex items-center justify-between gap-3 px-2">
-                <h2 id="recent-videos-title" className="text-sm font-semibold">
-                    Recentes
+        <section aria-labelledby="recent-videos-title" className="grid w-full gap-3">
+            <div className="flex items-center justify-between gap-3">
+                <h2 id="recent-videos-title" className="text-lg font-bold">
+                    Vídeos recentes
                 </h2>
                 <Link
                     to="/videos"
@@ -68,7 +68,7 @@ export function RecentVideos(): ReactNode {
                     <ArrowRightIcon aria-hidden="true" className="size-3.5" />
                 </Link>
             </div>
-            <ul className="grid gap-1 sm:grid-cols-3">
+            <ul className="grid gap-2 sm:grid-cols-3">
                 {recentVideos.map((video) => (
                     <RecentVideoLink key={video.id} video={video} />
                 ))}

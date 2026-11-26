@@ -2,8 +2,9 @@ import { truncateText } from "#/modules/video-records/model/video-title";
 import {
     MAX_CLIP_SECONDS,
     MAX_SCORE,
-    MIN_CLIP_SECONDS,
+    MIN_CLIP_CENTISECONDS,
     MIN_SCORE,
+    clipDurationCentiseconds,
 } from "#/modules/clips/model/clip-limits";
 import { CLIP_LENGTH_TARGETS } from "#/modules/clips/model/clip-length-targets";
 import { fitClipLength } from "#/modules/highlights/model/fit-clip-length";
@@ -111,7 +112,7 @@ function fitRange(
     });
     const padded = padEnd(fitted, { durationSeconds, maxLengthSeconds: target.trimAboveSeconds });
 
-    if (padded.endSeconds - padded.startSeconds < MIN_CLIP_SECONDS) {
+    if (clipDurationCentiseconds(padded.startSeconds, padded.endSeconds) < MIN_CLIP_CENTISECONDS) {
         return null;
     }
 

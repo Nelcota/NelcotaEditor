@@ -1,0 +1,2 @@
+ALTER TABLE "support_tickets" ADD COLUMN "topic" text DEFAULT 'clips' NOT NULL;--> statement-breakpoint
+ALTER TABLE "support_tickets" ADD CONSTRAINT "support_tickets_topic_known" CHECK ("support_tickets"."topic" in ('editor', 'clips'));

@@ -5,7 +5,7 @@ import {
     findOwnedPendingUpload,
     summarizePendingUploads,
 } from "#/modules/videos/server/pending-uploads.server";
-import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
+import { assertCanStartVideoFor } from "#/modules/videos/server/processing-limit.server";
 import { UploadTooLargeError } from "#/modules/videos/server/reserve-video-upload.server";
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
@@ -42,7 +42,7 @@ async function createVideoFromUpload(upload: VideoUpload, sourceBytes: number): 
 
     await runVideoStartTransaction(userId, async ({ transaction, jobDatabase }) => {
         const pending = await summarizePendingUploads(userId, transaction, upload.id);
-        await assertCanStartAnotherVideo(userId, transaction, pending.count);
+        await assertCanStartVideoFor({ userId, purpose: upload.purpose, pending }, transaction);
         await assertStorageAvailable(
             { userId, incomingBytes: sourceBytes, reservedBytes: pending.bytes },
             transaction,
@@ -63,19 +63,24 @@ async function createVideoFromUpload(upload: VideoUpload, sourceBytes: number): 
             throw new UploadNotFoundError();
         }
 
+        const processingStartedAt = new Date();
         await transaction.insert(videos).values({
             id: upload.id,
             userId,
             title: upload.title,
             source: "upload",
+            purpose: upload.purpose,
             sourcePath: upload.sourcePath,
             sourceBytes,
             requestedClipCount: upload.requestedClipCount,
             clipLength: upload.clipLength,
             transcriptionLanguage: upload.transcriptionLanguage,
-            processingStartedAt: new Date(),
+            processingStartedAt,
         });
-        await enqueueVideoProcessing({ videoId: upload.id, userId }, jobDatabase);
+        await enqueueVideoProcessing(
+            { videoId: upload.id, userId, processingStartedAt },
+            jobDatabase,
+        );
     });
 }
 

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_app/admin/support/$ticketId")({
             return {};
         }
 
-        return { meta: [{ title: "Ticket · Suporte · Admin · Nelcota" }] };
+        return { meta: [{ title: "Ticket · Suporte · Admin · Editor Oculto" }] };
     },
     loader: async ({ context, params }): Promise<void> => {
         const ticketId = params.ticketId;

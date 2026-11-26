@@ -21,9 +21,11 @@ function toPercent(current: number, total: number): number {
 export function StepProgressBar({ current, total }: StepProgressProps): ReactNode {
     return (
         <div aria-hidden="true" className="h-1 overflow-hidden rounded-full bg-foreground/10">
+            {/* Scaled, not resized: width would lay the page out again on every frame. The
+                track's rounding and overflow clip the ends, so the fill needs none. */}
             <div
-                className="h-full rounded-full bg-primary transition-[width] duration-300"
-                style={{ width: `${toPercent(current, total)}%` }}
+                className="h-full origin-left bg-primary transition-[scale] duration-300 ease-out"
+                style={{ scale: `${toPercent(current, total) / PERCENT} 1` }}
             />
         </div>
     );

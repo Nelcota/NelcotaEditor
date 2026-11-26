@@ -18,9 +18,13 @@ import { MAX_VIDEO_TITLE_LENGTH } from "#/modules/video-records/model/video-titl
 import {
     MAX_CLIP_COUNT,
     MIN_CLIP_COUNT,
+    VIDEO_PURPOSES,
     VIDEO_SOURCES,
     VIDEO_STATUSES,
 } from "#/modules/video-records/model/video-status";
+
+/** Constant values written into the CHECK; never user input. */
+const PURPOSE_LIST = VIDEO_PURPOSES.map((purpose) => `'${purpose}'`).join(", ");
 
 export const videoStatusEnum = pgEnum("video_status", VIDEO_STATUSES);
 export const videoSourceEnum = pgEnum("video_source", VIDEO_SOURCES);
@@ -43,6 +47,8 @@ export const videos = pgTable(
         // A frame taken by the worker; YouTube videos fall back to YouTube's own thumbnail.
         thumbnailPath: text("thumbnail_path"),
         durationSeconds: doublePrecision("duration_seconds"),
+        // What the video is for; a format video asks for no clips (count 0).
+        purpose: text("purpose", { enum: VIDEO_PURPOSES }).notNull().default("clips"),
         requestedClipCount: integer("requested_clip_count").notNull(),
         // Copied from the user's preferences (or picked when sending), like the clip count.
         clipLength: clipLengthEnum("clip_length").notNull().default(DEFAULT_CLIP_LENGTH),
@@ -58,6 +64,8 @@ export const videos = pgTable(
         // When the video first reached done, kept through every later retry or Studio render
         // (which reset finishedAt). The Painel's time per video runs from createdAt to here.
         firstFinishedAt: timestamp("first_finished_at", { withTimezone: true }),
+        // A migrated video was already done, but its first completion cannot be dated.
+        hasUnrecordedFirstFinish: boolean("has_unrecorded_first_finish").notNull().default(false),
         // When the current run was asked for (creation, retry or a Studio render). The running
         // run's time left is measured from here: createdAt would count the days between a video
         // and its re-render. Null for videos from before this column.
@@ -71,9 +79,10 @@ export const videos = pgTable(
     (table) => [
         // Every list is "this user's videos, newest first".
         index("videos_user_id_created_at_idx").on(table.userId, table.createdAt.desc()),
+        check("videos_purpose_known", sql`${table.purpose} in (${sql.raw(PURPOSE_LIST)})`),
         check(
             "videos_requested_clip_count_range",
-            sql`${table.requestedClipCount} between ${sql.raw(String(MIN_CLIP_COUNT))} and ${sql.raw(String(MAX_CLIP_COUNT))}`,
+            sql`(${table.purpose} = 'format' and ${table.requestedClipCount} = 0) or (${table.purpose} = 'clips' and ${table.requestedClipCount} between ${sql.raw(String(MIN_CLIP_COUNT))} and ${sql.raw(String(MAX_CLIP_COUNT))})`,
         ),
         check(
             "videos_source_bytes_positive",
@@ -83,6 +92,10 @@ export const videos = pgTable(
         check(
             "videos_duration_seconds_positive",
             sql`${table.durationSeconds} is null or ${table.durationSeconds} > 0`,
+        ),
+        check(
+            "videos_duration_seconds_finite",
+            sql`${table.durationSeconds} is null or ${table.durationSeconds} < 'Infinity'::double precision`,
         ),
         check(
             "videos_title_length",

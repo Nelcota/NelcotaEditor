@@ -1,27 +1,79 @@
 # Nelcota — design brief
 
-Nelcota turns long videos into vertical short clips with captions. Since 2026-11-23 the app follows the
-owner's second reference (a creators platform): a dark window by default, with greys that carry no hue
-(the owner asked for nothing bluish) and blue as the one action colour (it was the brand green until
-2026-11-23). The frame holds the
-sidebar: the NELCOTA logo, the bell (videos being cut) and the collapse button; the "Novo vídeo" card;
-the sections (Início, Vídeos, Cortes, Painel, Conta, and the Admin folder for admins); the storage card
-(used out of the quota, originals and clips, "Ver uso" and "Gerenciar"); the person with a menu. One
-rounded panel holds the breadcrumb bar (theme toggle trailing) and the page; page titles live in the
-breadcrumb and stay for screen readers only. Light stays available through the toggle.
+Editor Oculto (formerly Nelcota) holds two areas under one login: the Formatos Virais, which edit raw
+videos in a format with the person's Claude, and Cortes, which turn long videos into vertical short
+clips with captions. Since 2026-11-23 the app follows the owner's second reference (a creators
+platform): a dark window by default, with greys that carry no hue (the owner asked for nothing
+bluish) and lime as the one action colour (since 2026-11-25). The frame holds the sidebar: the Editor
+Oculto logo, the bell (videos being cut) and the collapse button; three labelled groups, Editor Oculto
+(Comece por aqui with the checklist count, Etapa 1 · Conectar Claude, Formatos Virais, Minhas
+edições), Cortes (Comece por aqui, Meus cortes, Painel) and Geral (Conta, Suporte, and the Admin
+folder for admins); the person with a menu. Storage lives in Conta. One rounded panel holds the
+breadcrumb bar (theme toggle trailing) and the page. The Editor Oculto pages and both "Comece por
+aqui" show a visible eyebrow and title, as in the prototype; the older pages keep the title in the
+breadcrumb and for screen readers only. Light stays available through the toggle.
 
-- **Início** opens with a greeting from Nel beside the brand mascot (40px on phones, 56px from
-  `sm`), a box to paste a YouTube link (it starts the video with the saved preferences, shown as
-  pills; the plus opens the full form), and shortcuts.
+- **Comece por aqui** is where people land ("/" redirects there): each area has its own.
+- **Meus cortes** opens with the box to paste a YouTube link (it starts the video with the saved
+  preferences, shown as pills; the plus opens the full form) and the last videos, over the clips.
 - **Vídeos** is a table (status pill, source, clips, progress with the stage, date), columns by a
   container query so a narrow panel falls back to compact rows.
 - **Painel** opens with the results card: totals, the clips ranked by score with bars, clips per day.
-- **Cortes** are cards with the primary download button; a finished video's page opens with the summary
+- **Clips** are cards with the primary download button; a finished video's page opens with the summary
   bubble and its settings as tags.
-- **Entrar / Criar conta** (direction B, 2026-11-23): the form wears the public site (`.theme-site`:
-  lavender page, white fields, Geist, the bracketed eyebrow and the light/heavy title), so the step
-  from the site keeps its look; from lg the dark app sits beside it (`.theme-app`): the link box and
-  four finished clips, using the site's Pexels frames in `public/auth/`. Phones show the form only.
+- **Entrar:** a single centered column up to 32rem wide holds the brand, form, and account and
+  support links. The form uses large labels and controls with a 3.75rem minimum height for the
+  sign-in button.
+- **Criar conta:** the form and sign-up states follow the app theme. On wide windows they sit beside
+  captures of the Studio and the Formatos Virais gallery from a local demo account. The Studio uses
+  the credited generic-format photo and demo captions. On phones the form and account states take
+  the full width.
+
+## Format previews
+
+The featured format, gallery cards and format dialogs share the same stills. The covers use frames
+from the owner's examples. Ranking and Hacking share the video about ranking editing tools, with
+separate covers.
+Their dialogs play the full vertical videos on demand and offer Portuguese captions. The dialogs
+show whether each format is available for editing before prompting anyone to connect Claude. The
+stock photos in gallery captures use the
+[Pexels license](https://www.pexels.com/license/).
+
+The subscription offer gives the monthly price its own space beside the benefit and uses the solid
+lime button for checkout. The price and payment terms stack below the benefit in narrow containers,
+and the button takes the full row on phones.
+
+The batch workspace groups uploads and their progress in a video panel. File names wrap in full.
+Deleting a video requires confirmation, and focus returns to the video panel once it is deleted.
+The Claude panel holds one optional adjustment field and an action to prepare the request. It queues
+the videos and saves the adjustment together. The panels stack in narrow containers. Once a batch
+is queued, the Claude panel shows the request to copy and its saved adjustments.
+
+Use the unmodified Claude Spark in Clay from the [Anthropic press kit](https://www.anthropic.com/press-kit)
+to identify Claude in the integration, connection prompts and batch handoff. The same mark stays
+Clay in both themes. Each placement has its own text label.
+
+Contraste uses the same batch flow as Tela dividida. Its renders keep the presenter in a vertical
+frame, with the topic at the top and two verdict labels during each comparison. The active verdict
+and the option's name change when the presenter moves to the next option.
+
+Dinâmico gamificado uses the same batch flow. Its vertical renders keep the clean takes, group the
+transcript into short captions, colour the selected words and pair each timed label and icon with a
+brief zoom and a quiet chime mixed under the voice.
+
+Hacking follows the owner's reference: a row of yellow rank numbers, a badge revealed below each
+rank as the presenter introduces it, a brief item spotlight, white captions and a yellow topic
+card. The board can be cleared for the closing while the captions continue.
+
+Ranking renders a vertical list of up to ten positions. The positions are
+visible before their labels, which are uncovered in the order the presenter speaks. The current
+row uses lime and a marker at its trailing edge. Captions sit above the list while it is visible.
+
+| Preview      | Photo credits                                                                                                                                                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Split screen | [Pavel Danilyuk](https://www.pexels.com/photo/a-female-coffee-barista-making-coffee-6612646/), [Esra Afşar](https://www.pexels.com/photo/barista-preparing-espresso-in-cafe-setting-32078567/) |
+| Ranking      | [Ben Khatry](https://www.pexels.com/photo/young-man-engaging-in-a-podcast-recording-36917949/)                                                                                                 |
+| Generic      | [SHVETS production](https://www.pexels.com/photo/young-woman-filming-video-in-light-apartment-7516247/)                                                                                        |
 
 ## Principles
 
@@ -39,9 +91,9 @@ breadcrumb and stay for screen readers only. Light stays available through the t
 | `background` (dark: charcoal)         | The rounded panel                                      |
 | `card` (a step above the panel)       | Filled boxes: search, table head, cards, sidebar cards |
 | `secondary` / `muted` / `accent`      | Pills, tracks, hover fills                             |
-| `primary` / `primary-solid` (blue)    | Primary buttons, current section, progress, focus      |
-| `primary-ink`                         | Blue text, links and the sidebar icons                 |
-| `muted-foreground`                    | Secondary text                                         |
+| `primary` / `primary-solid`           | Primary buttons, current section, progress, focus      |
+| `primary-ink`                         | Emphasized text, links and active navigation icons     |
+| `muted-foreground`                    | Secondary text and inactive navigation icons           |
 | `success` (green) / `warning` (amber) | Finished videos, storage bars / warnings               |
 | `destructive` (red)                   | Failures and delete                                    |
 
@@ -79,7 +131,8 @@ Raised one step on 2026-11-19: small grey text on the dark canvas was hard to re
 Two 4x4 sprites in `public/mascots/` (sources in `design/assets/`), drawn by `Mascot` (index 0–31).
 Each drawing has one meaning only:
 
-- **Shape 15 (the green ghost) is the brand mark** (`BrandMark`, top bar, sign-in, favicon).
+- **Shape 15 (the green ghost) is Nel, the brand mascot** (home greeting, empty screens). Since
+  2026-11-25 the logo is Editor Oculto's symbol (`BrandMark`): two lime clips with the play between them.
   It is reserved: no video or crew member uses it.
   It floats in the app frame and makes one gentle hop beside the home greeting. In the expanded
   sidebar and on Home, its eyes follow the pointer, taps or keyboard focus. It blinks at irregular
@@ -167,6 +220,9 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Shell:** top bar 56px; sidebar 288px on the frame; the panel fills the rest with 8px of frame on
   its trailing and bottom sides, 14px corners. Plain pages pad 32px inside the panel (16px on phones);
   the video page pads its column 32px and its inspector 24px.
+- **Desktop sidebar:** spans the window from top to bottom. Editor Oculto and Cortes stay near the
+  top, and Geral sits by the account menu at the bottom. On short windows the links scroll within
+  the sidebar, with the brand controls and the expanded account menu outside the scrolling area.
 - **Reading width:** paragraphs (page descriptions, clip reasons, empty states) stop at about 65
   characters (`max-w-prose`).
 - **Control heights:** 40px for buttons, inputs, selects, chips and search in toolbars and cards; 44px for
@@ -179,7 +235,7 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
 - **Edge lines** (gridline pass, 2026-11-21, redrawn 2026-11-23 after the creators redesign; set by
   Claude at the person's request): measured on ink, not boxes, within 1px.
     - Sidebar (288px, enlarged 2026-11-23 at the owner's request): 44px rows with 15px labels and
-      22px icons. Boxes 10px in (new video card, rows, storage card, account), icon column centred
+      22px icons. Boxes 10px in (rows, storage card, account), icon column centred
       at 33, labels at 56, trailing line 22px in (counts, the upload glyph, the account menu glyph,
       the storage card's numbers). The two cards pad 11px to take back their 1px border, so their
       content starts on the icons' leading edge (22). The brand header pairs the 40px ghost tile
@@ -187,6 +243,12 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
     - Panel: the breadcrumb and every plain page's content share one text line, 32px in (16px on
       phones). The page bar's trailing icon buttons sit 24px in, so their glyph ends on the page's
       trailing line. The page bar and the sidebar's first row share one centre line.
+    - Batch editing (2026-11-26, set by Codex at the owner's request): the back arrow starts on the
+      page text line. The video and Claude panels inset their content by 16px on phones and 20px
+      from `sm`, plus each panel's border. The video picker in the header ends on the inset trailing
+      edge and spans both inset edges when stacked. The empty drop area stays centred, and the
+      Claude mark leads the title row. The delete confirmation title and description start on the
+      inner leading edge at every width.
     - Inspector: cards 24px in; rows 16px in on both sides with a 20px icon and the label 12px after
       it (56px rows); field labels and group titles 4px in from the cards, as in the reference.
     - Clip list: rows 16px in on both sides; the number badge is the icon column, the open row's
@@ -284,3 +346,13 @@ Boards: `design/console/index.html`, `design/painel/4.0-painel.html`, `design/st
 | 2026-11-25 | Admin gets a fourth tab, Recursos: one settings group per area with a `Switch` (`src/shared/ui/switch.tsx`, Radix) per feature, its effect in one line and who changed it last; a blue notice on top lists the switches away from normal. Closing sign-up and turning maintenance on ask first. Where a feature is paused, the screen shows its one-line reason in place of the control | The owner wanted to turn parts of the app off without a deploy; a reason in place of a missing control keeps people from guessing |
 | 2026-11-25 | Suporte (board "Suporte: tickets dentro do Nelcota"): a Suporte item at the foot of the sidebar list with a blue dot for an unread answer (in the account menu on phones); tickets are a conversation with Aberto, Respondido and Fechado; a failed video offers "Relatar problema" with the video picked; Admin gets a Suporte tab with the queue beside the open ticket and its account, video and error, and the Admin folder counts the tickets waiting; people who cannot sign in reach a public Contato form, in the site's look, from Entrar | The owner wanted people to ask for help inside the app; tickets tied to a video spare a round of questions, and the public form follows the usual way out for a locked account |
 | 2026-11-25 | UX pass as a first-time user: crew names only next to their mascot or role; Início lists the last three videos under the shortcuts; quick counts use the same pills as the other short choices (wizard and Conta), "Curtos" reads "30 segundos"; storage shares are of the quota ("<1%" for a little); finished videos leave the list's progress cell empty; unknown addresses keep the app layout for signed-in people; forms validate on submit, then on change | A new person met six unexplained names, an empty Início after their first video and numbers that looked broken; the rest repeated what a pill or label already said |
+| 2026-11-25 | Brand becomes Editor Oculto: its symbol as logo and favicon, the name in titles and copy, lime `#C4F800` buttons with graphite text; in light, text, rings and thin fills use a deep lime (5.5:1) | The owner asked to bring the Editor Oculto prototype's identity in; lime on white is 1.25:1 |
+| 2026-11-25 | The "Novo vídeo" card leaves the sidebar; new videos start from Início's link box and the Vídeos page | The owner asked to remove it |
+| 2026-11-25 | "Comece por aqui" (`/getting-started`, from the Editor Oculto prototype): first in the sidebar under an "Editor Oculto" label with a done/total pill, also in the collapsed rail; the page has the welcome lesson beside a checklist of four steps, the Claude links and "Enviar meu primeiro vídeo". The checklist is kept per person in the browser; the lesson says it is not published until its video exists | The owner asked for the prototype's first screen; no Etapa 1 exists yet, so the button starts a video |
+| 2026-11-25 | Stage 1 of joining the Editor Oculto prototype: the sidebar follows its guide (groups Editor Oculto, Cortes, Geral; no Início, Vídeos or storage card), "/" opens Comece por aqui, the link box moves to Meus cortes, and Etapa 1, Formatos Virais, Minhas edições and the Cortes Comece por aqui arrive. Where nothing works yet (the Claude connection, editing, lessons), the page says so instead of simulating it | The owner chose the guide's menu and asked for real pages over the prototype's simulations; tokens, Pix and the Cortes lock come next |
+| 2026-11-25 | Claude's mark identifies Etapa 1, its sidebar item, the connection notice in Formatos Virais and the Claude links on Comece por aqui | The owner asked to replace the asterisk with the Claude mark |
+| 2026-11-25 | Suporte direction B (board `design/explore/support`): "Como podemos ajudar?" with the two areas, Editor Oculto and Cortes, as doors that start a conversation; "Suas conversas" as a table (Nº, Assunto, Área, Situação, Atualizada) that drops columns as it narrows; a conversation opens as a timeline with its number, area, opening date, video and "Meu problema foi resolvido"; states read Aguardando suporte, Respondido and Resolvido; "ticket" becomes "conversa" in the copy | The owner picked B from three directions after the prototype's support; the area lets the team split the queue |
+| 2026-11-25 | Meus cortes redone: eyebrow Cortes and "Cole um link. O Editor corta.", one card that makes clips (YouTube link, Quantos cortes, Duração, the order in one line, Enviar arquivo and Gerar cortes, starting from the saved preferences), Vídeos recentes, then Seus cortes with the library | The owner asked for a better Meus cortes without questions; the card follows the prototype's, without tokens until they exist |
+| 2026-11-25 | Etapa 1 connects the person's Claude for real: Editor Oculto is an MCP server at /api/mcp with Better Auth's MCP plugin as its OAuth provider (Claude registers itself; the person signs in at /oauth/sign-in and approves at /oauth/consent). Etapa 1 shows the address to paste into Claude's custom connectors, waits for the connection and then offers to disconnect; Formatos Virais drop the connect notice once Claude is in. The first tools only read: the formats, the person's videos and a video's transcript | The owner chose option A: Claude decides the edit and our worker renders; claude.ai offers no one-click install, so the address is copied |
+| 2026-11-25 | Minhas edições lists real edits: Claude sends a Tela dividida plan through the MCP tool `create_split_screen_edit` (takes to keep, top panels as examples from the person's own videos or full screen), the worker renders it with FFmpeg, and each row shows Na fila, Editando, Pronta or Não deu certo, with Assistir and Baixar once ready. The page polls every 5 s while an edit is in progress | The owner chose Tela dividida as the first format the server edits; music, effects, arrows and internet examples come later |
+| 2026-11-25 | Formatos Virais offer the Editor Oculto subscription in one row under the Claude notice: R$ 49,90 a month by card on Asaas's own checkout page, a new format each month for subscribers only (the current formats stay free). Subscribers see the next charge and Cancelar assinatura, which confirms first and keeps the paid days; the button is outline so the Claude step stays the filled action | The owner asked for a monthly plan that brings one new format a month; Asaas also covers the Pix tokens planned for Cortes |

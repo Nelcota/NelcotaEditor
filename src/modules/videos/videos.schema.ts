@@ -3,7 +3,11 @@ import { bigint, check, index, integer, pgTable, text, timestamp, uuid } from "d
 import { user } from "#/modules/auth/auth.schema";
 import { MAX_UPLOAD_BYTES } from "#/modules/video-records/model/upload-limits";
 import { MAX_VIDEO_TITLE_LENGTH } from "#/modules/video-records/model/video-title";
-import { MAX_CLIP_COUNT, MIN_CLIP_COUNT } from "#/modules/video-records/model/video-status";
+import {
+    MAX_CLIP_COUNT,
+    MIN_CLIP_COUNT,
+    VIDEO_PURPOSES,
+} from "#/modules/video-records/model/video-status";
 import { clipLengthEnum } from "#/modules/video-records/video-records.schema";
 
 /**
@@ -11,6 +15,9 @@ import { clipLengthEnum } from "#/modules/video-records/video-records.schema";
  * slot it was granted until the upload is confirmed (then it becomes a video), cancelled or expires. Its id is
  * the id the video will have, so the file is stored under the video's folder from the start.
  */
+/** Constant values written into the CHECK; never user input. */
+const PURPOSE_LIST = VIDEO_PURPOSES.map((purpose) => `'${purpose}'`).join(", ");
+
 export const videoUploads = pgTable(
     "video_uploads",
     {
@@ -23,6 +30,7 @@ export const videoUploads = pgTable(
         sourcePath: text("source_path").notNull(),
         declaredBytes: bigint("declared_bytes", { mode: "number" }).notNull(),
         title: text("title").notNull(),
+        purpose: text("purpose", { enum: VIDEO_PURPOSES }).notNull().default("clips"),
         requestedClipCount: integer("requested_clip_count").notNull(),
         clipLength: clipLengthEnum("clip_length").notNull(),
         // "" means "detect automatically", as on the video row.
@@ -49,9 +57,10 @@ export const videoUploads = pgTable(
             "video_uploads_declared_bytes_max",
             sql`${table.declaredBytes} <= ${sql.raw(String(MAX_UPLOAD_BYTES))}`,
         ),
+        check("video_uploads_purpose_known", sql`${table.purpose} in (${sql.raw(PURPOSE_LIST)})`),
         check(
             "video_uploads_requested_clip_count_range",
-            sql`${table.requestedClipCount} between ${sql.raw(String(MIN_CLIP_COUNT))} and ${sql.raw(String(MAX_CLIP_COUNT))}`,
+            sql`(${table.purpose} = 'format' and ${table.requestedClipCount} = 0) or (${table.purpose} = 'clips' and ${table.requestedClipCount} between ${sql.raw(String(MIN_CLIP_COUNT))} and ${sql.raw(String(MAX_CLIP_COUNT))})`,
         ),
         check(
             "video_uploads_title_length",

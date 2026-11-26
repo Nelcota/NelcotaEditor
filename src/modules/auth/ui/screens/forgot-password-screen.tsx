@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { forgotPasswordSchema } from "#/modules/auth/model/auth-forms";
 import { authClient } from "#/modules/auth/client/auth-client";
 import { runAuthRequest } from "#/modules/auth/client/run-auth-request";
-import { AuthCard } from "#/modules/auth/ui/components/auth-card";
+import { AuthEntryLayout } from "#/modules/auth/ui/components/auth-entry-layout";
 import { buildCaptchaHeaders } from "#/modules/auth/client/captcha-headers";
 import { CaptchaField } from "#/shared/ui/captcha-field";
 import { CAPTCHA_PENDING_MESSAGE, useCaptcha } from "#/shared/ui/use-captcha";
@@ -21,11 +21,10 @@ const FIELD_NAMES = ["email"] as const;
 /** The email's link opens Better Auth, which forwards a valid token to this screen. */
 const RESET_PASSWORD_PATH = "/reset-password";
 
-const CARD_TEXT = {
-    eyebrow: "Recuperar senha",
-    title: { lead: "Esqueceu a", emphasis: "senha" },
+const ENTRY_TEXT = {
+    title: "Esqueceu a senha?",
     description: "Digite o email da sua conta. Enviamos um link para criar uma nova senha.",
-    footer: { text: "Lembrou?", linkLabel: "Entrar", linkTo: "/sign-in" },
+    accountLink: { text: "Lembrou?", label: "Entrar", to: "/sign-in" },
 } as const;
 
 interface ForgotPasswordScreenProps {
@@ -36,12 +35,12 @@ interface ForgotPasswordScreenProps {
 /** The answer is the same whether or not the email has an account. */
 function SentNotice({ email }: { email: string }): ReactNode {
     return (
-        <AuthCard {...CARD_TEXT}>
+        <AuthEntryLayout {...ENTRY_TEXT}>
             <Alert tone="info">
                 Se existir uma conta com {email}, enviamos um link para criar uma nova senha. Ele
                 vale por 1 hora. Confira também o spam.
             </Alert>
-        </AuthCard>
+        </AuthEntryLayout>
     );
 }
 
@@ -87,10 +86,10 @@ export function ForgotPasswordScreen({ captchaSiteKey }: ForgotPasswordScreenPro
     }
 
     return (
-        <AuthCard {...CARD_TEXT}>
+        <AuthEntryLayout {...ENTRY_TEXT}>
             <form
                 noValidate
-                className="grid gap-4"
+                className="grid gap-5"
                 onSubmit={(event) => {
                     event.preventDefault();
                     track(form.handleSubmit());
@@ -106,6 +105,7 @@ export function ForgotPasswordScreen({ captchaSiteKey }: ForgotPasswordScreenPro
                             spellCheck={false}
                             autoCapitalize="none"
                             enterKeyHint="send"
+                            className="h-12"
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onValueChange={field.handleChange}
@@ -120,7 +120,7 @@ export function ForgotPasswordScreen({ captchaSiteKey }: ForgotPasswordScreenPro
                         <Button
                             type="submit"
                             size="lg"
-                            className="h-11"
+                            className="h-12 font-semibold"
                             disabled={isSubmitting}
                             aria-busy={isSubmitting}
                         >
@@ -130,6 +130,6 @@ export function ForgotPasswordScreen({ captchaSiteKey }: ForgotPasswordScreenPro
                     )}
                 </form.Subscribe>
             </form>
-        </AuthCard>
+        </AuthEntryLayout>
     );
 }

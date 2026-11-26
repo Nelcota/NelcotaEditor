@@ -12,6 +12,11 @@ export function formatPreciseClock(totalSeconds: number): string {
 
     // Rounded first, so 59.96 becomes "1:00.0" and never "0:60.0".
     const tenths = Math.round(totalSeconds * TENTHS_PER_SECOND);
+
+    if (Number.isSafeInteger(tenths) === false) {
+        return "0:00.0";
+    }
+
     const minutesTotal = Math.floor(tenths / (SECONDS_PER_MINUTE * TENTHS_PER_SECOND));
     const seconds =
         (tenths - minutesTotal * SECONDS_PER_MINUTE * TENTHS_PER_SECOND) / TENTHS_PER_SECOND;
@@ -48,8 +53,14 @@ export function parseClockInput(text: string): number | null {
     const multipliers = [1, SECONDS_PER_MINUTE, SECONDS_PER_HOUR];
     const reversedParts = parts.toReversed();
 
-    return reversedParts.reduce(
+    const totalSeconds = reversedParts.reduce(
         (total, part, index) => total + part * (multipliers[index] ?? 0),
         0,
     );
+
+    if (Number.isSafeInteger(Math.round(totalSeconds * TENTHS_PER_SECOND)) === false) {
+        return null;
+    }
+
+    return totalSeconds;
 }

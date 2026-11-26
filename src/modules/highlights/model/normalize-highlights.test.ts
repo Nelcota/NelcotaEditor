@@ -50,6 +50,23 @@ function toCentiseconds(seconds: number): number {
 }
 
 describe("normalizeHighlights", () => {
+    it("keeps an exact 15-second range whose floating-point difference is slightly smaller", () => {
+        const words = [
+            { text: "first", startSeconds: 1.21, endSeconds: 2.21 },
+            { text: "last", startSeconds: 15.06, endSeconds: 16.06 },
+        ];
+        const result = normalizeHighlights([candidate(1.06, 16.06, 80)], {
+            words,
+            durationSeconds: 16.06,
+            maxCount: 1,
+            clipLength: FREE,
+        });
+        const clip = result[0];
+
+        assert.ok(clip);
+        assert.equal(clipLengthCentiseconds(clip), MIN_CLIP_SECONDS * CENTISECONDS_PER_SECOND);
+    });
+
     it("snaps to word boundaries and pads the edges", () => {
         const words = spokenWords(0, 100);
         const result = normalizeHighlights([candidate(10.2, 39.7, 80)], {

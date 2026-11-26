@@ -6,7 +6,7 @@ import {
     UPLOAD_RESERVATION_MILLISECONDS,
     summarizePendingUploads,
 } from "#/modules/videos/server/pending-uploads.server";
-import { assertCanStartAnotherVideo } from "#/modules/videos/server/processing-limit.server";
+import { assertCanStartVideoFor } from "#/modules/videos/server/processing-limit.server";
 import { assertStorageAvailable } from "#/modules/videos/server/storage-quota.server";
 import { runVideoStartTransaction } from "#/modules/videos/server/video-start-transaction.server";
 import { videoUploads } from "#/modules/videos/videos.schema";
@@ -15,10 +15,16 @@ import {
     ALLOWED_VIDEO_EXTENSIONS,
     MAX_UPLOAD_BYTES,
 } from "#/modules/video-records/model/upload-limits";
+import type { VideoPurpose } from "#/modules/video-records/model/video-status";
 import { getVideoDirectory } from "#/shared/server/storage.server";
 import { UserFacingError } from "#/shared/server/user-facing-error";
 
 const SOURCE_FILE_NAME = "source";
+
+/** What the server reserves: the browser's declaration plus what the video is for (clips if unsaid). */
+export interface ReserveVideoUploadInput extends StartVideoUploadInput {
+    purpose?: VideoPurpose;
+}
 
 export class UploadTooLargeError extends UserFacingError {
     constructor() {
@@ -60,9 +66,10 @@ function readExtension(fileName: string): string {
  */
 export async function reserveVideoUpload(
     userId: string,
-    input: StartVideoUploadInput,
+    input: ReserveVideoUploadInput,
 ): Promise<VideoUpload> {
     const sizeBytes = input.sizeBytes;
+    const purpose = input.purpose ?? "clips";
 
     if (sizeBytes > MAX_UPLOAD_BYTES) {
         throw new UploadTooLargeError();
@@ -76,7 +83,7 @@ export async function reserveVideoUpload(
 
     return runVideoStartTransaction(userId, async ({ transaction }) => {
         const pending = await summarizePendingUploads(userId, transaction, null);
-        await assertCanStartAnotherVideo(userId, transaction, pending.count);
+        await assertCanStartVideoFor({ userId, purpose, pending }, transaction);
         await assertStorageAvailable(
             { userId, incomingBytes: sizeBytes, reservedBytes: pending.bytes },
             transaction,
@@ -89,6 +96,7 @@ export async function reserveVideoUpload(
                 sourcePath,
                 declaredBytes: sizeBytes,
                 title: resolveUploadTitle(input.fileName, input.title),
+                purpose,
                 requestedClipCount: input.clipCount,
                 clipLength: input.clipLength,
                 transcriptionLanguage: input.language,

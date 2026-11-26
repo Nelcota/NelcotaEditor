@@ -66,6 +66,16 @@ describe("useBreadcrumbs", () => {
         expect(renderCrumbs("/usage").at(-1)?.label).toBe("Conta");
     });
 
+    it("puts a batch page under Minhas edições", () => {
+        const crumbs = renderCrumbs("/edits/0193b4a0-0000-7000-8000-000000000002");
+
+        expect(crumbs.map((crumb) => crumb.label)).toEqual([
+            "Editor Oculto",
+            "Minhas edições",
+            "Lote",
+        ]);
+    });
+
     it("names an open video by the title its page loaded", () => {
         const queryClient = new QueryClient();
         queryClient.setQueryData(videoDetailsQueryOptions(VIDEO_ID).queryKey, VIDEO_DETAILS);

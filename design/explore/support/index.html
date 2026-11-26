@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <title>Suporte · 3 direções</title>
+        <link rel="stylesheet" href="option.css" />
+        <style>
+            body {
+                padding: 40px 32px 80px;
+            }
+            .wrap {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                gap: 44px;
+            }
+            section {
+                display: grid;
+                gap: 12px;
+            }
+            section h2 {
+                font-size: 22px;
+                font-weight: 800;
+            }
+            section p {
+                color: var(--muted-foreground);
+                max-width: 80ch;
+            }
+            .shots {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 220px;
+                gap: 14px;
+                align-items: start;
+            }
+            .shots.two {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            }
+            .shots img {
+                width: 100%;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <section>
+                <h2>Hoje</h2>
+                <p>
+                    Lista de tickets e um formulário solto (Assunto, Vídeo, Mensagem). Sem tema, sem
+                    número visível, conversa numa página separada.
+                </p>
+                <div class="shots two">
+                    <img src="renders/current-list.jpg" alt="" /><img
+                        src="renders/current-new.jpg"
+                        alt=""
+                    />
+                </div>
+            </section>
+            <section>
+                <h2>A · Caixa de entrada</h2>
+                <p>
+                    Igual ao protótipo, refinado: conversas à esquerda (tema, número, situação,
+                    ponto de resposta nova) e a conversa aberta à direita, com o botão Resolvido no
+                    topo e a resposta embaixo. Nova conversa abre no mesmo painel: tema primeiro,
+                    depois assunto, vídeo e mensagem.
+                </p>
+                <div class="shots">
+                    <img src="renders/a-thread.png" alt="" /><img
+                        src="renders/a-new.png"
+                        alt=""
+                    /><img src="renders/phone-a.png" alt="" />
+                </div>
+            </section>
+            <section>
+                <h2>B · Central de ajuda</h2>
+                <p>
+                    A página começa por "Como podemos ajudar?" com as duas áreas como portas
+                    (escolher a área já inicia a conversa). Abaixo, as conversas numa tabela com
+                    busca. Cada conversa abre em página própria, como uma linha do tempo, com o
+                    vídeo citado e o prazo de resposta.
+                </p>
+                <div class="shots">
+                    <img src="renders/b-new.png" alt="" /><img
+                        src="renders/b-thread.png"
+                        alt=""
+                    /><img src="renders/phone-b.png" alt="" />
+                </div>
+            </section>
+            <section>
+                <h2>C · Conversa</h2>
+                <p>
+                    Uma coluna de chat, como um mensageiro. As conversas ficam num seletor no topo.
+                    Começar uma conversa é o próprio campo de mensagem, com o tema em chips e o
+                    vídeo anexado. Depois da resposta, a pergunta "Resolveu?" aparece na conversa.
+                </p>
+                <div class="shots">
+                    <img src="renders/c-thread.png" alt="" /><img
+                        src="renders/c-new.png"
+                        alt=""
+                    /><img src="renders/phone-c.png" alt="" />
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

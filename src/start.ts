@@ -1,6 +1,7 @@
 import { isNotFound, isRedirect } from "@tanstack/react-router";
 import { createCsrfMiddleware, createMiddleware, createStart } from "@tanstack/react-start";
 import { setResponseHeader } from "@tanstack/react-start/server";
+import { MCP_PATH } from "#/modules/auth/model/mcp-connection";
 import { buildContentSecurityPolicy } from "#/shared/server/content-security-policy";
 import { getStorageMediaOrigin } from "#/shared/server/file-storage/storage-media-origin.server";
 import { logger, withLogContext } from "#/shared/server/logger.server";
@@ -10,13 +11,36 @@ import { UserFacingError, toUserMessage } from "#/shared/server/user-facing-erro
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 /**
+ * Called server to server by a person's Claude, with no Origin header and no cookie: the MCP
+ * endpoint takes a bearer token and the OAuth token endpoints a PKCE verifier or a client
+ * credential, so a page on another site gains nothing by calling them. The consent and continue
+ * endpoints act on the session cookie and keep the check.
+ */
+const BEARER_ONLY_PATHS = new Set([
+    MCP_PATH,
+    // Asaas posts payment events with a shared token and no Origin; the token is the check.
+    "/api/webhooks/asaas",
+    "/api/auth/oauth2/token",
+    "/api/auth/oauth2/register",
+    "/api/auth/oauth2/revoke",
+    "/api/auth/oauth2/introspect",
+]);
+
+/**
  * Server functions and the upload/avatar routes act on the signed-in user's cookie, so a page on
  * another site must not be able to call them. Page loads stay open: typing the URL or following a
  * link from elsewhere is not same-origin, and those requests change nothing.
  */
 const csrfMiddleware = createCsrfMiddleware({
-    filter: (context) =>
-        context.handlerType === "serverFn" || SAFE_METHODS.has(context.request.method) === false,
+    filter: (context) => {
+        const request = context.request;
+
+        if (BEARER_ONLY_PATHS.has(new URL(request.url).pathname) === true) {
+            return false;
+        }
+
+        return context.handlerType === "serverFn" || SAFE_METHODS.has(request.method) === false;
+    },
 });
 
 /**

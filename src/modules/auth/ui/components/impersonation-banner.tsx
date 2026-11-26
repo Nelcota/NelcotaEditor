@@ -24,7 +24,7 @@ export function ImpersonationBanner(): ReactNode {
         >
             <SpeechIcon className="size-5 shrink-0 text-primary-ink" aria-hidden="true" />
             <p className="min-w-0 flex-[1_1_16rem]">
-                Você está vendo o Nelcota como <strong>{currentUser.name}</strong> (
+                Você está vendo o Editor Oculto como <strong>{currentUser.name}</strong> (
                 {currentUser.email}). O que fizer aqui vale para a conta dessa pessoa.
                 {stop.isError === true && (
                     <span role="alert" className="block text-destructive">

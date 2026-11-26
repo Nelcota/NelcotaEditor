@@ -7,7 +7,7 @@ import { SignUpClosedScreen } from "#/modules/auth/ui/screens/sign-up-closed-scr
 import { SignUpScreen } from "#/modules/auth/ui/screens/sign-up-screen";
 
 export const Route = createFileRoute("/sign-up")({
-    head: () => ({ meta: [{ title: "Criar conta · Nelcota" }] }),
+    head: () => ({ meta: [{ title: "Criar conta · Editor Oculto" }] }),
     beforeLoad: async () => {
         const user = await getCurrentUser();
 

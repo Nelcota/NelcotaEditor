@@ -27,9 +27,7 @@ export function ClipLengthPicker({ value, onValueChange }: ClipLengthPickerProps
                 options={CLIP_LENGTH_OPTIONS}
                 onValueChange={onValueChange}
             />
-            <p aria-live="polite" className="text-sm text-muted-foreground">
-                {CLIP_LENGTH_HINTS[value]}
-            </p>
+            <p className="text-sm text-muted-foreground">{CLIP_LENGTH_HINTS[value]}</p>
         </div>
     );
 }

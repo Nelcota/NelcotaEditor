@@ -12,14 +12,16 @@ test.beforeEach(async ({ page }) => {
     await useOwnClientAddress(page);
 });
 
-test("creates an account and lands on the home page", async ({ page }) => {
+test("creates an account and lands on the getting started page", async ({ page }) => {
     const account = createTestAccount();
 
     await openPage(page, "/sign-up");
     await expectNoAccessibilityViolations(page);
     await signUp(page, account);
 
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ana.");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+        "Boas-vindas ao Editor Oculto",
+    );
     await expectNoAccessibilityViolations(page);
 });
 
@@ -36,7 +38,7 @@ test("signs in with an existing account", async ({ page, browser }) => {
     await freshPage.getByLabel("Senha", { exact: true }).fill(account.password);
     await freshPage.getByRole("button", { name: "Entrar" }).click();
 
-    await expect(freshPage).toHaveURL("/");
+    await expect(freshPage).toHaveURL("/getting-started");
     await freshContext.close();
 });
 
@@ -64,7 +66,7 @@ test("resets a forgotten password through the emailed link", async ({ page, brow
     await freshPage.getByLabel("Senha", { exact: true }).fill(newPassword);
     await freshPage.getByRole("button", { name: "Entrar" }).click();
 
-    await expect(freshPage).toHaveURL("/");
+    await expect(freshPage).toHaveURL("/getting-started");
     await freshContext.close();
 });
 

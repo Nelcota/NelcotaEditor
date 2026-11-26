@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import RotateCwIcon from "~icons/lucide/rotate-cw";
 import { CLIP_GRID_CLASS } from "#/modules/videos/ui/components/clip-library";
 import type { ClipViewMode } from "#/modules/videos/model/clip-view-mode";
-import { NewVideoLink } from "#/modules/videos/ui/components/new-video-link";
 import { StageCrewMascot } from "#/modules/videos/ui/components/stage-crew-mascot";
 import { Button } from "#/shared/ui/button";
 import { EmptyState } from "#/shared/ui/empty-state";
@@ -122,12 +121,7 @@ export function NoClipsYet() {
         <EmptyState
             art={<StageCrewMascot status="rendering" className="size-14" />}
             title="Nenhum corte pronto ainda"
-            description="Os cortes de todos os seus vídeos aparecem aqui assim que ficam prontos."
-            action={
-                <div className="w-48">
-                    <NewVideoLink emphasis="primary" />
-                </div>
-            }
+            description="Cole um link acima. Os cortes aparecem aqui assim que ficam prontos."
         />
     );
 }

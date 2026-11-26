@@ -598,7 +598,8 @@ WCAG 2.2 AA is the minimum.
   (`head`), and `<html lang>` matching the UI language.
 - Works at 200% zoom and 320 px wide with no horizontal scroll. Never block zoom
   (`user-scalable=no`, `maximum-scale`).
-- Animations respect `prefers-reduced-motion` (`motion-safe:`).
+- Animations respect `prefers-reduced-motion` (`motion-safe:`). Loading spinners are the
+  exception: they keep turning, since they travel nowhere and a still one looks frozen.
 
 ## UI copy
 
@@ -815,7 +816,10 @@ Pull requests:
 - Module layers: modules import only from lower layers, never sideways or up: `shell` ·
   `overview` · `studio`, then `admin`, `videos` (the library), `processing`, `highlights`,
   `clips`, `transcription` · `support` · `preferences`, `video-records` (the video row, its statuses and transitions),
-  `auth` · `app-switches` (the admin's on/off switches, read by every layer above). The exact map and each file-level exception (with its reason) live in
+  `auth` · `app-switches` (the admin's on/off switches, read by every layer above). `viral-formats`
+  (Formatos Virais, Etapa 1, Minhas edições) reads `auth`, `video-records`, `transcription` and
+  `billing` (the Editor Oculto subscription sold through Asaas, which reads only `auth`); `mcp` (the /api/mcp server a person's
+  Claude connects to) sits above `videos`, `transcription` and `viral-formats`. The exact map and each file-level exception (with its reason) live in
   `scripts/check-module-boundaries.ts`; `bun run check` enforces them.
 - Integration tests (`*.integration.test.ts`, database included) run with
   `bun run test:integration` against `nelcota_test`; `bun run setup` and `bun run local` create

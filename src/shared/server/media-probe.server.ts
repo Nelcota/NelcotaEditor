@@ -3,9 +3,13 @@ import { z } from "zod";
 import { localFileInput } from "#/shared/server/local-media-input.server";
 import { runCommand } from "#/shared/server/run-command.server";
 
-// ffprobe prints numbers as strings ("12.345000") and "N/A" when unknown, which coerces to NaN and fails.
+// ffprobe prints numbers as strings ("12.345000") and "N/A" when unknown.
+const durationSchema = z
+    .union([z.number(), z.string().trim().min(1)])
+    .pipe(z.coerce.number<number | string>().positive());
+
 const probeOutputSchema = z.object({
-    format: z.object({ duration: z.coerce.number().nonnegative() }),
+    format: z.object({ duration: durationSchema }),
     streams: z.array(z.object({ codec_type: z.string() })),
 });
 
