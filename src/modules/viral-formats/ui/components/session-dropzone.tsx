@@ -54,7 +54,7 @@ export function SessionDropzone({ onFiles, variant }: SessionDropzoneProps): Rea
                         buttonVariants({
                             variant: "outline",
                             size: "lg",
-                            className: "group-has-[input:hover]:bg-accent",
+                            className: "w-full group-has-[input:hover]:bg-accent",
                         }),
                 )}
             >

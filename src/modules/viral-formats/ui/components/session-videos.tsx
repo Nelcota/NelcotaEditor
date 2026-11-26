@@ -34,7 +34,7 @@ export function SessionVideos(props: SessionVideosProps): ReactNode {
             aria-labelledby="session-videos"
             className="@container/videos grid min-w-0 gap-5 rounded-2xl border border-card-border bg-card p-4 sm:p-5"
         >
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+            <div className="grid items-center gap-x-4 gap-y-3 @sm/videos:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="grid gap-1">
                     <h2
                         ref={headingRef}

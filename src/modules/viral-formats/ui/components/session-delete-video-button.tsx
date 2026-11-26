@@ -78,7 +78,7 @@ export function SessionDeleteVideoButton({
                     }
                 }}
             >
-                <AlertDialogHeader>
+                <AlertDialogHeader className="place-items-start text-start">
                     <AlertDialogTitle>Excluir vídeo?</AlertDialogTitle>
                     <AlertDialogDescription>
                         O arquivo <strong>{video.title}</strong> será apagado do Editor Oculto e

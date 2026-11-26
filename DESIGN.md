@@ -242,6 +242,12 @@ Based on the 8-point grid (Material, IBM Carbon), WCAG 2.5.8 target size and lin
     - Panel: the breadcrumb and every plain page's content share one text line, 32px in (16px on
       phones). The page bar's trailing icon buttons sit 24px in, so their glyph ends on the page's
       trailing line. The page bar and the sidebar's first row share one centre line.
+    - Batch editing (2026-11-26, set by Codex at the owner's request): the back arrow starts on the
+      page text line. The video and Claude panels inset their content by 16px on phones and 20px
+      from `sm`, plus each panel's border. The video picker in the header ends on the inset trailing
+      edge and spans both inset edges when stacked. The empty drop area stays centred, and the
+      Claude mark leads the title row. The delete confirmation title and description start on the
+      inner leading edge at every width.
     - Inspector: cards 24px in; rows 16px in on both sides with a 20px icon and the label 12px after
       it (56px rows); field labels and group titles 4px in from the cards, as in the reference.
     - Clip list: rows 16px in on both sides; the number badge is the icon column, the open row's
