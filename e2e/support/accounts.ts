@@ -25,9 +25,11 @@ export function createTestAccount(): TestAccount {
  * The test app trusts x-real-ip (see .env.test), so each test counts against the sign-up and
  * sign-in limits on its own address instead of all of them sharing one.
  */
-export async function useOwnClientAddress(page: Page): Promise<void> {
+export async function useOwnClientAddress(page: Page): Promise<string> {
     const address = `10.${randomInt(IP_OCTET_LIMIT)}.${randomInt(IP_OCTET_LIMIT)}.${randomInt(IP_OCTET_LIMIT)}`;
     await page.setExtraHTTPHeaders({ "x-real-ip": address });
+
+    return address;
 }
 
 /**

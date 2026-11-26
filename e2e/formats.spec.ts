@@ -2,21 +2,17 @@ import { expect, test } from "@playwright/test";
 import { expectNoAccessibilityViolations } from "./support/accessibility";
 import { createTestAccount, openPage, signUp, useOwnClientAddress } from "./support/accounts";
 
-test("shows when a format is available only as a preview before Claude is connected", async ({
-    page,
-}) => {
+test("offers Claude connection before editing in Ranking or Tela dividida", async ({ page }) => {
     await useOwnClientAddress(page);
     await signUp(page, createTestAccount());
     await openPage(page, "/formats");
     await page.getByRole("button", { name: "Ranking" }).click();
 
-    const preview = page.getByRole("dialog", { name: "Ranking" });
-    await expect(
-        preview.getByText("A edição neste formato ainda não está disponível.", { exact: false }),
-    ).toBeVisible();
-    await expect(preview.getByRole("link", { name: "Conectar o Claude" })).toHaveCount(0);
+    const ranking = page.getByRole("dialog", { name: "Ranking" });
+    await expect(ranking.getByRole("link", { name: "Conectar o Claude" })).toBeVisible();
+    await expect(ranking.getByRole("button", { name: "Escolher formato" })).toHaveCount(0);
     await expectNoAccessibilityViolations(page);
-    await preview.getByRole("button", { name: "Voltar" }).click();
+    await ranking.getByRole("button", { name: "Voltar" }).click();
 
     await page.getByRole("button", { name: "Tela dividida", exact: true }).click();
     const splitScreen = page.getByRole("dialog", { name: "Tela dividida" });

@@ -12,8 +12,10 @@ const registeredClientSchema = z.object({ client_id: z.string() });
 async function startClaudeAuthorization(
     request: APIRequestContext,
     origin: string,
+    clientAddress: string,
 ): Promise<string> {
     const registration = await request.post(`${origin}/api/auth/oauth2/register`, {
+        headers: { "x-real-ip": clientAddress },
         data: {
             client_name: "Claude",
             redirect_uris: [CLAUDE_CALLBACK],
@@ -22,6 +24,7 @@ async function startClaudeAuthorization(
             response_types: ["code"],
         },
     });
+    await expect(registration).toBeOK();
     const { client_id: clientId } = registeredClientSchema.parse(await registration.json());
     const verifier = randomBytes(32).toString("base64url");
     const query = new URLSearchParams({
@@ -54,12 +57,14 @@ async function catchClaudeCallbacks(page: Page): Promise<Array<string>> {
 }
 
 test("connects Claude after consent and disconnects it from Etapa 1", async ({ page, request }) => {
-    await useOwnClientAddress(page);
+    const clientAddress = await useOwnClientAddress(page);
     await signUp(page, createTestAccount());
     const origin = new URL(page.url()).origin;
     const callbacks = await catchClaudeCallbacks(page);
 
-    await page.goto(await startClaudeAuthorization(request, origin), { waitUntil: "networkidle" });
+    await page.goto(await startClaudeAuthorization(request, origin, clientAddress), {
+        waitUntil: "networkidle",
+    });
     await expect(page.getByRole("heading", { name: "Conectar o Claude" })).toBeVisible();
     await expectNoAccessibilityViolations(page);
     await page.getByRole("button", { name: "Permitir acesso" }).click();
@@ -85,9 +90,9 @@ test("signs a signed-out person in before asking for consent", async ({
     const origin = new URL(page.url()).origin;
     const signedOut = await browser.newContext();
     const signedOutPage = await signedOut.newPage();
-    await useOwnClientAddress(signedOutPage);
+    const clientAddress = await useOwnClientAddress(signedOutPage);
 
-    await signedOutPage.goto(await startClaudeAuthorization(request, origin), {
+    await signedOutPage.goto(await startClaudeAuthorization(request, origin, clientAddress), {
         waitUntil: "networkidle",
     });
     await expect(
@@ -102,18 +107,18 @@ test("signs a signed-out person in before asking for consent", async ({
     await signedOut.close();
 });
 
-const EDITABLE_FORMATS = ["Contraste", "Dinâmico gamificado", "Hacking"] as const;
+const EDITABLE_FORMATS = ["Contraste", "Dinâmico gamificado", "Hacking", "Ranking"] as const;
 
 for (const format of EDITABLE_FORMATS) {
     test(`opens a ${format} batch and sends its uploaded video to Claude`, async ({
         page,
         request,
     }) => {
-        await useOwnClientAddress(page);
+        const clientAddress = await useOwnClientAddress(page);
         await signUp(page, createTestAccount());
         const origin = new URL(page.url()).origin;
         const callbacks = await catchClaudeCallbacks(page);
-        await page.goto(await startClaudeAuthorization(request, origin), {
+        await page.goto(await startClaudeAuthorization(request, origin, clientAddress), {
             waitUntil: "networkidle",
         });
         await page.getByRole("button", { name: "Permitir acesso" }).click();

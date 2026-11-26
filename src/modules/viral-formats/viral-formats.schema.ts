@@ -22,6 +22,7 @@ import type { ContrastPlan } from "#/modules/viral-formats/model/contrast-plan";
 import type { GamifiedPlan } from "#/modules/viral-formats/model/gamified-plan";
 import type { HackingPlan } from "#/modules/viral-formats/model/hacking-plan";
 import { MAX_EDIT_TITLE_LENGTH } from "#/modules/viral-formats/model/presenter-plan";
+import type { RankingPlan } from "#/modules/viral-formats/model/ranking-plan";
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
 
 /** Constant values written into the CHECKs; never user input. */
@@ -139,7 +140,7 @@ export const edits = pgTable(
         format: text("format", { enum: EDIT_FORMATS }).notNull(),
         status: text("status", { enum: EDIT_STATUSES }).notNull().default("queued"),
         plan: jsonb("plan")
-            .$type<SplitScreenPlan | ContrastPlan | GamifiedPlan | HackingPlan>()
+            .$type<SplitScreenPlan | ContrastPlan | GamifiedPlan | HackingPlan | RankingPlan>()
             .notNull(),
         outputPath: text("output_path"),
         outputBytes: bigint("output_bytes", { mode: "number" }),

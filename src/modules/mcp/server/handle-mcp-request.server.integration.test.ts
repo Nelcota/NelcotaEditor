@@ -73,6 +73,17 @@ const EDIT_TOOL_CASES = [
             ],
         },
     },
+    {
+        format: "ranking",
+        tool: "create_ranking_edit",
+        fields: {
+            topic: "Melhores ferramentas",
+            items: [
+                { position: 2, at: 1, label: "CapCut" },
+                { position: 1, at: 3, label: "Editor Oculto" },
+            ],
+        },
+    },
 ] as const;
 
 function toCookieHeaders(setCookieHeaders: Headers): Headers {
