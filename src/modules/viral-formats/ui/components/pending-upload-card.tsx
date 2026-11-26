@@ -12,7 +12,7 @@ export function PendingUploadCard({ upload, onDismiss }: PendingUploadCardProps)
     const errorMessage = upload.errorMessage;
 
     return (
-        <li className="grid content-start gap-2">
+        <li className="grid min-w-0 content-start gap-2">
             <div className="grid aspect-clip-card place-items-center rounded-xl border border-dashed border-card-border p-4">
                 {errorMessage === null && (
                     <div className="grid w-full gap-2 text-center">
@@ -26,9 +26,7 @@ export function PendingUploadCard({ upload, onDismiss }: PendingUploadCardProps)
                     </p>
                 )}
             </div>
-            <p className="truncate text-sm font-bold" title={upload.name}>
-                {upload.name}
-            </p>
+            <p className="text-sm font-bold [overflow-wrap:anywhere]">{upload.name}</p>
             {errorMessage !== null && (
                 <button
                     type="button"

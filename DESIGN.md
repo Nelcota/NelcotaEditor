@@ -42,10 +42,11 @@ The subscription offer gives the monthly price its own space beside the benefit 
 lime button for checkout. The price and payment terms stack below the benefit in narrow containers,
 and the button takes the full row on phones.
 
-The batch workspace groups uploads and their progress in a video panel. The Claude panel holds one
-optional adjustment field and one action to queue the videos and save the adjustment together.
-The panels stack in narrow containers. Once a batch is queued, the Claude panel shows the request to
-copy and its saved adjustments.
+The batch workspace groups uploads and their progress in a video panel. File names wrap in full.
+Deleting a video requires confirmation, and focus returns to the video panel once it is deleted.
+The Claude panel holds one optional adjustment field and an action to prepare the request. It queues
+the videos and saves the adjustment together. The panels stack in narrow containers. Once a batch
+is queued, the Claude panel shows the request to copy and its saved adjustments.
 
 Use the unmodified Claude Spark in Clay from the [Anthropic press kit](https://www.anthropic.com/press-kit)
 to identify Claude in the integration, connection prompts and batch handoff. The same mark stays

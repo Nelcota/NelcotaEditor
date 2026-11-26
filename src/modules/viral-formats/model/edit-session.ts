@@ -5,12 +5,14 @@ import type { EditView } from "#/modules/viral-formats/model/edit-view";
 import type { VideoStatus } from "#/modules/video-records/model/video-status";
 
 /**
- * collecting: the person is still adding raw videos and adjustments. queued: they clicked Começar a
- * editar, so their Claude finds the session in its queue and edits every video in it.
+ * collecting: the person is still adding raw videos and adjustments. queued: the request is ready
+ * to copy to Claude, which can then find the batch in its queue.
  */
 export const EDIT_SESSION_STATUSES = ["collecting", "queued"] as const;
 
 export type EditSessionStatus = (typeof EDIT_SESSION_STATUSES)[number];
+
+export const EDIT_SESSION_REQUEST_LABEL = "Preparar pedido para o Claude";
 
 export const EDIT_SESSION_STATUS_LABELS: Readonly<Record<EditSessionStatus, string>> = {
     collecting: "Aguardando vídeos brutos",

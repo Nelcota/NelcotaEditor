@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { z } from "zod";
 import {
+    EDIT_SESSION_REQUEST_LABEL,
     MAX_SESSION_NOTE_LENGTH,
     MAX_SESSION_NOTES,
     sessionAdjustmentSchema,
@@ -18,7 +19,6 @@ import { cn } from "#/shared/ui/cn";
 import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { FormAlert } from "#/shared/ui/form-alert";
 import { toErrorMessages } from "#/shared/ui/form-errors";
-import { pluralize } from "#/shared/ui/pluralize";
 import { TextAreaField } from "#/shared/ui/text-area-field";
 import { toErrorMessage } from "#/shared/ui/to-error-message";
 import { useTrackPromise } from "#/shared/ui/use-track-promise";
@@ -26,7 +26,7 @@ import { useUnsavedChangesGuard } from "#/shared/ui/use-unsaved-changes-guard";
 
 const FORM_SCHEMA = z.object({ adjustment: sessionAdjustmentSchema });
 const FIELD_NAMES = ["adjustment"] as const;
-const FALLBACK_ERROR_MESSAGE = "Não foi possível mandar para o Claude. Tente de novo.";
+const FALLBACK_ERROR_MESSAGE = "Não foi possível preparar o pedido. Tente de novo.";
 const UPLOADS_RUNNING_MESSAGE = "Aguarde o envio dos vídeos.";
 
 function describeReadiness(videoCount: number, uploadsRunning: number): string {
@@ -35,18 +35,10 @@ function describeReadiness(videoCount: number, uploadsRunning: number): string {
     }
 
     if (videoCount === 0) {
-        return "Adicione pelo menos um vídeo para começar.";
+        return "Adicione pelo menos um vídeo para preparar o pedido.";
     }
 
-    return "O pedido para enviar ao Claude aparece a seguir.";
-}
-
-function toStartLabel(videoCount: number): string {
-    if (videoCount === 0) {
-        return "Começar a editar";
-    }
-
-    return `Começar a editar ${videoCount} ${pluralize(videoCount, "vídeo", "vídeos")}`;
+    return "Depois, copie o pedido e envie no Claude.";
 }
 
 export function SessionRequestForm({
@@ -120,16 +112,16 @@ export function SessionRequestForm({
                     type="submit"
                     size="lg"
                     className={cn(
-                        "min-h-11 font-bold whitespace-normal",
+                        "h-auto min-h-11 py-2 text-center leading-snug font-bold whitespace-normal",
                         canStart === false &&
                             "disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-100",
                     )}
                     aria-describedby="session-start-hint"
                     disabled={canStart === false}
                     isLoading={start.isPending}
-                    loadingLabel="Enviando para o Claude…"
+                    loadingLabel="Preparando pedido…"
                 >
-                    {toStartLabel(videoCount)}
+                    {EDIT_SESSION_REQUEST_LABEL}
                     <ArrowRightIcon aria-hidden="true" className="size-4" />
                 </Button>
                 <p

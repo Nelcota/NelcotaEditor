@@ -1,6 +1,8 @@
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import { MAX_SESSION_VIDEOS } from "#/modules/viral-formats/model/edit-session";
 import type { EditSessionView } from "#/modules/viral-formats/model/edit-session";
+import type { SessionVideoDeletion } from "#/modules/viral-formats/ui/components/session-delete-video-button";
 import { SessionDropzone } from "#/modules/viral-formats/ui/components/session-dropzone";
 import { SessionVideoGrid } from "#/modules/viral-formats/ui/components/session-video-grid";
 import type { PendingUpload } from "#/modules/viral-formats/ui/hooks/use-batch-upload";
@@ -20,6 +22,12 @@ export function SessionVideos(props: SessionVideosProps): ReactNode {
     const hasFiles = videoCount > 0 || pending.length > 0;
     const isCollecting = session.status === "collecting";
     const hasRoom = videoCount + uploadsRunning < MAX_SESSION_VIDEOS;
+    const headingRef = useRef<HTMLHeadingElement | null>(null);
+    let deletion: SessionVideoDeletion | null = null;
+
+    if (isCollecting) {
+        deletion = { deleteVideo, focusBatch: () => headingRef.current?.focus() };
+    }
 
     return (
         <section
@@ -28,7 +36,12 @@ export function SessionVideos(props: SessionVideosProps): ReactNode {
         >
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <div className="grid gap-1">
-                    <h2 id="session-videos" className="text-lg leading-tight font-bold">
+                    <h2
+                        ref={headingRef}
+                        id="session-videos"
+                        tabIndex={-1}
+                        className="rounded-sm text-lg leading-tight font-bold focus-visible:ring-4 focus-visible:ring-ring"
+                    >
                         Vídeos do lote
                     </h2>
                     <p role="status" className="text-xs text-muted-foreground tabular-nums">
@@ -47,7 +60,7 @@ export function SessionVideos(props: SessionVideosProps): ReactNode {
                     session={session}
                     pending={pending}
                     onDismiss={onDismiss}
-                    deleteVideo={deleteVideo}
+                    deletion={deletion}
                 />
             )}
             {isCollecting === false && hasFiles === false && (
