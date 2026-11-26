@@ -37,6 +37,10 @@ full vertical videos on demand and offer Portuguese captions. The dialogs show w
 is available for editing before prompting anyone to connect Claude. The stock photos use the
 [Pexels license](https://www.pexels.com/license/).
 
+Contraste uses the same batch flow as Tela dividida. Its renders keep the presenter in a vertical
+frame, with the topic at the top and two verdict labels during each comparison. The active verdict
+and the option's name change when the presenter moves to the next option.
+
 | Preview      | Photo credits                                                                                                                                                                                  |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Split screen | [Pavel Danilyuk](https://www.pexels.com/photo/a-female-coffee-barista-making-coffee-6612646/), [Esra Afşar](https://www.pexels.com/photo/barista-preparing-espresso-in-cafe-setting-32078567/) |

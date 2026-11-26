@@ -55,12 +55,12 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
         id: "this-or-that",
         access: "free",
         name: "Contraste",
-        tagline: "Duas opções lado a lado.",
+        tagline: "Compare opções com marcações de bom e ruim.",
         description:
-            "Coloca duas escolhas frente a frente e deixa claro qual vence. Gera comentário porque todo mundo quer dar a própria opinião.",
+            "Você apresenta as opções em tela cheia, e a edição destaca sua avaliação enquanto você fala de cada uma.",
         highlights: [
-            "Divisão lado a lado com o OU no meio",
-            "Marcação de certo e errado",
+            "Tema da comparação no topo do vídeo",
+            "Marcações de bom e ruim com o nome da opção em destaque",
             "Bom para comparar produtos, hábitos e estratégias",
         ],
         example: {

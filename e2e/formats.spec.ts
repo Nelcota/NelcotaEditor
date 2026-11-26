@@ -8,15 +8,15 @@ test("shows when a format is available only as a preview before Claude is connec
     await useOwnClientAddress(page);
     await signUp(page, createTestAccount());
     await openPage(page, "/formats");
-    await page.getByRole("button", { name: "Contraste" }).click();
+    await page.getByRole("button", { name: "Ranking" }).click();
 
-    const contrast = page.getByRole("dialog", { name: "Contraste" });
+    const preview = page.getByRole("dialog", { name: "Ranking" });
     await expect(
-        contrast.getByText("A edição neste formato ainda não está disponível.", { exact: false }),
+        preview.getByText("A edição neste formato ainda não está disponível.", { exact: false }),
     ).toBeVisible();
-    await expect(contrast.getByRole("link", { name: "Conectar o Claude" })).toHaveCount(0);
+    await expect(preview.getByRole("link", { name: "Conectar o Claude" })).toHaveCount(0);
     await expectNoAccessibilityViolations(page);
-    await contrast.getByRole("button", { name: "Voltar" }).click();
+    await preview.getByRole("button", { name: "Voltar" }).click();
 
     await page.getByRole("button", { name: "Tela dividida", exact: true }).click();
     const splitScreen = page.getByRole("dialog", { name: "Tela dividida" });

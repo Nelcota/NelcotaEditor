@@ -27,6 +27,7 @@ export const MAX_LISTED_SESSIONS = 30;
 
 const FORMAT_NAMES: Readonly<Record<EditFormat, string>> = {
     "split-screen": "Tela dividida",
+    "this-or-that": "Contraste",
 };
 
 export function toFormatName(format: EditFormat): string {
@@ -39,7 +40,7 @@ export function toEditSessionTitle(format: EditFormat, number: number): string {
         throw new RangeError(`An edit session number starts at 1, got ${String(number)}`);
     }
 
-    return `${FORMAT_NAMES[format]} #${number}`;
+    return `${toFormatName(format)} #${number}`;
 }
 
 export const editSessionIdInputSchema = z.object({ sessionId: z.uuid() });

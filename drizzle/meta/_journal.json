@@ -225,6 +225,13 @@
       "when": 1795646790821,
       "tag": "0031_edit_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795716792542,
+      "tag": "0032_enable_contrast_edits",
+      "breakpoints": true
     }
   ]
 }

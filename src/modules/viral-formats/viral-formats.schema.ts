@@ -18,7 +18,8 @@ import {
     MAX_SESSION_NOTE_LENGTH,
 } from "#/modules/viral-formats/model/edit-session";
 import { EDIT_FORMATS, EDIT_STATUSES } from "#/modules/viral-formats/model/edit-status";
-import { MAX_EDIT_TITLE_LENGTH } from "#/modules/viral-formats/model/split-screen-plan";
+import type { ContrastPlan } from "#/modules/viral-formats/model/contrast-plan";
+import { MAX_EDIT_TITLE_LENGTH } from "#/modules/viral-formats/model/presenter-plan";
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
 
 /** Constant values written into the CHECKs; never user input. */
@@ -135,7 +136,7 @@ export const edits = pgTable(
         title: text("title").notNull(),
         format: text("format", { enum: EDIT_FORMATS }).notNull(),
         status: text("status", { enum: EDIT_STATUSES }).notNull().default("queued"),
-        plan: jsonb("plan").$type<SplitScreenPlan>().notNull(),
+        plan: jsonb("plan").$type<SplitScreenPlan | ContrastPlan>().notNull(),
         outputPath: text("output_path"),
         outputBytes: bigint("output_bytes", { mode: "number" }),
         errorMessage: text("error_message"),

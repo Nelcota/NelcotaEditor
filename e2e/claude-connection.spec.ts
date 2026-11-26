@@ -102,6 +102,31 @@ test("signs a signed-out person in before asking for consent", async ({
     await signedOut.close();
 });
 
+test("opens a Contraste batch and sends its uploaded video to Claude", async ({
+    page,
+    request,
+}) => {
+    await useOwnClientAddress(page);
+    await signUp(page, createTestAccount());
+    const origin = new URL(page.url()).origin;
+    const callbacks = await catchClaudeCallbacks(page);
+    await page.goto(await startClaudeAuthorization(request, origin), { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Permitir acesso" }).click();
+    await expect.poll(() => callbacks.length).toBeGreaterThan(0);
+
+    await openPage(page, "/formats");
+    await page.getByRole("button", { name: "Contraste" }).click();
+    await page.getByRole("button", { name: "Escolher formato" }).click();
+
+    await expect(page.getByRole("heading", { name: "Contraste #1" })).toBeVisible();
+    await expectNoAccessibilityViolations(page);
+    await page
+        .getByLabel("Suba seus vídeos brutos")
+        .setInputFiles("public/viral-formats/contrast-example.mp4");
+    await page.getByRole("button", { name: "Começar a editar 1 vídeo" }).click();
+    await expect(page.getByRole("button", { name: "Copiar pedido" })).toBeVisible();
+});
+
 test("refuses a consent page whose request was changed", async ({ page }) => {
     await useOwnClientAddress(page);
     await signUp(page, createTestAccount());

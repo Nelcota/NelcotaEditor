@@ -1,9 +1,7 @@
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
-import { measureCutSeconds } from "#/modules/viral-formats/model/split-screen-plan";
-import type {
-    SplitScreenPanel,
-    SplitScreenTake,
-} from "#/modules/viral-formats/model/split-screen-plan";
+import { measureCutSeconds } from "#/modules/viral-formats/model/presenter-plan";
+import type { PresenterTake } from "#/modules/viral-formats/model/presenter-plan";
+import type { SplitScreenPanel } from "#/modules/viral-formats/model/split-screen-plan";
 
 /** One stretch of the edited video with the same top panel, in seconds of the edited video. */
 export type SplitScreenPiece = SplitScreenPanel & { start: number; end: number };
@@ -21,7 +19,7 @@ const PUNCTUATION = /[\p{P}\p{S}]/gu;
 /** Each panel runs until the next one starts; the last one until the video ends. */
 export function toPanelPieces(
     panels: ReadonlyArray<SplitScreenPanel>,
-    takes: ReadonlyArray<SplitScreenTake>,
+    takes: ReadonlyArray<PresenterTake>,
 ): Array<SplitScreenPiece> {
     const cutSeconds = measureCutSeconds(takes);
 
@@ -38,7 +36,7 @@ function toCaptionText(text: string): string {
 
 /** One take's words, each moved by `offset`, the edited time where the take starts. */
 function toTakeWords(
-    take: SplitScreenTake,
+    take: PresenterTake,
     offset: number,
     words: ReadonlyArray<TranscriptWord>,
 ): Array<CutWord> {
@@ -60,7 +58,7 @@ function toTakeWords(
  * A word belongs to the take that holds its midpoint, so a word cut in half is shown once.
  */
 export function toCutWords(
-    takes: ReadonlyArray<SplitScreenTake>,
+    takes: ReadonlyArray<PresenterTake>,
     words: ReadonlyArray<TranscriptWord>,
 ): Array<CutWord> {
     const cutWords: Array<CutWord> = [];

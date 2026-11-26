@@ -8,6 +8,7 @@ import { MCP_RESOURCE, auth } from "#/modules/auth/server/auth.server";
 import { getClientIpHeaders } from "#/modules/auth/server/client-ip.server";
 import { disconnectClaude } from "#/modules/auth/server/claude-connection.server";
 import { handleMcpRequest } from "#/modules/mcp/server/handle-mcp-request.server";
+import { transcripts } from "#/modules/transcription/transcription.schema";
 import { videos } from "#/modules/video-records/video-records.schema";
 
 // Runs against the test database from .env.test: bun run test:integration
@@ -275,5 +276,36 @@ describe("handleMcpRequest", () => {
         const response = await callTool(accessToken, "list_my_videos", {});
 
         expect(response.status).toBe(HTTP_UNAUTHORIZED);
+    });
+
+    it("queues a Contraste edit through the connected Claude tool", async () => {
+        const person = await signIn();
+        const videoId = await createVideo(person.userId, "Comparison");
+        await db
+            .update(videos)
+            .set({ sourcePath: `videos/${videoId}/source.mp4`, durationSeconds: 10 })
+            .where(eq(videos.id, videoId));
+        await db
+            .insert(transcripts)
+            .values({ videoId, words: [{ text: "Bom", startSeconds: 1, endSeconds: 1.5 }] });
+        const accessToken = await connectClaude(person);
+        const answer = await readToolText(
+            await callTool(accessToken, "create_contrast_edit", {
+                videoId,
+                title: "Comparison",
+                topic: "Fones de ouvido",
+                takes: [{ start: 0, end: 5 }],
+                comparisons: [{ start: 1, end: 3, label: "Com fio", verdict: "good" }],
+            }),
+        );
+
+        expect(answer.isError).toBe(false);
+        const result = z
+            .object({ editId: z.uuid(), status: z.literal("queued") })
+            .parse(JSON.parse(answer.text));
+        const edit = await readToolText(
+            await callTool(accessToken, "get_edit", { editId: result.editId }),
+        );
+        expect(JSON.parse(edit.text)).toMatchObject({ format: "this-or-that", status: "queued" });
     });
 });

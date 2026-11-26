@@ -8,7 +8,7 @@ import { videos } from "#/modules/video-records/video-records.schema";
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
 import { splitScreenPlanSchema } from "#/modules/viral-formats/model/split-screen-plan";
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
-import { createSplitScreenEdit } from "#/modules/viral-formats/server/create-split-screen-edit.server";
+import { createFormatEdit } from "#/modules/viral-formats/server/create-format-edit.server";
 import { edits } from "#/modules/viral-formats/viral-formats.schema";
 
 // Runs against the test database from .env.test: bun run test:integration
@@ -62,6 +62,10 @@ function buildPlan(videoId: string, exampleId: string, lastTakeEnd: number = 10)
             { kind: "fullscreen", at: 4 },
         ],
     });
+}
+
+async function createSplitScreenEdit(userId: string, plan: SplitScreenPlan): Promise<string> {
+    return await createFormatEdit(userId, { format: "split-screen", plan });
 }
 
 afterAll(async () => {
