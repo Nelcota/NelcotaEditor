@@ -21,7 +21,7 @@ export function FormatCard({ format, onOpen }: FormatCardProps): ReactNode {
     return (
         <li className="group relative grid w-44 shrink-0 content-start gap-2.5 transition-[scale] sm:w-52 motion-safe:has-[button:active]:scale-99">
             <FormatCover
-                formatId={format.id}
+                format={format}
                 loading="lazy"
                 className="transition-[background-color] group-has-[button:hover]:bg-accent"
             />

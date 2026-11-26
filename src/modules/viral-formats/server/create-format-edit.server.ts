@@ -1,10 +1,15 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { fromDrizzle } from "pg-boss";
 import { sql } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { findTranscriptWords } from "#/modules/transcription/server/find-transcript-words.server";
 import { videos } from "#/modules/video-records/video-records.schema";
+import type { ContrastPlan } from "#/modules/viral-formats/model/contrast-plan";
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
+import type { GamifiedPlan } from "#/modules/viral-formats/model/gamified-plan";
+import type { HackingPlan } from "#/modules/viral-formats/model/hacking-plan";
+import type { PresenterPlan } from "#/modules/viral-formats/model/presenter-plan";
+import { listSplitScreenSourceIds } from "#/modules/viral-formats/model/split-screen-plan";
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
 import { assertFormatAvailable } from "#/modules/viral-formats/server/assert-format-available.server";
 import { enqueueEditRender } from "#/modules/viral-formats/server/edit-render-queue.server";
@@ -16,6 +21,14 @@ import {
 
 /** Transcripts round times; a take may end a hair past the measured duration. */
 const DURATION_TOLERANCE_SECONDS = 0.05;
+
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export type FormatEditRequest =
+    | { format: "split-screen"; plan: SplitScreenPlan }
+    | { format: "this-or-that"; plan: ContrastPlan }
+    | { format: "generic"; plan: GamifiedPlan }
+    | { format: "hacking"; plan: HackingPlan };
 
 interface PlanVideo {
     id: string;
@@ -59,9 +72,11 @@ function requireUsableVideo(
     return { ...video, durationSeconds: video.durationSeconds };
 }
 
-function assertTakesInside(plan: SplitScreenPlan, durationSeconds: number): void {
+function assertTakesInside(plan: PresenterPlan, durationSeconds: number): void {
     const lateTake = plan.takes.find(
-        (take) => take.end > durationSeconds + DURATION_TOLERANCE_SECONDS,
+        (take) =>
+            take.start >= durationSeconds ||
+            take.end > durationSeconds + DURATION_TOLERANCE_SECONDS,
     );
 
     if (lateTake !== undefined) {
@@ -87,27 +102,31 @@ function assertExamplesInside(plan: SplitScreenPlan, planVideos: Map<string, Pla
     }
 }
 
-/** A plan from the queue must name one of the person's queued batches and a video in it. */
-async function assertVideoInQueuedSession(userId: string, plan: SplitScreenPlan): Promise<void> {
-    const sessionId = plan.sessionId;
+/** A batch lock serializes repeated requests for the same queued video. */
+async function findQueuedSessionEdit(
+    transaction: Transaction,
+    userId: string,
+    request: FormatEditRequest,
+): Promise<string | null> {
+    const { format, plan } = request;
+    const { sessionId, videoId } = plan;
 
     if (sessionId === undefined) {
-        return;
+        return null;
     }
 
-    const rows = await db
-        .select({ status: editSessions.status })
+    const [session] = await transaction
+        .select({ status: editSessions.status, format: editSessions.format })
         .from(editSessions)
         .innerJoin(editSessionVideos, eq(editSessionVideos.sessionId, editSessions.id))
         .where(
             and(
                 eq(editSessions.id, sessionId),
                 eq(editSessions.userId, userId),
-                eq(editSessionVideos.videoId, plan.videoId),
+                eq(editSessionVideos.videoId, videoId),
             ),
         )
-        .limit(1);
-    const session = rows[0];
+        .for("update", { of: editSessions });
 
     if (session === undefined) {
         throw new InvalidEditPlanError(
@@ -120,33 +139,72 @@ async function assertVideoInQueuedSession(userId: string, plan: SplitScreenPlan)
             "The person has not sent that batch to edit yet. Ask them to click Começar a editar.",
         );
     }
+
+    if (session.format !== format) {
+        throw new InvalidEditPlanError(
+            "This tool does not match the batch's format. Use the format from list_edit_queue.",
+        );
+    }
+
+    const [existing] = await transaction
+        .select({ id: edits.id })
+        .from(edits)
+        .where(
+            and(
+                eq(edits.userId, userId),
+                eq(edits.sessionId, sessionId),
+                eq(edits.videoId, videoId),
+                eq(edits.format, format),
+                ne(edits.status, "failed"),
+            ),
+        )
+        .limit(1);
+
+    return existing?.id ?? null;
 }
 
-/**
- * Checks a Tela dividida plan against the person's own videos and queues its render. The raw
- * video needs its transcript, since the captions come from it.
- */
-export async function createSplitScreenEdit(
-    userId: string,
-    plan: SplitScreenPlan,
-): Promise<string> {
-    await assertFormatAvailable(userId, "split-screen");
-    const sourceIds = plan.panels
-        .filter((panel) => panel.kind === "example")
-        .map((panel) => panel.sourceVideoId);
-    const planVideos = await findPlanVideos(userId, [plan.videoId, ...sourceIds]);
+async function assertPlanReady(userId: string, request: FormatEditRequest): Promise<void> {
+    const { format, plan } = request;
+    const videoIds = [plan.videoId];
+
+    if (format === "split-screen") {
+        videoIds.push(...listSplitScreenSourceIds(plan));
+    }
+
+    const planVideos = await findPlanVideos(userId, videoIds);
     const rawVideo = requireUsableVideo(planVideos, plan.videoId);
     assertTakesInside(plan, rawVideo.durationSeconds);
-    assertExamplesInside(plan, planVideos);
-    await assertVideoInQueuedSession(userId, plan);
+    if (format === "split-screen") {
+        assertExamplesInside(plan, planVideos);
+    }
 
     if ((await findTranscriptWords(plan.videoId)) === null) {
         throw new InvalidEditPlanError(
             "This video has no transcript yet. Try again once it is processed.",
         );
     }
+}
+
+export async function createFormatEdit(
+    userId: string,
+    request: FormatEditRequest,
+): Promise<string> {
+    const { format, plan } = request;
+
+    if (userId.trim().length === 0) {
+        throw new RangeError("An edit needs the signed-in person's id");
+    }
+
+    await assertFormatAvailable(userId, format);
+    await assertPlanReady(userId, request);
 
     return await db.transaction(async (transaction) => {
+        const existingId = await findQueuedSessionEdit(transaction, userId, request);
+
+        if (existingId !== null) {
+            return existingId;
+        }
+
         const inserted = await transaction
             .insert(edits)
             .values({
@@ -154,7 +212,7 @@ export async function createSplitScreenEdit(
                 videoId: plan.videoId,
                 sessionId: plan.sessionId ?? null,
                 title: plan.title,
-                format: "split-screen",
+                format,
                 plan,
             })
             .returning({ id: edits.id });

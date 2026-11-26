@@ -66,7 +66,7 @@ export function ChooseFormatButton({ format, children }: ChooseFormatButtonProps
     return (
         <div className="grid gap-3">
             <p className="text-sm text-muted-foreground">
-                Este formato chega em breve. Por enquanto, edite na Tela dividida.
+                A edição neste formato ainda não está disponível.
             </p>
             <div className="flex flex-wrap gap-2">{children}</div>
         </div>

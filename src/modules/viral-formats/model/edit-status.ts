@@ -9,7 +9,7 @@ export const EDIT_STATUS_LABELS: Readonly<Record<EditStatus, string>> = {
     failed: "Não deu certo",
 };
 
-export const EDIT_FORMATS = ["split-screen"] as const;
+export const EDIT_FORMATS = ["split-screen", "this-or-that", "generic", "hacking"] as const;
 
 export type EditFormat = (typeof EDIT_FORMATS)[number];
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { toFormatName } from "#/modules/viral-formats/model/edit-session";
 import { EDIT_STATUS_LABELS } from "#/modules/viral-formats/model/edit-status";
 import type { EditStatus } from "#/modules/viral-formats/model/edit-status";
 import { toEditFileUrl } from "#/modules/viral-formats/model/edit-view";
@@ -7,8 +8,6 @@ import { DownloadLink } from "#/shared/ui/download-link";
 import { formatDateTime } from "#/shared/ui/format";
 import { StatusBadge } from "#/shared/ui/status-badge";
 import type { StatusTone } from "#/shared/ui/status-badge";
-
-const FORMAT_LABELS = { "split-screen": "Tela dividida" } as const;
 
 const STATUS_TONES: Readonly<Record<EditStatus, StatusTone>> = {
     queued: "waiting",
@@ -25,7 +24,7 @@ function EditRow({ edit }: { edit: EditView }): ReactNode {
             <div className="grid min-w-0 gap-1">
                 <p className="font-bold [overflow-wrap:anywhere]">{edit.title}</p>
                 <p className="text-meta text-muted-foreground">
-                    {FORMAT_LABELS[edit.format]} · {formatDateTime(edit.createdAt)}
+                    {toFormatName(edit.format)} · {formatDateTime(edit.createdAt)}
                 </p>
                 {edit.errorMessage !== null && (
                     <p className="text-meta text-destructive">{edit.errorMessage}</p>

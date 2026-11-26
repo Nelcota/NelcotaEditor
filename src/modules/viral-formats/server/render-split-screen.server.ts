@@ -1,10 +1,9 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import { FRAME_HEIGHT, FRAME_WIDTH } from "#/modules/viral-formats/model/ass-overlay";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import {
     BOTTOM_PANEL_HEIGHT,
-    FRAME_HEIGHT,
-    FRAME_WIDTH,
     TOP_PANEL_HEIGHT,
     buildWordCaptions,
 } from "#/modules/viral-formats/model/split-screen-captions";
@@ -12,90 +11,28 @@ import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen
 import { toCutWords, toPanelPieces } from "#/modules/viral-formats/model/split-screen-timeline";
 import type { SplitScreenPiece } from "#/modules/viral-formats/model/split-screen-timeline";
 import { localFileInput } from "#/shared/server/local-media-input.server";
-import { runCommand } from "#/shared/server/run-command.server";
+import {
+    FRAMES_PER_SECOND,
+    PRESENTER_FILE_NAME,
+    VIDEO_ENCODING,
+    cutPresenter,
+    runFormatFfmpeg,
+    toRenderSeconds,
+} from "#/modules/viral-formats/server/render-presenter.server";
+import type { PresenterRenderInput } from "#/modules/viral-formats/server/render-presenter.server";
 
-const FRAMES_PER_SECOND = "30";
-const TIME_DECIMALS = 3;
 /** Where the eyes sit inside the bottom panel (REC-01), so the head never touches the seam. */
 const EYES_FROM_PANEL_TOP = 500;
 // REC-05: a linear 5 % zoom per second, capped at 12 %.
 const ZOOM_PER_SECOND = 0.05;
 const MAX_ZOOM = 0.12;
-// The broadcast loudness the format's music balance assumes (REC-06).
-const VOICE_LOUDNESS = "loudnorm=I=-14:TP=-1.5:LRA=11";
-const VIDEO_ENCODING = [
-    "-c:v",
-    "libx264",
-    "-preset",
-    "veryfast",
-    "-crf",
-    "20",
-    "-pix_fmt",
-    "yuv420p",
-    "-r",
-    FRAMES_PER_SECOND,
-];
-
-export interface SplitScreenRenderInput {
+interface SplitScreenRenderInput extends PresenterRenderInput {
     plan: SplitScreenPlan;
     words: ReadonlyArray<TranscriptWord>;
-    /** Local copies ffmpeg can read: the raw video and each example by its video id. */
-    rawVideoPath: string;
     examplePaths: ReadonlyMap<string, string>;
-    workDirectory: string;
-    signal: AbortSignal;
 }
 
 type ExamplePiece = Extract<SplitScreenPiece, { kind: "example" }>;
-
-function toSeconds(value: number): string {
-    return value.toFixed(TIME_DECIMALS);
-}
-
-async function runFfmpeg(args: Array<string>, input: SplitScreenRenderInput): Promise<void> {
-    await runCommand("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args], {
-        workingDirectory: input.workDirectory,
-        signal: input.signal,
-    });
-}
-
-/** The kept takes, one after the other, as a 1080x1920 video with an even voice level. */
-async function cutPresenter(input: SplitScreenRenderInput): Promise<string> {
-    const takes = input.plan.takes;
-    const trims = takes.map(
-        (take, index) =>
-            `[0:v]trim=start=${toSeconds(take.start)}:end=${toSeconds(take.end)},setpts=PTS-STARTPTS[v${index}];` +
-            `[0:a]atrim=start=${toSeconds(take.start)}:end=${toSeconds(take.end)},asetpts=PTS-STARTPTS[a${index}]`,
-    );
-    const concatInputs = takes.map((_take, index) => `[v${index}][a${index}]`).join("");
-    const filter = [
-        ...trims,
-        `${concatInputs}concat=n=${takes.length}:v=1:a=1[cv][ca]`,
-        `[cv]crop=w='min(iw,ih*9/16)':h='min(ih,iw*16/9)',scale=${FRAME_WIDTH}:${FRAME_HEIGHT},fps=${FRAMES_PER_SECOND},setsar=1[v]`,
-        `[ca]${VOICE_LOUDNESS}[a]`,
-    ].join(";");
-    const outputPath = "presenter.mp4";
-    await runFfmpeg(
-        [
-            ...localFileInput(input.rawVideoPath),
-            "-filter_complex",
-            filter,
-            "-map",
-            "[v]",
-            "-map",
-            "[a]",
-            ...VIDEO_ENCODING,
-            "-c:a",
-            "aac",
-            "-b:a",
-            "160k",
-            outputPath,
-        ],
-        input,
-    );
-
-    return outputPath;
-}
 
 /** How far down the presenter's frame the bottom panel starts, so the eyes land where they should. */
 function toBottomPanelTop(eyeLine: number): number {
@@ -111,7 +48,7 @@ function buildSplitArgs(
     examplePath: string,
     input: SplitScreenRenderInput,
 ): Array<string> {
-    const duration = toSeconds(piece.end - piece.start);
+    const duration = toRenderSeconds(piece.end - piece.start);
     const sourceStart = piece.sourceStart;
     const filter = [
         `[1:v]scale=${FRAME_WIDTH}:${TOP_PANEL_HEIGHT}:force_original_aspect_ratio=increase,crop=${FRAME_WIDTH}:${TOP_PANEL_HEIGHT},fps=${FRAMES_PER_SECOND},setsar=1[top]`,
@@ -121,15 +58,15 @@ function buildSplitArgs(
 
     return [
         "-ss",
-        toSeconds(piece.start),
+        toRenderSeconds(piece.start),
         "-t",
         duration,
-        ...localFileInput("presenter.mp4"),
+        ...localFileInput(PRESENTER_FILE_NAME),
         // A short example loops rather than leaving the panel empty.
         "-stream_loop",
         "-1",
         "-ss",
-        toSeconds(sourceStart),
+        toRenderSeconds(sourceStart),
         ...localFileInput(examplePath),
         "-filter_complex",
         filter,
@@ -144,16 +81,16 @@ function buildSplitArgs(
 
 /** The presenter alone, filling the frame, zooming in slowly (REC-05). */
 function buildFullscreenArgs(piece: SplitScreenPiece): Array<string> {
-    const duration = toSeconds(piece.end - piece.start);
+    const duration = toRenderSeconds(piece.end - piece.start);
     const scale = `(1+min(${MAX_ZOOM},${ZOOM_PER_SECOND}*t))`;
     const filter = `[0:v]scale=w='trunc(${FRAME_WIDTH}*${scale}/2)*2':h='trunc(${FRAME_HEIGHT}*${scale}/2)*2':eval=frame,crop=${FRAME_WIDTH}:${FRAME_HEIGHT},setsar=1[v]`;
 
     return [
         "-ss",
-        toSeconds(piece.start),
+        toRenderSeconds(piece.start),
         "-t",
         duration,
-        ...localFileInput("presenter.mp4"),
+        ...localFileInput(PRESENTER_FILE_NAME),
         "-filter_complex",
         filter,
         "-map",
@@ -186,7 +123,7 @@ async function renderPieces(
 
     for (const [index, piece] of pieces.entries()) {
         const pieceName = `piece-${index}.mp4`;
-        await runFfmpeg([...buildPieceArgs(piece, input), pieceName], input);
+        await runFormatFfmpeg([...buildPieceArgs(piece, input), pieceName], input);
         pieceNames.push(pieceName);
     }
 
@@ -196,7 +133,7 @@ async function renderPieces(
         pieceNames.map((name) => `file '${name}'`).join("\n"),
     );
     const joinedName = "joined.mp4";
-    await runFfmpeg(
+    await runFormatFfmpeg(
         ["-f", "concat", "-safe", "0", "-i", listName, "-c", "copy", joinedName],
         input,
     );
@@ -219,7 +156,7 @@ export async function renderSplitScreen(input: SplitScreenRenderInput): Promise<
         buildWordCaptions(toCutWords(plan.takes, input.words), pieces),
     );
     const outputName = "output.mp4";
-    await runFfmpeg(
+    await runFormatFfmpeg(
         [
             "-i",
             joinedName,

@@ -6,10 +6,11 @@ import { user } from "#/modules/auth/auth.schema";
 import { transcripts } from "#/modules/transcription/transcription.schema";
 import type { VideoPurpose } from "#/modules/video-records/model/video-status";
 import { videos } from "#/modules/video-records/video-records.schema";
+import { contrastPlanSchema } from "#/modules/viral-formats/model/contrast-plan";
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
 import { splitScreenPlanSchema } from "#/modules/viral-formats/model/split-screen-plan";
 import type { SplitScreenPlan } from "#/modules/viral-formats/model/split-screen-plan";
-import { createSplitScreenEdit } from "#/modules/viral-formats/server/create-split-screen-edit.server";
+import { createFormatEdit } from "#/modules/viral-formats/server/create-format-edit.server";
 import {
     EditSessionEmptyError,
     EditSessionLockedError,
@@ -70,6 +71,10 @@ function planFor(videoId: string, sessionId: string): SplitScreenPlan {
         takes: [{ start: 1, end: 6 }],
         panels: [{ kind: "fullscreen", at: 0 }],
     });
+}
+
+async function createSplitScreenEdit(userId: string, plan: SplitScreenPlan): Promise<string> {
+    return await createFormatEdit(userId, { format: "split-screen", plan });
 }
 
 afterAll(async () => {
@@ -170,6 +175,41 @@ describe("edit sessions", () => {
         const queue = await listQueuedEditSessions(userId);
 
         expect(queue).toEqual([]);
+    });
+
+    it("keeps a Contraste batch on its own tool and queues one edit per video on retries", async () => {
+        const userId = await createPerson();
+        const sessionId = await createEditSession(userId, "this-or-that");
+        const videoId = await createVideo(userId, "format");
+        await addSessionVideo(userId, { sessionId, videoId });
+        await queueEditSession(userId, sessionId);
+        const queue = await listQueuedEditSessions(userId);
+        expect(queue[0]).toMatchObject({
+            sessionId,
+            title: "Contraste #1",
+            format: "this-or-that",
+        });
+
+        await expect(createSplitScreenEdit(userId, planFor(videoId, sessionId))).rejects.toThrow(
+            "This tool does not match the batch's format.",
+        );
+
+        const plan = contrastPlanSchema.parse({
+            ...planFor(videoId, sessionId),
+            topic: "Ferramentas de edição",
+            comparisons: [{ start: 0, end: 2, label: "Editor", verdict: "good" }],
+        });
+        const request = { format: "this-or-that", plan } as const;
+        const [firstId, secondId] = await Promise.all([
+            createFormatEdit(userId, request),
+            createFormatEdit(userId, request),
+        ]);
+
+        expect(firstId).toBe(secondId);
+        const session = await findUserEditSession(userId, sessionId);
+        expect(session?.edits).toMatchObject([
+            { id: firstId, format: "this-or-that", status: "queued" },
+        ]);
     });
 
     it("leaves a failed raw video out of Claude's queue", async () => {

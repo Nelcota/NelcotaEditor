@@ -31,10 +31,24 @@ breadcrumb and for screen readers only. Light stays available through the toggle
 
 ## Format previews
 
-The featured format, gallery cards and format dialogs share the same stills. Each preview uses its
-own editing layout, such as stacked shots, a ranked list or a burned-in caption. Contraste shows a
-frame of the owner's own example video, which its dialog plays. The other cropped WebP files in
-`public/viral-formats/` use the [Pexels license](https://www.pexels.com/license/).
+The featured format, gallery cards and format dialogs share the same stills. Tela dividida,
+Contraste, Dinâmico gamificado and Hacking use frames from the owner's examples as their covers.
+Their dialogs play the full vertical videos on demand and offer Portuguese captions. The dialogs
+show whether each format is available for editing before prompting anyone to connect Claude. The
+stock photos in gallery captures and the Ranking cover use the
+[Pexels license](https://www.pexels.com/license/).
+
+Contraste uses the same batch flow as Tela dividida. Its renders keep the presenter in a vertical
+frame, with the topic at the top and two verdict labels during each comparison. The active verdict
+and the option's name change when the presenter moves to the next option.
+
+Dinâmico gamificado uses the same batch flow. Its vertical renders keep the clean takes, group the
+transcript into short captions, colour the selected words and pair each timed label and icon with a
+brief zoom and a quiet chime mixed under the voice.
+
+Hacking follows the owner's reference: a row of yellow rank numbers, a badge revealed below each
+rank as the presenter introduces it, a brief item spotlight, white captions and a yellow topic
+card. The board can be cleared for the closing while the captions continue.
 
 | Preview      | Photo credits                                                                                                                                                                                  |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

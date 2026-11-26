@@ -1,4 +1,7 @@
-export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "generic";
+export type ViralFormatId = "split-screen" | "ranking" | "this-or-that" | "generic" | "hacking";
+
+export const FORMAT_EXAMPLE_WIDTH = 720;
+export const FORMAT_EXAMPLE_HEIGHT = 1280;
 
 /** Free formats are open to everyone; each month a new one arrives for subscribers only. */
 export type FormatAccess = "free" | "subscriber";
@@ -26,14 +29,19 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
         id: "split-screen",
         access: "free",
         name: "Tela dividida",
-        tagline: "Você em cima, o conteúdo embaixo.",
+        tagline: "Conteúdo em cima, você embaixo.",
         description:
-            "A tela se divide em duas: de um lado você falando, do outro o print, o vídeo de apoio ou o produto. Prende a atenção sem tirar você de cena.",
+            "Os prints, produtos ou vídeos de apoio aparecem na metade de cima enquanto você fala na de baixo.",
         highlights: [
             "Ideal para reagir a prints, vídeos e resultados",
             "Corte automático das pausas e respiros",
             "Legenda dinâmica palavra por palavra",
         ],
+        example: {
+            videoUrl: "/viral-formats/split-screen-example.mp4",
+            posterUrl: "/viral-formats/split-screen-example-poster.webp",
+            captionsUrl: "/viral-formats/split-screen-example.vtt",
+        },
     },
     {
         id: "ranking",
@@ -52,12 +60,12 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
         id: "this-or-that",
         access: "free",
         name: "Contraste",
-        tagline: "Duas opções lado a lado.",
+        tagline: "Compare opções com marcações de bom e ruim.",
         description:
-            "Coloca duas escolhas frente a frente e deixa claro qual vence. Gera comentário porque todo mundo quer dar a própria opinião.",
+            "Você apresenta as opções em tela cheia, e a edição destaca sua avaliação enquanto você fala de cada uma.",
         highlights: [
-            "Divisão lado a lado com o OU no meio",
-            "Marcação de certo e errado",
+            "Tema da comparação no topo do vídeo",
+            "Marcações de bom e ruim com o nome da opção em destaque",
             "Bom para comparar produtos, hábitos e estratégias",
         ],
         example: {
@@ -69,14 +77,37 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     {
         id: "generic",
         access: "free",
-        name: "Genérico",
-        tagline: "Talking head limpo com legenda.",
+        name: "Dinâmico gamificado",
+        tagline: "Cortes rápidos e efeitos no ritmo da fala.",
         description:
-            "O formato coringa: você falando para a câmera, com cortes secos, zoom nos momentos fortes e legenda. Serve para quase todo conteúdo.",
+            "Você fala para a câmera enquanto cortes, textos e efeitos destacam as partes mais importantes.",
         highlights: [
-            "Remove gaguejos, pausas e repetições",
-            "Zoom nos trechos de ênfase",
-            "Legenda grande e fácil de ler no celular",
+            "Palavras-chave em destaque na legenda",
+            "Ícones e efeitos sonoros pontuam a fala",
+            "Mudanças de enquadramento nos momentos de ênfase",
         ],
+        example: {
+            videoUrl: "/viral-formats/dynamic-gamified-example.mp4",
+            posterUrl: "/viral-formats/dynamic-gamified-example-poster.webp",
+            captionsUrl: "/viral-formats/dynamic-gamified-example.vtt",
+        },
+    },
+    {
+        id: "hacking",
+        access: "free",
+        name: "Hacking",
+        tagline: "Dicas e ferramentas em uma sequência numerada.",
+        description:
+            "Apresente uma lista de dicas ou ferramentas com números no topo da tela e um destaque visual para cada item.",
+        highlights: [
+            "Números mostram o progresso da lista",
+            "Cada ferramenta aparece em destaque quando é citada",
+            "Tema da lista em destaque na tela",
+        ],
+        example: {
+            videoUrl: "/viral-formats/hacking-example.mp4",
+            posterUrl: "/viral-formats/hacking-example-poster.webp",
+            captionsUrl: "/viral-formats/hacking-example.vtt",
+        },
     },
 ];

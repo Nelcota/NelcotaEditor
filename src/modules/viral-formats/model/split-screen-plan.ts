@@ -1,23 +1,14 @@
 import { z } from "zod";
+import {
+    MAX_CUT_SECONDS,
+    measureCutSeconds,
+    presenterPlanSchema,
+    sourceSecondsSchema as secondsSchema,
+} from "#/modules/viral-formats/model/presenter-plan";
 
-/** A raw talking head of four hours is far past any Reel; the bound only stops absurd input. */
-const MAX_SECONDS = 4 * 60 * 60;
-const MAX_TAKES = 300;
 const MAX_PANELS = 300;
-export const MAX_EDIT_TITLE_LENGTH = 120;
 /** Where the presenter's eyes are by default, as a share of the frame height. */
 export const DEFAULT_EYE_LINE = 0.35;
-/** The finished Reel is at most this long: the format is for short videos. */
-export const MAX_CUT_SECONDS = 3 * 60;
-
-const secondsSchema = z.number().finite().nonnegative().max(MAX_SECONDS);
-
-const takeSchema = z
-    .object({
-        start: secondsSchema.describe("Start of the kept take, in seconds of the raw video."),
-        end: secondsSchema.describe("End of the kept take, in seconds of the raw video."),
-    })
-    .refine((take) => take.end > take.start, { message: "A take must end after it starts." });
 
 const panelSchema = z.discriminatedUnion("kind", [
     z.object({
@@ -33,12 +24,6 @@ const panelSchema = z.discriminatedUnion("kind", [
 ]);
 
 export type SplitScreenPanel = z.infer<typeof panelSchema>;
-export type SplitScreenTake = z.infer<typeof takeSchema>;
-
-/** The edited video's length: the takes played one after the other. */
-export function measureCutSeconds(takes: ReadonlyArray<SplitScreenTake>): number {
-    return takes.reduce((total, take) => total + (take.end - take.start), 0);
-}
 
 function arePanelsInOrder(panels: ReadonlyArray<SplitScreenPanel>): boolean {
     return panels.every((panel, index) => index === 0 || panel.at > (panels[index - 1]?.at ?? 0));
@@ -48,21 +33,8 @@ function arePanelsInOrder(panels: ReadonlyArray<SplitScreenPanel>): boolean {
  * What a person's Claude sends to edit a raw talking head as "Tela dividida": the takes to keep,
  * in the order they play, and what the top panel shows from each moment of the edited video.
  */
-export const splitScreenPlanSchema = z
-    .object({
-        videoId: z
-            .uuid()
-            .describe(
-                "The raw talking-head video to edit, from list_edit_queue or list_my_videos.",
-            ),
-        sessionId: z
-            .uuid()
-            .optional()
-            .describe(
-                "The batch from list_edit_queue the video belongs to. Leave it out for a video the person named in the chat.",
-            ),
-        title: z.string().trim().min(1).max(MAX_EDIT_TITLE_LENGTH),
-        takes: z.array(takeSchema).min(1).max(MAX_TAKES),
+export const splitScreenPlanSchema = presenterPlanSchema
+    .extend({
         panels: z.array(panelSchema).min(1).max(MAX_PANELS),
         eyeLine: z
             .number()
@@ -111,3 +83,9 @@ export const splitScreenPlanSchema = z
 
 export type SplitScreenPlan = z.output<typeof splitScreenPlanSchema>;
 export type SplitScreenPlanInput = z.input<typeof splitScreenPlanSchema>;
+
+export function listSplitScreenSourceIds(plan: SplitScreenPlan): Array<string> {
+    return plan.panels
+        .filter((panel) => panel.kind === "example")
+        .map((panel) => panel.sourceVideoId);
+}
