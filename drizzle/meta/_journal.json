@@ -239,6 +239,13 @@
       "when": 1795719109304,
       "tag": "0033_enable_gamified_edits",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795719981822,
+      "tag": "0034_enable_hacking_edits",
+      "breakpoints": true
     }
   ]
 }

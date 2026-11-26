@@ -11,6 +11,7 @@ import { contrastPlanSchema } from "#/modules/viral-formats/model/contrast-plan"
 import { InvalidEditPlanError } from "#/modules/viral-formats/model/edit-errors";
 import { isEditFormat } from "#/modules/viral-formats/model/edit-status";
 import { gamifiedPlanSchema } from "#/modules/viral-formats/model/gamified-plan";
+import { hackingPlanSchema } from "#/modules/viral-formats/model/hacking-plan";
 import { splitScreenPlanSchema } from "#/modules/viral-formats/model/split-screen-plan";
 import { VIRAL_FORMATS } from "#/modules/viral-formats/model/viral-formats";
 import { createFormatEdit } from "#/modules/viral-formats/server/create-format-edit.server";
@@ -52,7 +53,7 @@ const EDIT_QUEUE_GUIDE = [
     "Lists the batches the person prepared in Editor Oculto and sent to edit (they clicked Começar a editar), oldest first.",
     "Each batch has a format, the person's adjustments (apply them to every video of the batch) and its raw videos.",
     "Edit each video that is transcribed and has no edit yet: read its transcript with get_video_transcript, then call the format's edit tool with the batch's sessionId.",
-    "Use create_split_screen_edit for split-screen (Tela dividida), create_contrast_edit for this-or-that (Contraste), and create_gamified_edit for generic (Dinâmico gamificado).",
+    "Use create_split_screen_edit for split-screen (Tela dividida), create_contrast_edit for this-or-that (Contraste), create_gamified_edit for generic (Dinâmico gamificado), and create_hacking_edit for hacking (Hacking).",
     "A video that is not transcribed yet is still being prepared; edit it on a later call.",
 ].join(" ");
 
@@ -71,6 +72,14 @@ const GAMIFIED_GUIDE = [
     "Choose individual spoken keywords for the captions. Add a few short highlights grounded in the transcript. Use step for instructions, tip for useful advice, and emphasis for a turning point or result. Avoid repeating a caption verbatim in a highlight.",
     "Highlights use edited seconds, after subtracting the cuts. Keep them in order, without overlap, and use the speaker's language for labels.",
     "When the person sent a batch, follow its adjustments and pass its sessionId from list_edit_queue. Check the background render with get_edit.",
+].join(" ");
+
+const HACKING_GUIDE = [
+    "Edits a talking head as Hacking: yellow rank numbers across the top, a badge under each rank as it is revealed, a short item spotlight, white captions, and a yellow topic card below.",
+    "Read get_video_transcript. Keep clean takes in playback order, trimming restarts and long pauses. Keep the list introduction, all ranked items and the closing.",
+    "Use two to eight items that actually occur in the speech. Use the ranks the presenter gives, or number an unranked list in playback order. Do not invent items or rankings.",
+    "Supply items in the order they are revealed, including countdowns such as 5, 4, 3, 2, 1. Set at when each item is first identified, in seconds after the cuts. Use a brief topic and labels in the speaker's language.",
+    "Set outroAt at the start of a separate closing so the panel disappears while captions continue. For a queued batch, follow its adjustments and pass its sessionId. Check the background render with get_edit.",
 ].join(" ");
 
 const editIdInputSchema = z.object({
@@ -210,6 +219,16 @@ function registerEditTools(server: McpServer, userId: string): void {
             inputSchema: gamifiedPlanSchema,
         },
         async (plan) => await queueEditResult(userId, { format: "generic", plan }),
+    );
+
+    server.registerTool(
+        "create_hacking_edit",
+        {
+            title: "Editar em Hacking",
+            description: HACKING_GUIDE,
+            inputSchema: hackingPlanSchema,
+        },
+        async (plan) => await queueEditResult(userId, { format: "hacking", plan }),
     );
 
     server.registerTool(

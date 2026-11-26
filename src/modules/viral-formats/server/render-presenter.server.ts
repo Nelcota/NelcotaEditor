@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 import { FRAME_HEIGHT, FRAME_WIDTH } from "#/modules/viral-formats/model/ass-overlay";
 import type { PresenterPlan } from "#/modules/viral-formats/model/presenter-plan";
 import { localFileInput } from "#/shared/server/local-media-input.server";
@@ -6,6 +8,7 @@ import { runCommand } from "#/shared/server/run-command.server";
 export const FRAMES_PER_SECOND = "30";
 export const PRESENTER_FILE_NAME = "presenter.mp4";
 const OUTPUT_FILE_NAME = "output.mp4";
+const OVERLAY_FILE_NAME = "presenter.ass";
 const TIME_DECIMALS = 3;
 const VOICE_LOUDNESS = "loudnorm=I=-14:TP=-1.5:LRA=11";
 export const VIDEO_ENCODING = [
@@ -32,7 +35,6 @@ export interface PresenterRenderInput extends RenderWorkspace {
 }
 
 interface PresenterEffects {
-    overlayName: string;
     videoFilter?: string;
     soundSource?: string;
 }
@@ -73,7 +75,7 @@ function buildVideoFilters(effects: PresenterEffects | null): string {
     }
 
     if (effects !== null) {
-        filters.push(`ass=${effects.overlayName}`);
+        filters.push(`ass=${OVERLAY_FILE_NAME}`);
     }
 
     return `${filters.join(",")}[v]`;
@@ -129,4 +131,16 @@ export async function cutPresenter(
     );
 
     return outputName;
+}
+
+export async function renderPresenterOverlay(
+    input: PresenterRenderInput,
+    overlay: string,
+    effects: PresenterEffects = {},
+): Promise<string> {
+    const { workDirectory } = input;
+    await writeFile(path.join(workDirectory, OVERLAY_FILE_NAME), overlay);
+    const outputName = await cutPresenter(input, effects);
+
+    return path.join(workDirectory, outputName);
 }

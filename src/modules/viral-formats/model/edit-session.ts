@@ -29,6 +29,7 @@ const FORMAT_NAMES: Readonly<Record<EditFormat, string>> = {
     "split-screen": "Tela dividida",
     "this-or-that": "Contraste",
     generic: "Dinâmico gamificado",
+    hacking: "Hacking",
 };
 
 export function toFormatName(format: EditFormat): string {

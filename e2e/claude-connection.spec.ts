@@ -102,7 +102,7 @@ test("signs a signed-out person in before asking for consent", async ({
     await signedOut.close();
 });
 
-const EDITABLE_FORMATS = ["Contraste", "Dinâmico gamificado"] as const;
+const EDITABLE_FORMATS = ["Contraste", "Dinâmico gamificado", "Hacking"] as const;
 
 for (const format of EDITABLE_FORMATS) {
     test(`opens a ${format} batch and sends its uploaded video to Claude`, async ({

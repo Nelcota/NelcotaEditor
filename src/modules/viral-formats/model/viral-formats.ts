@@ -101,7 +101,7 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
             "Apresente uma lista de dicas ou ferramentas com números no topo da tela e um destaque visual para cada item.",
         highlights: [
             "Números mostram o progresso da lista",
-            "Ícones identificam as ferramentas",
+            "Cada ferramenta aparece em destaque quando é citada",
             "Tema da lista em destaque na tela",
         ],
         example: {

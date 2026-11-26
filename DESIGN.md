@@ -46,6 +46,10 @@ Dinâmico gamificado uses the same batch flow. Its vertical renders keep the cle
 transcript into short captions, colour the selected words and pair each timed label and icon with a
 brief zoom and a quiet chime mixed under the voice.
 
+Hacking follows the owner's reference: a row of yellow rank numbers, a badge revealed below each
+rank as the presenter introduces it, a brief item spotlight, white captions and a yellow topic
+card. The board can be cleared for the closing while the captions continue.
+
 | Preview      | Photo credits                                                                                                                                                                                  |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Split screen | [Pavel Danilyuk](https://www.pexels.com/photo/a-female-coffee-barista-making-coffee-6612646/), [Esra Afşar](https://www.pexels.com/photo/barista-preparing-espresso-in-cafe-setting-32078567/) |

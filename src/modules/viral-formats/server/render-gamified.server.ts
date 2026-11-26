@@ -1,5 +1,3 @@
-import { writeFile } from "node:fs/promises";
-import path from "node:path";
 import type { TranscriptWord } from "#/modules/transcription/model/transcript-word";
 import { FRAME_HEIGHT, FRAME_WIDTH } from "#/modules/viral-formats/model/ass-overlay";
 import { buildGamifiedOverlay } from "#/modules/viral-formats/model/gamified-overlay";
@@ -7,12 +5,11 @@ import type { GamifiedHighlight, GamifiedPlan } from "#/modules/viral-formats/mo
 import { measureCutSeconds } from "#/modules/viral-formats/model/presenter-plan";
 import {
     FRAMES_PER_SECOND,
-    cutPresenter,
+    renderPresenterOverlay,
     toRenderSeconds,
 } from "#/modules/viral-formats/server/render-presenter.server";
 import type { PresenterRenderInput } from "#/modules/viral-formats/server/render-presenter.server";
 
-const OVERLAY_FILE_NAME = "gamified.ass";
 const PUNCH_IN_RATIO = 0.16;
 const PUNCH_SECONDS = 0.8;
 const VERTICAL_ANCHOR = 0.4;
@@ -55,13 +52,9 @@ function buildSoundSource(plan: GamifiedPlan): string {
 }
 
 export async function renderGamified(input: GamifiedRenderInput): Promise<string> {
-    const { plan, words, workDirectory } = input;
-    await writeFile(path.join(workDirectory, OVERLAY_FILE_NAME), buildGamifiedOverlay(plan, words));
-    const outputName = await cutPresenter(input, {
-        overlayName: OVERLAY_FILE_NAME,
+    const { plan, words } = input;
+    return await renderPresenterOverlay(input, buildGamifiedOverlay(plan, words), {
         videoFilter: buildPunchFilter(plan.highlights),
         soundSource: buildSoundSource(plan),
     });
-
-    return path.join(workDirectory, outputName);
 }

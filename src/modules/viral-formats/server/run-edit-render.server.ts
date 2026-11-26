@@ -11,6 +11,7 @@ import {
 import { findTranscriptWords } from "#/modules/transcription/server/find-transcript-words.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 import { gamifiedPlanSchema } from "#/modules/viral-formats/model/gamified-plan";
+import { hackingPlanSchema } from "#/modules/viral-formats/model/hacking-plan";
 import {
     listSplitScreenSourceIds,
     splitScreenPlanSchema,
@@ -22,6 +23,7 @@ import {
 } from "#/modules/viral-formats/server/edit-render-queue.server";
 import { renderContrast } from "#/modules/viral-formats/server/render-contrast.server";
 import { renderGamified } from "#/modules/viral-formats/server/render-gamified.server";
+import { renderHacking } from "#/modules/viral-formats/server/render-hacking.server";
 import { renderSplitScreen } from "#/modules/viral-formats/server/render-split-screen.server";
 import type { Edit } from "#/modules/viral-formats/viral-formats.schema";
 import { edits } from "#/modules/viral-formats/viral-formats.schema";
@@ -102,6 +104,13 @@ async function renderEdit(edit: Edit, workDirectory: string, signal: AbortSignal
         const words = await requireTranscript(videoId);
 
         return await renderGamified({ plan, words, rawVideoPath, workDirectory, signal });
+    }
+
+    if (format === "hacking") {
+        const plan = hackingPlanSchema.parse(edit.plan);
+        const words = await requireTranscript(videoId);
+
+        return await renderHacking({ plan, words, rawVideoPath, workDirectory, signal });
     }
 
     const plan = contrastPlanSchema.parse(edit.plan);

@@ -62,6 +62,17 @@ const EDIT_TOOL_CASES = [
             highlights: [{ start: 1, end: 3, label: "Primeira dica", kind: "tip" }],
         },
     },
+    {
+        format: "hacking",
+        tool: "create_hacking_edit",
+        fields: {
+            topic: "Ferramentas de edição",
+            items: [
+                { position: 2, at: 1, label: "CapCut", marker: "CC" },
+                { position: 1, at: 3, label: "Editor Oculto", marker: "EO" },
+            ],
+        },
+    },
 ] as const;
 
 function toCookieHeaders(setCookieHeaders: Headers): Headers {
