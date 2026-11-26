@@ -27,10 +27,6 @@ function appUploadUrl(uploadId: string): string {
     return `/api/videos/uploads/${uploadId}/file`;
 }
 
-/**
- * Reserves space and a processing slot, then says where to send the file. Only the start checks
- * the uploads switch: a file already on its way still finishes.
- */
 /** Where the browser sends the reserved file: a signed storage link, or the app's own route. */
 async function toStartedUpload(upload: VideoUpload): Promise<StartedVideoUpload> {
     const storageUrl = await getFileStorage().createUploadUrl(upload.sourcePath, {
@@ -49,6 +45,10 @@ async function toStartedUpload(upload: VideoUpload): Promise<StartedVideoUpload>
     };
 }
 
+/**
+ * Reserves space and a processing slot, then says where to send the file. Only the start checks
+ * the uploads switch: a file already on its way still finishes.
+ */
 export const startVideoUpload = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(startVideoUploadInputSchema)
