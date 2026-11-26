@@ -7,25 +7,42 @@ import {
 } from "#/modules/viral-formats/server/edit-session-functions";
 
 const EDIT_SESSIONS_QUERY_KEY = ["edit-sessions"] as const;
-/** While a video is being prepared or edited the page checks this often for the next step. */
+/** While a video is being prepared or an edit renders the page checks this often for the next step. */
 const BUSY_CHECK_MILLISECONDS = 3000;
+/** Claude may take hours to pick a batch up, so an open page waiting for it checks less often. */
+const WAITING_FOR_CLAUDE_MILLISECONDS = 30_000;
 
 function hasVideoBeingPrepared(session: EditSessionView): boolean {
     return session.videos.some((video) => video.isReady === false && video.hasFailed === false);
 }
 
-function hasEditUnderWay(session: EditSessionView): boolean {
+function hasEditRendering(session: EditSessionView): boolean {
+    return session.edits.some((edit) => edit.status === "queued" || edit.status === "rendering");
+}
+
+/** A usable video of a queued batch that Claude has not edited yet; a failed one never will be. */
+function isWaitingForClaude(session: EditSessionView): boolean {
     if (session.status !== "queued") {
         return false;
     }
 
-    const finishedVideoIds = new Set(
-        session.edits
-            .filter((edit) => edit.status === "done" || edit.status === "failed")
-            .map((edit) => edit.videoId),
-    );
+    const editedVideoIds = new Set(session.edits.map((edit) => edit.videoId));
 
-    return session.videos.some((video) => finishedVideoIds.has(video.id) === false);
+    return session.videos.some(
+        (video) => video.hasFailed === false && editedVideoIds.has(video.id) === false,
+    );
+}
+
+function toRefetchInterval(session: EditSessionView): number | false {
+    if (hasVideoBeingPrepared(session) === true || hasEditRendering(session) === true) {
+        return BUSY_CHECK_MILLISECONDS;
+    }
+
+    if (isWaitingForClaude(session) === true) {
+        return WAITING_FOR_CLAUDE_MILLISECONDS;
+    }
+
+    return false;
 }
 
 export function editSessionQueryOptions(sessionId: string) {
@@ -39,11 +56,7 @@ export function editSessionQueryOptions(sessionId: string) {
                 return false;
             }
 
-            if (hasVideoBeingPrepared(session) === false && hasEditUnderWay(session) === false) {
-                return false;
-            }
-
-            return BUSY_CHECK_MILLISECONDS;
+            return toRefetchInterval(session);
         },
         refetchIntervalInBackground: false,
     });
