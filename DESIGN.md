@@ -42,6 +42,11 @@ The subscription offer gives the monthly price its own space beside the benefit 
 lime button for checkout. The price and payment terms stack below the benefit in narrow containers,
 and the button takes the full row on phones.
 
+The batch workspace groups uploads and their progress in a video panel. The Claude panel holds one
+optional adjustment field and one action to queue the videos and save the adjustment together.
+The panels stack in narrow containers. Once a batch is queued, the Claude panel shows the request to
+copy and its saved adjustments.
+
 Contraste uses the same batch flow as Tela dividida. Its renders keep the presenter in a vertical
 frame, with the topic at the top and two verdict labels during each comparison. The active verdict
 and the option's name change when the presenter moves to the next option.

@@ -156,31 +156,46 @@ export async function addSessionVideo(userId: string, input: SessionVideoInput):
     });
 }
 
+async function insertSessionNote(
+    transaction: Transaction,
+    input: { sessionId: string; body: string },
+): Promise<void> {
+    const { sessionId, body } = input;
+    const [noteCount] = await transaction
+        .select({ total: count() })
+        .from(editSessionNotes)
+        .where(eq(editSessionNotes.sessionId, sessionId));
+
+    if ((noteCount?.total ?? 0) >= MAX_SESSION_NOTES) {
+        throw new EditSessionNotesFullError();
+    }
+
+    await transaction.insert(editSessionNotes).values({ sessionId, body });
+}
+
 /** Saves one adjustment the person wants in every video of the batch. */
 export async function addSessionNote(
     userId: string,
     input: { sessionId: string; body: string },
 ): Promise<void> {
-    const { sessionId, body } = input;
-    await withOpenSession(userId, sessionId, async (transaction) => {
-        const [noteCount] = await transaction
-            .select({ total: count() })
-            .from(editSessionNotes)
-            .where(eq(editSessionNotes.sessionId, sessionId));
-
-        if ((noteCount?.total ?? 0) >= MAX_SESSION_NOTES) {
-            throw new EditSessionNotesFullError();
-        }
-
-        await transaction.insert(editSessionNotes).values({ sessionId, body });
-    });
+    await withOpenSession(userId, input.sessionId, (transaction) =>
+        insertSessionNote(transaction, input),
+    );
 }
 
 /** Closes the batch for changes and puts it in the queue the person's Claude reads. */
-export async function queueEditSession(userId: string, sessionId: string): Promise<void> {
+export async function queueEditSession(
+    userId: string,
+    sessionId: string,
+    adjustment = "",
+): Promise<void> {
     await withOpenSession(userId, sessionId, async (transaction) => {
         if ((await countSessionVideos(transaction, sessionId)) === 0) {
             throw new EditSessionEmptyError();
+        }
+
+        if (adjustment.length > 0) {
+            await insertSessionNote(transaction, { sessionId, body: adjustment });
         }
 
         await transaction

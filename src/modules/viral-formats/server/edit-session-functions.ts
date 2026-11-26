@@ -3,6 +3,7 @@ import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import {
     createEditSessionInputSchema,
     editSessionIdInputSchema,
+    queueEditSessionInputSchema,
     sessionNoteInputSchema,
     sessionVideoInputSchema,
 } from "#/modules/viral-formats/model/edit-session";
@@ -54,7 +55,7 @@ export const addNoteToMyEditSession = createServerFn({ method: "POST" })
 
 export const queueMyEditSession = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .validator(editSessionIdInputSchema)
+    .validator(queueEditSessionInputSchema)
     .handler(async ({ context, data }): Promise<void> =>
-        queueEditSession(context.user.id, data.sessionId),
+        queueEditSession(context.user.id, data.sessionId, data.adjustment),
     );

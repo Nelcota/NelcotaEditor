@@ -119,7 +119,10 @@ describe("edit sessions", () => {
         const userId = await createPerson();
         const sessionId = await createEditSession(userId, "split-screen");
 
-        await expect(queueEditSession(userId, sessionId)).rejects.toThrow(EditSessionEmptyError);
+        await expect(queueEditSession(userId, sessionId, "Legenda amarela")).rejects.toThrow(
+            EditSessionEmptyError,
+        );
+        expect((await findUserEditSession(userId, sessionId))?.notes).toEqual([]);
 
         await addSessionVideo(userId, {
             sessionId,
@@ -138,14 +141,14 @@ describe("edit sessions", () => {
         const videoId = await createVideo(userId, "format");
         await addSessionVideo(userId, { sessionId, videoId });
         await addSessionNote(userId, { sessionId, body: "Legenda amarela" });
-        await queueEditSession(userId, sessionId);
+        await queueEditSession(userId, sessionId, "Cortes no ritmo da fala");
 
         const queue = await listQueuedEditSessions(userId);
 
         expect(queue).toEqual([
             expect.objectContaining({
                 sessionId,
-                adjustments: ["Legenda amarela"],
+                adjustments: ["Legenda amarela", "Cortes no ritmo da fala"],
                 videos: [expect.objectContaining({ videoId, isTranscribed: true, hasEdit: false })],
             }),
         ]);
