@@ -7,6 +7,7 @@ import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
 import { ChooseFormatButton } from "#/modules/viral-formats/ui/components/choose-format-button";
 import { FormatPreview } from "#/modules/viral-formats/ui/components/format-preview";
 import { Button } from "#/shared/ui/button";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 import {
     Dialog,
     DialogClose,
@@ -35,8 +36,9 @@ function BackButton(): ReactNode {
 function ConnectFirst(): ReactNode {
     return (
         <div className="grid gap-3">
-            <p className="text-sm text-muted-foreground">
-                Para editar neste formato, conecte o seu Claude na Etapa 1.
+            <p className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                <ClaudeLogo className="mt-0.5 size-4 shrink-0" />
+                <span>Para editar neste formato, conecte o seu Claude na Etapa 1.</span>
             </p>
             <div className="flex flex-wrap gap-2">
                 <Button asChild size="lg" className="font-bold">

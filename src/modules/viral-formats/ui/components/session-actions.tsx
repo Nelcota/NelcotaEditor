@@ -4,6 +4,7 @@ import type { ReactNode, RefObject } from "react";
 import type { EditSessionView, SessionNote } from "#/modules/viral-formats/model/edit-session";
 import { SessionAdjustments } from "#/modules/viral-formats/ui/components/session-adjustments";
 import { SessionRequestForm } from "#/modules/viral-formats/ui/components/session-request-form";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 import { CopyTextButton } from "#/shared/ui/copy-text-button";
 
 const CLAUDE_REQUEST = "Edite a minha fila do Editor Oculto.";
@@ -23,8 +24,9 @@ function QueuedForClaude({
                     ref={headingRef}
                     tabIndex={-1}
                     id="session-actions"
-                    className="text-lg leading-tight font-bold"
+                    className="flex items-center gap-2.5 text-lg leading-tight font-bold"
                 >
+                    <ClaudeLogo className="size-5 shrink-0" />
                     Continue no Claude
                 </h2>
                 <p className="text-sm text-pretty text-muted-foreground">

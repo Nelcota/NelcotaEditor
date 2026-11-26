@@ -13,6 +13,7 @@ import { invalidateEditSessionQueries } from "#/modules/viral-formats/model/edit
 import { queueMyEditSession } from "#/modules/viral-formats/server/edit-session-functions";
 import { SessionAdjustments } from "#/modules/viral-formats/ui/components/session-adjustments";
 import { Button } from "#/shared/ui/button";
+import { ClaudeLogo } from "#/shared/ui/claude-logo";
 import { cn } from "#/shared/ui/cn";
 import { focusFirstInvalidField } from "#/shared/ui/focus-first-invalid-field";
 import { FormAlert } from "#/shared/ui/form-alert";
@@ -85,7 +86,11 @@ export function SessionRequestForm({
                 }
             }}
         >
-            <h2 id="session-actions" className="text-lg leading-tight font-bold">
+            <h2
+                id="session-actions"
+                className="flex items-center gap-2.5 text-lg leading-tight font-bold"
+            >
+                <ClaudeLogo className="size-5 shrink-0" />
                 Editar com Claude
             </h2>
             {hasRoomForAdjustment && (
