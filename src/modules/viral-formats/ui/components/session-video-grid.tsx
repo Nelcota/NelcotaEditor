@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { MAX_SESSION_VIDEOS } from "#/modules/viral-formats/model/edit-session";
 import type { EditSessionView } from "#/modules/viral-formats/model/edit-session";
 import { invalidateEditSessionQueries } from "#/modules/viral-formats/model/edit-session-queries";
-import { removeVideoFromMyEditSession } from "#/modules/viral-formats/server/edit-session-functions";
 import { PendingUploadCard } from "#/modules/viral-formats/ui/components/pending-upload-card";
 import { SessionDropzone } from "#/modules/viral-formats/ui/components/session-dropzone";
 import { SessionVideoCard } from "#/modules/viral-formats/ui/components/session-video-card";
@@ -18,7 +17,10 @@ interface SessionVideoGridProps {
     pending: Array<PendingUpload>;
     onFiles: (files: Array<File>) => void;
     onDismiss: (key: string) => void;
-    /** Deletes the raw video itself once it left the batch; it belongs to the videos module. */
+    /**
+     * Deletes the raw video, which takes it out of the batch too (the link cascades). One call, so
+     * a failure never leaves a video out of the batch but still stored.
+     */
     deleteVideo: (videoId: string) => Promise<void>;
 }
 
@@ -28,10 +30,7 @@ export function SessionVideoGrid(props: SessionVideoGridProps): ReactNode {
     const queryClient = useQueryClient();
     const editsByVideo = new Map(session.edits.map((edit) => [edit.videoId, edit]));
     const remove = useMutation({
-        mutationFn: async (videoId: string) => {
-            await removeVideoFromMyEditSession({ data: { sessionId: session.id, videoId } });
-            await deleteVideo(videoId);
-        },
+        mutationFn: deleteVideo,
         onSettled: () => invalidateEditSessionQueries(queryClient),
     });
 

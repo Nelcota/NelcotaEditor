@@ -15,7 +15,6 @@ import {
     addSessionVideo,
     createEditSession,
     queueEditSession,
-    removeSessionVideo,
 } from "#/modules/viral-formats/server/edit-session-commands.server";
 import {
     findUserEditSession,
@@ -47,11 +46,6 @@ export const addVideoToMyEditSession = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(sessionVideoInputSchema)
     .handler(async ({ context, data }): Promise<void> => addSessionVideo(context.user.id, data));
-
-export const removeVideoFromMyEditSession = createServerFn({ method: "POST" })
-    .middleware([authMiddleware])
-    .validator(sessionVideoInputSchema)
-    .handler(async ({ context, data }): Promise<void> => removeSessionVideo(context.user.id, data));
 
 export const addNoteToMyEditSession = createServerFn({ method: "POST" })
     .middleware([authMiddleware])

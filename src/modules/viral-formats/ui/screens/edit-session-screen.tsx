@@ -47,7 +47,12 @@ function SessionHeader({ session }: { session: EditSessionView }): ReactNode {
 
 function SessionLoaded(props: EditSessionScreenProps & { session: EditSessionView }): ReactNode {
     const { session, uploadVideo, deleteVideo } = props;
-    const { pending, addFiles, dismiss } = useBatchUpload({ sessionId: session.id, uploadVideo });
+    const { pending, addFiles, dismiss } = useBatchUpload({
+        sessionId: session.id,
+        videoCount: session.videos.length,
+        uploadVideo,
+        deleteVideo,
+    });
 
     return (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">

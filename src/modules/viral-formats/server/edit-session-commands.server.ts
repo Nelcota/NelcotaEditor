@@ -156,21 +156,6 @@ export async function addSessionVideo(userId: string, input: SessionVideoInput):
     });
 }
 
-/** Takes a raw video out of the person's open batch; the caller deletes the video itself. */
-export async function removeSessionVideo(userId: string, input: SessionVideoInput): Promise<void> {
-    const { sessionId, videoId } = input;
-    await withOpenSession(userId, sessionId, async (transaction) => {
-        await transaction
-            .delete(editSessionVideos)
-            .where(
-                and(
-                    eq(editSessionVideos.sessionId, sessionId),
-                    eq(editSessionVideos.videoId, videoId),
-                ),
-            );
-    });
-}
-
 /** Saves one adjustment the person wants in every video of the batch. */
 export async function addSessionNote(
     userId: string,
