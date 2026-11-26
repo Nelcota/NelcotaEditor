@@ -30,6 +30,7 @@ const FORMAT_NAMES: Readonly<Record<EditFormat, string>> = {
     "this-or-that": "Contraste",
     generic: "Dinâmico gamificado",
     hacking: "Hacking",
+    ranking: "Ranking",
 };
 
 export function toFormatName(format: EditFormat): string {

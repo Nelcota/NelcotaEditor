@@ -9,11 +9,17 @@ export const EDIT_STATUS_LABELS: Readonly<Record<EditStatus, string>> = {
     failed: "Não deu certo",
 };
 
-export const EDIT_FORMATS = ["split-screen", "this-or-that", "generic", "hacking"] as const;
+export const EDIT_FORMATS = [
+    "split-screen",
+    "this-or-that",
+    "generic",
+    "hacking",
+    "ranking",
+] as const;
 
 export type EditFormat = (typeof EDIT_FORMATS)[number];
 
-/** Formats the Editor Oculto can render today; the others are shown but not open yet. */
+/** Formats the Editor Oculto worker can render. */
 export function isEditFormat(format: string): format is EditFormat {
     return EDIT_FORMATS.some((editFormat) => editFormat === format);
 }

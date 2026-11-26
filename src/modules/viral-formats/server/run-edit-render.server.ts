@@ -12,6 +12,7 @@ import { findTranscriptWords } from "#/modules/transcription/server/find-transcr
 import { videos } from "#/modules/video-records/video-records.schema";
 import { gamifiedPlanSchema } from "#/modules/viral-formats/model/gamified-plan";
 import { hackingPlanSchema } from "#/modules/viral-formats/model/hacking-plan";
+import { rankingPlanSchema } from "#/modules/viral-formats/model/ranking-plan";
 import {
     listSplitScreenSourceIds,
     splitScreenPlanSchema,
@@ -24,6 +25,7 @@ import {
 import { renderContrast } from "#/modules/viral-formats/server/render-contrast.server";
 import { renderGamified } from "#/modules/viral-formats/server/render-gamified.server";
 import { renderHacking } from "#/modules/viral-formats/server/render-hacking.server";
+import { renderRanking } from "#/modules/viral-formats/server/render-ranking.server";
 import { renderSplitScreen } from "#/modules/viral-formats/server/render-split-screen.server";
 import type { Edit } from "#/modules/viral-formats/viral-formats.schema";
 import { edits } from "#/modules/viral-formats/viral-formats.schema";
@@ -111,6 +113,13 @@ async function renderEdit(edit: Edit, workDirectory: string, signal: AbortSignal
         const words = await requireTranscript(videoId);
 
         return await renderHacking({ plan, words, rawVideoPath, workDirectory, signal });
+    }
+
+    if (format === "ranking") {
+        const plan = rankingPlanSchema.parse(edit.plan);
+        const words = await requireTranscript(videoId);
+
+        return await renderRanking({ plan, words, rawVideoPath, workDirectory, signal });
     }
 
     const plan = contrastPlanSchema.parse(edit.plan);
