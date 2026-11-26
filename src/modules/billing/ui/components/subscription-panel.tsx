@@ -10,7 +10,7 @@ import { AsyncButton } from "#/shared/ui/async-button";
 import { formatDate } from "#/shared/ui/format";
 import { Skeleton } from "#/shared/ui/skeleton";
 
-const PANEL_CLASS = "rounded-2xl border border-card-border bg-card p-4 sm:px-5";
+const PANEL_CLASS = "@container rounded-2xl border border-card-border bg-card p-4 sm:px-5";
 
 function describeSubscriber(subscription: SubscriptionView): string {
     const accessEndsOn = formatDate(subscription.paidUntil ?? "");
