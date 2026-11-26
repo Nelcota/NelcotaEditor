@@ -34,6 +34,7 @@ export type DeletedVideo = Pick<
     | "userId"
     | "title"
     | "source"
+    | "purpose"
     | "sourcePath"
     | "sourceBytes"
     | "requestedClipCount"
@@ -70,6 +71,7 @@ export async function deleteStoppedVideoRow(
             userId: videos.userId,
             title: videos.title,
             source: videos.source,
+            purpose: videos.purpose,
             sourcePath: videos.sourcePath,
             sourceBytes: videos.sourceBytes,
             requestedClipCount: videos.requestedClipCount,

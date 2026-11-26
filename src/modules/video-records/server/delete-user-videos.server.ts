@@ -65,6 +65,7 @@ export async function deleteUserAccountRecords(userId: string): Promise<Array<st
                 title: videos.title,
                 status: videos.status,
                 source: videos.source,
+                purpose: videos.purpose,
                 sourcePath: videos.sourcePath,
                 sourceBytes: videos.sourceBytes,
                 requestedClipCount: videos.requestedClipCount,

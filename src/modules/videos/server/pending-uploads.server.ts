@@ -142,6 +142,8 @@ export async function holdUploadOfDeletedVideo(
             // The video's size also counts its thumbnail, but the link never takes more than this.
             declaredBytes: Math.min(sourceBytes, MAX_UPLOAD_BYTES),
             title: video.title,
+            // A raw format video asks for no clips, which only a format upload row allows.
+            purpose: video.purpose,
             requestedClipCount: video.requestedClipCount,
             clipLength: video.clipLength,
             transcriptionLanguage: video.transcriptionLanguage ?? "",

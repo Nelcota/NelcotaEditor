@@ -382,6 +382,22 @@ describe("video uploads", () => {
         await expect(next).rejects.toThrow(StorageQuotaExceededError);
     });
 
+    it("deletes a raw format video that was just uploaded", async () => {
+        const userId = await createTestUser();
+        const upload = await reserveVideoUpload(userId, {
+            ...uploadInput(SMALL_UPLOAD_BYTES),
+            clipCount: 0,
+            purpose: "format",
+        });
+        await sendFile(upload, SMALL_UPLOAD_BYTES);
+        const videoId = await confirmVideoUpload(upload.id, userId);
+        await db.update(videos).set({ status: "done" }).where(eq(videos.id, videoId));
+
+        await deleteVideoCoveringUploadLink({ id: videoId, userId });
+
+        expect(await countVideos(videoId)).toBe(0);
+    });
+
     it("sweeps a file sent through the link of a deleted video", async () => {
         const userId = await createTestUser();
         const upload = await uploadAndDeleteVideo(userId, SMALL_UPLOAD_BYTES);
