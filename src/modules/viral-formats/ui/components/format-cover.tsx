@@ -3,14 +3,8 @@ import {
     FORMAT_EXAMPLE_HEIGHT,
     FORMAT_EXAMPLE_WIDTH,
 } from "#/modules/viral-formats/model/viral-formats";
-import type { ViralFormat, ViralFormatId } from "#/modules/viral-formats/model/viral-formats";
+import type { ViralFormat } from "#/modules/viral-formats/model/viral-formats";
 import { cn } from "#/shared/ui/cn";
-
-const COVER_PHOTOS = {
-    "split-presenter": { width: 448, height: 352 },
-    "split-espresso": { width: 448, height: 352 },
-    "ranking-presenter": { width: 448, height: 704 },
-} as const;
 
 const RANKING_ITEMS = [
     { position: 1, label: "Luz natural" },
@@ -22,35 +16,17 @@ const RANKING_ITEMS = [
 
 type PhotoLoading = "eager" | "lazy";
 
-interface FormatPhotoProps {
-    name: keyof typeof COVER_PHOTOS;
-    loading: PhotoLoading;
-    className?: string;
-}
-
-function FormatPhoto({ name, loading, className }: FormatPhotoProps): ReactNode {
-    const { width, height } = COVER_PHOTOS[name];
-
-    return (
-        <img
-            src={`/viral-formats/${name}.webp`}
-            alt=""
-            width={width}
-            height={height}
-            loading={loading}
-            className={cn("size-full min-h-0 object-cover", className)}
-        />
-    );
-}
-
-interface CoverLayoutProps {
-    loading: PhotoLoading;
-}
-
-function RankingCover({ loading }: CoverLayoutProps): ReactNode {
+function RankingCover({ loading }: { loading: PhotoLoading }): ReactNode {
     return (
         <div className="relative size-full overflow-hidden rounded-lg">
-            <FormatPhoto name="ranking-presenter" loading={loading} />
+            <img
+                src="/viral-formats/ranking-presenter.webp"
+                alt=""
+                width={448}
+                height={704}
+                loading={loading}
+                className="size-full min-h-0 object-cover"
+            />
             <ol className="absolute inset-x-2 bottom-2 grid gap-0.5">
                 {RANKING_ITEMS.map(({ position, label }) => (
                     <li
@@ -70,16 +46,6 @@ function RankingCover({ loading }: CoverLayoutProps): ReactNode {
     );
 }
 
-const COVER_LAYOUTS: Partial<Record<ViralFormatId, (props: CoverLayoutProps) => ReactNode>> = {
-    "split-screen": ({ loading }) => (
-        <div className="grid size-full grid-rows-2 gap-1.5">
-            <FormatPhoto name="split-presenter" loading={loading} className="rounded-lg" />
-            <FormatPhoto name="split-espresso" loading={loading} className="rounded-lg" />
-        </div>
-    ),
-    ranking: RankingCover,
-};
-
 interface FormatCoverProps {
     format: ViralFormat;
     className?: string;
@@ -87,7 +53,6 @@ interface FormatCoverProps {
 }
 
 export function FormatCover({ format, className, loading = "eager" }: FormatCoverProps): ReactNode {
-    const Layout = COVER_LAYOUTS[format.id];
     const example = format.example;
 
     return (
@@ -105,7 +70,7 @@ export function FormatCover({ format, className, loading = "eager" }: FormatCove
                     className="size-full min-h-0 rounded-lg object-cover"
                 />
             )}
-            {example === undefined && Layout !== undefined && <Layout loading={loading} />}
+            {example === undefined && format.id === "ranking" && <RankingCover loading={loading} />}
         </div>
     );
 }

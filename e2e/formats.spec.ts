@@ -24,6 +24,7 @@ test("shows when a format is available only as a preview before Claude is connec
 });
 
 const EXAMPLES = [
+    { format: "Tela dividida", file: "split-screen-example" },
     { format: "Dinâmico gamificado", file: "dynamic-gamified-example" },
     { format: "Hacking", file: "hacking-example" },
 ] as const;

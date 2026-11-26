@@ -29,14 +29,19 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
         id: "split-screen",
         access: "free",
         name: "Tela dividida",
-        tagline: "Você em cima, o conteúdo embaixo.",
+        tagline: "Conteúdo em cima, você embaixo.",
         description:
-            "A tela se divide em duas: de um lado você falando, do outro o print, o vídeo de apoio ou o produto. Prende a atenção sem tirar você de cena.",
+            "Os prints, produtos ou vídeos de apoio aparecem na metade de cima enquanto você fala na de baixo.",
         highlights: [
             "Ideal para reagir a prints, vídeos e resultados",
             "Corte automático das pausas e respiros",
             "Legenda dinâmica palavra por palavra",
         ],
+        example: {
+            videoUrl: "/viral-formats/split-screen-example.mp4",
+            posterUrl: "/viral-formats/split-screen-example-poster.webp",
+            captionsUrl: "/viral-formats/split-screen-example.vtt",
+        },
     },
     {
         id: "ranking",

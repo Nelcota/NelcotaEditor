@@ -31,10 +31,11 @@ breadcrumb and for screen readers only. Light stays available through the toggle
 
 ## Format previews
 
-The featured format, gallery cards and format dialogs share the same stills. Contraste, Dinâmico
-gamificado and Hacking use frames from the owner's examples as their covers. Their dialogs play the
-full vertical videos on demand and offer Portuguese captions. The dialogs show whether each format
-is available for editing before prompting anyone to connect Claude. The stock photos use the
+The featured format, gallery cards and format dialogs share the same stills. Tela dividida,
+Contraste, Dinâmico gamificado and Hacking use frames from the owner's examples as their covers.
+Their dialogs play the full vertical videos on demand and offer Portuguese captions. The dialogs
+show whether each format is available for editing before prompting anyone to connect Claude. The
+stock photos in gallery captures and the Ranking cover use the
 [Pexels license](https://www.pexels.com/license/).
 
 Contraste uses the same batch flow as Tela dividida. Its renders keep the presenter in a vertical
