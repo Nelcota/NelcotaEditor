@@ -76,11 +76,12 @@ describe("cancelSubscription", () => {
     it("stops the charges at Asaas and keeps the paid days", async () => {
         const userId = await createPerson();
         const paidUntil = new Date(Date.now() + 86_400_000);
+        const asaasSubscriptionId = `sub_${randomUUID()}`;
         await db.insert(subscriptions).values({
             userId,
             checkoutId: `chk_${randomUUID()}`,
             checkoutExpiresAt: new Date(),
-            asaasSubscriptionId: "sub_cancel_test",
+            asaasSubscriptionId,
             status: "active",
             paidUntil,
         });
@@ -88,7 +89,7 @@ describe("cancelSubscription", () => {
         await cancelSubscription(userId);
 
         const [row] = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
-        expect(deleteAsaasSubscription).toHaveBeenCalledWith("sub_cancel_test");
+        expect(deleteAsaasSubscription).toHaveBeenCalledWith(asaasSubscriptionId);
         expect(row?.status).toBe("canceled");
         expect(row?.paidUntil?.getTime()).toBe(paidUntil.getTime());
     });
