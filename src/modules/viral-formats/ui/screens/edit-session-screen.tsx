@@ -25,9 +25,13 @@ function SessionHeader({ session }: { session: EditSessionView }): ReactNode {
 
     return (
         <header className="grid min-w-0 justify-items-start gap-3">
-            <Button asChild variant="ghost" className="min-h-11 px-2.5 text-muted-foreground">
+            <Button
+                asChild
+                variant="ghost"
+                className="min-h-11 text-muted-foreground has-[>svg]:pe-7 has-[>svg]:ps-0"
+            >
                 <Link to="/edits">
-                    <ArrowLeftIcon aria-hidden="true" className="size-4" />
+                    <ArrowLeftIcon aria-hidden="true" className="size-4" viewBox="4 0 24 24" />
                     Minhas edições
                 </Link>
             </Button>
