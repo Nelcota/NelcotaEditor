@@ -159,6 +159,34 @@ describe("edit sessions", () => {
         expect(edit?.sessionId).toBe(sessionId);
     });
 
+    it("takes a batch out of Claude's queue once every video has an edit", async () => {
+        const userId = await createPerson();
+        const sessionId = await createEditSession(userId, "split-screen");
+        const videoId = await createVideo(userId, "format");
+        await addSessionVideo(userId, { sessionId, videoId });
+        await queueEditSession(userId, sessionId);
+        await createSplitScreenEdit(userId, planFor(videoId, sessionId));
+
+        const queue = await listQueuedEditSessions(userId);
+
+        expect(queue).toEqual([]);
+    });
+
+    it("leaves a failed raw video out of Claude's queue", async () => {
+        const userId = await createPerson();
+        const sessionId = await createEditSession(userId, "split-screen");
+        const readyVideoId = await createVideo(userId, "format");
+        const failedVideoId = await createVideo(userId, "format");
+        await db.update(videos).set({ status: "failed" }).where(eq(videos.id, failedVideoId));
+        await addSessionVideo(userId, { sessionId, videoId: readyVideoId });
+        await addSessionVideo(userId, { sessionId, videoId: failedVideoId });
+        await queueEditSession(userId, sessionId);
+
+        const [batch] = await listQueuedEditSessions(userId);
+
+        expect(batch?.videos.map((video) => video.videoId)).toEqual([readyVideoId]);
+    });
+
     it("refuses an edit for a batch that was not sent yet", async () => {
         const userId = await createPerson();
         const sessionId = await createEditSession(userId, "split-screen");

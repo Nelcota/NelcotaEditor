@@ -1,4 +1,5 @@
-import { and, asc, count, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, exists, notExists, notInArray, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { videos } from "#/modules/video-records/video-records.schema";
 import {
@@ -20,7 +21,11 @@ import {
     editSessionNotes,
     editSessionVideos,
     editSessions,
+    edits,
 } from "#/modules/viral-formats/viral-formats.schema";
+
+/** A raw video that failed never gets a transcript, so it can never be edited. */
+const UNUSABLE_VIDEO_STATUSES = ["failed", "cancelled"] as const;
 
 /** The videos module serves the frame to its owner; null until the worker took one. */
 function toThumbnailUrl(videoId: string, thumbnailPath: string | null): string | null {
@@ -149,14 +154,47 @@ export async function findUserEditSession(
 }
 
 /**
- * The person's batches waiting for their Claude, oldest first, each with its adjustments and the
- * videos still to edit. A video counts as edited once an edit of it came from the batch.
+ * A queued batch still has work for Claude while one of its usable videos has no edit from it.
+ * Batches Claude finished leave the queue, so they never hold its few places.
+ */
+function hasVideoLeftToEdit(): SQL {
+    const editOfVideo = db
+        .select({ found: sql`1` })
+        .from(edits)
+        .where(
+            and(eq(edits.sessionId, editSessions.id), eq(edits.videoId, editSessionVideos.videoId)),
+        );
+
+    return exists(
+        db
+            .select({ found: sql`1` })
+            .from(editSessionVideos)
+            .innerJoin(videos, eq(videos.id, editSessionVideos.videoId))
+            .where(
+                and(
+                    eq(editSessionVideos.sessionId, editSessions.id),
+                    notInArray(videos.status, [...UNUSABLE_VIDEO_STATUSES]),
+                    notExists(editOfVideo),
+                ),
+            ),
+    );
+}
+
+/**
+ * The person's batches with videos left to edit, oldest first, each with its adjustments and
+ * its usable videos. A video counts as edited once an edit of it came from the batch.
  */
 export async function listQueuedEditSessions(userId: string): Promise<Array<QueuedEditSession>> {
     const rows = await db
         .select({ id: editSessions.id })
         .from(editSessions)
-        .where(and(eq(editSessions.userId, userId), eq(editSessions.status, "queued")))
+        .where(
+            and(
+                eq(editSessions.userId, userId),
+                eq(editSessions.status, "queued"),
+                hasVideoLeftToEdit(),
+            ),
+        )
         .orderBy(asc(editSessions.createdAt))
         .limit(MAX_QUEUED_SESSIONS_FOR_CLAUDE);
     const sessions = await Promise.all(rows.map((row) => findUserEditSession(userId, row.id)));
@@ -171,13 +209,15 @@ export async function listQueuedEditSessions(userId: string): Promise<Array<Queu
                 title: session.title,
                 format: session.format,
                 adjustments: session.notes.map((note) => note.body),
-                videos: session.videos.map((video) => ({
-                    videoId: video.id,
-                    title: video.title,
-                    durationSeconds: video.durationSeconds,
-                    isTranscribed: video.isReady,
-                    hasEdit: editedVideoIds.has(video.id),
-                })),
+                videos: session.videos
+                    .filter((video) => video.hasFailed === false)
+                    .map((video) => ({
+                        videoId: video.id,
+                        title: video.title,
+                        durationSeconds: video.durationSeconds,
+                        isTranscribed: video.isReady,
+                        hasEdit: editedVideoIds.has(video.id),
+                    })),
             };
         });
 }
