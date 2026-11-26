@@ -31,11 +31,12 @@ breadcrumb and for screen readers only. Light stays available through the toggle
 
 ## Format previews
 
-The featured format, gallery cards and format dialogs share the same stills. Tela dividida,
-Contraste, Dinâmico gamificado and Hacking use frames from the owner's examples as their covers.
+The featured format, gallery cards and format dialogs share the same stills. The covers use frames
+from the owner's examples. Ranking and Hacking share the video about ranking editing tools, with
+separate covers.
 Their dialogs play the full vertical videos on demand and offer Portuguese captions. The dialogs
 show whether each format is available for editing before prompting anyone to connect Claude. The
-stock photos in gallery captures and the Ranking cover use the
+stock photos in gallery captures use the
 [Pexels license](https://www.pexels.com/license/).
 
 The subscription offer gives the monthly price its own space beside the benefit and uses the solid
@@ -54,7 +55,7 @@ Hacking follows the owner's reference: a row of yellow rank numbers, a badge rev
 rank as the presenter introduces it, a brief item spotlight, white captions and a yellow topic
 card. The board can be cleared for the closing while the captions continue.
 
-Ranking follows its gallery cover with a vertical list of up to ten positions. The positions are
+Ranking renders a vertical list of up to ten positions. The positions are
 visible before their labels, which are uncovered in the order the presenter speaks. The current
 row uses lime and a marker at its trailing edge. Captions sit above the list while it is visible.
 

@@ -24,6 +24,11 @@ export interface ViralFormat {
     example?: FormatExample;
 }
 
+const RANKED_TOOLS_VIDEO = {
+    videoUrl: "/viral-formats/hacking-example.mp4",
+    captionsUrl: "/viral-formats/hacking-example.vtt",
+};
+
 export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
     {
         id: "split-screen",
@@ -55,6 +60,10 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
             "Destaque no item que você está falando",
             "Bom para listas, dicas e comparativos",
         ],
+        example: {
+            ...RANKED_TOOLS_VIDEO,
+            posterUrl: "/viral-formats/ranking-example-poster.webp",
+        },
     },
     {
         id: "this-or-that",
@@ -105,9 +114,8 @@ export const VIRAL_FORMATS: ReadonlyArray<ViralFormat> = [
             "Tema da lista em destaque na tela",
         ],
         example: {
-            videoUrl: "/viral-formats/hacking-example.mp4",
+            ...RANKED_TOOLS_VIDEO,
             posterUrl: "/viral-formats/hacking-example-poster.webp",
-            captionsUrl: "/viral-formats/hacking-example.vtt",
         },
     },
 ];

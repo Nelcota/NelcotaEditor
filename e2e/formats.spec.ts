@@ -19,13 +19,15 @@ test("offers Claude connection before editing in Ranking or Tela dividida", asyn
     await expect(splitScreen.getByRole("link", { name: "Conectar o Claude" })).toBeVisible();
 });
 
-const EXAMPLES = [
+const EXAMPLES: ReadonlyArray<{ format: string; file: string; poster?: string }> = [
     { format: "Tela dividida", file: "split-screen-example" },
+    { format: "Ranking", file: "hacking-example", poster: "ranking-example" },
+    { format: "Contraste", file: "contrast-example" },
     { format: "Dinâmico gamificado", file: "dynamic-gamified-example" },
     { format: "Hacking", file: "hacking-example" },
-] as const;
+];
 
-for (const { format, file } of EXAMPLES) {
+for (const { format, file, poster } of EXAMPLES) {
     test(`plays the ${format} example with a Portuguese caption track`, async ({
         page,
         request,
@@ -38,9 +40,12 @@ for (const { format, file } of EXAMPLES) {
         const dialog = page.getByRole("dialog", { name: format });
         const video = dialog.getByLabel(`Exemplo de vídeo no formato ${format}`);
         const examplePath = `/viral-formats/${file}`;
+        const posterPath = `/viral-formats/${poster ?? file}-poster.webp`;
         const captionsPath = `${examplePath}.vtt`;
 
-        await expect(video).toHaveAttribute("poster", `${examplePath}-poster.webp`);
+        await expect(video).toHaveAttribute("poster", posterPath);
+        const posterResponse = await request.get(posterPath);
+        await expect(posterResponse).toBeOK();
         await expect(video).toHaveAttribute("src", `${examplePath}.mp4`);
         await expect(video.locator("track")).toHaveAttribute("src", captionsPath);
         const captions = await request.get(captionsPath);
