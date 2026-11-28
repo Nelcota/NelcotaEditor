@@ -1,6 +1,8 @@
 ALTER TABLE "videos" ADD COLUMN "has_unrecorded_first_finish" boolean DEFAULT false NOT NULL;--> statement-breakpoint
--- A later render must not supply the missing first finish of an already completed video.
-UPDATE "videos" SET "has_unrecorded_first_finish" = true WHERE "status" = 'done' AND "first_finished_at" IS NULL;--> statement-breakpoint
+-- A later render must not supply the missing first finish of a video that may have completed
+-- already: a done one, or one run again since creation (retried or re-rendered, maybe after a
+-- finish) or from before run starts were stored, which the old rule kept out for that reason.
+UPDATE "videos" SET "has_unrecorded_first_finish" = true WHERE "first_finished_at" IS NULL AND ("status" = 'done' OR "processing_started_at" IS NULL OR "processing_started_at" >= "created_at" + interval '1 minute');--> statement-breakpoint
 -- Preserve old transcripts until the worker can regenerate them from the original audio.
 ALTER TABLE "transcripts" ADD CONSTRAINT "transcripts_words_array" CHECK (jsonb_typeof("transcripts"."words") = 'array' and not "transcripts"."words" @> '[null]'::jsonb) NOT VALID;--> statement-breakpoint
 -- A cut without an output can be retried through the regular failed-cut flow.
