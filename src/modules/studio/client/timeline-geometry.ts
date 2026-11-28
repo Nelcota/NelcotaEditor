@@ -8,6 +8,7 @@ const PERCENT = 100;
 const SHORT_WINDOW_SECONDS = 80;
 const SHORT_TICK_SECONDS = 5;
 const LONG_TICK_SECONDS = 10;
+const MIN_WINDOW_SECONDS = 1;
 
 export interface TimelineWindow {
     fromSeconds: number;
@@ -30,7 +31,7 @@ export function computeTimelineWindow(
         Math.max(draft.endSeconds, applied.endSeconds) + WINDOW_PADDING_SECONDS,
     );
 
-    return { fromSeconds, toSeconds: Math.max(toSeconds, fromSeconds + 1) };
+    return { fromSeconds, toSeconds: Math.max(toSeconds, fromSeconds + MIN_WINDOW_SECONDS) };
 }
 
 export function toPercent(window: TimelineWindow, seconds: number): number {
@@ -83,7 +84,7 @@ export function tickSeconds(window: TimelineWindow): Array<number> {
         Number.isFinite(toSeconds) === false ||
         fromSeconds < 0 ||
         toSeconds < fromSeconds ||
-        toSeconds > MAX_VIDEO_DURATION_SECONDS + 1
+        toSeconds > MAX_VIDEO_DURATION_SECONDS + MIN_WINDOW_SECONDS
     ) {
         return [];
     }
