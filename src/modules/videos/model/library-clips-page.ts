@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_SCORE, MIN_SCORE } from "#/modules/clips/model/clip-limits";
 import { CLIP_ORDERS } from "#/modules/videos/model/clip-order";
 import type { LibraryClip } from "#/modules/videos/model/video-views";
 
@@ -14,8 +15,8 @@ export const MAX_CLIP_SEARCH_LENGTH = 120;
 export const libraryClipCursorSchema = z.object({
     id: z.uuid(),
     createdAt: z.iso.datetime(),
-    score: z.number().int(),
-    position: z.number().int(),
+    score: z.int().min(MIN_SCORE).max(MAX_SCORE),
+    position: z.int32(),
 });
 
 export type LibraryClipCursor = z.infer<typeof libraryClipCursorSchema>;

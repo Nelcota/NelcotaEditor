@@ -5,19 +5,18 @@ import { db } from "#/db/database.server";
 import { PROCESS_VIDEO_QUEUE } from "#/modules/processing/server/video-processing-queue.server";
 import type { VideoRun } from "#/modules/video-records/server/video-progress.server";
 
-// A run's first job is sent in the transaction that stores its start, and pg-boss stamps the job
-// with that transaction's now(), which can come just before the start the app wrote.
-const RUN_START_TOLERANCE = sql`interval '1 minute'`;
+const countRowSchema = z.object({
+    failedJobCount: z.string().regex(/^\d+$/).pipe(z.coerce.number<string>().int().nonnegative()),
+});
 
-const countRowSchema = z.object({ failedJobCount: z.coerce.number().int().min(0) });
-
-/** A video from before runs were stamped has no start, so every failed job of it counts. */
+/** Unstamped jobs from before deployment count only if they were created during this run. */
 function createdInRun(processingStartedAt: Date | null): SQL {
     if (processingStartedAt === null) {
-        return sql`true`;
+        return sql`data ->> 'runStartedAt' is null`;
     }
 
-    return sql`created_on > ${processingStartedAt.toISOString()}::timestamptz - ${RUN_START_TOLERANCE}`;
+    const runStartedAt = processingStartedAt.toISOString();
+    return sql`(data ->> 'runStartedAt' = ${runStartedAt} or ((data ? 'runStartedAt') is not true and created_on >= ${runStartedAt}::timestamptz))`;
 }
 
 /**
@@ -36,7 +35,7 @@ export async function countFailedRunJobs(run: VideoRun): Promise<number> {
     }
 
     const result = await db.execute(
-        sql`select count(*) as "failedJobCount" from pgboss.job where name = ${PROCESS_VIDEO_QUEUE} and singleton_key = ${videoId} and state = 'failed' and ${createdInRun(processingStartedAt)}`,
+        sql`select count(*)::text as "failedJobCount" from pgboss.job where name = ${PROCESS_VIDEO_QUEUE} and singleton_key = ${videoId} and state = 'failed' and ${createdInRun(processingStartedAt)}`,
     );
     const parsed = countRowSchema.safeParse(result.rows[0]);
 

@@ -22,7 +22,11 @@ import type {
     TicketPage,
     TicketVideo,
 } from "#/modules/support/model/support-views";
-import { afterTicketCursor, splitTicketPage } from "#/modules/support/server/ticket-pages.server";
+import {
+    afterTicketCursor,
+    splitTicketPage,
+    ticketActivityTime,
+} from "#/modules/support/server/ticket-pages.server";
 import {
     appendTicketMessage,
     listTicketMessages,
@@ -45,7 +49,7 @@ interface OwnedTicketRow {
     subject: string;
     status: TicketStatus;
     hasUnreadReply: boolean;
-    lastMessageAt: Date;
+    lastMessageAt: string;
     videoId: string | null;
     videoTitle: string | null;
     videoStatus: VideoStatus | null;
@@ -60,7 +64,7 @@ async function findOwnedTicketRow(owned: OwnedTicket): Promise<OwnedTicketRow | 
             subject: supportTickets.subject,
             status: supportTickets.status,
             hasUnreadReply: supportTickets.hasUnreadReply,
-            lastMessageAt: supportTickets.lastMessageAt,
+            lastMessageAt: ticketActivityTime,
             videoId: videos.id,
             videoTitle: videos.title,
             videoStatus: videos.status,
@@ -136,7 +140,7 @@ export async function listCustomerTickets(
             subject: supportTickets.subject,
             status: supportTickets.status,
             hasUnreadReply: supportTickets.hasUnreadReply,
-            lastMessageAt: supportTickets.lastMessageAt,
+            lastMessageAt: ticketActivityTime,
             videoTitle: videos.title,
         })
         .from(supportTickets)
@@ -147,7 +151,7 @@ export async function listCustomerTickets(
     const { pageRows, nextCursor } = splitTicketPage(rows, SUPPORT_PAGE_SIZE);
 
     return {
-        rows: pageRows.map((row) => ({ ...row, lastMessageAt: row.lastMessageAt.toISOString() })),
+        rows: pageRows,
         nextCursor,
     };
 }
@@ -165,7 +169,7 @@ export async function findCustomerTicket(
     let unreadReplyAt: string | null = null;
 
     if (ticket.hasUnreadReply === true) {
-        unreadReplyAt = ticket.lastMessageAt.toISOString();
+        unreadReplyAt = ticket.lastMessageAt;
     }
 
     let video: CustomerTicketDetails["video"] = null;
@@ -188,7 +192,7 @@ export async function findCustomerTicket(
 /** Leave any reply newer than the rendered conversation unread. */
 export async function markCustomerTicketRead(
     owned: OwnedTicket,
-    lastMessageAt: Date,
+    lastMessageAt: string,
 ): Promise<void> {
     await db
         .update(supportTickets)
@@ -198,7 +202,7 @@ export async function markCustomerTicketRead(
                 eq(supportTickets.id, owned.ticketId),
                 eq(supportTickets.userId, owned.userId),
                 eq(supportTickets.hasUnreadReply, true),
-                eq(supportTickets.lastMessageAt, lastMessageAt),
+                eq(supportTickets.lastMessageAt, sql`${lastMessageAt}::timestamptz`),
             ),
         );
 }

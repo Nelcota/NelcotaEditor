@@ -208,7 +208,11 @@ async function runAndRecord(video: Video, jobSignal: AbortSignal): Promise<void>
  * Read under the lock, after any earlier run let go of the video, so this run carries the start
  * time of the request it serves.
  */
-async function runIfStillQueued(videoId: string, signal: AbortSignal): Promise<void> {
+async function runIfStillQueued(
+    videoId: string,
+    signal: AbortSignal,
+    expectedRunStart: string | null | undefined,
+): Promise<void> {
     const video = await findVideoById(videoId);
 
     // Finished, cancelled or deleted while waiting in the queue: nothing to do.
@@ -216,7 +220,22 @@ async function runIfStillQueued(videoId: string, signal: AbortSignal): Promise<v
         return;
     }
 
+    const currentRunStart = video.processingStartedAt?.toISOString() ?? null;
+
+    if (expectedRunStart !== undefined && expectedRunStart !== currentRunStart) {
+        await enqueueCurrentRun(video, 0);
+        return;
+    }
+
     await runAndRecord(video, signal);
+}
+
+function enqueueCurrentRun(video: Video, startAfterSeconds: number): Promise<void> {
+    const { id: videoId, userId, processingStartedAt } = video;
+    return enqueueVideoProcessing(
+        { videoId, userId, processingStartedAt, startAfterSeconds },
+        null,
+    );
 }
 
 /**
@@ -230,18 +249,19 @@ async function retryWhenLockIsFree(videoId: string): Promise<void> {
         return;
     }
 
-    await enqueueVideoProcessing(
-        { videoId, userId: video.userId, startAfterSeconds: LOCKED_VIDEO_RETRY_SECONDS },
-        null,
-    );
+    await enqueueCurrentRun(video, LOCKED_VIDEO_RETRY_SECONDS);
     logger.info({ videoId }, "Video already processing in another run, retrying later");
 }
 
 /** Two workers (replicas, an overlapping restart) never process the same video at once. */
-export async function processVideo(videoId: string, signal: AbortSignal): Promise<void> {
+export async function processVideo(
+    videoId: string,
+    signal: AbortSignal,
+    expectedRunStart?: string | null,
+): Promise<void> {
     signal.throwIfAborted();
     const hasRun = await runWithVideoProcessingLock(videoId, () =>
-        runIfStillQueued(videoId, signal),
+        runIfStillQueued(videoId, signal, expectedRunStart),
     );
 
     if (hasRun === false) {

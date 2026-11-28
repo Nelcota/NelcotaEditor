@@ -1,6 +1,6 @@
 import type { JobWithMetadata } from "pg-boss";
 import { startAuthEmailWorker } from "#/modules/auth/server/auth-email-queue.server";
-import { backfillStoredBytes } from "#/modules/processing/server/backfill-stored-bytes.server";
+import { startStoredBytesBackfill } from "#/modules/processing/server/backfill-stored-bytes.server";
 import { processVideo } from "#/modules/processing/server/process-video.server";
 import {
     requeueInterruptedVideos,
@@ -13,6 +13,7 @@ import {
     PROCESS_VIDEO_QUEUE,
     processVideoJobSchema,
 } from "#/modules/processing/server/video-processing-queue.server";
+import type { ProcessVideoJob } from "#/modules/processing/server/video-processing-queue.server";
 import { createVideoWorkSync } from "#/modules/processing/server/video-work-switch.server";
 import { startIdleTicketClosing } from "#/modules/support/server/close-idle-tickets.server";
 import { startSupportEmailWorker } from "#/modules/support/server/support-email-queue.server";
@@ -53,15 +54,16 @@ async function readFinalStatus(videoId: string): Promise<string> {
  * come from the log context around the job.
  */
 async function processVideoWithLogs(
-    videoId: string,
+    job: ProcessVideoJob,
     signal: AbortSignal,
     queueWaitMs: number,
 ): Promise<void> {
+    const { videoId, runStartedAt } = job;
     const startedAt = performance.now();
     logger.info({ queueWaitMs }, "Job started");
 
     try {
-        await processVideo(videoId, signal);
+        await processVideo(videoId, signal, runStartedAt);
     } catch (error) {
         // pg-boss only marks the job failed; this line is the one record of why.
         logger.error({ durationMs: Math.round(performance.now() - startedAt), error }, "Job threw");
@@ -85,24 +87,13 @@ async function handleJob(job: JobWithMetadata<unknown>): Promise<void> {
         throw new InvalidJobPayloadError(result.error.issues.length);
     }
 
-    const videoId = result.data.videoId;
+    const processingJob = result.data;
+    const videoId = processingJob.videoId;
     const eligibleAt = Math.max(createdOn.getTime(), startAfter.getTime());
     const queueWaitMs = Math.max(0, startedOn.getTime() - eligibleAt);
     await withLogContext({ jobId, videoId }, () =>
-        processVideoWithLogs(videoId, signal, queueWaitMs),
+        processVideoWithLogs(processingJob, signal, queueWaitMs),
     );
-}
-
-/**
- * A backfill is no reason to stay down: with the file store unreachable at boot, throwing here
- * would restart the worker in a loop and stop every video. The next start tries again.
- */
-async function backfillStoredBytesWithoutBlocking(): Promise<void> {
-    try {
-        await backfillStoredBytes();
-    } catch (error) {
-        logger.error({ error }, "Could not backfill stored file sizes");
-    }
 }
 
 async function startVideoWork(): Promise<void> {
@@ -175,7 +166,7 @@ async function startWorker(): Promise<void> {
     // Jobs a dead worker held are failed by their heartbeat, and workspaces are removed only when
     // their video's lock is free, so a start never touches the active runs of other replicas.
     await removeAbandonedVideoWorkspaces();
-    await backfillStoredBytesWithoutBlocking();
+    await startStoredBytesBackfill();
     await requeueInterruptedVideos();
     await syncVideoWork();
     scheduleVideoWorkSync();

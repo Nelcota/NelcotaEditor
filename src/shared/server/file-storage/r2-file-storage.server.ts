@@ -248,7 +248,13 @@ export function createR2FileStorage(settings: R2Settings): FileStorage {
                 new HeadObjectCommand({ Bucket: bucket, Key: key }),
                 smallRequestSignal(),
             );
-            return head.ContentLength ?? 0;
+            const bytes = head.ContentLength;
+
+            if (bytes === undefined || Number.isSafeInteger(bytes) === false || bytes < 0) {
+                throw new Error("Storage response is missing a valid content length");
+            }
+
+            return bytes;
         } catch (error) {
             if (error instanceof NotFound) {
                 return 0;

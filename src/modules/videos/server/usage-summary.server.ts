@@ -1,13 +1,11 @@
-import { and, count, eq, gte, sum } from "drizzle-orm";
+import { and, count, eq, gte, sql, sum } from "drizzle-orm";
 import { db } from "#/db/database.server";
 import { clips } from "#/modules/clips/clips.schema";
 import type { StorageUsage, UsageSummary } from "#/modules/videos/model/video-views";
 import { summarizePendingUploads } from "#/modules/videos/server/pending-uploads.server";
 import { videos } from "#/modules/video-records/video-records.schema";
-import { getEnvironment } from "#/shared/server/env.server";
+import { BYTES_PER_GIBIBYTE, getEnvironment } from "#/shared/server/env.server";
 import { startOfBusinessMonth } from "#/shared/server/business-time-zone";
-
-const BYTES_PER_GIGABYTE = 1024 * 1024 * 1024;
 
 /** The database or the open transaction that holds the user's start lock. */
 type QueryExecutor = Pick<typeof db, "select">;
@@ -85,31 +83,53 @@ async function countSelectedClips(userId: string): Promise<number> {
 export function getStorageQuotaBytes(): number {
     const environment = getEnvironment();
 
-    return environment.STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIGABYTE;
+    return Math.floor(environment.STORAGE_QUOTA_GIGABYTES * BYTES_PER_GIBIBYTE);
 }
 
-async function sumSourceBytes(userId: string, executor: QueryExecutor): Promise<number> {
+async function sumSourceBytes(userId: string, executor: QueryExecutor): Promise<number | null> {
     const rows = await executor
-        .select({ bytes: sum(videos.sourceBytes) })
+        .select({
+            bytes: sum(videos.sourceBytes),
+            unmeasured: count(
+                sql`case when ${videos.sourceBytes} is null and (${videos.sourcePath} is not null or ${videos.thumbnailPath} is not null) then 1 end`,
+            ),
+        })
         .from(videos)
         .where(eq(videos.userId, userId));
 
-    return toSumNumber(rows[0]?.bytes);
+    const totals = rows[0];
+
+    if (totals !== undefined && totals.unmeasured > 0) {
+        return null;
+    }
+
+    return toSumNumber(totals?.bytes);
 }
 
-async function sumClipBytes(userId: string, executor: QueryExecutor): Promise<number> {
+async function sumClipBytes(userId: string, executor: QueryExecutor): Promise<number | null> {
     const rows = await executor
-        .select({ bytes: sum(clips.outputBytes) })
+        .select({
+            bytes: sum(clips.outputBytes),
+            unmeasured: count(
+                sql`case when ${clips.outputBytes} is null and (${clips.outputPath} is not null or ${clips.posterPath} is not null) then 1 end`,
+            ),
+        })
         .from(clips)
         .innerJoin(videos, eq(videos.id, clips.videoId))
         .where(eq(videos.userId, userId));
 
-    return toSumNumber(rows[0]?.bytes);
+    const totals = rows[0];
+
+    if (totals !== undefined && totals.unmeasured > 0) {
+        return null;
+    }
+
+    return toSumNumber(totals?.bytes);
 }
 
 /**
- * Sums the sizes saved with each file instead of walking the disk. Sizes not known yet (a download
- * in progress, rows the worker has not backfilled) count as 0 until they are written.
+ * An incomplete size makes the total unknown. A video that has not stored any file need not
+ * wait for the backfill.
  */
 export async function measureUserStorage(
     userId: string,
@@ -120,7 +140,13 @@ export async function measureUserStorage(
         sumClipBytes(userId, executor),
     ]);
 
-    return { totalBytes: sourceBytes + clipBytes, clipBytes, sourceBytes };
+    let totalBytes: number | null = null;
+
+    if (sourceBytes !== null && clipBytes !== null) {
+        totalBytes = sourceBytes + clipBytes;
+    }
+
+    return { totalBytes, clipBytes, sourceBytes };
 }
 
 /** What the files take plus what uploads hold, the same space the quota check counts. */
@@ -131,7 +157,13 @@ async function measureStorageWithReservations(userId: string): Promise<StorageUs
     ]);
     const reservedBytes = pendingUploads.bytes;
 
-    return { ...stored, reservedBytes, totalBytes: stored.totalBytes + reservedBytes };
+    const totalBytes = stored.totalBytes;
+
+    if (totalBytes === null) {
+        return { ...stored, reservedBytes };
+    }
+
+    return { ...stored, reservedBytes, totalBytes: totalBytes + reservedBytes };
 }
 
 /** The queries do not depend on each other, so they all run at once. */

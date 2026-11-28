@@ -13,6 +13,10 @@ describe("formatPreciseClock", () => {
         assert.equal(formatPreciseClock(59.96), "1:00.0");
     });
 
+    it("shows 0:00.0 when the tenths overflow a safe integer", () => {
+        assert.equal(formatPreciseClock(1e308), "0:00.0");
+    });
+
     it("shows 0:00.0 for NaN, infinite and negative values", () => {
         for (const value of [Number.NaN, Number.NEGATIVE_INFINITY, -0.1]) {
             assert.equal(formatPreciseClock(value), "0:00.0");
@@ -31,6 +35,10 @@ describe("parseClockInput", () => {
 
     it("round-trips what formatPreciseClock shows", () => {
         assert.equal(parseClockInput(formatPreciseClock(75.4)), 75.4);
+    });
+
+    it("rejects overflow when converting finite hours to seconds", () => {
+        assert.equal(parseClockInput(`${"9".repeat(306)}:00:00`), null);
     });
 
     it("rejects minutes or seconds of 60 and above after the first part", () => {

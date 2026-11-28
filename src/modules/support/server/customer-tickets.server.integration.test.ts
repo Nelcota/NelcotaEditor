@@ -148,7 +148,7 @@ describe("an answer from the team", () => {
         await db.transaction((transaction) =>
             replyAsStaff({ adminId, ticketId, body: "Complemento" }, transaction),
         );
-        await markCustomerTicketRead({ userId, ticketId }, new Date(unreadReplyAt));
+        await markCustomerTicketRead({ userId, ticketId }, unreadReplyAt);
         expect(await hasUnreadSupportReply(userId)).toBe(true);
 
         const latest = await findCustomerTicket({ userId, ticketId });
@@ -158,7 +158,7 @@ describe("an answer from the team", () => {
             throw new Error("The ticket had no new unread reply");
         }
 
-        await markCustomerTicketRead({ userId, ticketId }, new Date(latestUnreadReplyAt));
+        await markCustomerTicketRead({ userId, ticketId }, latestUnreadReplyAt);
         expect(await hasUnreadSupportReply(userId)).toBe(false);
     });
 

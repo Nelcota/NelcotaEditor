@@ -63,10 +63,7 @@ export const markMyTicketRead = createServerFn({ method: "POST" })
     .validator(ticketReadSchema)
     .handler(async ({ context, data }): Promise<void> => {
         const { ticketId, lastMessageAt } = data;
-        await markCustomerTicketRead(
-            { userId: context.user.id, ticketId },
-            new Date(lastMessageAt),
-        );
+        await markCustomerTicketRead({ userId: context.user.id, ticketId }, lastMessageAt);
     });
 
 export const replyToMyTicket = createServerFn({ method: "POST" })

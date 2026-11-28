@@ -58,6 +58,8 @@ export const videos = pgTable(
         // When the video first reached done, kept through every later retry or Studio render
         // (which reset finishedAt). The Painel's time per video runs from createdAt to here.
         firstFinishedAt: timestamp("first_finished_at", { withTimezone: true }),
+        // A migrated video was already done, but its first completion cannot be dated.
+        hasUnrecordedFirstFinish: boolean("has_unrecorded_first_finish").notNull().default(false),
         // When the current run was asked for (creation, retry or a Studio render). The running
         // run's time left is measured from here: createdAt would count the days between a video
         // and its re-render. Null for videos from before this column.
@@ -83,6 +85,10 @@ export const videos = pgTable(
         check(
             "videos_duration_seconds_positive",
             sql`${table.durationSeconds} is null or ${table.durationSeconds} > 0`,
+        ),
+        check(
+            "videos_duration_seconds_finite",
+            sql`${table.durationSeconds} is null or ${table.durationSeconds} < 'Infinity'::double precision`,
         ),
         check(
             "videos_title_length",

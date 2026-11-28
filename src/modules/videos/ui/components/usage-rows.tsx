@@ -80,10 +80,9 @@ function describePercent(bytes: number, percent: number): string {
 }
 
 /** Space held by uploads counts as used, so the line says how much of it is only reserved. */
-function describeUsedSpace(usage: UsageSummary, usedPercent: number): string {
+function describeUsedSpace(usage: UsageSummary, totalBytes: number, usedPercent: number): string {
     const storage = usage.storage;
     const reservedBytes = storage.reservedBytes;
-    const totalBytes = storage.totalBytes;
     const usedLabel = `${formatBytes(totalBytes)} de ${formatBytes(usage.storageQuotaBytes)} · ${describePercent(totalBytes, usedPercent)}`;
 
     if (reservedBytes <= 0) {
@@ -96,8 +95,18 @@ function describeUsedSpace(usage: UsageSummary, usedPercent: number): string {
 function StorageRow({ usage }: { usage: UsageSummary }): ReactNode {
     const totalBytes = usage.storage.totalBytes;
     const quotaBytes = usage.storageQuotaBytes;
+
+    if (totalBytes === null) {
+        return (
+            <SettingsRow
+                label="Espaço"
+                description={<span role="status">Calculando o espaço usado.</span>}
+            />
+        );
+    }
+
     const usedPercent = toPercentOfQuota(totalBytes, quotaBytes);
-    const usedLabel = describeUsedSpace(usage, usedPercent);
+    const usedLabel = describeUsedSpace(usage, totalBytes, usedPercent);
 
     return (
         <SettingsRow label="Espaço" description={describeStorage(usedPercent, usedLabel)}>

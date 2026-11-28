@@ -1,10 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { db } from "#/db/database.server";
 import { authMiddleware } from "#/modules/auth/server/auth-middleware";
 import { buildTranscriptLines } from "#/modules/transcription/model/build-transcript-lines";
-import { transcripts } from "#/modules/transcription/transcription.schema";
+import { findSavedTranscript } from "#/modules/transcription/server/find-transcript-words.server";
 import type { TranscriptView } from "#/modules/transcription/model/transcript-view";
 import { findOwnedVideo } from "#/modules/video-records/server/find-owned-video.server";
 
@@ -16,14 +14,9 @@ export const getVideoTranscript = createServerFn({ method: "GET" })
     .validator(transcriptInputSchema)
     .handler(async ({ context, data }): Promise<TranscriptView | null> => {
         const video = await findOwnedVideo(data.videoId, context.user.id);
-        const rows = await db
-            .select({ language: transcripts.language, words: transcripts.words })
-            .from(transcripts)
-            .where(eq(transcripts.videoId, video.id))
-            .limit(1);
-        const transcript = rows[0];
+        const transcript = await findSavedTranscript(video.id);
 
-        if (transcript === undefined) {
+        if (transcript === null) {
             return null;
         }
 

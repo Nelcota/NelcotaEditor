@@ -194,7 +194,22 @@ export function StorageCard(): ReactNode {
     }
 
     const storage = usage.storage;
-    const totalBytes = storage.totalBytes;
+    const { totalBytes, sourceBytes, clipBytes, reservedBytes } = storage;
+
+    if (totalBytes === null || sourceBytes === null || clipBytes === null) {
+        return (
+            <section
+                aria-label="Armazenamento"
+                className="grid gap-1 rounded-2xl border border-card-border bg-card p-[11px]"
+            >
+                <h2 className="text-xs text-muted-foreground">Armazenamento</h2>
+                <p role="status" className="text-sm">
+                    Calculando o espaço usado.
+                </p>
+            </section>
+        );
+    }
+
     let usedLabel = formatBytes(totalBytes);
     let eyeLabel = "Esconder os números";
     let foldLabel = "Recolher o armazenamento";
@@ -249,9 +264,9 @@ export function StorageCard(): ReactNode {
             {isCollapsed === false && (
                 <div id={DETAILS_ID} className="grid gap-3">
                     <StorageDetails
-                        sourceBytes={storage.sourceBytes}
-                        clipBytes={storage.clipBytes}
-                        reservedBytes={storage.reservedBytes}
+                        sourceBytes={sourceBytes}
+                        clipBytes={clipBytes}
+                        reservedBytes={reservedBytes}
                         quotaBytes={usage.storageQuotaBytes}
                         isHidden={isHidden}
                     />

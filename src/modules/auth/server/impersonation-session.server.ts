@@ -13,7 +13,7 @@ interface SessionRefreshContext {
 
 const impersonatedSessionSchema = z.object({
     impersonatedBy: z.string().min(1),
-    expiresAt: z.coerce.date(),
+    expiresAt: z.union([z.date(), z.iso.datetime({ offset: true }).pipe(z.coerce.date())]),
 });
 
 /**
@@ -24,7 +24,7 @@ const impersonatedSessionSchema = z.object({
 export async function keepImpersonatedSessionExpiry(
     update: SessionUpdate,
     endpointContext: SessionRefreshContext | null,
-): Promise<{ data: SessionUpdate } | undefined> {
+): Promise<{ data: SessionUpdate } | false | undefined> {
     if (update.expiresAt === undefined || endpointContext === null) {
         return undefined;
     }
@@ -35,10 +35,17 @@ export async function keepImpersonatedSessionExpiry(
         return undefined;
     }
 
-    const result = impersonatedSessionSchema.safeParse(currentSession.session);
+    const session = currentSession.session;
+    const impersonatedBy = session.impersonatedBy;
+
+    if (impersonatedBy === null || impersonatedBy === undefined) {
+        return undefined;
+    }
+
+    const result = impersonatedSessionSchema.safeParse(session);
 
     if (result.success === false) {
-        return undefined;
+        return false;
     }
 
     return { data: { ...update, expiresAt: result.data.expiresAt } };
